@@ -1,0 +1,20 @@
+{
+  "name": "meshtailor-js",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "npm --workspace @meshtailor/studio run dev",
+    "build": "npm --workspace @meshtailor/studio run build && npm run typecheck",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "cli": "npm --workspace @meshtailor/cli run start",
+    "check": "npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}
