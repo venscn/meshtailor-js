@@ -12,7 +12,15 @@ import { UVCanvas } from './UVCanvas';
 import { importMeshFiles, type SceneImportOptions } from './importers';
 import type { SeamJob, SeamResult } from './workers/seam.worker';
 import { prepareViewportMesh } from './viewport-math';
+import { meshWithPreviewUV } from '@meshtailor/uv';
+import { useUVSnapshot } from './unfold/useUVSnapshot';
+import { useUnfoldPlayer } from './unfold/useUnfoldPlayer';
+import { UnfoldControls, UnfoldTransport } from './unfold/UnfoldControls';
+import { UnfoldViewport } from './unfold/UnfoldViewport';
+import { CorrespondenceInspector } from './unfold/CorrespondenceInspector';
+import type { UVTarget } from './workers/uv.worker';
 import './styles.css';
+const EMPTY_EDGES = new Set<string>();
 
 function describeMesh(mesh:MeshData){
   const t=buildTopology(mesh);
@@ -32,12 +40,24 @@ export default function App(){
   const [detail,setDetail]=useState<MeshDetail>('medium'),[exampleId,setExampleId]=useState<ComplexExampleId>('garment');
   const [weld,setWeld]=useState<SceneImportOptions['weld']>('exact'),[tolerance,setTolerance]=useState(1e-7);
   const [busy,setBusy]=useState<string|null>(null),[notice,setNotice]=useState('Ready. Choose an offline mesh or import OBJ / FBX / GLB / GLTF.');
-  const [liveUV,setLiveUV]=useState(false),[chartCount,setChartCount]=useState<number|null>(null);
+  const [liveUV,setLiveUV]=useState(false);
+  const [viewMode,setViewMode]=useState<'traversal'|'unfold'>('traversal'),[uvTarget,setUVTarget]=useState<UVTarget>('generated');
   const operation=useRef(0),seamWorker=useRef<Worker|null>(null),abortDownload=useRef<AbortController|null>(null);
   const frame=step>=0?frames[step]:undefined;
   const activeEdges=useMemo(()=>showAllSeams?seamEdges:frame?new Set(frame.revealedEdges):seamEdges,[frame,seamEdges,showAllSeams]);
   const stats=useMemo(()=>describeMesh(mesh),[mesh]);
   const uvEdges=mesh.faces.length>20_000&&!liveUV?seamEdges:activeEdges;
+  // Unfolding always freezes the COMPLETE seam set. Traversal progress must not repack its target mid-animation.
+  const snapshotTarget = viewMode==='unfold'?uvTarget:'generated';
+  const snapshotEdges = snapshotTarget==='source'?EMPTY_EDGES:viewMode==='unfold'?seamEdges:uvEdges;
+  const uvState = useUVSnapshot(mesh,snapshotEdges,snapshotTarget);
+  const snapshot = uvState.snapshot;
+  const player = useUnfoldPlayer(snapshot);
+  const chartCount = snapshot?.packed.length??null;
+  const uvStatus = uvState.error ? 'UV 预览失败：'+uvState.error : uvState.loading ? '正在计算同一份网格 / UV 对应数据…' : null;
+  const uvAll = useMemo(()=>snapshot?.geometry.islands.map(c=>c.id)??[],[snapshot]);
+  useEffect(()=>{if(viewMode==='unfold')setPlaying(false);else player.pause();},[viewMode]);
+  const exportTargetUV=()=>{if(!snapshot)return;try{saveFile('meshtailor-target-uv.obj',meshToOBJ(meshWithPreviewUV(mesh,snapshot.packed)),'text/plain');}catch(error){setLoadError(String(error));}};
   const timelineStart=Math.max(0,Math.min(Math.max(0,frames.length-100),step-35));
   const timelineFrames=frames.slice(timelineStart,timelineStart+100);
 
@@ -106,9 +126,10 @@ export default function App(){
   const togglePlayback=()=>{if(!frames.length)return;if(!playing&&step>=frames.length-1)setStep(0);setPlaying(!playing);};
 
   return <div className="app-shell" onDragOver={e=>{e.preventDefault();}} onDrop={e=>{e.preventDefault();if(e.dataTransfer.files.length)void loadFiles(Array.from(e.dataTransfer.files));}}>
-    <header className="topbar"><div><div className="brand">MeshTailor-JS <span>Studio · 0.2.0</span></div><div className="subtitle">复杂网格 · FBX import · mesh-native traversal debugger</div></div><div className="paper-pill">d={MESH_TAILOR_V2_SPEC.modelDimension} · {MESH_TAILOR_V2_SPEC.decoderLayers} decoder layers</div></header>
+    <header className="topbar"><div><div className="brand">MeshTailor-JS <span>Studio · 0.3.0</span></div><div className="subtitle">3D ↔ UV 岛展开 · 逐个 / 多选 / 全部 · mesh-native traversal</div></div><div className="paper-pill">d={MESH_TAILOR_V2_SPEC.modelDimension} · {MESH_TAILOR_V2_SPEC.decoderLayers} decoder layers</div></header>
     <main className="workspace">
       <aside className="sidebar">
+        {viewMode==='unfold'&&<UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={setUVTarget} onExport={exportTargetUV}/>}
         <section><h3>Mesh · 网格</h3><div className="button-grid"><button onClick={()=>resetForMesh(makeCube())}>Cube</button><button onClick={()=>resetForMesh(makeCylinder(20))}>Cylinder</button><button onClick={()=>resetForMesh(makeTorsoGrid())}>Torso</button></div>
           <label className="file-label">Load OBJ / FBX / GLB / GLTF<input type="file" multiple accept=".obj,.fbx,.glb,.gltf,.bin" onChange={e=>{const files=Array.from(e.target.files??[]);if(files.length)void loadFiles(files);e.target.value='';}}/></label>
           <small>可拖入文件。glTF 与配套 .bin 请一起选择。只导入网格，不显示材质贴图。</small>
@@ -134,7 +155,7 @@ export default function App(){
           <label>Structural cross-sections <b>{rings}</b><input type="range" min="0" max="5" step="1" value={rings} onChange={e=>setRings(+e.target.value)}/></label>
           <label>Baseline edge budget <input aria-label="Edge budget" type="number" min="50" max="20000" step="50" value={maxEdges} onChange={e=>{const n=Math.floor(+e.target.value);if(n>=50&&n<=20000)setMaxEdges(n);}}/></label><small>预算仅限制几何 baseline，不抽稀输入网格，不截断已有 UV 接缝。</small>
         </section>
-        <section><h3>Display</h3><button onClick={()=>setCameraResetKey(n=>n+1)}>Reset camera</button>
+        <section><h3>Display</h3><button onClick={()=>{setCameraResetKey(n=>n+1);if(viewMode==='unfold')player.fit('orbit');}}>Reset camera</button>
           <label className="check"><input type="checkbox" checked={wireframe} onChange={e=>setWireframe(e.target.checked)}/> wireframe</label>
           <label className="check"><input type="checkbox" checked={xray} onChange={e=>setXray(e.target.checked)}/> X-ray traversal</label>
           <label className="check"><input type="checkbox" checked={showAllSeams} onChange={e=>setShowAllSeams(e.target.checked)}/> Show all seams</label>
@@ -146,16 +167,17 @@ export default function App(){
         {importReport&&<section className="import-report"><h3>Import report</h3><p>{importReport.parts} parts · {importReport.sourceVertices.toLocaleString()} source vertices → {importReport.vertices.toLocaleString()} topology vertices</p><p>{importReport.weldedVertices.toLocaleString()} welded · {importReport.uvFaces.toLocaleString()} faces with UV</p><details><summary>导入说明 / Warnings</summary>{importReport.warnings.map((w,i)=><p key={i}>{w}</p>)}</details></section>}
       </aside>
       <section className="center">
-        <div className="panel scene-panel"><div className="panel-title"><span>3D traversal</span><span>{mesh.name} · {activeEdges.size}/{seamEdges.size} seams</span></div><MeshViewport mesh={mesh} seamEdges={activeEdges} frame={frame} wireframe={wireframe} xray={xray} cameraResetKey={cameraResetKey}/></div>
-        <div className="debugbar"><button aria-label="First step" onClick={()=>seek(0)} disabled={!frames.length}>⏮</button><button aria-label="Previous step" onClick={()=>seek(step-1)} disabled={!frames.length}>◀</button><button className="primary" onClick={togglePlayback} disabled={!frames.length||!!busy}>{playing?'Pause':'Play'}</button><button aria-label="Next step" onClick={()=>seek(step+1)} disabled={!frames.length}>▶</button><button aria-label="Last step" onClick={()=>seek(frames.length-1)} disabled={!frames.length}>⏭</button><input aria-label="Traversal step" type="range" min="0" max={Math.max(0,frames.length-1)} value={Math.max(0,step)} onChange={e=>seek(+e.target.value)} disabled={!frames.length}/><span className="step-label">{frames.length?`${step+1}/${frames.length}`:'0/0'}</span></div>
-        <div className="notice">{loadError?<span role="alert">{loadError}</span>:busy?<span role="status">{busy} <button onClick={()=>{cancel();setNotice('Operation cancelled.');}}>Cancel</button></span>:frame?<><b>{frame.tokenLabel}</b> · {frame.message} · candidates {frame.mask.vertices.length}{frame.mask.allowEOC?' + EOC':''}{frame.mask.allowEOS?' + EOS':''}</>:notice}</div>
-        {frames.length>0&&<div className="operation-summary">{notice}</div>}
+        <div className="view-tabs" role="tablist" aria-label="3D preview mode"><button role="tab" aria-selected={viewMode==='traversal'} onClick={()=>setViewMode('traversal')}>裁切线遍历</button><button role="tab" aria-selected={viewMode==='unfold'} onClick={()=>setViewMode('unfold')}>3D ↔ UV 展开动画</button><span>接缝 → UV 岛 → 目标 UV</span></div>
+        <div className="panel scene-panel"><div className="panel-title"><span>{viewMode==='unfold'?'3D ↔ UV unfolding':'3D traversal'}</span><span>{mesh.name} · {viewMode==='unfold'?`${chartCount??'…'} UV islands`:`${activeEdges.size}/${seamEdges.size} seams`}</span></div>{viewMode==='unfold'?<UnfoldViewport geometry={snapshot?.geometry??null} options={{progress:player.progress,selected:player.active,order:player.order,path:player.path,separation:player.separation,context:player.context,wireframe,checker:player.checker,labels:player.labels,xray,focusFace:player.focusFace}} cameraCommand={player.cameraCommand} onPick={player.pick} status={uvStatus}/>:<MeshViewport mesh={mesh} seamEdges={activeEdges} frame={frame} wireframe={wireframe} xray={xray} cameraResetKey={cameraResetKey}/>}</div>
+        {viewMode==='unfold'?<UnfoldTransport player={player} disabled={!snapshot}/>:<div className="debugbar"><button aria-label="First step" onClick={()=>seek(0)} disabled={!frames.length}>⏮</button><button aria-label="Previous step" onClick={()=>seek(step-1)} disabled={!frames.length}>◀</button><button className="primary" onClick={togglePlayback} disabled={!frames.length||!!busy}>{playing?'Pause':'Play'}</button><button aria-label="Next step" onClick={()=>seek(step+1)} disabled={!frames.length}>▶</button><button aria-label="Last step" onClick={()=>seek(frames.length-1)} disabled={!frames.length}>⏭</button><input aria-label="Traversal step" type="range" min="0" max={Math.max(0,frames.length-1)} value={Math.max(0,step)} onChange={e=>seek(+e.target.value)} disabled={!frames.length}/><span className="step-label">{frames.length?`${step+1}/${frames.length}`:'0/0'}</span></div>}
+        <div className="notice">{loadError?<span role="alert">{loadError}</span>:busy?<span role="status">{busy} <button onClick={()=>{cancel();setNotice('Operation cancelled.');}}>Cancel</button></span>:viewMode==='unfold'?<>{uvState.error?<><span role="alert">{uvState.error}</span> <button onClick={uvState.retry}>重试 UV</button></>:snapshot?'动画终点 = 右侧目标 UV = 导出的目标 UV。展开使用完整接缝，不跟随遍历步骤重排。':uvStatus}</>:frame?<><b>{frame.tokenLabel}</b> · {frame.message} · candidates {frame.mask.vertices.length}{frame.mask.allowEOC?' + EOC':''}{frame.mask.allowEOS?' + EOS':''}</>:notice}</div>
+        {viewMode==='traversal'&&frames.length>0&&<div className="operation-summary">{notice}</div>}
       </section>
       <aside className="rightbar">
-        <div className="panel uv-panel"><div className="panel-title"><span>UV charts</span><span>{uvEdges===seamEdges&&mesh.faces.length>20_000&&!liveUV?'full seams':'current step'}</span></div><UVCanvas mesh={mesh} seamEdges={uvEdges} onChartCount={setChartCount}/></div>
-        <div className="panel timeline"><div className="panel-title"><span>Decode timeline</span><span>{chains.length} chains</span></div>{frames.length>100&&<small className="timeline-window">Showing {timelineStart+1}–{timelineStart+timelineFrames.length} of {frames.length}. Use slider to seek.</small>}<div className="timeline-scroll">{frames.length?timelineFrames.map((f,j)=>{const i=j+timelineStart;return <button key={i} className={i===step?'active':''} onClick={()=>seek(i)}><span>{String(i+1).padStart(3,'0')}</span><b>{f.tokenLabel}</b><em>{f.message}</em></button>;}):<p className="empty">Generate seams to inspect mesh-native pointer traversal.</p>}</div></div>
+        <div className="panel uv-panel"><div className="panel-title"><span>{viewMode==='unfold'?'目标 UV · 点击对应岛':'UV charts'}</span><span>{viewMode==='unfold'?(uvTarget==='source'?'原始 UV':'完整接缝'):uvEdges===seamEdges&&mesh.faces.length>20_000&&!liveUV?'full seams':'current step'}</span></div><UVCanvas snapshot={snapshot} status={uvStatus} selected={viewMode==='unfold'?player.active:uvAll} focusFace={viewMode==='unfold'?player.focusFace:null} checker={viewMode==='unfold'&&player.checker} wireframe={wireframe} onPick={viewMode==='unfold'?player.pick:undefined}/></div>
+        {viewMode==='unfold'?<CorrespondenceInspector mesh={mesh} snapshot={snapshot} player={player}/>:<div className="panel timeline"><div className="panel-title"><span>Decode timeline</span><span>{chains.length} chains</span></div>{frames.length>100&&<small className="timeline-window">Showing {timelineStart+1}–{timelineStart+timelineFrames.length} of {frames.length}. Use slider to seek.</small>}<div className="timeline-scroll">{frames.length?timelineFrames.map((f,j)=>{const i=j+timelineStart;return <button key={i} className={i===step?'active':''} onClick={()=>seek(i)}><span>{String(i+1).padStart(3,'0')}</span><b>{f.tokenLabel}</b><em>{f.message}</em></button>;}):<p className="empty">Generate seams to inspect mesh-native pointer traversal.</p>}</div></div>}
       </aside>
     </main>
-    <footer>Research reproduction scaffold. Complex meshes do not imply a trained MeshTailor model. Baseline is geometric; UV is a planar debug preview.</footer>
+    <footer>Research reproduction scaffold. Complex meshes do not imply a trained MeshTailor model. Baseline is geometric. Generated UV is a planar debug preview; unfolding is a correspondence morph, not a solver trace.</footer>
   </div>;
 }
