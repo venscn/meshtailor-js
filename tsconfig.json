@@ -11,15 +11,39 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@meshtailor/mesh-core": ["packages/mesh-core/src/index.ts"],
-      "@meshtailor/chaining-seams": ["packages/chaining-seams/src/index.ts"],
-      "@meshtailor/runtime": ["packages/runtime/src/index.ts"],
-      "@meshtailor/uv": ["packages/uv/src/index.ts"],
-      "@meshtailor/model": ["packages/model/src/index.ts"]
+      "@meshtailor/mesh-core": [
+        "packages/mesh-core/src/index.ts"
+      ],
+      "@meshtailor/chaining-seams": [
+        "packages/chaining-seams/src/index.ts"
+      ],
+      "@meshtailor/runtime": [
+        "packages/runtime/src/index.ts"
+      ],
+      "@meshtailor/uv": [
+        "packages/uv/src/index.ts"
+      ],
+      "@meshtailor/model": [
+        "packages/model/src/index.ts"
+      ]
     },
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "jsx": "react-jsx",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ]
   },
-  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts", "packages/**/*.tsx", "vite.config.ts"]
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "vite.config.ts",
+    "scripts/**/*.ts",
+    "vitest.config.ts"
+  ]
 }

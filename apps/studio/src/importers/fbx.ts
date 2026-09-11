@@ -10,7 +10,7 @@ export function parseFBX(data:ArrayBuffer,name:string,options:SceneImportOptions
   const placeholder=new THREE.DataTexture(new Uint8Array([255,255,255,255]),1,1);
   placeholder.needsUpdate=true;
   const textures=new THREE.TextureLoader(manager);
-  textures.load=()=>placeholder;
+  textures.load=(url)=>{if(url.startsWith('blob:'))URL.revokeObjectURL(url);return placeholder;};
   manager.addHandler(/.*/,textures);
   let scene:THREE.Group|undefined;
   try{

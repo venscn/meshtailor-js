@@ -4,3 +4,5 @@ dist
 coverage
 *.log
 .history/*.bundle
+apps/studio/public/assets/remote/*
+!apps/studio/public/assets/remote/.gitkeep

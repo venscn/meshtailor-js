@@ -56,7 +56,7 @@ export function meshToOBJ(mesh: MeshData): string {
     const corners=f.vertices.map((vertex,corner)=>{
       const uv=f.uvs?.[corner];if(!uv)return String(vertex+1);
       const source=f.uvIndices?.[corner];
-      const key=source!==null&&source!==undefined?`source:${source}`:`value:${uv[0]},${uv[1]}`;
+      const key=source!==null&&source!==undefined?`source:${source}:${uv[0]},${uv[1]}`:`value:${uv[0]},${uv[1]}`;
       let index=uvMap.get(key);
       if(index===undefined){index=uvMap.size+1;uvMap.set(key,index);uvLines.push(`vt ${uv[0]} ${uv[1]}`);}
       return `${vertex+1}/${index}`;

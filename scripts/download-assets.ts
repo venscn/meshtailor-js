@@ -1,5 +1,5 @@
 /** Run with npm run assets:download [-- --only corset]. Downloads are opt-in. */
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';

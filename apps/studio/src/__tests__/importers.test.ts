@@ -53,7 +53,7 @@ function triangleGLTF(external:boolean){
 }
 describe('Unified local import',()=>{
   // Node does not provide ProgressEvent, which Three FileLoader uses for streamed blobs.
-  if(typeof globalThis.ProgressEvent==='undefined')globalThis.ProgressEvent=class extends Event{lengthComputable=false;loaded=0;total=0;constructor(type:string,init:ProgressEventInit={}){super(type);Object.assign(this,init);}} as typeof ProgressEvent;
+  if(typeof globalThis.ProgressEvent==='undefined')globalThis.ProgressEvent=class extends Event{lengthComputable=false;loaded=0;total=0;constructor(type:string,init:ProgressEventInit={}){super(type);Object.assign(this,init);}} as unknown as typeof ProgressEvent;
   it('imports geometry-only GLB without trying to load its absent texture',async()=>{const {document,binary}=triangleGLTF(false);expect((await importMeshFiles([new File([writeGLB(document,binary)],'triangle.GLB')])).mesh.faces).toHaveLength(1);});
   it('resolves a glTF companion .bin selected with its model',async()=>{const {document,binary}=triangleGLTF(true);const result=await importMeshFiles([new File([JSON.stringify(document)],'triangle.gltf'),new File([binary],'positions.bin')]);expect(result.mesh.faces).toHaveLength(1);});
   it('rejects missing resources and multiple main models with useful messages',async()=>{const {document}=triangleGLTF(true);await expect(importMeshFiles([new File([JSON.stringify(document)],'triangle.gltf')])).rejects.toThrow(/Missing/);await expect(importMeshFiles([new File([],'a.fbx'),new File([],'b.obj')])).rejects.toThrow(/exactly ONE/);});

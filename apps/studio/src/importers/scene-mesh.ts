@@ -11,7 +11,7 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
   root.updateMatrixWorld(true);
   root.traverse(obj => { if ((obj as THREE.SkinnedMesh).isSkinnedMesh) (obj as THREE.SkinnedMesh).skeleton.update(); });
   const parts: RawMeshPart[] = [], warnings: string[] = [];
-  let totalTriangles=0,skinned=0;
+  let totalTriangles=0,totalSourceVertices=0,skinned=0;
   const maxTriangles=options.maxTriangles??300_000;
   root.traverse(obj => {
     const mesh=obj as THREE.Mesh;
@@ -25,6 +25,8 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
     if(start%3 || (end-start)%3)throw new Error(`${obj.name}: triangle index count is not divisible by 3.`);
     const instances=(obj as THREE.InstancedMesh).isInstancedMesh?(obj as THREE.InstancedMesh).count:1;
     totalTriangles+=(end-start)/3*instances;
+    totalSourceVertices+=attribute.count*instances;
+    if(totalSourceVertices>maxTriangles*3)throw new Error('Source vertex count exceeds the import budget. Remove unused vertices or split the mesh.');
     if(totalTriangles>maxTriangles)throw new Error(`Import exceeds ${maxTriangles.toLocaleString()} triangles. Split or decimate this asset first.`);
     const uv=geometry.getAttribute('uv'),v=new THREE.Vector3();
     for(let instance=0;instance<instances;instance++){

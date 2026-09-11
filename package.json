@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -17,11 +17,19 @@
     "test:core": "node scripts/core-smoke.mjs",
     "test:layout": "node scripts/layout-smoke.mjs",
     "test:browser": "node scripts/studio-smoke.mjs",
-    "check:full": "npm run check && npm run test:core && npm run test:layout && npm run test:browser"
+    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:layout && npm run test:browser",
+    "assets:generate": "node scripts/generate-examples.mjs",
+    "assets:download": "tsx scripts/download-assets.ts",
+    "test:complex": "node scripts/complex-smoke.mjs",
+    "test:imports": "vitest run apps/studio/src/__tests__/importers.test.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "tsx": "^4.20.5"
+  },
+  "engines": {
+    "node": ">=22.16.0"
   }
 }
