@@ -6,3 +6,4 @@ export * from './obj.js';
 export * from './surface.js';
 export * from './examples.js';
 export * from './import-mesh.js';
+export * from './complex-examples.js';
