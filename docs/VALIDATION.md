@@ -1,46 +1,50 @@
-# Validation — v0.1.1
+# Validation — v0.2.0
 
-This record distinguishes executed checks from unexecuted UI checks. The original release record is preserved in `VALIDATION-0.1.0.md`.
+This record distinguishes real executed checks, simulated transport checks, and unexecuted integration checks. Historical records remain in `VALIDATION-0.1.1.md` / `VALIDATION-0.1.0.md`.
 
-## Executed successfully
+## Executed
 
-`node scripts/core-smoke.mjs --report docs/validation/core-smoke.json`
+Environment: Node v22.16.0, global TypeScript 5.8.3, Chromium 144.0.7559.96. These are assembly-time tools, not a claim that the declared npm dependency tree was installed.
 
-- TypeScript 5.8.3 strict compilation of the five core packages and `viewport-math.ts`.
-- 21 executable cases: original seam/traversal/UV pipeline, training sample shape, display normalization, camera fit, hidden viewport sizing, and invalid input.
-- Syntax-only transpilation of 41 TypeScript/TSX source files, including the UI. This is **not** a full UI typecheck.
+| Command | Passed | Scope |
+|---|---:|---|
+| `node scripts/core-smoke.mjs` | 21 | strict core/view-math compile, original traversal/UV pipeline, camera math, invalid meshes |
+| `node scripts/complex-smoke.mjs` | 40 | welding, UV, complex mesh topology/traversal, GLB helpers, mock downloads, actual asset hashes and FBX fixture structure |
+| `node scripts/layout-smoke.mjs` | 11 | real Chromium native canvas/CSS layout; no React/Three.js |
 
-`node scripts/layout-smoke.mjs --report docs/validation/layout-smoke.json`
+Machine-readable results are in `docs/validation/v0.2.0/`.
 
-- 9 real Chromium CSS/native-canvas layout cases.
-- The original v0.1.0 CSS reproduces unbounded HiDPI intrinsic-width growth (bounded to eight observations by the test).
-- Fixed CSS settles at DPR 1, 1.25, 2, and 3, with pixel ratio capped at 2 as in the renderer.
-- Three window-resize sizes and hide/show recovery pass.
-- This suite does **not** load React or Three.js. It verifies the canvas-sizing mechanism and CSS fix, not the full GPU-rendered Studio.
+The core script also performs **syntax-only** transpilation of 53 TS/TSX files. It is not a UI declaration typecheck. The complex suite validates all four procedural meshes at low/medium/high density for finite coordinates, nondegenerate triangles and edge-manifold incidence, then runs the complete baseline→chain→candidate-mask→traversal→UV coverage pipeline on medium meshes. OBJ export/import preserves tested UV seam sets, including the original UV cube.
 
-The JSON reports are included in `docs/validation/`.
+The download cases use a mock `fetch` transport: GLB reassembly, texture stripping, failure paths, path restrictions and size checks are executable, but **no actual remote model download succeeded here**. Timings in reports measure this container only, not user hardware or GPU/browser performance.
 
-## Not executed / not claimed
+The FBX cases validate generated file structure, binary node offsets, array decompression, polygon/UV counts and checksums. They do **not** instantiate FBXLoader. The generated ASCII/Binary fixtures are real files, not placeholders, but production import compatibility is unverified.
 
-The assembly environment cannot resolve `registry.npmjs.org`; the UI dependency tree is not installed. Therefore the following are not certified by this release assembly:
+The layout suite reproduces the original v0.1.0 HiDPI growth as a negative control; verifies fixed DPR 1/1.25/2/3 and resize/hide/show; and adds 1100×700 and 1920×1080 layouts with long import diagnostics, a fourth status row and a 100-row timeline. This is a native canvas/CSS test, not a full GPU-rendered application test.
 
-- complete `npm install`;
-- full UI typecheck against React/Three declarations;
-- the Vitest suite through the actual dependency tree;
-- Vite production bundle;
-- React + Three.js end-to-end display or camera interaction;
-- macOS, Windows or Safari execution.
+## Unexecuted / not certified
 
-The real Studio browser test was invoked and stopped at its explicit missing-dependency check. No success report was generated for that test.
+The environment could not resolve npm registry / asset download hosts. No successful dependency installation was achieved. The real Studio test was invoked and stopped at its explicit missing-dependency guard (record in `environment.txt`). The following remain unverified:
 
-## Full local regression
+- Actual Three FBXLoader decoding of the ASCII/Binary fixtures or user FBX files.
+- Full glTF/FBX scene import, React rendering, skin/morph behavior through installed Three.
+- Complete UI TypeScript checking, Vitest integration run, Vite production bundle.
+- Full Studio browser interactions, Worker integration through Vite, GPU rendering.
+- Real upstream Corset / Flight Helmet retrieval and browser display.
+- macOS, Windows, Safari or user GPU execution.
+- General FBX exporter/version compatibility, material fidelity or animations.
 
-After successful dependency installation, run:
+No fake Three.js module, mocked FBX parser or hand-authored success log substitutes for these checks. No npm lockfile is fabricated from an uninstalled dependency tree.
+
+## Full integration entry points
+
+After successful `npm install`, run:
 
 ```bash
+npm run test:imports
 npm run check:full
 ```
 
-`test:browser` starts the real Vite Studio. It tests DPR 1 and 2, successful rendering, seam steps, preservation of canvas identity and camera orientation, mesh switches, playback restart, and visible WebGL initialization errors. It does not substitute fake React or Three.js implementations.
+`test:imports` uses real Three geometry, transformations, instancing, skin/morph pose, both bundled FBX encodings, malformed FBX, geometry-only GLB and glTF companion buffers. `test:browser` starts the real Studio and covers the original rendering regression plus complex sample selection, both FBX buttons and bounded timeline. They are tests to run, not tests already passed.
 
-Node.js 22 and a local Chrome/Chromium/Edge executable are needed for browser regression scripts. Set `CHROME_PATH` if autodetection does not find your browser. The full Studio test also requires actual WebGL 2 support.
+Browser checks require Node.js 22 plus local Chrome/Chromium/Edge and WebGL2 for the full Studio. Set `CHROME_PATH` as needed. `.github/workflows/ci.yml` is supplied for dependency-backed checks but no hosted CI run is claimed.

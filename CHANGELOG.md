@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 — 2026-09-11
+
+- Add four offline complex meshes at three densities, UV-preserving OBJ export and two synthetic FBX 7400 fixtures.
+- Add Studio FBX import and shared transformed-scene normalization with per-object welding and per-corner UVs.
+- Add opt-in CC0 Corset / Flight Helmet catalog and geometry-only GLB download/cache commands; remote binaries are not bundled.
+- Move seam/UV calculation to workers, reuse adjacency, lazily expose traversal history and bound timeline rows.
+- Keep long diagnostics and new timeline labels from breaking the previously fixed 3D layout.
+- Add pure geometry/assets tests and real Three/FBX/Studio integration test entry points.
+- Executed: 21 core + 40 complex + 11 native layout cases. Real dependency-backed FBX/UI/Vite checks remain unexecuted; see docs/VALIDATION.md.
+
+
 ## 0.1.1 — 2026-09-11
 
 ### Fixed

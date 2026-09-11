@@ -78,3 +78,14 @@ The largest patch is refined first; its most balanced valid internal loop is app
 ## 5. Current UV stage
 
 `buildCharts()` is real topology cutting: face adjacency cannot cross a seam edge. `planarPackPreview()` is only the parameterization preview. This distinction is intentional because MeshTailor predicts seams; ABF++ is a downstream solver in the paper.
+
+
+## 0.2.0 additions
+
+The browser import boundary is `apps/studio/src/importers/`: OBJ retains source topology; FBX/glTF pass a Three scene through `sceneToMesh` and pure `assembleMeshParts`. Position welding is scoped per object/instance while UV lives on face corners. Imported source scenes are disposed after extraction. FBXLoader parse remains synchronous.
+
+Complex mesh generators, the remote asset catalog, bounded geometry downloads and GLB repack helpers live in `packages/mesh-core`. They are independent of React/Three except for the later browser scene decoder. Remote download is opt-in and source/credit/hash are retained.
+
+`seam.worker.ts` returns seam edges and ordered chains, not pre-expanded debugger frames. The main thread constructs frames with lazy edge-history getters. Structured-cloning those frames would eagerly invoke getters and negate the memory optimization; do not move frame arrays across the worker boundary. `uv.worker.ts` returns chart/preview data. Operation sequence IDs reject stale replies.
+
+The timeline renders at most 100 nearby rows. Above 20,000 triangles, UV defaults to complete seam data rather than playback-frame updates. None of these changes replace the geometric baseline with a learned model or the planar preview with ABF++.
