@@ -68,13 +68,27 @@ try {
     await click('Pause');
     await click('Reset camera');
     for (const mesh of ['Cube', 'Cylinder', 'Torso']) {
-      await click(mesh); await click('Generate baseline'); await ariaClick('Last step'); await delay(150);
+      await click(mesh); await page.waitFor(`${canvas}.dataset.step === '-1'`); await click('Generate baseline'); await page.waitFor(`${canvas}.dataset.step === '0'`); await ariaClick('Last step'); await page.waitFor(`Number(${canvas}.dataset.seamCount)>0`);
       assert.ok(await page.evaluate(`${canvas} === __originalCanvas && Number(${canvas}.dataset.seamCount) > 0`));
     }
+    // Load both REAL FBX fixtures through the app's file importer (not mocked data).
+    for(const format of ['ASCII','Binary']){
+      await click('FBX '+format);
+      await page.waitFor(`document.querySelector('.scene-panel .panel-title')?.textContent.includes('garment-${format.toLowerCase()}.fbx')`);
+      await page.waitFor(`!document.querySelector('.notice [role="status"]')`);
+      await click('Generate baseline');await page.waitFor(`${canvas}.dataset.step === '0'`);
+      await ariaClick('Last step');await page.waitFor(`Number(${canvas}.dataset.seamCount)>0`);
+      assert.ok(await page.evaluate(`${canvas} === __originalCanvas`));
+    }
+    await click('Load complex mesh');
+    await page.waitFor(`document.querySelector('.scene-panel .panel-title')?.textContent.includes('Pleated garment')`);
+    await click('Generate baseline');await page.waitFor(`${canvas}.dataset.step === '0'`);
+    await ariaClick('Last step');await page.waitFor(`Number(${canvas}.dataset.seamCount)>0`);
+    assert.ok(await page.evaluate(`document.querySelectorAll('.timeline-scroll button').length <= 100`));
     const errors = await page.evaluate('__testErrors');
     assert.deepEqual(errors, []);
     assert.ok(await page.evaluate(`!document.querySelector('[role="alert"]')`));
-    report.cases.push({ name: `DPR ${dpr}: rendered mesh, seams, camera persistence, seek/playback and mesh switching`, passed: true, rect });
+    report.cases.push({ name: `DPR ${dpr}: rendered mesh, FBX ASCII/Binary, complex garment, bounded timeline, camera and seek/playback`, passed: true, rect });
     page.close();
   }
   // Verify the app remains usable and shows a visible error if WebGL is unavailable.
