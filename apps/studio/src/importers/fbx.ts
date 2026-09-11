@@ -9,7 +9,9 @@ export function parseFBX(data:ArrayBuffer,name:string,options:SceneImportOptions
   const manager=new THREE.LoadingManager();
   const placeholder=new THREE.DataTexture(new Uint8Array([255,255,255,255]),1,1);
   placeholder.needsUpdate=true;
-  manager.addHandler(/.*/,{load:()=>placeholder} as unknown as THREE.Loader);
+  const textures=new THREE.TextureLoader(manager);
+  textures.load=()=>placeholder;
+  manager.addHandler(/.*/,textures);
   let scene:THREE.Group|undefined;
   try{
     scene=new FBXLoader(manager).parse(data,'');
