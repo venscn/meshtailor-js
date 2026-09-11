@@ -9,8 +9,8 @@ export function buildCharts(mesh:MeshData,seamEdges:Set<string>):UVChart[]{
   while(unvisited.size){
     const root=unvisited.values().next().value as number;
     unvisited.delete(root); const faces=[root]; const queue=[root];
-    while(queue.length){
-      const fi=queue.shift()!, f=mesh.faces[fi]!;
+    for(let head=0;head<queue.length;head++){
+      const fi=queue[head]!, f=mesh.faces[fi]!;
       for(const [a,b] of [[f.vertices[0],f.vertices[1]],[f.vertices[1],f.vertices[2]],[f.vertices[2],f.vertices[0]]] as const){
         const key=edgeKey(a,b); if(seamEdges.has(key)) continue;
         const e=topology.edges.get(key); if(!e) continue;

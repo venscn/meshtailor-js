@@ -1,4 +1,4 @@
-import { buildTopology, distance3, edgeKey, triangleArea, type MeshData } from '@meshtailor/mesh-core';
+import { buildTopology, distance3, edgeKey, triangleArea, type MeshData, type MeshTopology } from '@meshtailor/mesh-core';
 import { chainEdgeKeys, type SeamChain } from './chains.js';
 
 interface Patch { faces: Set<number>; area: number }
@@ -14,9 +14,8 @@ function patch(mesh: MeshData, faces: Iterable<number>): Patch {
   return { faces:set, area };
 }
 
-function splitPatch(mesh: MeshData, current: Patch, loop: SeamChain): [Patch,Patch] | null {
+function splitPatch(mesh: MeshData, current: Patch, loop: SeamChain, topology: MeshTopology): [Patch,Patch] | null {
   if (!loop.closed) return null;
-  const topology = buildTopology(mesh);
   const blocked = chainEdgeKeys(loop);
   // A valid internal loop must have two incident faces inside the current patch for every edge.
   for (const key of blocked) {
@@ -29,8 +28,8 @@ function splitPatch(mesh: MeshData, current: Patch, loop: SeamChain): [Patch,Pat
     const root=unvisited.values().next().value as number;
     const comp=new Set<number>([root]); unvisited.delete(root);
     const queue=[root];
-    while(queue.length){
-      const fi=queue.shift()!;
+    for(let head=0;head<queue.length;head++){
+      const fi=queue[head]!;
       const f=mesh.faces[fi]!;
       for(const [a,b] of [[f.vertices[0],f.vertices[1]],[f.vertices[1],f.vertices[2]],[f.vertices[2],f.vertices[0]]] as const){
         if(blocked.has(edgeKey(a,b))) continue;
@@ -57,10 +56,19 @@ export function chainLength(mesh: MeshData, chain: SeamChain): number {
 
 /** Implements Appendix B.2 Algorithm 1 as closely as possible on face patches. */
 export function canonicalOrder(mesh: MeshData, chains: SeamChain[]): SeamChain[] {
+  const topology=buildTopology(mesh);
   const loops=chains.filter((c)=>c.closed);
   const opens=chains.filter((c)=>!c.closed);
   const remaining=new Set(loops);
-  let patches: Patch[]=[patch(mesh,mesh.faces.keys())];
+  let patches: Patch[]=[];
+  const unvisited=new Set(mesh.faces.keys());
+  while(unvisited.size){
+    const root=unvisited.values().next().value as number, queue=[root];unvisited.delete(root);
+    for(let head=0;head<queue.length;head++)for(const other of topology.faceNeighbors[queue[head]!]!){
+      if(unvisited.delete(other))queue.push(other);
+    }
+    patches.push(patch(mesh,queue));
+  }
   const ordered: SeamChain[]=[];
 
   while(patches.length && remaining.size){
@@ -70,7 +78,7 @@ export function canonicalOrder(mesh: MeshData, chains: SeamChain[]): SeamChain[]
       const p=patches[pi]!;
       const candidates: {loop:SeamChain; split:[Patch,Patch]; balance:number}[]=[];
       for(const loop of remaining){
-        const split=splitPatch(mesh,p,loop);
+        const split=splitPatch(mesh,p,loop,topology);
         if(!split) continue;
         const [a,b]=split;
         if(a.area < 1e-12 || b.area < 1e-12) continue;
