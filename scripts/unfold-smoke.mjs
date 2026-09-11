@@ -19,6 +19,8 @@ try {
     return { packed, geometry:uv.buildUnfoldGeometry(mesh,packed,edges), edges };
   };
   const {geometry:g,packed,edges}=make(cube,true);
+  const demoModule=await compiled.load('apps/studio/src/unfold/demo.js');
+  check('One-click demo has six real charts and matching source UVs',()=>{const demo=demoModule.makeUnfoldDemo();assert.equal(uv.buildCharts(demo.mesh,demo.edges).length,6);assert.equal(seams.extractSeamEdgesFromUV(demo.mesh).size,demo.edges.size);assert.ok(demo.frames.length>0);assert.ok(demo.mesh.faces.every(f=>f.uvs?.length===3));});
   const all=g.islands.map(i=>i.id);
   const opts={progress:0,selected:all,order:'together',path:'staged',separation:.6};
   check('UV cube has six real islands, not a triangle-per-island proxy',()=>assert.equal(g.islands.length,6));

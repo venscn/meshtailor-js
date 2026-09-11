@@ -2,12 +2,14 @@ import { useMemo, useState } from 'react';
 import { islandColor, islandProgress } from '@meshtailor/uv';
 import type { UVSnapshot, UVTarget } from '../workers/uv.worker';
 import type { UnfoldPlayer, UnfoldScope } from './useUnfoldPlayer';
-export function UnfoldControls({player:p,snapshot,target,onTarget,onExport}:{player:UnfoldPlayer;snapshot:UVSnapshot|null;target:UVTarget;onTarget:(v:UVTarget)=>void;onExport:()=>void}){
+export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDemo}:{player:UnfoldPlayer;snapshot:UVSnapshot|null;target:UVTarget;onTarget:(v:UVTarget)=>void;onExport:()=>void;onDemo:()=>void}){
   const [page,setPage]=useState(0),[filter,setFilter]=useState('');
   const islands=useMemo(()=>snapshot?.geometry.islands.filter(c=>!filter||String(c.id+1).includes(filter))??[],[snapshot,filter]);
   const pages=Math.max(1,Math.ceil(islands.length/40)),current=Math.min(page,pages-1),visible=islands.slice(current*40,current*40+40);
   return <section className="unfold-controls">
     <h3>展开对应预览 · Unfold</h3>
+    <button onClick={onDemo}>加载六岛立方体示例</button>
+    <small>此按钮替换当前网格；自己的模型可先生成裁切线，或直接选择原始 UV 目标。</small>
     <label>UV 目标<select aria-label="UV target" value={target} onChange={e=>onTarget(e.target.value as UVTarget)}><option value="generated">生成的 UV 调试预览</option><option value="source">网格原始 UV（不重新打包）</option></select></label>
     <small>两侧视图和下方导出共用同一份 UV；原始 UV 模式使用原始 UV 接缝，而非 baseline。</small>
     <label>预览范围<select aria-label="Unfold scope" value={p.scope} onChange={e=>p.changeScope(e.target.value as UnfoldScope)}><option value="all">全部 UV 岛</option><option value="single">单个 UV 岛</option><option value="selected">多选 UV 岛</option></select></label>

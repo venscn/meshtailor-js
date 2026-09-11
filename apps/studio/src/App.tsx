@@ -13,6 +13,7 @@ import { importMeshFiles, type SceneImportOptions } from './importers';
 import type { SeamJob, SeamResult } from './workers/seam.worker';
 import { prepareViewportMesh } from './viewport-math';
 import { meshWithPreviewUV } from '@meshtailor/uv';
+import { makeUnfoldDemo } from './unfold/demo';
 import { useUVSnapshot } from './unfold/useUVSnapshot';
 import { useUnfoldPlayer } from './unfold/useUnfoldPlayer';
 import { UnfoldControls, UnfoldTransport } from './unfold/UnfoldControls';
@@ -73,6 +74,7 @@ export default function App(){
     prepareViewportMesh(m); // Reject malformed input before React/topology/Three see it.
     setMesh(m);setImportReport(report);setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
   };
+  const loadUnfoldDemo=()=>{cancel();setLoadError(null);try{const demo=makeUnfoldDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setUVTarget('generated');setViewMode('unfold');setNotice('六岛立方体：拖动 0–100% 进度，观察同色编号的面片移入对应 UV 岛。');}catch(error){setLoadError(String(error));}};
   const resetForMesh=(m:MeshData)=>{cancel();setLoadError(null);try{replaceMesh(m);}catch(error){setLoadError(String(error));}};
   const loadFiles=async(files:File[])=>{
     const id=begin('Importing mesh…');
@@ -129,7 +131,7 @@ export default function App(){
     <header className="topbar"><div><div className="brand">MeshTailor-JS <span>Studio · 0.3.0</span></div><div className="subtitle">3D ↔ UV 岛展开 · 逐个 / 多选 / 全部 · mesh-native traversal</div></div><div className="paper-pill">d={MESH_TAILOR_V2_SPEC.modelDimension} · {MESH_TAILOR_V2_SPEC.decoderLayers} decoder layers</div></header>
     <main className="workspace">
       <aside className="sidebar">
-        {viewMode==='unfold'&&<UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={setUVTarget} onExport={exportTargetUV}/>}
+        {viewMode==='unfold'&&<UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={setUVTarget} onExport={exportTargetUV} onDemo={loadUnfoldDemo}/>}
         <section><h3>Mesh · 网格</h3><div className="button-grid"><button onClick={()=>resetForMesh(makeCube())}>Cube</button><button onClick={()=>resetForMesh(makeCylinder(20))}>Cylinder</button><button onClick={()=>resetForMesh(makeTorsoGrid())}>Torso</button></div>
           <label className="file-label">Load OBJ / FBX / GLB / GLTF<input type="file" multiple accept=".obj,.fbx,.glb,.gltf,.bin" onChange={e=>{const files=Array.from(e.target.files??[]);if(files.length)void loadFiles(files);e.target.value='';}}/></label>
           <small>可拖入文件。glTF 与配套 .bin 请一起选择。只导入网格，不显示材质贴图。</small>
