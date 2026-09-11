@@ -85,6 +85,25 @@ try {
     await click('Generate baseline');await page.waitFor(`${canvas}.dataset.step === '0'`);
     await ariaClick('Last step');await page.waitFor(`Number(${canvas}.dataset.seamCount)>0`);
     assert.ok(await page.evaluate(`document.querySelectorAll('.timeline-scroll button').length <= 100`));
+    // Actual React controls + actual browser UV worker + new native WebGL viewport.
+    await click('3D ↔ UV 展开动画');await click('加载六岛立方体示例');
+    const unfold=`document.querySelector('[data-testid="unfold-canvas"]')`;
+    await page.waitFor(`${unfold}?.dataset.selectedCount === '6'`);
+    await click('UV · 100%');await page.waitFor(`${unfold}.dataset.targetError === '0'`);
+    const setValue=async(label,value,select=false)=>page.evaluate(`(()=>{const el=document.querySelector('[aria-label="${label}"]');Object.getOwnPropertyDescriptor(${select?'HTMLSelectElement':'HTMLInputElement'}.prototype,'value').set.call(el,${JSON.stringify(value)});el.dispatchEvent(new Event('${select?'change':'input'}',{bubbles:true}));})()`);
+    await setValue('Unfold scope','single',true);await page.waitFor(`${unfold}.dataset.selectedCount === '1'`);
+    await click('下一个岛');await click('UV · 100%');await page.waitFor(`${unfold}.dataset.completed === '1'`);
+    await setValue('Unfold scope','all',true);await setValue('Unfold order','sequential',true);
+    await setValue('Unfold progress','.25');await page.waitFor(`${unfold}.dataset.completed === '1'`);
+    await page.evaluate(`document.querySelector('[aria-label="Include island 2"]').click()`);await page.waitFor(`${unfold}.dataset.selectedCount === '5'`);
+    await click('清空选择');await page.waitFor(`${unfold}.dataset.selectedCount === '0'`);
+    await setValue('Unfold scope','all',true);await setValue('Unfold order','together',true);
+    await click('播放展开');await page.waitFor(`Number(${unfold}.dataset.progress)>.025`);await click('暂停展开');
+    await click('UV 正视');const orbit=await page.evaluate(`${unfold}.dataset.camera`);
+    await setValue('Unfold progress','.37');await page.waitFor(`${unfold}.dataset.progress === '0.37'`);assert.equal(await page.evaluate(`${unfold}.dataset.camera`),orbit);
+    await setValue('UV target','source',true);await page.waitFor(`${unfold}.dataset.selectedCount === '6' && ${unfold}.dataset.progress === '0'`);
+    await click('UV · 100%');await page.waitFor(`${unfold}.dataset.targetError === '0'`);
+    report.cases.push({name:`DPR ${dpr}: actual React unfold controls, browser UV worker, selection, sequential progress, playback and original UV`,passed:true});
     const errors = await page.evaluate('__testErrors');
     assert.deepEqual(errors, []);
     assert.ok(await page.evaluate(`!document.querySelector('[role="alert"]')`));

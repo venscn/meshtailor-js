@@ -62,6 +62,7 @@ export async function startChrome() {
   const profile = await mkdtemp(join(tmpdir(), 'meshtailor-chrome-'));
   const args = ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
     '--no-first-run', '--no-default-browser-check', '--disable-dev-shm-usage', 'about:blank'];
+  if (process.env.CHROME_SOFTWARE_WEBGL === '1') args.unshift('--use-angle=swiftshader', '--enable-unsafe-swiftshader');
   if (process.platform === 'linux' && process.getuid?.() === 0) args.unshift('--no-sandbox');
   let child;
   try { child = spawn(chromePath(), args, { stdio: ['ignore', 'ignore', 'pipe'] }); }
@@ -80,6 +81,7 @@ export async function startChrome() {
   const base = `http://${socketUrl.host}`;
   const connections = [];
   return {
+    diagnostics: () => stderr,
     async page() {
       const response = await fetch(`${base}/json/new?about:blank`, { method: 'PUT' });
       if (!response.ok) throw new Error(`Cannot create browser page: HTTP ${response.status}`);
