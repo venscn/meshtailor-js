@@ -32,6 +32,10 @@
       "passed": true
     },
     {
+      "name": "training samples keep xyz+normal, sampled point count and EOS",
+      "passed": true
+    },
+    {
       "name": "off-origin mesh is normalized before float32 conversion",
       "passed": true
     },
@@ -90,5 +94,5 @@
     "result": "pass",
     "fullUITypecheck": "not performed by this script"
   },
-  "passed": 20
+  "passed": 21
 }

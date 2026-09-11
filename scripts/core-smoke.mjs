@@ -25,7 +25,9 @@ async function walk(path) {
   const result = [];
   for (const entry of await readdir(path, { withFileTypes: true })) {
     const full = join(path, entry.name);
-    if (entry.isDirectory()) result.push(...await walk(full)); else result.push(full);
+    if (entry.isDirectory()) {
+      if (!['node_modules', 'dist', '.git', '.vite'].includes(entry.name)) result.push(...await walk(full));
+    } else result.push(full);
   }
   return result;
 }
@@ -85,6 +87,13 @@ try {
     const mesh = uvCube;
     const edges = chaining.extractSeamEdgesFromUV(mesh);
     assert.equal(edges.size, 12);
+  });
+  check('training samples keep xyz+normal, sampled point count and EOS', () => {
+    const sample = model.buildTrainingSample(uvCube, 32, 1);
+    assert.equal(sample.vertices.length, uvCube.positions.length);
+    assert.ok(sample.vertices.every((row) => row.length === 6));
+    assert.equal(sample.points.length, 32);
+    assert.equal(sample.target.at(-1), chaining.EOS);
   });
   check('off-origin mesh is normalized before float32 conversion', () => {
     const mesh = core.makeCube();
