@@ -176,14 +176,18 @@ export class ViewportScene {
     if (!this.viewMesh) return;
     const { radius } = this.viewMesh;
     const distance = fitDistance(radius, this.camera.fov, this.camera.aspect);
-    // reset() also clears OrbitControls' pending damping deltas after a drag.
+    // Flush pending damping deltas before placing a new camera.
+    const damping = this.controls.enableDamping;
+    this.controls.enableDamping = false;
     this.controls.reset();
     this.controls.target.set(0, 0, 0);
     this.camera.position.set(.75, .5, .85).normalize().multiplyScalar(distance);
     this.camera.near = radius / 1000;
     this.camera.far = Math.max(radius * 200, distance * 4);
     this.camera.updateProjectionMatrix();
+    this.controls.maxDistance = Math.max(radius * 80, distance * 2);
     this.controls.update();
+    this.controls.enableDamping = damping;
     this.controls.saveState();
     this.recordCamera();
   }
