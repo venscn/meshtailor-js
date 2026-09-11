@@ -1,0 +1,37 @@
+{
+  "source": "Delivered conversation ZIPs and the original v0.2.0 Git bundle",
+  "comparison": "Every tracked file was compared byte-for-byte with its release ZIP; directories ignored; .history/repository.bundle is a packaging artifact.",
+  "releases": [
+    {
+      "version": "0.1.0",
+      "source_zip_sha256": "f05f1228818449d27d955574f29f32787efbf41aef020de65a17248d765e8ea4",
+      "commit": "e7d080f8353eb11c05431a141d2708f22459d2bc",
+      "tracked_files": 59,
+      "missing": [],
+      "different": [],
+      "archive_extra": []
+    },
+    {
+      "version": "0.1.1",
+      "source_zip_sha256": "6a2dd287ae4039422272799ca10a85d2694e466f879b8ab383c93be0b479f89d",
+      "commit": "9b3a581b4d77623062370d4d474db81130febe5a",
+      "tracked_files": 75,
+      "missing": [],
+      "different": [],
+      "archive_extra": [
+        ".history/repository.bundle"
+      ]
+    },
+    {
+      "version": "0.2.0",
+      "source_zip_sha256": "c6f43b5b9dc663986efc5c7ab0271374ff1d6651aa426bb43e1374b834aae9ce",
+      "commit": "1500f2bf2e3a9ead88c48734b6ae6604acc4d32c",
+      "tracked_files": 112,
+      "missing": [],
+      "different": [],
+      "archive_extra": [
+        ".history/repository.bundle"
+      ]
+    }
+  ]
+}

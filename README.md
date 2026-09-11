@@ -1,5 +1,7 @@
 # MeshTailor-JS 0.2.0
 
+> **Git 仓库交接版（应用基线 v0.2.0）**：本包含完整 `.git/`，解压后可直接运行 `git log` 和 `git tag`，不需要 `git init` 或另行恢复 bundle。`master` 在原 `v0.2.0` 之后增加了维护规则、校验工具、测试与交付说明提交；旧版 tag 均保持不变，没有发布 `v0.2.1`。详见 [Git 交接说明](docs/GIT_HANDOFF.md) 和根目录 `AGENTS.md`。
+
 在 0.1.1 基础上增加 **复杂网格样例、FBX 导入、在线 CC0 模型入口及大网格计算优化**。这是独立的 TypeScript / JavaScript 研究工程，不是官方 MeshTailor 软件。
 
 **本次交付边界：** ZIP 内含真实生成的复杂 OBJ 和 ASCII/Binary FBX 测试文件；公开模型只提供在线加载/下载缓存入口，没有把未下载成功的网络文件冒充为内置资源。核心、几何、文件结构和原生画布布局测试已执行；制作环境无法安装 npm 依赖，因此完整 React/Three.js 页面、真实 FBXLoader 导入和 Vite 构建仍待验证。详见 [验证记录](docs/VALIDATION.md)。
