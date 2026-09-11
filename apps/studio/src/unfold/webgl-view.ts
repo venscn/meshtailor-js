@@ -13,6 +13,7 @@ export interface UnfoldDisplay extends UnfoldOptions {
 }
 const VERTEX=`#version 300 es
 precision highp float;
+precision highp int;
 layout(location=0) in vec3 position;
 layout(location=1) in vec3 color;
 layout(location=2) in vec2 uv;
@@ -26,6 +27,7 @@ void main(){
 }`;
 const FRAGMENT=`#version 300 es
 precision highp float;
+precision highp int;
 in vec3 vColor; in vec3 vWorld; in vec2 vUV; in vec3 bary; flat in int face;
 uniform float opacity; uniform bool wire; uniform bool checker; uniform bool lineMode;
 uniform vec3 lineColor; uniform int focus;
