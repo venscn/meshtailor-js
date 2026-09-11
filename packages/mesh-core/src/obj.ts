@@ -45,9 +45,23 @@ export function parseOBJ(text: string, name = 'uploaded.obj'): MeshData {
   return { name, positions, faces };
 }
 
+/** Export corner UVs without inventing seams on every triangle.
+ * Original OBJ UV identities remain distinct even when coordinates overlap.
+ */
 export function meshToOBJ(mesh: MeshData): string {
-  const out: string[] = [`# ${mesh.name}`];
+  const out: string[] = [`# ${mesh.name}`], uvLines:string[]=[], faceLines:string[]=[];
   for (const p of mesh.positions) out.push(`v ${p[0]} ${p[1]} ${p[2]}`);
-  for (const f of mesh.faces) out.push(`f ${f.vertices[0] + 1} ${f.vertices[1] + 1} ${f.vertices[2] + 1}`);
-  return out.join('\n') + '\n';
+  const uvMap=new Map<string,number>();
+  for(const f of mesh.faces){
+    const corners=f.vertices.map((vertex,corner)=>{
+      const uv=f.uvs?.[corner];if(!uv)return String(vertex+1);
+      const source=f.uvIndices?.[corner];
+      const key=source!==null&&source!==undefined?`source:${source}`:`value:${uv[0]},${uv[1]}`;
+      let index=uvMap.get(key);
+      if(index===undefined){index=uvMap.size+1;uvMap.set(key,index);uvLines.push(`vt ${uv[0]} ${uv[1]}`);}
+      return `${vertex+1}/${index}`;
+    });
+    faceLines.push('f '+corners.join(' '));
+  }
+  return [...out,...uvLines,...faceLines].join('\n')+'\n';
 }
