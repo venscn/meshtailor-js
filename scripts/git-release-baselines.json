@@ -1,0 +1,23 @@
+[
+  {
+    "tag": "v0.1.0",
+    "refObject": "e7d080f8353eb11c05431a141d2708f22459d2bc",
+    "commit": "e7d080f8353eb11c05431a141d2708f22459d2bc",
+    "tagType": "commit",
+    "commitsSincePrevious": null
+  },
+  {
+    "tag": "v0.1.1",
+    "refObject": "9b3a581b4d77623062370d4d474db81130febe5a",
+    "commit": "9b3a581b4d77623062370d4d474db81130febe5a",
+    "tagType": "commit",
+    "commitsSincePrevious": 6
+  },
+  {
+    "tag": "v0.2.0",
+    "refObject": "e6c2a290c0bced503a5ea65df78cb27b28aca836",
+    "commit": "1500f2bf2e3a9ead88c48734b6ae6604acc4d32c",
+    "tagType": "tag",
+    "commitsSincePrevious": 11
+  }
+]

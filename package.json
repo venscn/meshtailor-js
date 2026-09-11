@@ -21,7 +21,8 @@
     "assets:generate": "node scripts/generate-examples.mjs",
     "assets:download": "tsx scripts/download-assets.ts",
     "test:complex": "node scripts/complex-smoke.mjs",
-    "test:imports": "vitest run apps/studio/src/__tests__/importers.test.ts"
+    "test:imports": "vitest run apps/studio/src/__tests__/importers.test.ts",
+    "git:check": "node scripts/git-history-check.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
