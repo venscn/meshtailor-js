@@ -123,7 +123,7 @@ export default function App(){
           <label>密度<select aria-label="Mesh detail" value={detail} onChange={e=>setDetail(e.target.value as MeshDetail)}><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
           <small>{COMPLEX_EXAMPLES.find(m=>m.id===exampleId)?.description}</small>
           <button onClick={()=>resetForMesh(makeComplexExample(exampleId,detail))}>Load complex mesh</button>
-          <div className="button-grid"><button disabled={!!busy} onClick={()=>void loadFBXExample('ascii')}>FBX ASCII</button><button disabled={!!busy} onClick={()=>void loadFBXExample('binary')}>FBX Binary</button></div>
+          <div className="button-grid two"><button disabled={!!busy} onClick={()=>void loadFBXExample('ascii')}>FBX ASCII</button><button disabled={!!busy} onClick={()=>void loadFBXExample('binary')}>FBX Binary</button></div>
           <button onClick={()=>saveFile('meshtailor-mesh.obj',meshToOBJ(mesh),'text/plain')}>Export current OBJ + UV</button>
         </section>
         <section><h3>公开模型 · Online</h3><small>CC0；优先使用已下载的本地副本，否则从原站获取几何和 UV，不下载贴图。</small>

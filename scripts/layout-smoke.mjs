@@ -64,6 +64,36 @@ try {
   const visible = await page.evaluate(`(() => {const host=document.querySelector('.viewport'),c=host.querySelector('canvas');return host.clientWidth>0 && host.clientWidth===c.clientWidth && host.clientHeight===c.clientHeight;})()`);
   assert.ok(visible);
   report.cases.push({ name: 'hidden panel becomes visible without intrinsic canvas growth', passed: true });
+  // v0.2.0 adds a fourth center child and an optional timeline-window row.
+  // Exercise them at constrained and spacious sizes, without a React/Three surrogate.
+  for (const [width,height] of [[1100,700],[1920,1080]]) {
+    await load(current,2,width,height);
+    await page.evaluate(`(() => {
+      const summary=document.createElement('div');summary.className='operation-summary';summary.textContent='Baseline: 1500 edges, 300 chains, 2400 steps. Worker finished.';
+      document.querySelector('.center').append(summary);
+      document.querySelector('.notice').textContent='Import diagnostic: '+('A very long file name or error message. '.repeat(28));
+      const timeline=document.querySelector('.timeline');timeline.replaceChildren();
+      const title=document.createElement('div');title.className='panel-title';title.textContent='Decode timeline';
+      const label=document.createElement('small');label.className='timeline-window';label.textContent='Showing 1–100 of 2400. Use slider to seek.';
+      const scroll=document.createElement('div');scroll.className='timeline-scroll';
+      for(let i=0;i<100;i++){const row=document.createElement('button');row.textContent='Traversal '+i;scroll.append(row);}
+      timeline.append(title,label,scroll);
+    })()`);
+    await page.evaluate('new Promise(resolve=>setTimeout(resolve,250))');
+    const state=await page.evaluate(`(() => {
+      const box=s=>document.querySelector(s).getBoundingClientRect();
+      const center=box('.center'),scene=box('.scene-panel'),notice=box('.notice'),summary=box('.operation-summary');
+      const timeline=box('.timeline'),scroll=box('.timeline-scroll'),el=document.querySelector('.timeline-scroll'),canvas=box('.viewport>canvas'),host=box('.viewport');
+      return {sceneHeight:scene.height,centerBottom:center.bottom,summaryBottom:summary.bottom,noticeHeight:notice.height,timelineBottom:timeline.bottom,scrollBottom:scroll.bottom,scrollHeight:scroll.height,contentHeight:el.scrollHeight,canvasWidth:canvas.width,hostWidth:host.width};
+    })()`);
+    assert.ok(state.sceneHeight>150,'status text must not consume the 3D panel');
+    assert.ok(state.noticeHeight<=111,'long import diagnostics must be bounded');
+    assert.ok(state.summaryBottom<=state.centerBottom+1,'operation summary must remain within workspace');
+    assert.ok(state.scrollBottom<=state.timelineBottom+1&&state.scrollHeight>40,'timeline rows must scroll inside the panel');
+    assert.ok(state.contentHeight>state.scrollHeight,'100 timeline rows must not grow the panel');
+    assert.equal(state.canvasWidth,state.hostWidth);
+    report.cases.push({name:`complex-mesh controls and populated timeline stay bounded at ${width}x${height}`,state});
+  }
   report.passed = report.cases.length;
   const output = process.argv.indexOf('--report');
   if (output !== -1) await writeFile(process.argv[output + 1], JSON.stringify(report, null, 2) + '\n');
