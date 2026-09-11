@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -17,13 +17,16 @@
     "test:core": "node scripts/core-smoke.mjs",
     "test:layout": "node scripts/layout-smoke.mjs",
     "test:browser": "node scripts/studio-smoke.mjs",
-    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:layout && npm run test:browser",
+    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser",
     "assets:generate": "node scripts/generate-examples.mjs",
     "assets:download": "tsx scripts/download-assets.ts",
     "test:complex": "node scripts/complex-smoke.mjs",
     "test:imports": "vitest run apps/studio/src/__tests__/importers.test.ts",
     "git:check": "node scripts/git-history-check.mjs",
-    "test:git": "node --test scripts/tests/git-history-check.test.mjs"
+    "test:git": "node --test scripts/tests/git-history-check.test.mjs",
+    "test:unfold": "node scripts/unfold-smoke.mjs",
+    "test:unfold:browser": "node scripts/unfold-browser-smoke.mjs",
+    "test:uv-worker": "node scripts/uv-worker-smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
