@@ -1,8 +1,10 @@
-# MeshTailor-JS
+# MeshTailor-JS 0.1.1
+
+**3D traversal display hotfix:** see [中文修复说明](docs/HOTFIX-0.1.1.md) and [validation scope](docs/VALIDATION.md).
 
 A TypeScript/JavaScript **paper-level reproduction scaffold** for **MeshTailor: Cutting Seams via Generative Mesh Traversal** (arXiv:2603.27309v2), with a functional browser Studio and a geometric fallback seam generator.
 
-> Status: the MeshTailor project page still marks official code as **TBA** and no author checkpoint is bundled here. Therefore this repository cleanly separates two paths:
+> No author checkpoint is bundled here. Upstream release status was not rechecked for this display-only hotfix. This repository separates two paths:
 > 1. `GeometricBaseline` — runnable now, useful for the Studio/debugger and data plumbing.
 > 2. `MeshTailorBackend` — the learned pointer-model boundary, ready for independently trained or future author weights.
 >
@@ -29,7 +31,7 @@ A TypeScript/JavaScript **paper-level reproduction scaffold** for **MeshTailor: 
 
 ## Quick start
 
-Requires Node.js 20+ (22 recommended).
+Node.js 22.x is recommended; the core checks in this release used Node.js 22.16.0. The dependency-free browser regression utilities require Node.js 22.
 
 ```bash
 npm install
@@ -84,7 +86,11 @@ target:   vertex ids / EOC(-1) / EOS(-2)
 - **Curvature quantile**: adjusts feature-edge selection.
 - **Structural cross-sections**: adds coarse cuts perpendicular to the longest object axis.
 - **Play / Step / timeline**: shows the autoregressive vertex sequence.
-- Yellow points = current 1-ring candidates, green = current vertex, blue = previous vertex, red = already generated seam.
+- **Reset camera**: fit the active mesh in the view.
+- **X-ray traversal**: show traversal overlays through the mesh (enabled by default).
+- **Show all seams**: show the complete result instead of only the edges revealed by the current step.
+- Yellow points = candidates used to choose the displayed token (all vertices at a chain start, otherwise a masked 1-ring); green = current vertex; blue = previous vertex; red = revealed seams.
+- The first token chooses a start vertex, so no seam edge exists until the next step. The viewport now explains this state.
 
 ## Learned model integration
 
@@ -110,9 +116,19 @@ docs                      architecture and model integration notes
 
 ## Verification performed for this package
 
-The creation environment could not resolve `registry.npmjs.org`, so dependency installation and the Vite bundle could not be executed there. Core packages were nevertheless checked with a globally available TypeScript compiler in strict mode and were compiled to temporary JavaScript for executable smoke tests. The smoke test exercised Cube, Cylinder and Torso through topology -> baseline seam generation -> chain ordering -> autoregressive frames -> chart construction -> UV preview and asserted that every traversal edge is a real 1-ring mesh edge.
+21 executable core/view-math regression cases and 9 native Chromium canvas/CSS layout cases passed. Strict core/view-math compilation and syntax-only checks of 41 TS/TSX source files passed.
 
-Run `npm run check` in a normal networked environment after `npm install` to validate the UI bundle with your installed dependency versions.
+The original HiDPI canvas-width feedback loop was reproduced as a negative control. The fixed CSS remains stable at DPR 1, 1.25, 2 and 3, including window resize and hide/show.
+
+**Not certified here:** the complete React/Three.js frontend, UI declaration typecheck, Vitest through installed dependencies, or Vite production bundle. npm registry DNS remains unavailable in the assembly environment. A native canvas CSS test must not be mistaken for a full Studio rendering test.
+
+```bash
+npm run test:core       # TypeScript required; UI dependencies not required
+npm run test:layout     # Node.js 22 + Chrome/Chromium/Edge; no UI dependencies
+npm run check:full      # requires npm install and WebGL 2
+```
+
+See [docs/VALIDATION.md](docs/VALIDATION.md) for exact scope and raw JSON reports. Git history can be restored using the bundle included under [.history](.history/README.md).
 
 ## References
 

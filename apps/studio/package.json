@@ -1,22 +1,25 @@
 {
   "name": "@meshtailor/studio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
-  "scripts": {"dev":"vite","build":"vite build"},
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
   "dependencies": {
-    "@meshtailor/mesh-core":"*",
-    "@meshtailor/chaining-seams":"*",
-    "@meshtailor/runtime":"*",
-    "@meshtailor/uv":"*",
-    "@meshtailor/model":"*",
-    "@vitejs/plugin-react":"^5.0.2",
-    "vite":"^7.1.3",
-    "react":"^19.1.1",
-    "react-dom":"^19.1.1",
-    "three":"^0.179.1",
-    "@types/react":"^19.1.10",
-    "@types/react-dom":"^19.1.7",
-    "@types/three":"^0.179.0"
+    "@meshtailor/mesh-core": "*",
+    "@meshtailor/chaining-seams": "*",
+    "@meshtailor/runtime": "*",
+    "@meshtailor/uv": "*",
+    "@meshtailor/model": "*",
+    "@vitejs/plugin-react": "^5.0.2",
+    "vite": "^7.1.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "three": "^0.179.1",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@types/three": "^0.179.0"
   }
 }

@@ -1,61 +1,46 @@
-# Validation record
+# Validation — v0.1.1
 
-The package was validated during assembly in two layers.
+This record distinguishes executed checks from unexecuted UI checks. The original release record is preserved in `VALIDATION-0.1.0.md`.
 
-## Strict core typecheck
+## Executed successfully
 
-A globally available TypeScript 5.8.3 compiler was used with `strict: true` on all non-UI packages:
+`node scripts/core-smoke.mjs --report docs/validation/core-smoke.json`
 
-```text
-packages/mesh-core
-packages/chaining-seams
-packages/runtime
-packages/model
-packages/uv
-```
+- TypeScript 5.8.3 strict compilation of the five core packages and `viewport-math.ts`.
+- 21 executable cases: original seam/traversal/UV pipeline, training sample shape, display normalization, camera fit, hidden viewport sizing, and invalid input.
+- Syntax-only transpilation of 41 TypeScript/TSX source files, including the UI. This is **not** a full UI typecheck.
 
-Result: pass.
+`node scripts/layout-smoke.mjs --report docs/validation/layout-smoke.json`
 
-A syntax/no-check compile was also run across all TypeScript/TSX sources, including the Studio and CLI, to catch parser/emission errors without installed third-party declarations.
+- 9 real Chromium CSS/native-canvas layout cases.
+- The original v0.1.0 CSS reproduces unbounded HiDPI intrinsic-width growth (bounded to eight observations by the test).
+- Fixed CSS settles at DPR 1, 1.25, 2, and 3, with pixel ratio capped at 2 as in the renderer.
+- Three window-resize sizes and hide/show recovery pass.
+- This suite does **not** load React or Three.js. It verifies the canvas-sizing mechanism and CSS fix, not the full GPU-rendered Studio.
 
-## Executable smoke test
+The JSON reports are included in `docs/validation/`.
 
-The core packages were emitted to temporary JavaScript and exercised with Node.js 22.16.0.
+## Not executed / not claimed
 
-Observed baseline pipeline:
+The assembly environment cannot resolve `registry.npmjs.org`; the UI dependency tree is not installed. Therefore the following are not certified by this release assembly:
 
-```text
-Cube             8 vertices, 12 triangles, 12 seams, 12 chains, 36 frames, 6 charts
-Cylinder        26 vertices, 48 triangles, 24 seams,  2 chains, 28 frames, 3 charts
-Torso-like tube 132 vertices, 240 triangles, 100 seams, 38 chains, 176 frames, 14 charts
-```
+- complete `npm install`;
+- full UI typecheck against React/Three declarations;
+- the Vitest suite through the actual dependency tree;
+- Vite production bundle;
+- React + Three.js end-to-end display or camera interaction;
+- macOS, Windows or Safari execution.
 
-Assertions covered:
+The real Studio browser test was invoked and stopped at its explicit missing-dependency check. No success report was generated for that test.
 
-- every autoregressive vertex-to-vertex step is a real 1-ring adjacency,
-- closed ring seam traces as one loop,
-- `cube_uv.obj` produces 12 UV seam edges,
-- training sample vertices have six channels `(xyz+normal)`,
-- sampled point count is respected,
-- target stream terminates in EOS,
-- chart preview covers all constructed charts.
+## Full local regression
 
-## CLI smoke test
-
-Compiled CLI commands were run against `examples/cube_uv.obj`:
-
-```text
-inspect: 8 vertices / 12 triangles / 18 edges / manifold
-uv-seams: 12 seam edges / 12 chains
-```
-
-## Dependency/build limitation in the assembly environment
-
-The environment could not resolve `registry.npmjs.org` (`EAI_AGAIN`), so `npm install`, Vitest through the local dependency tree, and the final Vite bundle could not be executed there. This is an environment-network limitation rather than a hidden successful build.
-
-In a normal networked environment run:
+After successful dependency installation, run:
 
 ```bash
-npm install
-npm run check
+npm run check:full
 ```
+
+`test:browser` starts the real Vite Studio. It tests DPR 1 and 2, successful rendering, seam steps, preservation of canvas identity and camera orientation, mesh switches, playback restart, and visible WebGL initialization errors. It does not substitute fake React or Three.js implementations.
+
+Node.js 22 and a local Chrome/Chromium/Edge executable are needed for browser regression scripts. Set `CHROME_PATH` if autodetection does not find your browser. The full Studio test also requires actual WebGL 2 support.

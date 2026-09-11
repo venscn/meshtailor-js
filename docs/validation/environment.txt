@@ -1,0 +1,7 @@
+Recorded during v0.1.1 assembly
+v22.16.0
+10.9.2
+Version 5.8.3
+Chromium 144.0.7559.96 built on Debian GNU/Linux 13 (trixie)
+Network check: registry.npmjs.org DNS lookup failed (curl: could not resolve host).
+Full Studio browser attempt: stopped at missing Vite dependency guard; NOT passed.

@@ -40,7 +40,7 @@ export default function App(){
   const loadFile=async(file:File)=>{setLoadError(null);try{const ext=file.name.split('.').pop()?.toLowerCase();const m=ext==='obj'?parseOBJ(await file.text(),file.name):ext==='glb'||ext==='gltf'?await loadGLTFFile(file):null;if(!m)throw new Error('Supported formats: .obj, .glb, .gltf');prepareViewportMesh(m);resetForMesh(m);}catch(e){setLoadError(e instanceof Error?e.message:String(e));}};
 
   return <div className="app-shell">
-    <header className="topbar"><div><div className="brand">MeshTailor-JS <span>Studio</span></div><div className="subtitle">paper-level TypeScript reproduction scaffold · functional geometric fallback</div></div><div className="paper-pill">MeshTailor v2 · d={MESH_TAILOR_V2_SPEC.modelDimension} · {MESH_TAILOR_V2_SPEC.decoderLayers} decoder layers</div></header>
+    <header className="topbar"><div><div className="brand">MeshTailor-JS <span>Studio · 0.1.1</span></div><div className="subtitle">paper-level TypeScript reproduction scaffold · functional geometric fallback</div></div><div className="paper-pill">MeshTailor v2 · d={MESH_TAILOR_V2_SPEC.modelDimension} · {MESH_TAILOR_V2_SPEC.decoderLayers} decoder layers</div></header>
     <main className="workspace">
       <aside className="sidebar">
         <section><h3>Mesh</h3><div className="button-grid"><button onClick={()=>resetForMesh(makeCube())}>Cube</button><button onClick={()=>resetForMesh(makeCylinder(20))}>Cylinder</button><button onClick={()=>resetForMesh(makeTorsoGrid())}>Torso</button></div><label className="file-label">Load OBJ / GLB / GLTF<input type="file" accept=".obj,.glb,.gltf" onChange={(e)=>{const file=e.target.files?.[0];if(file)void loadFile(file);e.target.value='';}}/></label></section>
