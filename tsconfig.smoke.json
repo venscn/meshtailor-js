@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.core.json",
+  "compilerOptions": { "rootDir": "." },
+  "include": ["packages/**/*.ts", "apps/studio/src/viewport-math.ts"],
+  "exclude": ["packages/**/__tests__/**"]
+}

@@ -1,0 +1,167 @@
+{
+  "suite": "Chromium native canvas CSS-layout regression (no React/Three.js dependencies)",
+  "cases": [
+    {
+      "name": "v0.1.0 negative control: growing HiDPI canvas reproduced",
+      "samples": [
+        {
+          "hostW": 828,
+          "hostH": 652,
+          "canvasW": 1656,
+          "canvasH": 1304,
+          "bufferW": 1656,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 1656,
+          "hostH": 652,
+          "canvasW": 3312,
+          "canvasH": 1304,
+          "bufferW": 3312,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 3312,
+          "hostH": 652,
+          "canvasW": 6624,
+          "canvasH": 1304,
+          "bufferW": 6624,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 6624,
+          "hostH": 652,
+          "canvasW": 13248,
+          "canvasH": 1304,
+          "bufferW": 13248,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 13248,
+          "hostH": 652,
+          "canvasW": 26496,
+          "canvasH": 1304,
+          "bufferW": 26496,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 26496,
+          "hostH": 652,
+          "canvasW": 52992,
+          "canvasH": 1304,
+          "bufferW": 52992,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 52992,
+          "hostH": 652,
+          "canvasW": 105984,
+          "canvasH": 1304,
+          "bufferW": 105984,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 105984,
+          "hostH": 652,
+          "canvasW": 211968,
+          "canvasH": 1304,
+          "bufferW": 211968,
+          "bufferH": 1304
+        }
+      ]
+    },
+    {
+      "name": "fixed CSS at DPR 1",
+      "samples": [
+        {
+          "hostW": 828,
+          "hostH": 652,
+          "canvasW": 828,
+          "canvasH": 652,
+          "bufferW": 828,
+          "bufferH": 652
+        }
+      ]
+    },
+    {
+      "name": "fixed CSS at DPR 1.25",
+      "samples": [
+        {
+          "hostW": 828,
+          "hostH": 652,
+          "canvasW": 828,
+          "canvasH": 652,
+          "bufferW": 1035,
+          "bufferH": 815
+        }
+      ]
+    },
+    {
+      "name": "fixed CSS at DPR 2",
+      "samples": [
+        {
+          "hostW": 828,
+          "hostH": 652,
+          "canvasW": 828,
+          "canvasH": 652,
+          "bufferW": 1656,
+          "bufferH": 1304
+        }
+      ]
+    },
+    {
+      "name": "fixed CSS at DPR 3",
+      "samples": [
+        {
+          "hostW": 828,
+          "hostH": 652,
+          "canvasW": 828,
+          "canvasH": 652,
+          "bufferW": 1656,
+          "bufferH": 1304
+        }
+      ]
+    },
+    {
+      "name": "window resize 1100x700",
+      "state": {
+        "w": 488,
+        "h": 452,
+        "cw": 488,
+        "ch": 452,
+        "bw": 976,
+        "bh": 904,
+        "count": 2
+      }
+    },
+    {
+      "name": "window resize 1920x1080",
+      "state": {
+        "w": 1308,
+        "h": 832,
+        "cw": 1308,
+        "ch": 832,
+        "bw": 2616,
+        "bh": 1664,
+        "count": 3
+      }
+    },
+    {
+      "name": "window resize 1280x800",
+      "state": {
+        "w": 668,
+        "h": 552,
+        "cw": 668,
+        "ch": 552,
+        "bw": 1336,
+        "bh": 1104,
+        "count": 4
+      }
+    },
+    {
+      "name": "hidden panel becomes visible without intrinsic canvas growth",
+      "passed": true
+    }
+  ],
+  "passed": 9
+}
