@@ -1,11 +1,31 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { MeshData } from '@meshtailor/mesh-core';
-import { buildCharts, planarPackPreview } from '@meshtailor/uv';
+import type { PackedChart } from '@meshtailor/uv';
+import type { UVResult } from './workers/uv.worker';
 
-export function UVCanvas({ mesh, seamEdges }: { mesh: MeshData; seamEdges: Set<string> }) {
+export function UVCanvas({ mesh, seamEdges, onChartCount }: { mesh: MeshData; seamEdges: Set<string>; onChartCount?: (count:number|null)=>void }) {
   const host = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLCanvasElement>(null);
-  const packed = useMemo(() => planarPackPreview(mesh, buildCharts(mesh, seamEdges)), [mesh, seamEdges]);
+  const [packed,setPacked]=useState<PackedChart[]>([]);
+  const [status,setStatus]=useState('Computing UV preview…');
+  useEffect(()=>{
+    setPacked([]);setStatus('Computing UV preview…');onChartCount?.(null);
+    let worker:Worker|undefined;
+    // Coalesce quick timeline scrubs before cloning the full mesh into a worker.
+    const timer=setTimeout(()=>{
+      try{
+        worker=new Worker(new URL('./workers/uv.worker.ts',import.meta.url),{type:'module'});
+        worker.onmessage=(event:MessageEvent<UVResult>)=>{
+          if(event.data.ok){setPacked(event.data.packed);onChartCount?.(event.data.packed.length);setStatus('');}
+          else setStatus('UV preview failed: '+event.data.error);
+          worker?.terminate();
+        };
+        worker.onerror=(event)=>{setStatus('UV worker failed: '+event.message);worker?.terminate();};
+        worker.postMessage({mesh,edges:[...seamEdges]});
+      }catch(error){setStatus('UV preview unavailable: '+String(error));}
+    },100);
+    return()=>{clearTimeout(timer);worker?.terminate();};
+  },[mesh,seamEdges,onChartCount]);
 
   useEffect(() => {
     const el = host.current;
@@ -49,5 +69,5 @@ export function UVCanvas({ mesh, seamEdges }: { mesh: MeshData; seamEdges: Set<s
     return () => { observer.disconnect(); window.removeEventListener('resize', draw); };
   }, [packed]);
 
-  return <div ref={host} className="uv-viewport"><canvas ref={ref} className="uv-canvas" aria-label="UV chart preview" /></div>;
+  return <div ref={host} className="uv-viewport"><canvas ref={ref} className="uv-canvas" aria-label="UV chart preview" />{status&&<div className="uv-status" role="status">{status}</div>}</div>;
 }

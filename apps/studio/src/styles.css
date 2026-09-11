@@ -7,3 +7,10 @@
 .viewport-error{position:absolute;inset:16px;z-index:2;overflow:auto;align-content:center;padding:20px;background:#111722f2;border:1px solid #6f424b;border-radius:8px;color:#d9c3c8;font-size:12px;line-height:1.6}
 .viewport-error strong{color:#ff98a6}.viewport-error p{overflow-wrap:anywhere}.viewport-error button{padding:7px 12px;border:1px solid #53667a;background:#1b3143;border-radius:6px;color:#d1eaff;cursor:pointer}
 button:disabled{cursor:default;opacity:.45}
+/* v0.2.0 asset library and import diagnostics; retain bounded HiDPI viewport layout. */
+select,input[type="number"]{box-sizing:border-box;width:100%;border:1px solid #30394b;border-radius:6px;padding:8px;background:#101520;color:#d4dbea;font:inherit;min-width:0}
+select{margin-top:5px}details{margin-top:10px;font-size:12px;line-height:1.55}summary{cursor:pointer;color:#b4c6e6}
+.sidebar small{display:block;color:#939fb3;font-size:11px;line-height:1.65;margin:5px 0}.sidebar a{color:#9bbfff}.asset-card{margin-top:12px;padding-top:5px;border-top:1px solid #242d3e}
+.import-report p{font-size:11px;line-height:1.6;overflow-wrap:anywhere}.uv-status{position:absolute;inset:38px 12px auto;font-size:12px;color:#bdc7db;pointer-events:none;background:#101520e8;padding:10px;border-radius:6px}
+.notice button{padding:3px 8px;margin-left:8px;display:inline-block;width:auto}.notice{overflow-wrap:anywhere}.operation-summary{font-size:10px;padding:5px 12px;color:#8e9bb0;line-height:1.5}
+.timeline-window{padding:8px 12px;color:#8e9bb0;font-size:10px}.timeline .timeline-scroll{min-height:0}.panel-title>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sidebar section{scroll-margin-top:10px}
