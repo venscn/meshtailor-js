@@ -89,3 +89,13 @@ Complex mesh generators, the remote asset catalog, bounded geometry downloads an
 `seam.worker.ts` returns seam edges and ordered chains, not pre-expanded debugger frames. The main thread constructs frames with lazy edge-history getters. Structured-cloning those frames would eagerly invoke getters and negate the memory optimization; do not move frame arrays across the worker boundary. `uv.worker.ts` returns chart/preview data. Operation sequence IDs reject stale replies.
 
 The timeline renders at most 100 nearby rows. Above 20,000 triangles, UV defaults to complete seam data rather than playback-frame updates. None of these changes replace the geometric baseline with a learned model or the planar preview with ABF++.
+
+## v0.3.0 — Shared correspondence and unfolding
+
+`packages/uv/src/unfold.ts` derives a per-face-corner source/target geometry from the same PackedChart faceUVs drawn by the UV view and used by target-UV export. Render corners are not welded across seams. Each face retains its source face index and chart ID. A deterministic pure function writes simultaneous/sequential, single/multi/all selected-island positions; source, target and unselected positions remain immutable.
+
+The UV worker now returns a single UVSnapshot (packed atlas + geometry + seam set + target + warnings). `useUVSnapshot` owns cancellation and stale-result rejection; UVCanvas no longer creates its own independent worker. Generated targets use the full seam set during unfolding, never a changing traversal prefix; source targets derive seams from existing UVs and fail explicitly when UVs are incomplete.
+
+`useUnfoldPlayer` separates scope, selection, ordering and timeline controls. `UnfoldWebGLView` updates native WebGL2 buffers and picks current morphed triangles; `uv-drawing.ts` draws/picks the shared atlas; CorrespondenceInspector displays original source and target corner coordinates. The original Three.js MeshViewport remains the traversal renderer. Both modes use consistent normalization, but they do not share a renderer instance across a mode switch.
+
+This is presentation interpolation, not ABF++/LSCM iteration or physical cloth motion. Solver replacement must preserve the face/corner contract so preview, picking and export stay identical. See UNFOLD_PREVIEW.md and VALIDATION.md.

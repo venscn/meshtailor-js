@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-09-11
+
+- Add reversible per-corner 3D-to-UV morph with single/multi/all island scope and simultaneous/sequential scheduling.
+- Share one immutable UV snapshot across 3D, UV, correspondence inspection and target-UV OBJ export.
+- Support original UV targets, generated preview targets, checker/labels, current-surface picking, orbit/UV cameras and six-island demo.
+- Retain original traversal/Three.js path; use a dependency-free native WebGL2 renderer for unfolding.
+- Execute 33 unfold, 4 Node UV-job, 24 native WebGL, 13 layout and existing 21 core/40 complex/22 Git-tool checks. Two browser worker cases are explicitly skipped; full React/Vite/FBX integration is not verified.
+- Preserve existing version tags and small-commit history; release a new annotated v0.3.0 tag.
+
+
 ## 0.2.0 — 2026-09-11
 
 - Add four offline complex meshes at three densities, UV-preserving OBJ export and two synthetic FBX 7400 fixtures.

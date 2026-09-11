@@ -1,10 +1,10 @@
-# MeshTailor-JS 0.2.0
+# MeshTailor-JS 0.3.0
 
-> **Git 仓库交接版（应用基线 v0.2.0）**：本包含完整 `.git/`，解压后可直接运行 `git log` 和 `git tag`，不需要 `git init` 或另行恢复 bundle。`master` 在原 `v0.2.0` 之后增加了维护规则、校验工具、测试与交付说明提交；旧版 tag 均保持不变，没有发布 `v0.2.1`。详见 [Git 交接说明](docs/GIT_HANDOFF.md) 和根目录 `AGENTS.md`。
+新增 **3D ↔ UV 岛展开对应动画**：可拖动进度，单个 / 多选 / 全部岛，逐个 / 同时展开，3D 与 UV 联动拾取，原始或生成 UV 目标，以及对应 UV 导出。原有遍历、复杂网格和 FBX 导入入口保留。这是独立的 TypeScript / JavaScript 研究工程，不是官方 MeshTailor 软件。
 
-在 0.1.1 基础上增加 **复杂网格样例、FBX 导入、在线 CC0 模型入口及大网格计算优化**。这是独立的 TypeScript / JavaScript 研究工程，不是官方 MeshTailor 软件。
+ZIP 直接包含完整 `.git/` 和 `.history/repository.bundle`。新版本为独立附注 tag **v0.3.0**；原 `v0.1.0`、`v0.1.1`、`v0.2.0` 指向不变。本版继续采用小步提交，约束见 `AGENTS.md`。上一次维护交接的历史情况仍保留在 `docs/GIT_HANDOFF.md`。
 
-**本次交付边界：** ZIP 内含真实生成的复杂 OBJ 和 ASCII/Binary FBX 测试文件；公开模型只提供在线加载/下载缓存入口，没有把未下载成功的网络文件冒充为内置资源。核心、几何、文件结构和原生画布布局测试已执行；制作环境无法安装 npm 依赖，因此完整 React/Three.js 页面、真实 FBXLoader 导入和 Vite 构建仍待验证。详见 [验证记录](docs/VALIDATION.md)。
+**验证边界：** 已执行严格非 React 数据/渲染层编译、真实原生 WebGL2 渲染与拾取、核心/复杂网格/对应关系/Node Worker/布局/Git 回归。npm 安装因 DNS 失败，因此完整 React/Vite 页面和浏览器 Worker 加载、全量 UI 类型检查、真实 FBXLoader 仍未认证。生成 UV 依旧是平面投影调试预览，动画不是求解器或物理展开。详见 [验证记录](docs/VALIDATION.md)。
 
 ## 启动
 
@@ -15,7 +15,15 @@ npm install
 npm run dev
 ```
 
-打开 Vite 输出的地址。顶栏应显示 `Studio · 0.2.0`。启动脚本不依赖 Python；同一 npm 入口用于 macOS、Windows、Linux，但本次没有跨平台实机验证。
+打开 Vite 输出的地址。顶栏应显示 `Studio · 0.3.0`。启动脚本不依赖 Python；同一 npm 入口用于 macOS、Windows、Linux，但本次没有跨平台实机验证。
+
+## 3D ↔ UV 展开预览
+
+在主视口上方选择 **3D ↔ UV 展开动画**，点击左侧 **加载六岛立方体示例**，拖动下方 0–100% 进度或点击 **播放展开**。同色同编号的岛从网格移向右侧相同位置；选择 **UV 正视** 可直接比较最终布局。
+
+“预览范围”提供单个、多选、全部岛；“播放方式”独立提供同时、逐个。可倒放、循环、调节时长和分离距离，或隐藏未选岛。点击两侧面片会联动选择，并显示逐角 3D / UV 坐标。
+
+目标可选网格原始 UV，或完整接缝的生成预览 UV。两侧视图和 **导出对应 OBJ + 目标 UV** 共用同一份面角数据，100% 不会另算一套布局。原 UV 缺失会明确报错。使用自己的网格可以先生成接缝，也可直接选原 UV。详细操作、语义和限制见 [展开预览文档](docs/UNFOLD_PREVIEW.md)。
 
 ## 复杂网格
 
@@ -82,7 +90,10 @@ npm run assets:download -- --only flight-helmet
 ```bash
 npm run test:core       # 已执行：21 项，严格 core/view-math 编译
 npm run test:complex    # 已执行：40 项，真实几何/UV/文件结构 + 模拟下载
-npm run test:layout     # 已执行：11 项，原生 Chromium canvas/CSS，无 React/Three
+npm run test:unfold     # 已执行：33 项，逐角对应/端点/选择/导出
+npm run test:uv-worker  # 已执行：4 项，真实生产 job 在 Node Worker 运行
+npm run test:unfold:browser # 原生 WebGL：本次 24 项通过，2 项浏览器 Worker 显式跳过
+npm run test:layout     # 已执行：13 项，原生 Chromium canvas/CSS，无 React/Three
 npm run test:imports    # 未执行：真实 Three.js/FBXLoader/glTF 导入测试
 npm run check          # 未执行：安装依赖后的 Vitest + Vite + 全量类型检查
 npm run test:browser    # 未执行完整流程：真实 Studio/WebGL 浏览器测试
@@ -103,11 +114,13 @@ npm run cli -- training-sample examples/cube_uv.obj cube-training.json
 npm run cli -- paper-spec
 ```
 
-没有增加或训练神经网络权重。`GeometricBaseline` 仍是几何启发式，`MeshTailorBackend` 仍是 learned-model 接口；右侧 UV 仍为 planar debug preview，不是 ABF++/LSCM 产品级展开。复杂输入支持不代表论文效果已经复现。原有设计见 [模型后端](docs/MODEL_BACKEND.md) 和 [架构](docs/ARCHITECTURE.md)。
+没有增加或训练神经网络权重。`GeometricBaseline` 仍是几何启发式，`MeshTailorBackend` 仍是 learned-model 接口；生成目标仍为 planar debug preview；原 UV 目标保留已有 UV。两者都不代表加入了 ABF++/LSCM 产品级展开。复杂输入支持不代表论文效果已经复现。原有设计见 [模型后端](docs/MODEL_BACKEND.md) 和 [架构](docs/ARCHITECTURE.md)。
 
 ## 目录与历史
 
 ```text
+apps/studio/src/unfold/          展开控制、3D/UV 渲染、对应关系、示例
+packages/uv/src/unfold.ts        逐面角数据、可逆变形与导出
 apps/studio/src/importers/       FBX/glTF + 场景拓扑归一化
 apps/studio/src/workers/         接缝和 UV Worker
 apps/studio/public/assets/       随包 FBX fixture、可选下载缓存
@@ -117,4 +130,4 @@ scripts/                        资产生成/下载、回归测试
 THIRD_PARTY_ASSETS.md            来源、许可与资产是否随包
 ```
 
-ZIP 从干净已提交的 Git HEAD 构建，`.history/repository.bundle` 保存小步提交历史，恢复方式见 [.history/README.md](.history/README.md)。[0.2.0 发布说明](docs/RELEASE-0.2.0.md)；[0.1.1 历史 README](docs/README-0.1.1.md)。
+ZIP 从干净已提交的 Git HEAD 构建，`.history/repository.bundle` 保存小步提交历史，恢复方式见 [.history/README.md](.history/README.md)。[0.3.0 发布说明](docs/RELEASE-0.3.0.md)；[0.2.0 发布说明](docs/RELEASE-0.2.0.md)；[0.1.1 历史 README](docs/README-0.1.1.md)。

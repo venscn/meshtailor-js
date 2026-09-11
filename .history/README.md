@@ -1,6 +1,6 @@
 # Git 历史与恢复
 
-## 本次仓库交接包
+## v0.3.0 完整仓库包
 
 本包直接包含 `.git/`。解压后在项目根目录运行：
 
@@ -12,7 +12,7 @@ git tag --list 'v*' --sort=version:refname
 
 不要重新 `git init`。`.git` 是隐藏目录，Finder / 文件资源管理器默认可能不显示它。
 
-HEAD 位于 `master`，是应用 v0.2.0 之后的已提交维护快照；不是将旧版 `v0.2.0` tag 移到当前 HEAD。详见 `docs/GIT_HANDOFF.md`。
+HEAD 位于 `master`，对应新的独立附注 tag `v0.3.0`。旧版 tag 没有移动；上一次维护交接背景保留在 `docs/GIT_HANDOFF.md`，本版功能见 `docs/RELEASE-0.3.0.md`。
 
 ## bundle 备份
 

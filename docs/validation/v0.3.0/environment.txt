@@ -1,0 +1,13 @@
+Node: v22.16.0
+TypeScript (globally installed test compiler): 5.8.3
+Chromium: 144.0.7559.96 (Debian)
+Display: Xvfb; WebGL: SwiftShader software renderer
+
+npm install --ignore-scripts --package-lock=false --fetch-retries=0 --fetch-timeout=8000
+Result: failed; EAI_AGAIN getaddrinfo registry.npmjs.org
+No npm dependencies, lockfile, Vite build, full UI typecheck or full React Studio success claimed.
+
+Native unfold browser command used --skip-browser-worker.
+Passed 24 native render/picking/lifecycle tests; 2 browser module-worker cases explicitly skipped.
+Production UV worker handler separately passed 4 Node worker_threads tests.
+Screenshots are from the native production renderer test host, NOT the complete React Studio.

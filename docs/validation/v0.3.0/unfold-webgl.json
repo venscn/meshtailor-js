@@ -1,0 +1,148 @@
+{
+  "suite": "Native unfold WebGL2 + shared UV canvas + real worker (not full React Studio)",
+  "softwareWebGL": true,
+  "cases": [
+    {
+      "name": "DPR 1: actual WebGL2 shaders render colored mesh pixels",
+      "passed": true,
+      "details": {
+        "colored": 102648,
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR 1: stable canvas CSS size and independent GPU drawing buffer",
+      "passed": true,
+      "details": {
+        "w": 1054,
+        "h": 758,
+        "cw": 1054,
+        "ch": 758,
+        "bw": 1054,
+        "bh": 758
+      }
+    },
+    {
+      "name": "DPR 1: source, intermediate and UV actually produce different rendered images",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: exact UV endpoint and framebuffer still render",
+      "passed": true,
+      "details": {
+        "colored": 37592,
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR 1: backward scrubbing preserves camera and reuses canvas",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: multi selection leaves other islands assembled",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: sequential schedule completes only the first island",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: 2D picking returns the exact chart and source face",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: REAL 3D pointer picking follows the morphed target, not source",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: orbit drag remains independent of morph progress",
+      "passed": true
+    },
+    {
+      "name": "90,112-triangle complex assembly: real rendered intermediate and exact original-UV endpoint",
+      "passed": true,
+      "details": {
+        "triangles": 90112
+      }
+    },
+    {
+      "name": "WebGL context loss/restoration reuploads geometry without replacing canvas",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: no uncaught exceptions; disposal removes canvas and labels",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: actual WebGL2 shaders render colored mesh pixels",
+      "passed": true,
+      "details": {
+        "colored": 407385,
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR 2: stable canvas CSS size and independent GPU drawing buffer",
+      "passed": true,
+      "details": {
+        "w": 1054,
+        "h": 758,
+        "cw": 1054,
+        "ch": 758,
+        "bw": 2108,
+        "bh": 1516
+      }
+    },
+    {
+      "name": "DPR 2: source, intermediate and UV actually produce different rendered images",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: exact UV endpoint and framebuffer still render",
+      "passed": true,
+      "details": {
+        "colored": 144399,
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR 2: backward scrubbing preserves camera and reuses canvas",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: multi selection leaves other islands assembled",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: sequential schedule completes only the first island",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: 2D picking returns the exact chart and source face",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: REAL 3D pointer picking follows the morphed target, not source",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: orbit drag remains independent of morph progress",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: no uncaught exceptions; disposal removes canvas and labels",
+      "passed": true
+    }
+  ],
+  "skipped": [
+    {
+      "name": "DPR 1: browser module Worker",
+      "reason": "Explicitly skipped for a restricted offline test host; not a passed worker test."
+    },
+    {
+      "name": "DPR 2: browser module Worker",
+      "reason": "Explicitly skipped for a restricted offline test host; not a passed worker test."
+    }
+  ],
+  "passed": 24
+}
