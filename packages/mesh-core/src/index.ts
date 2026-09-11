@@ -5,3 +5,4 @@ export * from './normals.js';
 export * from './obj.js';
 export * from './surface.js';
 export * from './examples.js';
+export * from './import-mesh.js';
