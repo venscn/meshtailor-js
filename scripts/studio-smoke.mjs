@@ -97,7 +97,7 @@ try {
     await setValue('Unfold progress','.25');await page.waitFor(`${unfold}.dataset.completed === '1'`);
     await page.evaluate(`document.querySelector('[aria-label="Include island 2"]').click()`);await page.waitFor(`${unfold}.dataset.selectedCount === '5'`);
     await click('清空选择');await page.waitFor(`${unfold}.dataset.selectedCount === '0'`);
-    await setValue('Unfold scope','all',true);await setValue('Unfold order','together',true);
+    await setValue('Unfold scope','all',true);await setValue('Unfold order','relay',true);
     await click('播放展开');await page.waitFor(`Number(${unfold}.dataset.progress)>.025`);await click('暂停展开');
     await click('UV 正视');const orbit=await page.evaluate(`${unfold}.dataset.camera`);
     await setValue('Unfold progress','.37');await page.waitFor(`${unfold}.dataset.progress === '0.37'`);assert.equal(await page.evaluate(`${unfold}.dataset.camera`),orbit);

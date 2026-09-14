@@ -17,7 +17,7 @@
     "test:core": "node scripts/core-smoke.mjs",
     "test:layout": "node scripts/layout-smoke.mjs",
     "test:browser": "node scripts/studio-smoke.mjs",
-    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser && npm run test:parameterization && npm run test:atlas && npm run test:hinge && npm run test:uv-guards && npm run lab:build && npm run test:lab && npm run test:packing-large && npm run test:uv-progress && npm run test:uv-client && npm run test:uv-large && npm run test:uv-lifecycle:browser && npm run test:camera && npm run test:camera:browser",
+    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser && npm run test:parameterization && npm run test:atlas && npm run test:hinge && npm run test:uv-guards && npm run lab:build && npm run test:lab && npm run test:packing-large && npm run test:uv-progress && npm run test:uv-client && npm run test:uv-large && npm run test:uv-lifecycle:browser && npm run test:camera && npm run test:camera:browser && npm run test:relay && npm run test:relay:browser",
     "assets:generate": "node scripts/generate-examples.mjs",
     "assets:download": "tsx scripts/download-assets.ts",
     "test:complex": "node scripts/complex-smoke.mjs",
@@ -41,7 +41,9 @@
     "test:uv-lifecycle:browser": "node scripts/uv-lifecycle-browser-smoke.mjs",
     "test:flight-helmet": "tsx scripts/flight-helmet-smoke.ts",
     "test:camera": "node scripts/camera-policy-smoke.mjs",
-    "test:camera:browser": "node scripts/camera-browser-smoke.mjs"
+    "test:camera:browser": "node scripts/camera-browser-smoke.mjs",
+    "test:relay": "node scripts/schedule-smoke.mjs",
+    "test:relay:browser": "node scripts/relay-browser-smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
