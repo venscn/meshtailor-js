@@ -1,4 +1,4 @@
-import { DEFAULT_UNFOLD_ORDER, unfoldIslandPose, sampleUnfoldSchedule, hingeRemainingAngle, islandColor, islandProgress, selectedIslands, uvToWorld, writeUnfoldPositions, type UnfoldGeometry, type UnfoldOptions } from '@meshtailor/uv';
+import { DEFAULT_SEPARATION, DEFAULT_UNFOLD_ORDER, unfoldIslandPose, sampleUnfoldSchedule, hingeRemainingAngle, islandColor, islandProgress, selectedIslands, uvToWorld, writeUnfoldPositions, type UnfoldGeometry, type UnfoldOptions } from '@meshtailor/uv';
 import { viewportSize } from '../viewport-math.js';
 import { cameraBasis, cameraMatrix, pickFace, projectPoint, type OrbitCamera } from './camera-math.js';
 import type { Vec3 } from '@meshtailor/mesh-core';
@@ -72,7 +72,7 @@ export class UnfoldWebGLView {
   private uniforms = new Map<string, WebGLUniformLocation>();
   private data: UnfoldGeometry | null = null;
   private positions = new Float32Array(0);
-  private options: UnfoldDisplay = {progress:0,selected:[],order:DEFAULT_UNFOLD_ORDER,path:'staged',separation:.45,context:'dim',wireframe:false,checker:false,labels:true,xray:false,focusFace:null,autoFrame:DEFAULT_AUTO_FRAME};
+  private options: UnfoldDisplay = {progress:0,selected:[],order:DEFAULT_UNFOLD_ORDER,path:'staged',separation:DEFAULT_SEPARATION,context:'dim',wireframe:false,checker:false,labels:true,xray:false,focusFace:null,autoFrame:DEFAULT_AUTO_FRAME};
   private active = new Set<number>();
   private activeCount=0; private contextCount=0; private seamCount=0;
   private camera: OrbitCamera = {yaw:.65,pitch:.35,distance:8,target:[0,0,0]};

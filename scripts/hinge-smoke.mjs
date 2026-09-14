@@ -28,7 +28,7 @@ try{
  check('All seven stage joins continuous',()=>{for(const index of [0,1,2])for(const stage of [.18,.28,.7,.8,.92]){const t=uv.islandTimelineProgress(uv.hingePlaybackProgress(stage),index,ids.length,opts.order);const a=uv.writeUnfoldPositions(g,{...opts,progress:t-1e-7}),b=uv.writeUnfoldPositions(g,{...opts,progress:t+1e-7});a.forEach((v,i)=>assert.ok(Math.abs(v-b[i])<2e-5));}});
  check('Backward scrub has no accumulated transform drift',()=>{const b=new Float32Array(g.source.length);uv.writeUnfoldPositions(g,{...opts,progress:.93},b);uv.writeUnfoldPositions(g,{...opts,progress:.39},b);assert.deepEqual(b,uv.writeUnfoldPositions(g,{...opts,progress:.39}));});
  check('Unselected islands do not move',()=>{const out=uv.writeUnfoldPositions(g,{...opts,selected:[ids[1]],progress:.61});for(const i of g.islands)if(i.id!==ids[1])for(const fi of i.faces)assert.deepEqual(out.slice(fi*9,fi*9+9),g.source.slice(fi*9,fi*9+9));});
- check('Workbench islands have non-overlapping bounding spheres',()=>{const layout=uv.hingeLayout(g,ids,.6);for(let i=0;i<ids.length;i++)for(let j=0;j<i;j++){const a=g.hinge.islands[i],b=g.hinge.islands[j];assert.ok(dist(layout.get(a.id),layout.get(b.id))>a.radius+b.radius);}});
- check('Single-island workbench is centered instead of using old atlas slot',()=>assert.deepEqual(uv.hingeLayout(g,[ids[2]],.6).get(ids[2]),[0,0,0]));
+ check('Workbench translation is bounded by half the model extent, not island radii',()=>{const layout=uv.hingeLayout(g,ids,.6);for(const i of g.islands)assert.ok(dist(layout.get(i.id),i.sourceCenter)<=1.000001);});
+ check('Island workbench does not jump when selection membership changes',()=>assert.deepEqual(uv.hingeLayout(g,[ids[2]],.6).get(ids[2]),uv.hingeLayout(g,ids,.6).get(ids[2])));
  console.log(`${passed} hinge regressions passed.`);
 }finally{await c.cleanup();}

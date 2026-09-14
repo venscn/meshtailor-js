@@ -1,3 +1,4 @@
+import { separationOffset } from './presentation.js';
 import { motionPose, type MotionTimeline } from './motion-timing.js';
 import { uvProgress, type UVWork } from './work.js';
 import { buildHingeRig, writeHingePositions, type HingeRig } from './hinge.js';
@@ -39,7 +40,7 @@ export interface UnfoldOptions {
   selected: readonly number[];
   order: UnfoldOrder;
   path: UnfoldPath;
-  /** Display-only separation distance in normalized mesh coordinates. */
+  /** Display-only separation as a fraction of model longest side; bounded at 50%. */
   separation: number;
   hingeWave?: boolean;
   /** Start the next island when its predecessor reaches this local progress. */
@@ -188,7 +189,7 @@ export function writeUnfoldPositions(geometry: UnfoldGeometry, options: UnfoldOp
       const i = fi * 9 + k, a = k % 3, s = geometry.source[i]!, d = geometry.target[i]!;
       if (t === 1) { out[i] = d; continue; }
       if (options.path === 'direct') { out[i] = s + (d - s) * smooth(t); continue; }
-      const shift = island.direction[a]! * options.separation;
+      const shift = separationOffset(island,options.separation)[a]!;
       const separated = s + shift;
       const flattened = d - island.targetCenter[a]! + island.sourceCenter[a]! + shift;
       out[i] = t < .2 ? s + shift * smooth(t / .2) : t < .8 ? separated + (flattened - separated) * smooth((t - .2) / .6) : flattened + (d - flattened) * smooth((t - .8) / .2);

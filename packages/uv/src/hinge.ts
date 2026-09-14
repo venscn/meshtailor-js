@@ -1,3 +1,4 @@
+import { separationOffset } from './presentation.js';
 import { triangleMorph, morphPoint } from './planar-morph.js';
 import { motionPose } from './motion-timing.js';
 import { islandProgress } from './unfold-schedule.js';
@@ -171,9 +172,11 @@ export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<s
   rig.temporaryCuts=new Uint32Array(temporary);scratch.delete(rig);return rig;
 }
 export function hingeLayout(g:UnfoldGeometry,selected:readonly number[],gap:number):Map<number,Vec3>{
-  const rig=g.hinge;if(!rig)return new Map();const set=new Set(selected),items=rig.islands.filter(i=>set.has(i.id));
-  const cols=Math.max(1,Math.ceil(Math.sqrt(items.length))),rows=Math.ceil(items.length/cols),radius=Math.max(.15,...items.map(i=>i.radius)),step=radius*2+gap+.2;
-  return new Map(selected.map((id,i)=>[id,[(i%cols-(cols-1)/2)*step,((rows-1)/2-Math.floor(i/cols))*step,0] as Vec3]));
+  const byId=new Map(g.islands.map(i=>[i.id,i]));
+  return new Map(selected.filter(id=>byId.has(id)).map(id=>{
+    const island=byId.get(id)!,offset=separationOffset(island,gap);
+    return [id,island.sourceCenter.map((v,a)=>v+offset[a]!) as Vec3];
+  }));
 }
 /** 0–18 isolate; 18–28 orient; 28–70 edge-axis rigid hinge rotations;
  * 70–80 hold true net; 80–92 explicitly non-rigid UV fit; 92–100 pack.

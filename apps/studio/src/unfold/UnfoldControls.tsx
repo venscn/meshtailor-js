@@ -30,7 +30,7 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
       <label className="check"><input aria-label="Hold rigid net" type="checkbox" checked={p.holdNet} onChange={e=>p.changeHoldNet(e.target.checked)}/> 在刚性平面网额外停留（默认关闭）</label>
       <small>铰链旋转与 UV 形变仍为不同阶段；默认跳过静止停留。检查平面网可随时点阶段按钮暂停。</small>
     </>}
-    <label>分离距离 <b>{p.separation.toFixed(2)}</b><input aria-label="Unfold separation" type="range" min="0" max="1.5" step=".05" value={p.separation} onChange={e=>p.setSeparation(+e.target.value)}/></label>
+    <label>向外分离 <b>{Math.round(p.separation*100)}% 模型最长边</b><input aria-label="Unfold separation" type="range" min="0" max=".5" step=".01" value={p.separation} onChange={e=>p.setSeparation(+e.target.value)}/></label><button onClick={()=>p.setSeparation(0)}>原位展开（不向外分离）</button><small>默认仅移动模型最长边的 12%，不会随岛数或最大岛半径扩张。0 可禁用分离；相机不跟随动画。</small>
     <label>每岛基准时长（跳过前，秒）<input aria-label="Unfold duration" type="number" min=".5" max="60" step=".5" value={p.seconds} onChange={e=>{const v=+e.target.value;if(v>=.5&&v<=60)p.setSeconds(v);}}/></label>
     <small>本轮 {p.active.length} / {p.all.length} 个岛 · 总时长 {p.duration.toFixed(1)} 秒（按实际选择计算）</small>
     <label>未选择的岛<select aria-label="Unselected islands" value={p.context} onChange={e=>p.setContext(e.target.value as 'dim'|'hidden'|'solid')}><option value="dim">半透明留在原网格上</option><option value="hidden">隐藏（只看选中部分）</option><option value="solid">实体留在原网格上</option></select></label>

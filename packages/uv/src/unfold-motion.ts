@@ -1,3 +1,4 @@
+import { separationOffset } from './presentation.js';
 import { hingeLayout } from './hinge.js';
 import { createMotionProfile, createMotionTimeline, type MotionSegment, type MotionTimeline } from './motion-timing.js';
 import { unfoldHandoff } from './unfold-schedule.js';
@@ -74,9 +75,9 @@ export function buildMotionTimeline(g:UnfoldGeometry,options:Omit<UnfoldOptions,
       const pack=maxDelta(island,(i,a)=>g.target[i+a]!-((g.target[i+a]!-island.targetCenter[a]!)*rig.uvScale+center[a]!));
       add(.92,1,'排布',pack>epsilon);
     }else if(options.path==='staged'){
-      add(0,.2,'分离',options.separation>epsilon);
+      add(0,.2,'分离',norm(separationOffset(island,options.separation))>epsilon);
       add(.2,.8,'展平',maxDelta(island,(i,a)=>g.target[i+a]!-island.targetCenter[a]!+island.sourceCenter[a]!-g.source[i+a]!)>epsilon);
-      add(.8,1,'排布',norm(island.targetCenter.map((x,a)=>x-island.sourceCenter[a]!-island.direction[a]!*options.separation))>epsilon);
+      add(.8,1,'排布',norm(island.targetCenter.map((x,a)=>x-island.sourceCenter[a]!-separationOffset(island,options.separation)[a]!))>epsilon);
     }else{
       add(0,1,'直接变换',maxDelta(island,(i,a)=>g.target[i+a]!-g.source[i+a]!)>epsilon);
     }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { buildMotionTimeline, motionLocal, DEFAULT_SKIP_STATIC, DEFAULT_MOTION_RELATIVE_EPSILON, DEFAULT_UNFOLD_ORDER, DEFAULT_HANDOFF, MIN_HANDOFF, unfoldDuration, sampleUnfoldSchedule, islandTimelineProgress, hingePlaybackProgress, advanceUnfoldPlayback, islandProgress, type UnfoldOrder, type UnfoldPath } from '@meshtailor/uv';
+import { DEFAULT_SEPARATION, buildMotionTimeline, motionLocal, DEFAULT_SKIP_STATIC, DEFAULT_MOTION_RELATIVE_EPSILON, DEFAULT_UNFOLD_ORDER, DEFAULT_HANDOFF, MIN_HANDOFF, unfoldDuration, sampleUnfoldSchedule, islandTimelineProgress, hingePlaybackProgress, advanceUnfoldPlayback, islandProgress, type UnfoldOrder, type UnfoldPath } from '@meshtailor/uv';
 import type { UVSnapshot } from '../workers/uv.worker';
 import type { UnfoldDisplay } from './webgl-view';
 import { DEFAULT_AUTO_FRAME } from './camera-policy';
@@ -11,7 +11,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const [skipStatic,setSkipStatic]=useState(DEFAULT_SKIP_STATIC),[motionTolerance,setMotionTolerance]=useState(DEFAULT_MOTION_RELATIVE_EPSILON);
   const [inspectionIndex,setInspectionIndex]=useState<number|null>(null);
   const [progress,setProgress]=useState(0),[playing,setPlaying]=useState(false),[seconds,setSeconds]=useState(12);
-  const [reverse,setReverse]=useState(false),[loop,setLoop]=useState(false),[separation,setSeparation]=useState(.45);
+  const [reverse,setReverse]=useState(false),[loop,setLoop]=useState(false),[separation,setSeparation]=useState(DEFAULT_SEPARATION);
   const [context,setContext]=useState<UnfoldDisplay['context']>('dim'),[checker,setChecker]=useState(false),[labels,setLabels]=useState(true);
   const [hingeWave,setHingeWave]=useState(true),[showHinges,setShowHinges]=useState(true),[showTemporaryCuts,setShowTemporaryCuts]=useState(true),[autoFrame,setAutoFrame]=useState(DEFAULT_AUTO_FRAME);
   const [focusFace,setFocusFace]=useState<number|null>(null);
