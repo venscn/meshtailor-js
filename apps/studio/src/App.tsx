@@ -125,7 +125,7 @@ export default function App(){
           setUVTarget(seamTarget(kind));
           if(kind.startsWith('auto-')&&result.parameters)setUVConfig({...result.parameters,timeBudgetMs:uvConfig.timeBudgetMs,padding:uvConfig.padding});
           setSeamEdges(edges);setChains(result.chains);setFrames(fs);setShowAllSeams(false);setStep(fs.length?0:-1);setPlaying(false);
-          setNotice(kind==='uv-seams'?`已读取原始 UV 接缝：${edges.size} 条边。显示和动画直接使用原 UV，不重新分割。`:`${result.regionCount??'传统'} 个候选分区，合并 ${result.mergedCount??0} 个小区域；${edges.size} 条接缝。最终岛数由 UV 有效性检查决定。`);
+          setNotice(kind==='uv-seams'?`已读取原始 UV 接缝：${edges.size} 条边。显示和动画直接使用原 UV，不重新分割。`:`输入 ${result.analysis?.components??'?'} 个独立连通部件（不跨部件焊接）；${result.regionCount??'传统'} 个候选分区，合并 ${result.mergedCount??0} 个小区域；${edges.size} 条接缝。最终岛数由 UV 有效性检查决定。`);
           if(kind.startsWith('auto-'))setShowAllSeams(true);
           if(!edges.size&&kind!=='uv-seams')setNotice('候选区域无需分隔边；UV 求解按需开缝，仍保留所有面。');
         }catch(error){setLoadError(String(error));}
