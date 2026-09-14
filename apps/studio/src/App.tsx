@@ -135,7 +135,7 @@ export default function App(){
   const togglePlayback=()=>{if(!frames.length)return;if(!playing&&step>=frames.length-1)setStep(0);setPlaying(!playing);};
 
   return <div className="app-shell" onDragOver={e=>{e.preventDefault();}} onDrop={e=>{e.preventDefault();if(e.dataTransfer.files.length)void loadFiles(Array.from(e.dataTransfer.files));}}>
-    <header className="topbar"><div><div className="brand">MeshTailor-JS <span>Studio · 0.4.3</span></div><div className="subtitle">自由相机 · 铰链展开 · LSCM / Tutte · 大网格进度 / 取消</div></div><div className="paper-pill">d={MESH_TAILOR_V2_SPEC.modelDimension} · {MESH_TAILOR_V2_SPEC.decoderLayers} decoder layers</div></header>
+    <header className="topbar"><div><div className="brand">MeshTailor-JS <span>Studio · 0.4.4</span></div><div className="subtitle">自由相机 · 铰链展开 · LSCM / Tutte · 大网格进度 / 取消</div></div><div className="paper-pill">d={MESH_TAILOR_V2_SPEC.modelDimension} · {MESH_TAILOR_V2_SPEC.decoderLayers} decoder layers</div></header>
     <main className="workspace">
       <aside className="sidebar">
         {viewMode==='unfold'&&<UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={setUVTarget} onExport={exportTargetUV} onDemo={loadUnfoldDemo} onHingeDemo={loadHingeDemo}/>}

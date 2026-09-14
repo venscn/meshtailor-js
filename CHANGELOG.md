@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.4 — 2026-09-14
+
+- Analyze each island's actual transform spans; remove static time instead of redistributing it.
+- Compact phase seeking, reverse playback, geometry, hinge angles and UI counters through one shared timeline.
+- Use duration-bounded late overlap for short / long islands; no overtaking, triple activity or zero-motion tail.
+- Add default-on skip switch, relative tolerance, actual/saved durations, per-island skipped-stage diagnostics.
+- Cache O(face corners) analysis; keep opt-in teaching holds, independent camera and exact source / target endpoints.
+- Preserve all published tags and release a new annotated v0.4.4 from clean committed HEAD.
+
 ## 0.4.3 — 2026-09-14
 
 - Default to ordered island relay: start the successor at 85% of its predecessor; bound overlap to adjacent pairs and retain strict serial mode.
