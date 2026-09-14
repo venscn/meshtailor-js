@@ -8,6 +8,15 @@ import { parseFBX, sceneToMesh, importMeshFiles } from '../importers';
 import { disposeImportedScene } from '../importers/scene-mesh';
 function bytes(path:string):ArrayBuffer{const b=readFileSync(new URL(path,import.meta.url));return b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength) as ArrayBuffer;}
 describe('Three scene topology adapter',()=>{
+  it('keeps material groups in index order, including mirrored transforms',()=>{
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0,1,1,0],3));g.setIndex([0,1,2,1,3,2]);g.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,0,1,1,1],2));g.addGroup(0,3,0);g.addGroup(3,3,1);
+    const a=new THREE.MeshBasicMaterial(),b=new THREE.MeshBasicMaterial();a.name='Leather';b.name='Metal';const obj=new THREE.Mesh(g,[a,b]);obj.scale.x=-1;
+    try{const {mesh}=sceneToMesh(obj,'groups');expect(mesh.faces.map(f=>f.uvSpaceName)).toEqual(['Leather','Metal']);expect(new Set(mesh.faces.map(f=>f.uvSpace)).size).toBe(2);expect(extractSeamEdgesFromUV(mesh).size).toBe(1);}finally{disposeImportedScene(obj);}
+  });
+  it('stitches unique near-coincident open boundary edges within one source object',()=>{
+    const d=2e-7,g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0,1+d,0,0,1,1,0,d,1,0],3));const obj=new THREE.Mesh(g);
+    try{const r=sceneToMesh(obj,'near-boundary');expect(r.mesh.faces).toHaveLength(2);expect(r.report.stitchedEdges).toBe(1);expect(r.mesh.positions).toHaveLength(4);}finally{disposeImportedScene(obj);}
+  });
   it('welds hard-normal splits in indexed geometry',()=>{
     const root=new THREE.Group(),mesh=new THREE.Mesh(new THREE.BoxGeometry(),new THREE.MeshBasicMaterial());root.add(mesh);
     try{const result=sceneToMesh(root,'box');expect(result.mesh.positions).toHaveLength(8);expect(result.mesh.faces).toHaveLength(12);expect(buildTopology(result.mesh).boundaryEdges.size).toBe(0);}finally{disposeImportedScene(root);}
@@ -54,7 +63,7 @@ function triangleGLTF(external:boolean){
 describe('Unified local import',()=>{
   // Node does not provide ProgressEvent, which Three FileLoader uses for streamed blobs.
   if(typeof globalThis.ProgressEvent==='undefined')globalThis.ProgressEvent=class extends Event{lengthComputable=false;loaded=0;total=0;constructor(type:string,init:ProgressEventInit={}){super(type);Object.assign(this,init);}} as unknown as typeof ProgressEvent;
-  it('imports geometry-only GLB without trying to load its absent texture',async()=>{const {document,binary}=triangleGLTF(false);expect((await importMeshFiles([new File([writeGLB(document,binary)],'triangle.GLB')])).mesh.faces).toHaveLength(1);});
+  it('imports geometry-only GLB without trying to load its absent texture',async()=>{const {document,binary}=triangleGLTF(false);const {mesh}=await importMeshFiles([new File([writeGLB(document,binary)],'triangle.GLB')]);expect(mesh.faces).toHaveLength(1);expect(mesh.faces[0]!.uvSpace).toBe('material:0');});
   it('resolves a glTF companion .bin selected with its model',async()=>{const {document,binary}=triangleGLTF(true);const result=await importMeshFiles([new File([JSON.stringify(document)],'triangle.gltf'),new File([binary],'positions.bin')]);expect(result.mesh.faces).toHaveLength(1);});
   it('rejects missing resources and multiple main models with useful messages',async()=>{const {document}=triangleGLTF(true);await expect(importMeshFiles([new File([JSON.stringify(document)],'triangle.gltf')])).rejects.toThrow(/Missing/);await expect(importMeshFiles([new File([],'a.fbx'),new File([],'b.obj')])).rejects.toThrow(/exactly ONE/);});
 });
