@@ -1,10 +1,13 @@
 import { hingeRemainingAngle, islandColor, islandProgress, selectedIslands, uvToWorld, writeUnfoldPositions, type UnfoldGeometry, type UnfoldOptions } from '@meshtailor/uv';
-import { fitDistance, viewportSize } from '../viewport-math.js';
+import { viewportSize } from '../viewport-math.js';
 import { cameraBasis, cameraMatrix, pickFace, projectPoint, type OrbitCamera } from './camera-math.js';
 import type { Vec3 } from '@meshtailor/mesh-core';
+import { CameraFollowPolicy, DEFAULT_AUTO_FRAME } from './camera-policy.js';
 
 export interface UnfoldDisplay extends UnfoldOptions {
-  showHinges?:boolean; showTemporaryCuts?:boolean; autoFrame?:boolean;
+  showHinges?:boolean; showTemporaryCuts?:boolean;
+  /** Opt-in only. A camera gesture disables following until explicitly re-enabled. */
+  autoFrame?:boolean;
   context: 'dim' | 'hidden' | 'solid';
   wireframe: boolean;
   checker: boolean;
@@ -68,17 +71,19 @@ export class UnfoldWebGLView {
   private uniforms = new Map<string, WebGLUniformLocation>();
   private data: UnfoldGeometry | null = null;
   private positions = new Float32Array(0);
-  private options: UnfoldDisplay = {progress:0,selected:[],order:'together',path:'staged',separation:.45,context:'dim',wireframe:false,checker:false,labels:true,xray:false,focusFace:null};
+  private options: UnfoldDisplay = {progress:0,selected:[],order:'together',path:'staged',separation:.45,context:'dim',wireframe:false,checker:false,labels:true,xray:false,focusFace:null,autoFrame:DEFAULT_AUTO_FRAME};
   private active = new Set<number>();
   private activeCount=0; private contextCount=0; private seamCount=0;
   private camera: OrbitCamera = {yaw:.65,pitch:.35,distance:8,target:[0,0,0]};
+  private readonly cameraFollow = new CameraFollowPolicy();
+  private uploadingGeometry = false;
   private raf=0; private disposed=false; private lost=false;
   private size={width:0,height:0,dpr:0};
   private lastSelection='';
   private pointer: {id:number;x:number;y:number;startX:number;startY:number;button:number;dragged:boolean}|null=null;
   private labels: {id:number;el:HTMLButtonElement;faces:number[]}[]=[];
 
-  constructor(private host:HTMLDivElement, private onPick:(id:number,face:number|null,additive:boolean)=>void, private onError:(error:string|null)=>void){
+  constructor(private host:HTMLDivElement, private onPick:(id:number,face:number|null,additive:boolean)=>void, private onError:(error:string|null)=>void, private onCameraManual:()=>void=()=>{}){
     this.canvas=document.createElement('canvas');
     this.canvas.dataset.testid='unfold-canvas';this.canvas.setAttribute('aria-label','3D to UV unfolding canvas');
     Object.assign(this.canvas.style,{position:'absolute',inset:'0',width:'100%',height:'100%',display:'block',touchAction:'none'});
@@ -89,6 +94,7 @@ export class UnfoldWebGLView {
     this.labelHost.className='unfold-labels';host.append(this.canvas,this.labelHost);
     this.canvas.addEventListener('pointerdown',this.pointerDown);this.canvas.addEventListener('pointermove',this.pointerMove);
     this.canvas.addEventListener('pointerup',this.pointerUp);this.canvas.addEventListener('pointercancel',this.pointerCancel);
+    this.canvas.addEventListener('lostpointercapture',this.pointerCancel);
     this.canvas.addEventListener('wheel',this.wheel,{passive:false});this.canvas.addEventListener('contextmenu',this.contextMenu);
     this.canvas.addEventListener('webglcontextlost',this.contextLost);this.canvas.addEventListener('webglcontextrestored',this.contextRestored);
     this.observer=new ResizeObserver(this.invalidate);this.observer.observe(host);
@@ -113,7 +119,7 @@ export class UnfoldWebGLView {
     const gl=this.gl;gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.bufferData(gl.ARRAY_BUFFER,values,dynamic?gl.DYNAMIC_DRAW:gl.STATIC_DRAW);
     gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,0,0);
   }
-  setGeometry(data:UnfoldGeometry|null){
+  setGeometry(data:UnfoldGeometry|null,{resetCamera=true}:{resetCamera?:boolean}={}){
     this.data=data;this.positions=data?data.source.slice():new Float32Array(0);this.lastSelection='';this.lastPose='';
     if(!data){this.activeCount=this.contextCount=this.seamCount=0;this.labelHost.replaceChildren();this.labels=[];this.hingeLabels=[];this.invalidate();return;}
     // Reuse the fixed position/index buffers; replace only the two immutable attributes.
@@ -129,10 +135,17 @@ export class UnfoldWebGLView {
     this.attribute(0,3,new Float32Array(points.flatMap(p=>uvToWorld(p as [number,number],a))));
     gl.disableVertexAttribArray(1);gl.disableVertexAttribArray(2);gl.vertexAttrib3f(1,0,0,0);gl.vertexAttrib2f(2,0,0);
     gl.bindVertexArray(null);
-    this.setOptions(this.options);this.fit('orbit');
+    // Uploading/recomputing geometry must not accidentally enable the animation camera.
+    // Callers only request the one-time initial fit when loading a different source mesh.
+    this.uploadingGeometry=true;
+    try{this.setOptions(this.options);}finally{this.uploadingGeometry=false;}
+    if(resetCamera)this.resetCameraPose('orbit',true);
+    this.invalidate();
   }
   setOptions(options:UnfoldDisplay){
     this.options=options;
+    const followStarted=this.cameraFollow.setRequested(options.autoFrame===true);
+    this.canvas.dataset.cameraMode=this.cameraFollow.active?'follow':'manual';
     if(!this.data||this.lost)return;
     const data=this.data,gl=this.gl,ids=selectedIslands(data,options.selected);
     this.active=new Set(ids);
@@ -148,8 +161,11 @@ export class UnfoldWebGLView {
       this.makeLabels();
     }
     writeUnfoldPositions(data,options,this.positions);
-    const poseKey=JSON.stringify([options.progress,ids,options.path,options.separation]);
-    if(options.autoFrame&&poseKey!==this.lastPose)this.frameCurrent();this.lastPose=poseKey;
+    const poseKey=JSON.stringify([options.progress,ids,options.path,options.separation,options.order,options.hingeWave,options.context]);
+    // This is the only animation-driven camera write. A held pointer suspends it;
+    // a drag/wheel latches it off before modifying the user's camera.
+    if(this.cameraFollow.active&&!this.pointer&&!this.uploadingGeometry&&(followStarted||poseKey!==this.lastPose))this.frameCurrent();
+    this.lastPose=poseKey;
     const rig=data.hinge;
     this.hingeCount=this.temporaryCount=0;
     if(options.path==='hinge'&&rig){
@@ -183,25 +199,37 @@ export class UnfoldWebGLView {
       }
     }
   }
-  private frameCurrent(){
-    if(!this.data||!this.active.size)return;
+  private frameCurrent(all=false){
+    if(!this.data)return;
+    const visible=(fi:number)=>all||!this.active.size||this.active.has(this.data!.faceChart[fi]!);
     const min:Vec3=[Infinity,Infinity,Infinity],max:Vec3=[-Infinity,-Infinity,-Infinity];
-    for(let fi=0;fi<this.data.faceChart.length;fi++)if(this.active.has(this.data.faceChart[fi]!))for(let k=0;k<3;k++)for(let a=0;a<3;a++){const v=this.positions[fi*9+k*3+a]!;min[a]=Math.min(min[a]!,v);max[a]=Math.max(max[a]!,v);}
+    for(let fi=0;fi<this.data.faceChart.length;fi++)if(visible(fi))for(let k=0;k<3;k++)for(let a=0;a<3;a++){const v=this.positions[fi*9+k*3+a]!;min[a]=Math.min(min[a]!,v);max[a]=Math.max(max[a]!,v);}
     if(!Number.isFinite(min[0]))return;const center=min.map((v,a)=>(v+max[a]!)/2) as Vec3;
     // Fit in camera space rather than enclosing a sphere: separated skinny islands
     // otherwise occupy only a small fraction of the viewport despite "fit" being on.
     const basis=cameraBasis({...this.camera,target:center,distance:1}),tanV=Math.tan(21*Math.PI/180),tanH=tanV*Math.max(.1,this.host.clientWidth/Math.max(1,this.host.clientHeight));
     let distance=.15;
-    for(let fi=0;fi<this.data.faceChart.length;fi++)if(this.active.has(this.data.faceChart[fi]!))for(let k=0;k<3;k++){
+    for(let fi=0;fi<this.data.faceChart.length;fi++)if(visible(fi))for(let k=0;k<3;k++){
       const q:Vec3=[this.positions[fi*9+k*3]!-center[0],this.positions[fi*9+k*3+1]!-center[1],this.positions[fi*9+k*3+2]!-center[2]];
       const dot=(v:Vec3)=>q[0]*v[0]+q[1]*v[1]+q[2]*v[2];
       distance=Math.max(distance,-dot(basis.forward)+1.13*Math.max(Math.abs(dot(basis.right))/tanH,Math.abs(dot(basis.up))/tanV));
     }
     this.camera.target=center;this.camera.distance=distance+.03;
   }
-  fit(kind:'orbit'|'uv'='orbit'){
+  private resetCameraPose(kind:'orbit'|'uv',all=false){
     this.camera={yaw:kind==='uv'?0:.38,pitch:kind==='uv'?0:.22,distance:8,target:[0,0,0]};
-    this.frameCurrent();this.invalidate();
+    this.frameCurrent(all);
+  }
+  /** Explicit fit is a single camera command, not permission for future frames to follow. */
+  fit(kind:'orbit'|'uv'='orbit'){
+    this.takeCameraControl();this.resetCameraPose(kind);this.invalidate();
+  }
+  /** Fit the current visible pose without throwing away the user's orbit orientation. */
+  fitCurrent(){this.takeCameraControl();this.frameCurrent();this.invalidate();}
+  private takeCameraControl(){
+    const notify=this.cameraFollow.takeManualControl();
+    this.canvas.dataset.cameraMode='manual';
+    if(notify)this.onCameraManual();
   }
   /** Public snapshot for regression diagnostics, not a second animation implementation. */
   getPositions(){return this.positions.slice();}
@@ -254,12 +282,13 @@ export class UnfoldWebGLView {
     const error=gl.getError();if(error!==gl.NO_ERROR)this.onError(`Unfold WebGL error 0x${error.toString(16)}. Retry the preview.`);
     this.canvas.dataset.draws=String(Number(this.canvas.dataset.draws??0)+1);this.canvas.dataset.glError=String(error);this.canvas.dataset.camera=JSON.stringify(this.camera);
   };
-  private readonly pointerDown=(e:PointerEvent)=>{if(e.button!==0&&e.button!==2)return;this.pointer={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,button:e.button,dragged:false};this.canvas.setPointerCapture(e.pointerId);};
+  private readonly pointerDown=(e:PointerEvent)=>{if(this.pointer||(e.button!==0&&e.button!==2))return;this.pointer={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,button:e.button,dragged:false};this.canvas.setPointerCapture(e.pointerId);};
   private readonly pointerMove=(e:PointerEvent)=>{
     const p=this.pointer;if(!p||p.id!==e.pointerId)return;
     const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
     p.dragged ||= Math.hypot(e.clientX-p.startX,e.clientY-p.startY)>4;
     if(!p.dragged)return;
+    this.takeCameraControl();
     if(p.button===2){const b=cameraBasis(this.camera),scale=this.camera.distance*.7/Math.max(1,this.host.clientHeight);for(let i=0;i<3;i++)this.camera.target[i]+=(-dx*b.right[i]!+dy*b.up[i]!)*scale;}
     else{this.camera.yaw-=dx*.007;this.camera.pitch=Math.max(-1.48,Math.min(1.48,this.camera.pitch+dy*.007));}
     this.invalidate();
@@ -272,14 +301,18 @@ export class UnfoldWebGLView {
       if(fi!==null)this.onPick(this.data.faceChart[fi]!,fi,e.shiftKey||e.ctrlKey||e.metaKey);
     }
   };
-  private readonly pointerCancel=()=>{this.pointer=null;};
-  private readonly wheel=(e:WheelEvent)=>{e.preventDefault();this.camera.distance=Math.max(.2,Math.min(200,this.camera.distance*Math.exp(Math.max(-300,Math.min(300,e.deltaY))*.0015)));this.invalidate();};
+  private readonly pointerCancel=(e:PointerEvent)=>{
+    if(this.pointer?.id!==e.pointerId)return;this.pointer=null;
+    if(this.canvas.hasPointerCapture(e.pointerId))this.canvas.releasePointerCapture(e.pointerId);
+  };
+  private readonly wheel=(e:WheelEvent)=>{e.preventDefault();if(!Number.isFinite(e.deltaY)||e.deltaY===0)return;this.takeCameraControl();this.camera.distance=Math.max(.2,Math.min(200,this.camera.distance*Math.exp(Math.max(-300,Math.min(300,e.deltaY))*.0015)));this.invalidate();};
   private readonly contextMenu=(e:Event)=>e.preventDefault();
   private readonly contextLost=(e:Event)=>{e.preventDefault();this.lost=true;this.onError('Unfold WebGL context lost. Wait for browser recovery or use Retry.');};
-  private readonly contextRestored=()=>{try{this.initialize();this.lost=false;this.setGeometry(this.data);this.onError(null);}catch(error){this.onError(String(error));}};
+  private readonly contextRestored=()=>{try{this.initialize();this.lost=false;this.setGeometry(this.data,{resetCamera:false});this.onError(null);}catch(error){this.onError(String(error));}};
   dispose(){
     if(this.disposed)return;this.disposed=true;cancelAnimationFrame(this.raf);this.observer.disconnect();window.removeEventListener('resize',this.invalidate);
     this.canvas.removeEventListener('pointerdown',this.pointerDown);this.canvas.removeEventListener('pointermove',this.pointerMove);this.canvas.removeEventListener('pointerup',this.pointerUp);this.canvas.removeEventListener('pointercancel',this.pointerCancel);
+    this.canvas.removeEventListener('lostpointercapture',this.pointerCancel);
     this.canvas.removeEventListener('wheel',this.wheel);this.canvas.removeEventListener('contextmenu',this.contextMenu);this.canvas.removeEventListener('webglcontextlost',this.contextLost);this.canvas.removeEventListener('webglcontextrestored',this.contextRestored);
     this.buffers.forEach(b=>this.gl.deleteBuffer(b));this.gl.deleteVertexArray(this.vao);this.gl.deleteVertexArray(this.atlasVAO);this.gl.deleteProgram(this.program);this.gl.getExtension('WEBGL_lose_context')?.loseContext();
     this.canvas.remove();this.labelHost.remove();this.data=null;
