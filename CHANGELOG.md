@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.2 — 2026-09-14
+
+- Default to a manual camera in Studio and the offline lab; animation progress no longer overwrites orbit, pan or zoom.
+- Keep optional follow explicitly opt-in, with immediate latched user takeover and synchronized UI; no automatic resume after release or loop.
+- Add one-shot fit-current that preserves orientation; make 3D/UV fit buttons one-shot and preserve camera during same-mesh UV recompute and context recovery.
+- Add 10 policy and 39 real-browser camera cases; rerun existing rendering, hinge, core and layout regressions. Full React/Vite build remains unavailable due to missing dependencies.
+- Preserve all published tags and add annotated v0.4.2 from a clean committed HEAD.
+
+Previous v0.4.0/v0.4.1 algorithm and performance changes are recorded in their versioned `docs/RELEASE-*.md` files.
+
 ## 0.3.0 — 2026-09-11
 
 - Add reversible per-corner 3D-to-UV morph with single/multi/all island scope and simultaneous/sequential scheduling.

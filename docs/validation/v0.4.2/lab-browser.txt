@@ -1,0 +1,22 @@
+PASS DPR 1: real browser Worker returns validated LSCM atlas and hinge rig
+PASS DPR 1: WebGL2 shader renders without error
+PASS DPR 1: exact atlas endpoint and source endpoint
+PASS DPR 1: real phase controls expose separated pieces then hinge angles
+PASS DPR 1: single/multiple/all controls and sequential playback
+PASS DPR 1: play advances / scrubbing pauses / reverse moves backward
+PASS DPR 1: UV export uses exact target per-corner coordinates
+PASS DPR 1: Tutte solver selection actually reruns browser worker
+PASS DPR 1: invalid padding reports an error instead of keeping stale UV
+PASS DPR 1: recover after failure with the same canvas and clean console
+PASS complex knot worker solve, temporary cuts visible only in hinge stage
+PASS DPR 2: real browser Worker returns validated LSCM atlas and hinge rig
+PASS DPR 2: WebGL2 shader renders without error
+PASS DPR 2: exact atlas endpoint and source endpoint
+PASS DPR 2: real phase controls expose separated pieces then hinge angles
+PASS DPR 2: single/multiple/all controls and sequential playback
+PASS DPR 2: play advances / scrubbing pauses / reverse moves backward
+PASS DPR 2: UV export uses exact target per-corner coordinates
+PASS DPR 2: Tutte solver selection actually reruns browser worker
+PASS DPR 2: invalid padding reports an error instead of keeping stale UV
+PASS DPR 2: recover after failure with the same canvas and clean console
+PASS 21 cases
