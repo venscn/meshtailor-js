@@ -33,7 +33,7 @@ try{
       });
       if(detail==='medium'){
         await check(`${item.id}: full real-edge baseline/traversal/UV pipeline`,()=>{
-          const start=performance.now(),generated=runtime.generateGeometricSeams(mesh,{maxEdges:750}),fs=runtime.buildGenerationFrames(mesh,generated.chains);
+          const start=performance.now(),generated=runtime.generateGeometricSeams(mesh,{strategy:'legacy',maxEdges:750}),fs=runtime.buildGenerationFrames(mesh,generated.chains);
           assert.equal(fs.at(-1).token,chaining.EOS);assert.ok(generated.seamEdges.size<=750);
           for(const frame of fs)if(frame.token>=0)assert.ok(frame.mask.vertices.includes(frame.token));
           assert.deepEqual(new Set(fs.at(-1).revealedEdges),generated.seamEdges);

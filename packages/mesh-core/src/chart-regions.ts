@@ -83,7 +83,9 @@ export function segmentMeshRegions(mesh:MeshData,options:RegionOptions,protected
   let mergedRegions=0;
   for(let pass=0;pass<3;pass++){
     let changed=false;const small=regions.map((r,i)=>({r,i})).filter(({r})=>r.alive).sort((a,b)=>Math.round(a.r.area/Math.max(1e-30,a.r.componentArea)*1e10)-Math.round(b.r.area/Math.max(1e-30,b.r.componentArea)*1e10)||a.i-b.i);
-    for(const {r,i}of small){if(!r.alive||r.faces.length>=o.minRegionFaces&&r.area>=r.componentArea*o.minRegionAreaRatio)continue;
+    for(const {r,i}of small){// Coarse meshes can have a meaningful panel with only two triangles.
+      // Face count alone must not merge a large fraction of a component.
+      if(!r.alive||(r.faces.length>=o.minRegionFaces||r.area>=r.componentArea*.08)&&r.area>=r.componentArea*o.minRegionAreaRatio)continue;
       check();let best=-1,cost=Infinity;
       for(const [j,shared]of r.adj){const s=regions[j]!;if(!s.alive||s.faces.length+r.faces.length>o.maxChartFaces)continue;
         const d=dot3(r.normal,s.normal)/Math.max(1e-30,Math.hypot(...r.normal)*Math.hypot(...s.normal));
