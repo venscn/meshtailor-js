@@ -22,7 +22,7 @@ try {
       await page.evaluate(`lab.pause();lab.update({progress:${t},order:'together',path:'hinge',labels:false,showHinges:false});document.querySelector('#reverse').checked=${reverse};document.querySelector('#loop').checked=${loop};document.querySelector('#seconds').value='${seconds}';document.querySelector('#play').click();`);
       await page.waitFor(`lab.playing && lab.options.progress!==${t}`);
     };
-    const stable=async()=>{const after=await camera(),t=await progress();await delay(180);assert.deepEqual(await camera(),after);assert.notEqual(await progress(),t,'animation must keep running');assert.equal(await page.evaluate('lab.playing'),true);return after;};
+    const stable=async()=>{const after=await camera(),t=await progress();await delay(180);await page.waitFor(`lab.playing && lab.options.progress!==${t}`,3000);assert.deepEqual(await camera(),after);assert.notEqual(await progress(),t,'animation must keep running');assert.equal(await page.evaluate('lab.playing'),true);return after;};
     const drag=async(button,dx,dy)=>{
       const p=await point(),buttons=button==='right'?2:1;
       await page.send('Input.dispatchMouseEvent',{type:'mousePressed',...p,button,buttons,clickCount:1});
