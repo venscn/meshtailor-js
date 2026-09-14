@@ -1,9 +1,10 @@
 import type { MeshData } from '@meshtailor/mesh-core';
 import { extractSeamEdgesFromUV } from '@meshtailor/chaining-seams';
-import { buildCharts, buildUnfoldGeometry, unwrapMesh, sourceUVPreview, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
+import { buildCharts, buildUnfoldGeometry, unwrapMesh, sourceUVPreview, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
 export type UVTarget = 'generated' | 'source';
 export interface UVSnapshot {
   packed:PackedChart[]; geometry:UnfoldGeometry; seams:string[]; target:UVTarget; warnings:string[];
+  fragmentation?:FragmentationReport;
   addedSeams?:string[]; diagnostics?:ChartDiagnostic[];
   metrics?:{occupancy:number;boxOccupancy:number;padding:number;validated:boolean;elapsedMs:number;packingMethod?:string};
   timing?:{elapsedMs:number;stages:Record<string,number>};
@@ -41,7 +42,7 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
       snapshot={packed,geometry:buildUnfoldGeometry(mesh,packed,seams,work),seams:[...seams],target,warnings:[config?.sourceUVLayout==='overlay'?'诊断叠加视图：所有材质共用画框，跨材质重叠不等于原 UV 错误。':'原 UV 按材质分框显示；展示偏移不会写入导出，每框仍是各自的原始坐标。', '同一材质内的原始重叠、镜像复用或退化仍原样保留。分框不是修复或统一重排；重新展开需要重新烘焙贴图。']};
     }else{
       const result=unwrapMesh(mesh,seams,config,work);seams=new Set(result.seams);
-      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,addedSeams:result.addedSeams,diagnostics:result.diagnostics,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
+      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,fragmentation:result.fragmentation,addedSeams:result.addedSeams,diagnostics:result.diagnostics,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
     }
     const rig=snapshot.geometry.hinge;
     if(rig?.islands.some(i=>i.targetOrientation<0))snapshot.warnings.push('镜像 UV 岛保持原坐标；动画在刚性转向阶段对齐其正反面，避免最后形变阶段翻面。');

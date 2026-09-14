@@ -23,7 +23,9 @@ export function UVSolverControls({value,onChange,snapshot,onAuto}:{onAuto:(goal:
     <label>UV 任务预算（秒）<input aria-label="UV time budget" type="number" min="5" max="900" step="5" value={(draft.timeBudgetMs??120000)/1000} onChange={e=>patch({timeBudgetMs:+e.target.value*1000})}/></label>
     <label>单岛面数预算<input type="number" min="8" max="20000" step="128" value={draft.maxChartFaces} onChange={e=>patch({maxChartFaces:+e.target.value})}/></label>
     <label>长宽比补切阈值<input type="number" min="1" max="100" step=".5" value={draft.maxAspect} onChange={e=>patch({maxAspect:+e.target.value})}/></label>
-    <label>角形变阈值（最大奇异值比）<input type="number" min="1" max="1000" step="1" value={draft.maxStretch} onChange={e=>patch({maxStretch:+e.target.value})}/></label>
+    <label>形变控制的源表面积比例<input aria-label="Stretch area percentile" type="number" min="90" max="100" step=".1" value={(draft.stretchAreaPercentile??1)*100} onChange={e=>patch({stretchAreaPercentile:+e.target.value/100})}/></label>
+    <small>99 表示允许最多 1% 表面积的微小细节超过软形变阈值，不因此反复切碎整岛；100 恢复最坏面控制。真实翻面、退化、交叠仍禁止。</small>
+    <label>角形变阈值（奇异值比）<input type="number" min="1" max="1000" step="1" value={draft.maxStretch} onChange={e=>patch({maxStretch:+e.target.value})}/></label>
     <details><summary>区域与数值求解设置</summary>
       <label>区域法线锥角（度）<input type="number" min="1" max="178" value={draft.regionOptions?.normalConeDegrees??80} onChange={e=>patch({regionOptions:{...draft.regionOptions,normalConeDegrees:+e.target.value}})}/></label>
       <label>小区域表面积比<input type="number" min="0" max=".5" step=".005" value={draft.regionOptions?.minRegionAreaRatio??.01} onChange={e=>patch({regionOptions:{...draft.regionOptions,minRegionAreaRatio:+e.target.value}})}/></label>
@@ -33,6 +35,7 @@ export function UVSolverControls({value,onChange,snapshot,onAuto}:{onAuto:(goal:
       <label>岛 / 包围盒最小面积比<input type="number" min="0" max="1" step=".05" value={draft.minFill} onChange={e=>patch({minFill:+e.target.value})}/></label>
     </details>
     <div className="button-grid two"><button className="primary" onClick={()=>onChange({...draft})}>应用并重新展开</button><button onClick={()=>{setDraft({...DEFAULT_UNWRAP});onChange({...DEFAULT_UNWRAP});}}>恢复默认（固定参数）</button></div>
+    {snapshot?.fragmentation&&<p>分裂来源：{snapshot.fragmentation.inputComponents} 个原几何连通分量 → {snapshot.fragmentation.initialCharts} 个初始区域 → {snapshot.fragmentation.outputCharts} 个最终岛；小于16面：{snapshot.fragmentation.tinyCharts}。<br/>补切原因：{Object.entries(snapshot.fragmentation.reasons).map(([k,v])=>`${k}: ${v}`).join(' · ')||'无'}。</p>}
     {snapshot?.metrics&&<div className="uv-quality-stats"><b>有效 UV 占用 {(snapshot.metrics.occupancy*100).toFixed(1)}%</b><span>包围盒占用 {(snapshot.metrics.boxOccupancy*100).toFixed(1)}%</span><span>{snapshot.addedSeams?.length??0} 条补切 · {snapshot.diagnostics?.filter(d=>d.method==='tutte').length??0} 个 Tutte 岛</span><span>实际排布：{snapshot.metrics.packingMethod??'MaxRects'}</span><span>生成 UV 已检查翻面、退化和正面积重叠</span></div>}
   </details>;
 }
