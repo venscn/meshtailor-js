@@ -1,0 +1,146 @@
+
+> meshtailor-js@0.4.1 test:git
+> node --test scripts/tests/git-history-check.test.mjs
+
+TAP version 13
+# Subtest: accepts complete clean history with three distinct original tags
+ok 1 - accepts complete clean history with three distinct original tags
+  ---
+  duration_ms: 114.587463
+  type: 'test'
+  ...
+# Subtest: accepts annotated release matching HEAD and package version
+ok 2 - accepts annotated release matching HEAD and package version
+  ---
+  duration_ms: 109.893562
+  type: 'test'
+  ...
+# Subtest: rejects a missing historical tag
+ok 3 - rejects a missing historical tag
+  ---
+  duration_ms: 106.446122
+  type: 'test'
+  ...
+# Subtest: rejects moving an old tag
+ok 4 - rejects moving an old tag
+  ---
+  duration_ms: 110.183496
+  type: 'test'
+  ...
+# Subtest: rejects rewriting annotation even if the tagged commit is unchanged
+ok 5 - rejects rewriting annotation even if the tagged commit is unchanged
+  ---
+  duration_ms: 102.736055
+  type: 'test'
+  ...
+# Subtest: rejects an untracked source file
+ok 6 - rejects an untracked source file
+  ---
+  duration_ms: 102.994936
+  type: 'test'
+  ...
+# Subtest: rejects unstaged changes
+ok 7 - rejects unstaged changes
+  ---
+  duration_ms: 157.095541
+  type: 'test'
+  ...
+# Subtest: rejects staged changes
+ok 8 - rejects staged changes
+  ---
+  duration_ms: 116.944188
+  type: 'test'
+  ...
+# Subtest: allows ignored bundle artifacts without tracking recursive history
+ok 9 - allows ignored bundle artifacts without tracking recursive history
+  ---
+  duration_ms: 105.62989
+  type: 'test'
+  ...
+# Subtest: rejects two release versions on one commit
+ok 10 - rejects two release versions on one commit
+  ---
+  duration_ms: 111.457131
+  type: 'test'
+  ...
+# Subtest: allows a new annotated release after an independent release commit
+ok 11 - allows a new annotated release after an independent release commit
+  ---
+  duration_ms: 119.154607
+  type: 'test'
+  ...
+# Subtest: rejects a lightweight tag for a new release
+ok 12 - rejects a lightweight tag for a new release
+  ---
+  duration_ms: 124.739813
+  type: 'test'
+  ...
+# Subtest: rejects a release/package version mismatch
+ok 13 - rejects a release/package version mismatch
+  ---
+  duration_ms: 124.604879
+  type: 'test'
+  ...
+# Subtest: rejects a workspace version mismatch
+ok 14 - rejects a workspace version mismatch
+  ---
+  duration_ms: 121.677794
+  type: 'test'
+  ...
+# Subtest: accepts a correctly versioned multi-workspace release
+ok 15 - accepts a correctly versioned multi-workspace release
+  ---
+  duration_ms: 119.13687
+  type: 'test'
+  ...
+# Subtest: rejects release mode when HEAD is ahead of the requested tag
+ok 16 - rejects release mode when HEAD is ahead of the requested tag
+  ---
+  duration_ms: 188.916432
+  type: 'test'
+  ...
+# Subtest: accepts a clean detached release checkout
+ok 17 - accepts a clean detached release checkout
+  ---
+  duration_ms: 111.083242
+  type: 'test'
+  ...
+# Subtest: rejects a replacement root unrelated to historical commits
+ok 18 - rejects a replacement root unrelated to historical commits
+  ---
+  duration_ms: 103.56823
+  type: 'test'
+  ...
+# Subtest: rejects shallow clones
+ok 19 - rejects shallow clones
+  ---
+  duration_ms: 123.570945
+  type: 'test'
+  ...
+# Subtest: rejects directories without a working Git repository
+ok 20 - rejects directories without a working Git repository
+  ---
+  duration_ms: 54.702071
+  type: 'test'
+  ...
+# Subtest: audit is read-only for index, refs and status
+ok 21 - audit is read-only for index, refs and status
+  ---
+  duration_ms: 108.585835
+  type: 'test'
+  ...
+# Subtest: CLI rejects invalid arguments without claiming a passed check
+ok 22 - CLI rejects invalid arguments without claiming a passed check
+  ---
+  duration_ms: 122.779505
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2634.077349

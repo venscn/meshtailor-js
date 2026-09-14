@@ -1,0 +1,14 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: v0.1.0 must reproduce the HiDPI growth loop
+    at file:///mnt/data/work-041/meshtailor-js/scripts/layout-smoke.mjs:38:10 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '=='
+}
+
+Node.js v22.16.0

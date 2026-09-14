@@ -1,53 +1,78 @@
-# Validation — v0.4.0
+# Validation — v0.4.1
 
-2026-09-14。本记录仅列实际执行的检查。v0.3.0 原记录存为 `VALIDATION-0.3.0.md`，早期版本也保留。
+本记录仅列本轮实际执行的测试。前版记录保存在 `VALIDATION-0.4.0.md`，不会覆盖历史证据。日期：2026-09-14。
 
-## 执行环境
+## 环境及限制
 
-Node 22.16.0、全局 TypeScript 5.8.3、Chromium 144、Linux、Xvfb / SwiftShader 软件渲染。不是 macOS / Windows 或硬件 GPU 实机性能测试。npm registry 的本轮访问仍实际返回 DNS `EAI_AGAIN`；日志位于 `validation/v0.4.0/npm-registry-attempt.log`。没有成功安装完整 npm 依赖树，不伪造 lockfile。
+Linux、Node 22.16.0、全局 TypeScript 5.8.3、Chromium 144.0.7559.96，Xvfb + ANGLE/SwiftShader 软件渲染。不是 macOS / Windows 或硬件 GPU 的性能测试。
 
-## 实际通过
+npm install 在 20 秒进程限制内未完成（退出 124）；没有安装成功或产生可信 lockfile。远端模型 raw 文件的独立下载遇到 DNS 解析失败。**本轮没有真实 Flight Helmet 几何资产**，不以程序网格代替该模型宣称通过。
 
-| 检查 | 通过 | 范围 |
+## 实际结果
+
+| 测试入口 | 通过 | 范围 |
 |---|---:|---|
-| `test:core` | 21 | 纯核心、视口数学严格编译；70 个 TS/TSX 语法转译。语法转译不是完整 UI 类型检查。 |
-| `test:complex` | 40 | 原有复杂网格 / 焊接 / 格式结构 / 模拟下载。不是实际 FBXLoader 解码。 |
-| `test:unfold` | 33 | 旧模式对应关系、精确端点、选择、导出和大型网格。 |
-| `test:uv-worker` | 4 | 生产 UV handler 在 Node worker_threads；Map / TypedArray 转移、source/generated、错误、复杂输入。 |
-| `test:parameterization` | 一套 10 断言回归 | 折角面 LSCM / Tutte、长度比例、翻面、重叠、退化、圆筒同岛长切缝。 |
-| `test:atlas` | 6 个模型 + 排布/严格策略检查 | 每面覆盖、每岛有效、单位域、不同岛包围盒无交叠、面积比例、禁止补切时拒绝非盘。 |
-| `test:hinge` | 17 | 刚性边长、铰链共点、真正平面网、单/多/全部、端点、反向、连续性。 |
-| `test:uv-guards` | 11 | 无效设置、零面积拒绝、源网格不变、重叠坐标 UV 身份、曲面临时断边及平面网。 |
-| `test:lab` | 21 | 实际离线 UI、WebGL2 像素、DPR 1/2、按钮、单/多/全、播放/反向、导出、真实浏览器 Worker、更换求解器、错误恢复、复杂结网。无跳过项。 |
-| `test:unfold:browser` | 24 | 原生渲染器老回归；真实拾取 / 相机 / 90,112 面源 UV / 上下文恢复。两项 module Worker 检查显式跳过，不算通过。 |
-| `test:layout` | 13 | 原生 CSS / canvas 布局回归，不运行 React。 |
-| `test:git` | 22 | Git 维护工具、不可变旧 tag、脏工作树、版本校验等。 |
+| `test:packing-large` | 5 | 2,000 岛、留白、有效三角形、不重叠、统一纹素密度、确定性、非法设置拒绝 |
+| `test:uv-progress` | 5 | 真实阶段、截止时间跨数值回退传播、观测前后曲面求解结果一致 |
+| `test:uv-client` | 11 | 可控模拟 transport：进度、完成、取消、超时、消息/启动/克隆失败与迟到结果；不是浏览器替代认证 |
+| `test:uv-large` | 3 | 90,112 面生产 Node Worker generated / source 完整路径；真实预算失败 |
+| `test:uv-lifecycle:browser` | 7 | 实际浏览器线程、页面响应、取消、重试、超时、同步死循环终止、原 UV 与生成恢复 |
+| `test:lab` | 21 | 实际离线 UI/WebGL/Worker、拾取/动画/导出等原有行为 |
+| `test:layout` | 13 | 原生 CSS/canvas 布局，不运行 React |
+| `test:unfold:browser` | 24 | 原生 WebGL 回归；另 2 项 module Worker 检查显式跳过 |
+| `test:core` | 21 | 核心严格编译；73 个 TS/TSX 文件语法转译，**不是完整 UI 类型检查** |
+| `test:complex` | 40 | 复杂输入 / 焊接 / 格式结构；不是真实 FBXLoader 解码 |
+| `test:unfold` | 33 | 对应关系、原有模式端点、选择和导出 |
+| `test:uv-worker` | 4 | Node worker_threads 的生产 handler、缓冲区与错误路径 |
+| `test:parameterization` | 10 断言 | LSCM/Tutte、折角与圆筒、翻面退化和重叠 |
+| `test:atlas` | 6 模型与附加断言 | 全面覆盖、有效 UV、单位域、密度、显式补切策略 |
+| `test:hinge` | 17 | 面边长度、铰链共点、精确终点和连续性 |
+| `test:uv-guards` | 11 | 无效配置、零面积、源网格不变、曲面临时断边等 |
+| `test:git` | 22 | Git 审计工具测试；最终发布审计另在 tag 建立后执行 |
 
-机器报告、数值日志、源文件语法检查范围位于 `docs/validation/v0.4.0/`。`atlas.json` 记录六个模型的真实面积利用率和岛数，不将较低数值隐藏，也不把包围盒面积当成 UV 面积。
+JSON、日志与实际数值在 `validation/v0.4.1/`。部分测试以命名断言而不是独立测试用例计数，未将所有数值简单相加成夸大的总数。
 
-## 离线实验页与主 Studio 的验证区别
+## 大网格实测，不是飞行头盔实测
 
-`test:lab` 读取打包的 **同一个 `unfold-lab.html` 文件**，通过 CDP `Page.setDocumentContent` 加载完整 DOM 和内嵌脚本。实际构造 WebGL2、draw/readPixels、启动 Worker、求解并转移数据、操作真实 DOM 控件。它执行相同的求解与渲染源代码，不是截图替代、假的库或简化模型。
+`large-worker.json`：确定性 `makeComplexExample('assembly','high')`，90,112 三角形。generated 总墙钟约 9,702.6 ms，Worker 内约 9,069.9 ms，462 岛，71 次进度。排布约 53.2 ms，采用 Shelf，有效占用约 45.85%。source 墙钟约 2,730.5 ms，保持逐角原 UV，不重新求解。
 
-该环境策略阻止 file:// 导航，也阻止 about:blank 测试宿主中的 module Worker 加载。没有更改策略。离线页因此设计为自包含 classic Worker：TypeScript 仅把生产 Worker 的静态模块图转换为 CommonJS 工厂，直接打包进 blob，没有网络 import；该真实线程通过浏览器测试。主 Studio 的 Vite module Worker 加载尚未验证。Node Worker 成功也不能替代主 Studio 的 hook / Vite 生命周期测试。
+`packing.json`：2,000 个确定性矩形岛，新版排布约 90.6 ms，有效占用约 52.05%。旧版同样输入在 35 秒上限结束（退出 124）；不能将 35 秒当成其完成耗时。性能数字包括具体测试环境影响，不能承诺用户机器时长。
 
-截图 `docs/images/v0.4.0/` 来自实际离线实验页及当前 renderer，不是 React Studio 截图。它们证明该页面的实际效果，但不声称浏览器 file:// 导航已在此容器实测；用户正常浏览器的本地文件入口与 Node 本地服务入口均提供，macOS / Windows / Safari 尚待实机回归。
+## 浏览器测试的边界和一次测试修正
 
-本次原生渲染测试命令：
+离线实验页通过 CDP `Page.setDocumentContent` 加载实际 DOM/代码，运行共用计算、classic Worker、实际 WebGL 渲染和导出。没有替换成假的数学或渲染逻辑。没有验证 file:// 导航、Vite module Worker 加载或 React hook 的端到端时序。
+
+原生模块 Worker 在受限 about:blank 宿主中不能正常完成，因此旧原生 suite 的 2 项检查依旧明确跳过；这不同于离线 classic Worker 已通过。没有绕过宿主策略，也没有将跳过列为通过。
+
+原布局 suite 首次固定等待 300 ms 后负面对照未收集到足够 ResizeObserver 帧。已按逻辑独立提交改为等待实际样本条件并断开旧 observer；保持原有五次增长及至少十六倍增大断言，没有降低标准。修正后 13 项通过。初次失败和成功日志均保留。
+
+## 复跑
+
+先安装真实依赖（依赖轻量的测试也可使用本机已有 TypeScript）：
 
 ```bash
-xvfb-run -a env CHROME_SOFTWARE_WEBGL=1 node scripts/lab-browser-smoke.mjs \
-  --report /tmp/lab.json --screenshots /tmp/hinge
-xvfb-run -a env CHROME_SOFTWARE_WEBGL=1 node scripts/unfold-browser-smoke.mjs \
-  --skip-browser-worker --report /tmp/native-webgl.json
+npm run test:uv-client
+npm run test:uv-progress
+npm run test:packing-large
+npm run test:uv-large
+npm run lab:build
+npm run test:lab
+npm run test:uv-lifecycle:browser
+npm run git:check -- --release v0.4.1
 ```
 
-Xvfb 只是此 Linux 制作环境的测试需求，用户启动 Studio 不需要它。
+本 Linux 容器测试浏览器时使用：
 
-## 尚未完成验证
+```bash
+xvfb-run -a env CHROME_SOFTWARE_WEBGL=1 node scripts/lab-browser-smoke.mjs
+xvfb-run -a env CHROME_SOFTWARE_WEBGL=1 node scripts/uv-lifecycle-browser-smoke.mjs
+xvfb-run -a env CHROME_SOFTWARE_WEBGL=1 node scripts/unfold-browser-smoke.mjs --skip-browser-worker
+```
 
-完整 React/Vite 安装与页面联调、Vitest、全量 UI 类型检查、Vite 生产构建、真实 FBXLoader/glTF 导入、远端模型下载；主 Studio module Worker 的打包加载与 React hook 的取消时序。`npm run check:full` 仍是安装真实依赖后的完整入口，没有将未执行项算作通过。
+Xvfb 仅是制作环境的测试需求，不是 macOS/Windows Studio 的运行依赖。
 
-生成 UV 在有限精度和阈值下验证，不是精确几何证明。LSCM 不保证任意网格都有效；回退/补切可以报错。原 UV 不修复。MaxRects 不保证全局最优利用率，当前不做凹多边形嵌套；刚性教学动画不保证过程无碰撞，UV 形变阶段不保长。没有加入 ARAP / SLIM / ABF++ / xatlas 运行库，也没有训练权重。
+## 尚未验证
 
-所有发布 tag 与干净工作区在最终打包时另外用 `npm run git:check -- --release v0.4.0` 及 `git fsck` 检查；不可将 tag 创建前的普通回归日志当作最终发布检查。
+完整 npm 安装、全量 UI 类型检查、Vitest、Vite 构建、React/Vite 主界面、主界面 module Worker 的加载、真实 FBX/glTF 导入与真实 Flight Helmet。专项 `test:flight-helmet` 必须安装依赖并提供真实 GLB 才可运行，本轮未执行。不要把语法转译、生成几何格式测试、离线实验页或 Node Worker 的成功称为这些未完成项的成功。
+
+排布仍为启发式，可能改变布局与利用率；不做凹多边形嵌套。源 UV 不修复。计算预算明确终止昂贵任务，而不是保证任意输入都能在预算内求解。原有有限精度、材料变形、过程碰撞及未提供训练权重的限制不变。

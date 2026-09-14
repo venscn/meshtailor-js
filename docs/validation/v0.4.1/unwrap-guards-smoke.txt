@@ -1,0 +1,12 @@
+PASS Reject NaN gutter
+PASS Reject negative gutter
+PASS Reject unknown solver
+PASS Reject zero iterations
+PASS Reject invalid boundary
+PASS Reject invalid budget
+PASS Reject untyped autoCut
+PASS A 3D zero-area face errors without dropping geometry
+PASS Solving never mutates source coordinates or caller seams
+PASS Original coincident UV islands remain topologically separate after export
+PASS Curved rigid net records explicit temporary cycle breaks
+11 unwrap guard regressions passed.
