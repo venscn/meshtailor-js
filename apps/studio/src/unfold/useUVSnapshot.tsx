@@ -1,25 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { UnwrapOptions } from '@meshtailor/uv';
 import type { MeshData } from '@meshtailor/mesh-core';
-import type { UVJob, UVResult, UVSnapshot, UVTarget } from '../workers/uv.worker';
-interface State { mesh:MeshData; edges:Set<string>; target:UVTarget; config:Partial<UnwrapOptions>|undefined; snapshot:UVSnapshot|null; error:string|null }
-/** One cancellable worker and one immutable snapshot shared by BOTH views. */
+import type { UVJobProgress, UVSnapshot, UVTarget } from '../workers/uv.worker';
+import { startUVJob, UVJobFailure } from './uv-job-client';
+export type UVPhase='starting'|'running'|'completed'|'cancelled'|'timeout'|'error';
+interface State {
+  mesh:MeshData;edges:Set<string>;target:UVTarget;config:Partial<UnwrapOptions>|undefined;
+  snapshot:UVSnapshot|null;error:string|null;phase:UVPhase;progress:UVJobProgress|null;elapsedMs:number;
+}
+/** One cancellable worker, finite job lifetime, and one snapshot shared by BOTH views. */
 export function useUVSnapshot(mesh:MeshData,edges:Set<string>,target:UVTarget,config?:Partial<UnwrapOptions>){
-  const [state,setState]=useState<State|null>(null),[retry,setRetry]=useState(0);
+  const [state,setState]=useState<State|null>(null),[retry,setRetry]=useState(0),cancelRef=useRef<()=>void>(()=>{});
   useEffect(()=>{
-    let disposed=false,worker:Worker|undefined;
-    setState(null);
+    let disposed=false,done=false,job:ReturnType<typeof startUVJob>|undefined;
+    const start=performance.now();
+    const identity={mesh,edges,target,config};
+    setState({...identity,snapshot:null,error:null,phase:'starting',progress:null,elapsedMs:0});
+    const finish=(snapshot:UVSnapshot|null,error:string|null,phase:UVPhase)=>{
+      if(disposed||done)return;done=true;clearInterval(clock);
+      setState(previous=>({...identity,snapshot,error,phase,progress:previous?.progress??null,elapsedMs:performance.now()-start}));
+    };
+    const clock=setInterval(()=>{if(!disposed&&!done)setState(previous=>previous?{...previous,elapsedMs:performance.now()-start}:previous);},500);
     const timer=setTimeout(()=>{
-      const finish=(snapshot:UVSnapshot|null,error:string|null)=>{if(!disposed)setState({mesh,edges,target,config,snapshot,error});worker?.terminate();};
-      try{
-        worker=new Worker(new URL('../workers/uv.worker.ts',import.meta.url),{type:'module'});
-        worker.onmessage=(event:MessageEvent<UVResult>)=>event.data.ok?finish(event.data.snapshot,null):finish(null,event.data.error);
-        worker.onerror=event=>finish(null,'UV worker failed: '+event.message);
-        worker.postMessage({mesh,edges:[...edges],target,config} satisfies UVJob);
-      }catch(error){finish(null,String(error));}
+      if(disposed||done)return;
+      job=startUVJob({mesh,edges:[...edges],target,config},{
+        createWorker:()=>new Worker(new URL('../workers/uv.worker.ts',import.meta.url),{type:'module'}),
+        onProgress:progress=>{if(!disposed&&!done)setState({...identity,snapshot:null,error:null,phase:'running',progress,elapsedMs:performance.now()-start});}
+      });
+      void job.result.then(snapshot=>finish(snapshot,null,'completed'),error=>{
+        const phase=error instanceof UVJobFailure?(error.code==='cancelled'?'cancelled':error.code==='timeout'?'timeout':'error'):'error';
+        finish(null,error instanceof Error?error.message:String(error),phase);
+      });
     },100);
-    return()=>{disposed=true;clearTimeout(timer);worker?.terminate();};
+    const cancel=()=>{clearTimeout(timer);if(job)job.cancel();else finish(null,'已取消 UV 计算；原网格未修改。','cancelled');};
+    cancelRef.current=cancel;
+    return()=>{disposed=true;clearTimeout(timer);clearInterval(clock);job?.cancel();if(cancelRef.current===cancel)cancelRef.current=()=>{};};
   },[mesh,edges,target,config,retry]);
   const current=state?.mesh===mesh&&state.edges===edges&&state.target===target&&state.config===config?state:null;
-  return {snapshot:current?.snapshot??null,error:current?.error??null,loading:!current,retry:()=>setRetry(x=>x+1)};
+  const phase=current?.phase??'starting';
+  return {snapshot:current?.snapshot??null,error:current?.error??null,phase,loading:phase==='starting'||phase==='running',progress:current?.progress??null,elapsedMs:current?.elapsedMs??0,cancel:()=>cancelRef.current(),retry:()=>setRetry(x=>x+1)};
 }

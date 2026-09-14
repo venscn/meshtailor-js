@@ -4,8 +4,9 @@ import { extractSeamEdgesFromUV } from '/packages/chaining-seams/src/index.js';
 import { makeHingeDemo, makeUnfoldDemo } from '/apps/studio/src/unfold/demo.js';
 import { UnfoldWebGLView } from '/apps/studio/src/unfold/webgl-view.js';
 import { drawUVSnapshot, pickUVFace } from '/apps/studio/src/unfold/uv-drawing.js';
+import {startUVJob,describeUVProgress} from '/apps/studio/src/unfold/uv-job-client.js';
 const $=id=>document.getElementById(id);
-let mesh,seams,snapshot=null,worker=null,playing=false,last=0,sequence=0;
+let mesh,seams,snapshot=null,jobHandle=null,playing=false,last=0,sequence=0;
 const options={progress:0,selected:[],order:'together',path:'hinge',separation:.5,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:true};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
 const view=new UnfoldWebGLView($('view'),(id,face,add)=>select(id,face,add),e=>{if(e)fail(e);});
@@ -15,11 +16,27 @@ function drawUV(){if(!snapshot)return;const host=$('uvhost'),c=$('uv'),d=Math.mi
 function list(){if(!snapshot)return;$('islands').replaceChildren();for(const island of snapshot.geometry.islands.slice(0,100)){const row=document.createElement('div');row.className='island';const box=document.createElement('input');box.type='checkbox';box.checked=options.selected.includes(island.id);box.setAttribute('aria-label','选中岛 '+(island.id+1));box.onchange=()=>select(island.id,null,true);const b=document.createElement('button');b.innerHTML=`<i style="background:rgb(${uv.islandColor(island.id).map(x=>Math.round(x*255)).join(',')})"></i>#${island.id+1} · ${island.faces.length} 面`;b.onclick=()=>select(island.id,null,false);row.append(box,b);$('islands').append(row);}}
 function select(id,face=null,add=false){pause();options.selected=add?(options.selected.includes(id)?options.selected.filter(x=>x!==id):[...options.selected,id]):[id];options.focusFace=face;options.progress=0;list();update();}
 function update(patch={}){Object.assign(options,patch);view.setOptions(options);drawUV();$('progress').value=options.progress;$('percent').textContent=(options.progress*100).toFixed(1)+'%';const local=options.order==='sequential'?Math.min(1,options.progress===1?1:(options.progress*options.selected.length)%1):options.progress;$('phase').textContent=local<.18?'分离面片':local<.28?'转向观察':local<.70?'沿边铰链旋转':local<.80?'刚性平面网':local<.92?'UV 参数化形变':local<1?'面积感知排布':'目标 UV';}
-function cancel(){sequence++;if(worker){worker.terminate();worker=null;}$('cancel').disabled=true;$('solve').disabled=false;}
-async function solve(){cancel();pause();window.lab.ready=false;const token=sequence;$('error').hidden=true;snapshot=null;view.setGeometry(null);$('islands').replaceChildren();const c=$('uv'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);$('status').textContent='正在独立 Worker 中检查拓扑、展开和排布…';$('solve').disabled=true;$('cancel').disabled=false;
-  try{const workerURL=window.labWorkerURL();worker=new Worker(workerURL);URL.revokeObjectURL(workerURL);await new Promise((resolve,reject)=>{const current=worker;current.onerror=e=>reject(Error(e.message||'浏览器不能启动离线 Worker；请通过 npm run lab:serve 打开此页。'));current.onmessage=e=>{if(!e.data.ok){reject(Error(e.data.error));return;}if(token!==sequence){resolve();return;}snapshot=e.data.snapshot;resolve();};current.postMessage({mesh,edges:[...seams],target:$('target').value,config:{...uv.DEFAULT_UNWRAP,method:$('solver').value,padding:Number($('padding').value),autoCut:$('autocut').checked,rotate:$('rotate').checked}});});if(token!==sequence)return;worker?.terminate();worker=null;options.selected=snapshot.geometry.islands.map(i=>i.id);options.progress=0;options.focusFace=null;view.setGeometry(snapshot.geometry);list();update();const m=snapshot.metrics;$('title').textContent=`${mesh.name} · ${mesh.faces.length.toLocaleString()} 三角面 · ${snapshot.packed.length} 岛`;$('status').textContent=(m?`生成 UV：翻面 / 退化 / 正面积重叠检查通过\n有效面积占用 ${(m.occupancy*100).toFixed(1)}% · 包围盒 ${(m.boxOccupancy*100).toFixed(1)}%\n新增 ${snapshot.addedSeams.length} 条 UV 补切 · LSCM ${snapshot.diagnostics.filter(d=>d.method==='lscm').length} / Tutte ${snapshot.diagnostics.filter(d=>d.method==='tutte').length}\n`:'原始 UV：未修复、未重新排布\n')+`Worker 已完成（真实浏览器线程 / 离线打包）\n`+snapshot.warnings.join('\n');window.lab.ready=true;}
-  catch(e){if(token===sequence){fail(e.message);$('status').textContent='未生成结果，原网格未修改。';}}
-  finally{if(token===sequence){worker?.terminate();worker=null;$('solve').disabled=false;$('cancel').disabled=true;}}
+function cancel(){sequence++;jobHandle?.cancel();jobHandle=null;$('cancel').disabled=true;$('solve').disabled=false;}
+async function solve(){
+  cancel();pause();window.lab.ready=false;window.lab.progressEvents=[];
+  const token=sequence,start=performance.now();let lastProgress=null,clock;
+  $('error').hidden=true;snapshot=null;view.setGeometry(null);$('islands').replaceChildren();
+  const c=$('uv'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
+  $('status').textContent='启动 UV Worker…';$('solve').disabled=true;$('cancel').disabled=false;
+  try{
+    jobHandle=startUVJob({mesh,edges:[...seams],target:$('target').value,config:{...uv.DEFAULT_UNWRAP,method:$('solver').value,padding:Number($('padding').value),autoCut:$('autocut').checked,rotate:$('rotate').checked,packing:$('packing')?.value??'auto',timeBudgetMs:Number($('budget')?.value??120)*1000}},{
+      createWorker:()=>{const url=window.labWorkerURL();try{return new Worker(url);}finally{URL.revokeObjectURL(url);}},
+      onProgress:p=>{if(token!==sequence)return;lastProgress=p;window.lab.progressEvents.push(p);$('status').textContent=describeUVProgress(p,performance.now()-start);}
+    });
+    clock=setInterval(()=>{if(token===sequence)$('status').textContent=describeUVProgress(lastProgress,performance.now()-start);},500);
+    const result=await jobHandle.result;if(token!==sequence)return;
+    snapshot=result;jobHandle=null;options.selected=snapshot.geometry.islands.map(i=>i.id);options.progress=0;options.focusFace=null;
+    view.setGeometry(snapshot.geometry);list();update();const m=snapshot.metrics;
+    $('title').textContent=`${mesh.name} · ${mesh.faces.length.toLocaleString()} 三角面 · ${snapshot.packed.length} 岛`;
+    $('status').textContent=(m?`生成 UV：翻面 / 退化 / 正面积重叠检查通过\n有效面积占用 ${(m.occupancy*100).toFixed(1)}% · 包围盒 ${(m.boxOccupancy*100).toFixed(1)}%\n${m.packingMethod} 排布 · 新增 ${snapshot.addedSeams.length} 条 UV 补切\n`:'原始 UV：未修复、未重新排布\n')+`Worker 完成 · ${(snapshot.timing.elapsedMs/1000).toFixed(2)} 秒\n`+snapshot.warnings.join('\n');
+    window.lab.ready=true;
+  }catch(e){if(token===sequence){fail(e.message);$('status').textContent='未生成结果，原网格未修改。';}}
+  finally{clearInterval(clock);if(token===sequence){jobHandle=null;$('solve').disabled=false;$('cancel').disabled=true;}}
 }
 function load(demo){mesh=demo.mesh;seams=demo.edges;window.lab.ready=false;return solve();}
 for(const stage of uv.HINGE_STAGES){const b=document.createElement('button');b.textContent=stage.label;b.dataset.stage=stage.t;b.onclick=()=>{pause();let t=stage.t;if(options.order==='sequential'){const n=Math.max(1,options.selected.length);t=(Math.min(n-1,Math.floor(options.progress*n))+stage.t)/n;}update({progress:t});};$('stages').append(b);}
@@ -34,5 +51,5 @@ function tick(now){if(playing){const sec=Math.max(1,Math.min(60,Number($('second
 $('uv').onclick=e=>{if(!snapshot)return;const r=$('uv').getBoundingClientRect(),hit=pickUVFace(snapshot,r.width,r.height,e.clientX-r.left,e.clientY-r.top,options.selected);if(hit)select(hit.id,hit.face,e.shiftKey||e.ctrlKey||e.metaKey);};
 $('export').onclick=()=>{if(!snapshot)return;const text=core.meshToOBJ(uv.meshWithPreviewUV(mesh,snapshot.packed)),url=URL.createObjectURL(new Blob([text],{type:'text/plain'})),a=document.createElement('a');a.href=url;a.download='meshtailor-target-uv.obj';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 new ResizeObserver(drawUV).observe($('uvhost'));
-window.lab={ready:false,view,options,errors,update,select,load,solve,pause,uv,core,get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
+window.lab={ready:false,view,options,errors,update,select,load,solve,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
 await load(makeHingeDemo());

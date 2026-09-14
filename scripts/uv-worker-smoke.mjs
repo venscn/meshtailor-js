@@ -15,7 +15,7 @@ const run=job=>new Promise((resolve,reject)=>{
   const worker=new Worker(`const {parentPort}=require('node:worker_threads');globalThis.self=globalThis;self.postMessage=(data,options)=>parentPort.postMessage(data,options?.transfer);import(${JSON.stringify(url)}).then(()=>{parentPort.on('message',data=>self.onmessage({data}));parentPort.postMessage({ready:true});});`,{eval:true});
   const timer=setTimeout(()=>{void worker.terminate();reject(Error('UV worker timed out'));},10000);
   worker.on('error',error=>{clearTimeout(timer);void worker.terminate();reject(error);});
-  worker.on('message',data=>{if(data.ready){worker.postMessage(job);return;}clearTimeout(timer);void worker.terminate();resolve(data);});
+  worker.on('message',data=>{if(data.ready){worker.postMessage(job);return;}if(data.type==='progress')return;clearTimeout(timer);void worker.terminate();resolve(data);});
 });
 const check=async(name,fn)=>{await fn();report.cases.push({name,passed:true});};
 try{
