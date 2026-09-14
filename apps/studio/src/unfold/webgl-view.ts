@@ -1,4 +1,4 @@
-import { hingeRemainingAngle, islandColor, islandProgress, selectedIslands, uvToWorld, writeUnfoldPositions, type UnfoldGeometry, type UnfoldOptions } from '@meshtailor/uv';
+import { DEFAULT_UNFOLD_ORDER, hingePoseProgress, sampleUnfoldSchedule, hingeRemainingAngle, islandColor, islandProgress, selectedIslands, uvToWorld, writeUnfoldPositions, type UnfoldGeometry, type UnfoldOptions } from '@meshtailor/uv';
 import { viewportSize } from '../viewport-math.js';
 import { cameraBasis, cameraMatrix, pickFace, projectPoint, type OrbitCamera } from './camera-math.js';
 import type { Vec3 } from '@meshtailor/mesh-core';
@@ -71,7 +71,7 @@ export class UnfoldWebGLView {
   private uniforms = new Map<string, WebGLUniformLocation>();
   private data: UnfoldGeometry | null = null;
   private positions = new Float32Array(0);
-  private options: UnfoldDisplay = {progress:0,selected:[],order:'together',path:'staged',separation:.45,context:'dim',wireframe:false,checker:false,labels:true,xray:false,focusFace:null,autoFrame:DEFAULT_AUTO_FRAME};
+  private options: UnfoldDisplay = {progress:0,selected:[],order:DEFAULT_UNFOLD_ORDER,path:'staged',separation:.45,context:'dim',wireframe:false,checker:false,labels:true,xray:false,focusFace:null,autoFrame:DEFAULT_AUTO_FRAME};
   private active = new Set<number>();
   private activeCount=0; private contextCount=0; private seamCount=0;
   private camera: OrbitCamera = {yaw:.65,pitch:.35,distance:8,target:[0,0,0]};
@@ -148,6 +148,7 @@ export class UnfoldWebGLView {
     this.canvas.dataset.cameraMode=this.cameraFollow.active?'follow':'manual';
     if(!this.data||this.lost)return;
     const data=this.data,gl=this.gl,ids=selectedIslands(data,options.selected);
+    this.options={...options,selected:ids};
     this.active=new Set(ids);
     const key=JSON.stringify([ids,options.context,options.showHinges]);
     if(key!==this.lastSelection){
@@ -161,7 +162,7 @@ export class UnfoldWebGLView {
       this.makeLabels();
     }
     writeUnfoldPositions(data,options,this.positions);
-    const poseKey=JSON.stringify([options.progress,ids,options.path,options.separation,options.order,options.hingeWave,options.context]);
+    const poseKey=JSON.stringify([options.progress,ids,options.path,options.separation,options.order,options.handoff,options.holdNet,options.hingeWave,options.context]);
     // This is the only animation-driven camera write. A held pointer suspends it;
     // a drag/wheel latches it off before modifying the user's camera.
     if(this.cameraFollow.active&&!this.pointer&&!this.uploadingGeometry&&(followStarted||poseKey!==this.lastPose))this.frameCurrent();
@@ -170,7 +171,7 @@ export class UnfoldWebGLView {
     this.hingeCount=this.temporaryCount=0;
     if(options.path==='hinge'&&rig){
       const ranks=new Map(ids.map((id,i)=>[id,i]));
-      const indices=(source:Uint32Array,enabled:boolean,end:number)=>{const out:number[]=[];if(enabled)for(let i=0;i<source.length;i+=2){const id=data.faceChart[Math.floor(source[i]!/3)]!,rank=ranks.get(id),t=islandProgress(options.progress,rank??-1,ids.length,options.order);if(rank!==undefined&&t>.18&&t<end)out.push(source[i]!,source[i+1]!);}return new Uint32Array(out);};
+      const indices=(source:Uint32Array,enabled:boolean,end:number)=>{const out:number[]=[];if(enabled)for(let i=0;i<source.length;i+=2){const id=data.faceChart[Math.floor(source[i]!/3)]!,rank=ranks.get(id),t=hingePoseProgress(islandProgress(options.progress,rank??-1,ids.length,options.order,options.handoff),options.holdNet);if(rank!==undefined&&t>.18&&t<end)out.push(source[i]!,source[i+1]!);}return new Uint32Array(out);};
       const hinges=indices(rig.hingeEdges,options.showHinges!==false,.8),cuts=indices(rig.temporaryCuts,options.showTemporaryCuts!==false,.92);
       gl.bindVertexArray(this.vao);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.hingeBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,hinges,gl.DYNAMIC_DRAW);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.temporaryBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,cuts,gl.DYNAMIC_DRAW);this.hingeCount=hinges.length;this.temporaryCount=cuts.length;
@@ -179,13 +180,20 @@ export class UnfoldWebGLView {
     this.canvas.dataset.progress=String(options.progress);this.canvas.dataset.selectedCount=String(ids.length);
     this.canvas.dataset.targetError=options.progress===1&&ids.length===data.islands.length?String(this.positions.reduce((m,v,i)=>Math.max(m,Math.abs(v-data.target[i]!)),0)):'not-at-all-target';
     this.canvas.dataset.sourceError=options.progress===0?String(this.positions.reduce((m,v,i)=>Math.max(m,Math.abs(v-data.source[i]!)),0)):'not-at-source';
-    this.canvas.dataset.completed=String(ids.filter((_,i)=>islandProgress(options.progress,i,ids.length,options.order)===1).length);
+    const schedule=sampleUnfoldSchedule(options.progress,ids.length,options.order,options.handoff);
+    this.canvas.dataset.completed=String(schedule.completed);
+    this.canvas.dataset.waiting=String(schedule.waiting);
+    this.canvas.dataset.animating=JSON.stringify(schedule.active.map(a=>({id:ids[a.index],progress:a.progress})));
+    const labelKey=schedule.active.map(a=>ids[a.index]).join(',');
+    if(labelKey!==this.lastAnimationLabels){this.lastAnimationLabels=labelKey;this.makeLabels(schedule.active.map(a=>ids[a.index]!));}
     this.invalidate();
   }
-  private makeLabels(){
+  private lastAnimationLabels="";
+  private makeLabels(priority:readonly number[]=[]){
     this.labelHost.replaceChildren();this.labels=[];this.hingeLabels=[];if(!this.data)return;
     // Bounded DOM on highly fragmented meshes. The full list is paginated in Studio.
-    const islands=this.data.islands.filter(i=>this.active.has(i.id)).slice(0,48);
+    const all=this.data.islands.filter(i=>this.active.has(i.id)),chosen=new Set(priority);
+    const islands=[...all.filter(i=>chosen.has(i.id)),...all.filter(i=>!chosen.has(i.id))].slice(0,48);
     for(const island of islands){
       const el=document.createElement('button');el.type='button';el.textContent=`#${island.id+1}`;el.setAttribute('aria-label',`Select island ${island.id+1}`);
       el.style.borderColor=`rgb(${islandColor(island.id).map(x=>Math.round(x*255)).join(',')})`;
@@ -272,7 +280,7 @@ export class UnfoldWebGLView {
       label.el.hidden=!visible;if(p&&visible)label.el.style.transform=`translate(${p[0]}px,${p[1]}px) translate(-50%,-50%)`;
     }
     for(const label of this.hingeLabels){
-      const id=this.data.faceChart[label.face]!,rank=this.options.selected.indexOf(id),t=islandProgress(this.options.progress,rank,this.options.selected.length,this.options.order),rig=this.data.hinge!;
+      const id=this.data.faceChart[label.face]!,rank=this.options.selected.indexOf(id),t=hingePoseProgress(islandProgress(this.options.progress,rank,this.options.selected.length,this.options.order,this.options.handoff),this.options.holdNet),rig=this.data.hinge!;
       label.el.hidden=this.options.path!=='hinge'||t<.18||t>=.7||this.options.showHinges===false;
       if(label.el.hidden)continue;
       const a=rig.edgeCorners[label.face*2]!,b=rig.edgeCorners[label.face*2+1]!,center:Vec3=[0,0,0];for(let k=0;k<3;k++)center[k]=(this.positions[a*3+k]!+this.positions[b*3+k]!)/2;
