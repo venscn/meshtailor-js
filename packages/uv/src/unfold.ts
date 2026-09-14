@@ -86,7 +86,7 @@ export function sourceUVPreview(mesh: MeshData, charts: UVChart[], layout:'mater
     span=Math.max(span,maxU-minU,maxV-minV);
   }
   const pitch=Math.ceil((span+.25)*8)/8,cols=Math.ceil(Math.sqrt(domains.length));
-  const origins=new Map(domains.map((d,i)=>[d,layout==='overlay'?[0,0] as Vec2:[i%cols*pitch-lows.get(d)![0],Math.floor(i/cols)*pitch-lows.get(d)![1]] as Vec2]));
+  const origins=new Map(domains.map((d,i)=>[d,(layout==='overlay'||domains.length===1)?[0,0] as Vec2:[i%cols*pitch-lows.get(d)![0],Math.floor(i/cols)*pitch-lows.get(d)![1]] as Vec2]));
   return charts.map(chart => {
     const first=mesh.faces[chart.faces[0]!]!,domain=first.uvSpace??'default';
     if(chart.faces.some(fi=>(mesh.faces[fi]!.uvSpace??'default')!==domain))throw new Error('Source chart crosses material domains. Extract material-boundary seams first.');
