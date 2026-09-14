@@ -6,7 +6,7 @@ import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { signedArea2 } from './uv-quality.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
-export interface UnwrapOptions extends SolverOptions,PackOptions { chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
+export interface UnwrapOptions extends SolverOptions,PackOptions { sourceUVLayout?:'materials'|'overlay'; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
 export interface ChartDiagnostic {id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface UnwrapResult extends AtlasPacking { seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
 export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};

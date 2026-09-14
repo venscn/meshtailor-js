@@ -1,7 +1,10 @@
 import type { MeshData, Vec2, Vec3 } from '@meshtailor/mesh-core';
 import type { UVChart } from './charts.js';
 
-export interface PackedChart { id:number; polygon:Vec2[]; faceUVs:Map<number,[Vec2,Vec2,Vec2]>; bounds:[number,number,number,number] }
+export interface PackedChart {
+  /** Display-only domain offset. Stored/exported faceUVs are always unchanged. */
+  displayOffset?:Vec2; uvSpace?:string; uvSpaceName?:string;
+  id:number; polygon:Vec2[]; faceUVs:Map<number,[Vec2,Vec2,Vec2]>; bounds:[number,number,number,number] }
 
 function dominantProjection(points:Vec3[]):0|1|2{
   let min:[number,number,number]=[Infinity,Infinity,Infinity],max:[number,number,number]=[-Infinity,-Infinity,-Infinity];
@@ -34,4 +37,8 @@ export function planarPackPreview(mesh:MeshData,charts:UVChart[]):PackedChart[]{
     for(const [fi,uvs] of r.faceUVs) faceUVs.set(fi,uvs.map((p)=>[tx+p[0]*sx,ty+p[1]*sy] as Vec2) as [Vec2,Vec2,Vec2]);
     return {id:r.chart.id,faceUVs,bounds:[tx,ty,tx+sx,ty+sy],polygon:[[tx,ty],[tx+sx,ty],[tx+sx,ty+sy],[tx,ty+sy]] as Vec2[]};
   });
+}
+
+export function displayUV(chart:PackedChart,uv:Vec2):Vec2 {
+  return [uv[0]+(chart.displayOffset?.[0]??0),uv[1]+(chart.displayOffset?.[1]??0)];
 }

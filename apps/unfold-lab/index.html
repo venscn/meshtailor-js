@@ -11,7 +11,7 @@
 <label>单岛面数预算<input id="chart-faces" type="number" min="8" max="20000" step="128" value="8192"></label>
 <label>区域法线锥角<input id="chart-cone" type="number" min="1" max="178" value="80"></label>
 <label>最大角形变比<input id="chart-stretch" type="number" min="1" max="1000" value="30"></label><label>UV 来源<select id="target"><option value="generated">重新展开 + 面积感知排布</option><option value="source">保留原始 UV（不修复 / 不重排）</option></select></label>
-<label>求解方式<select id="solver"><option value="auto">LSCM → 检查 → Tutte 回退</option><option value="lscm">仅 LSCM</option><option value="tutte">凸边界 Tutte</option></select></label>
+<label>原 UV 显示<select id="source-layout"><option value="materials">材质分框（不改原坐标）</option><option value="overlay">原位叠加（诊断）</option></select></label><label>求解方式<select id="solver"><option value="auto">LSCM → 检查 → Tutte 回退</option><option value="lscm">仅 LSCM</option><option value="tutte">凸边界 Tutte</option></select></label>
 <label>排布策略<select id="packing"><option value="auto">自动 MaxRects / Shelf</option><option value="maxrects">MaxRects（≤1024 岛）</option><option value="shelf">Shelf 大岛数快速排布</option></select></label>
 <label>UV 任务预算（秒）<input id="budget" type="number" min="5" max="900" step="5" value="120"></label>
 <label>UV 每侧留白<input id="padding" type="number" value=".003" min="0" max=".05" step=".001"></label>

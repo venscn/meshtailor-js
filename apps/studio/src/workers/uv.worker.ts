@@ -36,9 +36,9 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     let snapshot:UVSnapshot;
     if(target==='source'){
       work.report({stage:'charts',detail:'提取原始 UV 岛（不重新参数化或排布）'});
-      const packed=sourceUVPreview(mesh,buildCharts(mesh,seams));
+      const packed=sourceUVPreview(mesh,buildCharts(mesh,seams),config?.sourceUVLayout??'materials');
       work.check();work.report({stage:'correspondence',detail:'原始 UV 已读取，建立动画对应',facesDone:mesh.faces.length,facesTotal:mesh.faces.length,islandsDone:packed.length});
-      snapshot={packed,geometry:buildUnfoldGeometry(mesh,packed,seams,work),seams:[...seams],target,warnings:['原始 UV 原样保留，未修复重叠、镜像、退化或越界。需要重新展开时选择“拓扑展开 + 面积排布”。']};
+      snapshot={packed,geometry:buildUnfoldGeometry(mesh,packed,seams,work),seams:[...seams],target,warnings:[config?.sourceUVLayout==='overlay'?'诊断叠加视图：所有材质共用画框，跨材质重叠不等于原 UV 错误。':'原 UV 按材质分框显示；展示偏移不会写入导出，每框仍是各自的原始坐标。', '同一材质内的原始重叠、镜像复用或退化仍原样保留。分框不是修复或统一重排；重新展开需要重新烘焙贴图。']};
     }else{
       const result=unwrapMesh(mesh,seams,config,work);seams=new Set(result.seams);
       snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,addedSeams:result.addedSeams,diagnostics:result.diagnostics,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};

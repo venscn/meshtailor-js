@@ -67,6 +67,7 @@ export class UnfoldWebGLView {
   private hingeLabels:{face:number;el:HTMLSpanElement}[]=[];
   private seamBuffer!: WebGLBuffer;
   private atlasVAO!: WebGLVertexArrayObject;
+  private atlasLineCount=0;
   private buffers: WebGLBuffer[] = [];
   private uniforms = new Map<string, WebGLUniformLocation>();
   private data: UnfoldGeometry | null = null;
@@ -131,7 +132,9 @@ export class UnfoldWebGLView {
     for(let fi=0;fi<data.faceChart.length;fi++){const c=islandColor(data.faceChart[fi]!);for(let k=0;k<3;k++)colors.set(c,fi*9+k*3);}
     this.attribute(1,3,colors);this.attribute(2,2,data.uv);
     gl.bindVertexArray(this.atlasVAO);
-    const a=data.atlas,points=[a.min,[a.max[0],a.min[1]],a.max,[a.min[0],a.max[1]],a.min];
+    const a=data.atlas,frames=a.spaces?.length?a.spaces:[a];
+    const points=frames.flatMap(f=>[f.min,[f.max[0],f.min[1]],[f.max[0],f.min[1]],f.max,f.max,[f.min[0],f.max[1]],[f.min[0],f.max[1]],f.min]);
+    this.atlasLineCount=points.length;
     this.attribute(0,3,new Float32Array(points.flatMap(p=>uvToWorld(p as [number,number],a))));
     gl.disableVertexAttribArray(1);gl.disableVertexAttribArray(2);gl.vertexAttrib3f(1,0,0,0);gl.vertexAttrib2f(2,0,0);
     gl.bindVertexArray(null);
@@ -255,7 +258,7 @@ export class UnfoldWebGLView {
     gl.uniform1i(this.uniform('checker'),Number(this.options.checker));gl.uniform1i(this.uniform('wire'),Number(this.options.wireframe));gl.uniform1i(this.uniform('focus'),this.options.focusFace??-1);
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.disable(gl.CULL_FACE);
     gl.uniform1i(this.uniform('lineMode'),1);gl.uniform3f(this.uniform('lineColor'),.23,.31,.39);gl.uniform1f(this.uniform('opacity'),.8);
-    gl.disable(gl.DEPTH_TEST);gl.bindVertexArray(this.atlasVAO);gl.drawArrays(gl.LINE_STRIP,0,5);
+    gl.disable(gl.DEPTH_TEST);gl.bindVertexArray(this.atlasVAO);gl.drawArrays(gl.LINES,0,this.atlasLineCount);
     gl.bindVertexArray(this.vao);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
     gl.uniform1i(this.uniform('lineMode'),0);
     gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1,1);

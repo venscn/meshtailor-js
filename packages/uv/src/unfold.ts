@@ -3,13 +3,14 @@ import { uvProgress, type UVWork } from './work.js';
 import { buildHingeRig, writeHingePositions, type HingeRig } from './hinge.js';
 import { buildTopology, edgeKey, type MeshData, type Vec2, type Vec3 } from '@meshtailor/mesh-core';
 import type { UVChart } from './charts.js';
-import type { PackedChart } from './preview.js';
+import { displayUV, type PackedChart } from './preview.js';
 
 import { islandProgress, type UnfoldOrder } from './unfold-schedule.js';
 export { islandProgress } from './unfold-schedule.js';
 export type { UnfoldOrder } from './unfold-schedule.js';
 export type UnfoldPath = 'hinge' | 'staged' | 'direct';
-export interface AtlasFrame { min: Vec2; max: Vec2; center: Vec2; scale: number }
+export interface UVSpaceFrame {id:string;name:string;min:Vec2;max:Vec2;offset:Vec2}
+export interface AtlasFrame { spaces?:UVSpaceFrame[]; min: Vec2; max: Vec2; center: Vec2; scale: number }
 export interface UnfoldIsland {
   id: number;
   faces: number[];
@@ -22,6 +23,8 @@ export interface UnfoldGeometry {
   source: Float32Array;
   target: Float32Array;
   uv: Float32Array;
+  /** Display UV may be offset into material tiles; uv remains the original coordinate. */
+  displayUV?: Float32Array;
   faceChart: Int32Array;
   boundaries: Uint32Array;
   islands: UnfoldIsland[];
@@ -50,21 +53,43 @@ const smooth = (x: number) => { const t = clamp(x); return t * t * (3 - 2 * t); 
 /** Display frame only: NEVER changes, re-packs, or normalizes stored/exported UVs. */
 export function atlasFrame(packed: readonly PackedChart[]): AtlasFrame {
   const min: Vec2 = [0, 0], max: Vec2 = [1, 1];
-  for (const chart of packed) for (const uvs of chart.faceUVs.values()) for (const p of uvs) {
+  for (const chart of packed) for (const uvs of chart.faceUVs.values()) for (const raw of uvs) {
+    const p=displayUV(chart,raw);
     if (!p.every(Number.isFinite)) throw new Error('UV coordinates must be finite.');
     for (let a = 0; a < 2; a++) { min[a] = Math.min(min[a]!, p[a]!); max[a] = Math.max(max[a]!, p[a]!); }
   }
+  const spaces=new Map<string,UVSpaceFrame>();
+  for(const chart of packed)if(chart.uvSpace!==undefined){
+    const offset=chart.displayOffset??[0,0],key=chart.uvSpace;
+    const frame=spaces.get(key)??{id:key,name:chart.uvSpaceName??key,min:[offset[0],offset[1]] as Vec2,max:[offset[0]+1,offset[1]+1] as Vec2,offset};
+    frame.min[0]=Math.min(frame.min[0],chart.bounds[0]+offset[0]);frame.min[1]=Math.min(frame.min[1],chart.bounds[1]+offset[1]);
+    frame.max[0]=Math.max(frame.max[0],chart.bounds[2]+offset[0]);frame.max[1]=Math.max(frame.max[1],chart.bounds[3]+offset[1]);spaces.set(key,frame);
+  }
+  for(const frame of spaces.values())for(let a=0;a<2;a++){min[a]=Math.min(min[a]!,frame.min[a]!);max[a]=Math.max(max[a]!,frame.max[a]!);}
   const span = Math.max(max[0] - min[0], max[1] - min[1]);
   if (!Number.isFinite(span)) throw new Error('Unsupported UV extent.');
-  return { min, max, center: [min[0] / 2 + max[0] / 2, min[1] / 2 + max[1] / 2], scale: 2.6 / span };
+  return { ...(spaces.size?{spaces:[...spaces.values()]}:{}), min, max, center: [min[0] / 2 + max[0] / 2, min[1] / 2 + max[1] / 2], scale: 2.6 / span };
 }
 export function uvToWorld(uv: Vec2, atlas: AtlasFrame): Vec3 {
   return [(uv[0] - atlas.center[0]) * atlas.scale, (uv[1] - atlas.center[1]) * atlas.scale, 0];
 }
 
 /** Preserve an imported atlas exactly, including mirrored, overlapping and out-of-tile UVs. */
-export function sourceUVPreview(mesh: MeshData, charts: UVChart[]): PackedChart[] {
+export function sourceUVPreview(mesh: MeshData, charts: UVChart[], layout:'materials'|'overlay'='materials'): PackedChart[] {
+  if(!['materials','overlay'].includes(layout))throw new Error('Unknown source UV layout.');
+  const domains=[...new Set(mesh.faces.map(f=>f.uvSpace??'default'))];
+  // A common, even-checker-cell pitch preserves checker phase. No per-island repack.
+  let span=1;const lows=new Map<string,Vec2>();
+  for(const domain of domains){let minU=0,minV=0,maxU=1,maxV=1;
+    for(const f of mesh.faces)if((f.uvSpace??'default')===domain)for(const uv of f.uvs??[])if(uv){minU=Math.min(minU,uv[0]);minV=Math.min(minV,uv[1]);maxU=Math.max(maxU,uv[0]);maxV=Math.max(maxV,uv[1]);}
+    minU=Math.floor(minU*8)/8;minV=Math.floor(minV*8)/8;lows.set(domain,[minU,minV]);
+    span=Math.max(span,maxU-minU,maxV-minV);
+  }
+  const pitch=Math.ceil((span+.25)*8)/8,cols=Math.ceil(Math.sqrt(domains.length));
+  const origins=new Map(domains.map((d,i)=>[d,layout==='overlay'?[0,0] as Vec2:[i%cols*pitch-lows.get(d)![0],Math.floor(i/cols)*pitch-lows.get(d)![1]] as Vec2]));
   return charts.map(chart => {
+    const first=mesh.faces[chart.faces[0]!]!,domain=first.uvSpace??'default';
+    if(chart.faces.some(fi=>(mesh.faces[fi]!.uvSpace??'default')!==domain))throw new Error('Source chart crosses material domains. Extract material-boundary seams first.');
     const faceUVs = new Map<number, [Vec2, Vec2, Vec2]>();
     const bounds: [number, number, number, number] = [Infinity, Infinity, -Infinity, -Infinity];
     for (const fi of chart.faces) {
@@ -76,7 +101,7 @@ export function sourceUVPreview(mesh: MeshData, charts: UVChart[]): PackedChart[
       faceUVs.set(fi, copy);
       for (const [u, v] of copy) { bounds[0] = Math.min(bounds[0], u); bounds[1] = Math.min(bounds[1], v); bounds[2] = Math.max(bounds[2], u); bounds[3] = Math.max(bounds[3], v); }
     }
-    return { id: chart.id, faceUVs, bounds, polygon: [[bounds[0], bounds[1]], [bounds[2], bounds[1]], [bounds[2], bounds[3]], [bounds[0], bounds[3]]] };
+    return { id: chart.id, uvSpace:domain,uvSpaceName:first.uvSpaceName??domain,displayOffset:origins.get(domain)!,faceUVs, bounds, polygon: [[bounds[0], bounds[1]], [bounds[2], bounds[1]], [bounds[2], bounds[3]], [bounds[0], bounds[3]]] };
   });
 }
 
@@ -92,7 +117,7 @@ export function buildUnfoldGeometry(mesh: MeshData, packed: PackedChart[], seams
   if (!(span > 0) || !Number.isFinite(span)) throw new Error('Unsupported mesh extent.');
   const center = min.map((v, i) => v / 2 + max[i]! / 2);
   const source = new Float32Array(mesh.faces.length * 9), target = new Float32Array(source.length), uv = new Float32Array(mesh.faces.length * 6);
-  const faceChart = new Int32Array(mesh.faces.length).fill(-1);
+  const faceChart = new Int32Array(mesh.faces.length).fill(-1),displayCoords=new Float32Array(uv.length);
   const atlas = atlasFrame(packed), ids = new Set<number>();
   const islands: UnfoldIsland[] = [];
   let radius = 0;
@@ -110,13 +135,13 @@ export function buildUnfoldGeometry(mesh: MeshData, packed: PackedChart[], seams
       for (let k = 0; k < 3; k++) {
         const vi = face.vertices[k]!, p = mesh.positions[vi], q = uvs[k]!;
         if (!Number.isInteger(vi) || !p || q.length !== 2 || !q.every(Number.isFinite)) throw new Error(`Invalid corner on face ${fi}.`);
-        const dst = uvToWorld(q, atlas);
+        const shown=displayUV(chart,q),dst = uvToWorld(shown, atlas);
         for (let a = 0; a < 3; a++) {
           const s = (p[a]! - center[a]!) / span * 2;
           source[fi * 9 + k * 3 + a] = s; target[fi * 9 + k * 3 + a] = dst[a]!;
           cs[a] += s; ct[a] += dst[a]!;
         }
-        uv.set(q, fi * 6 + k * 2);
+        uv.set(q, fi * 6 + k * 2);displayCoords.set(shown,fi*6+k*2);
       }
     }
     for (let a = 0; a < 3; a++) { cs[a] /= faces.length * 3; ct[a] /= faces.length * 3; }
@@ -137,7 +162,7 @@ export function buildUnfoldGeometry(mesh: MeshData, packed: PackedChart[], seams
       if (seams.has(key) || neighbors.length !== 2 || neighbors.some(n => faceChart[n] !== faceChart[fi])) boundaries.push(fi * 3 + k, fi * 3 + (k + 1) % 3);
     }
   });
-  const result:UnfoldGeometry={ source, target, uv, faceChart, boundaries: new Uint32Array(boundaries), islands, atlas, radius };
+  const result:UnfoldGeometry={ source, target, uv, displayUV:displayCoords, faceChart, boundaries: new Uint32Array(boundaries), islands, atlas, radius };
   result.hinge=buildHingeRig(mesh,result,seams,work,topology);
   return result;
 }
@@ -198,6 +223,6 @@ export function meshWithPreviewUV(mesh: MeshData, packed: PackedChart[]): MeshDa
       const key=`${charts.get(i)}:${f.vertices[k]}:${p.join(',')}:${original?f.uvIndices?.[k]??'':''}`;
       let id=identities.get(key);if(id===undefined){id=identities.size;identities.set(key,id);}return id;
     }) as [number,number,number];
-    return { vertices: [...f.vertices] as [number, number, number], uvs: values.map(p => [...p] as Vec2) as [Vec2, Vec2, Vec2],uvIndices };
+    return { ...f, vertices: [...f.vertices] as [number, number, number], uvs: values.map(p => [...p] as Vec2) as [Vec2, Vec2, Vec2],uvIndices };
   }) };
 }

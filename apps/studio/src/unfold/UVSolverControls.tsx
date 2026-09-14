@@ -8,6 +8,8 @@ export function UVSolverControls({value,onChange,snapshot,onAuto}:{onAuto:(goal:
   return <details className="uv-solver-controls" open><summary>UV 求解与排布</summary>
     <div className="button-grid two"><button className="primary" aria-label="Auto large charts" onClick={()=>onAuto('large')}>自动参数 · 大块重分割</button><button aria-label="Auto balanced charts" onClick={()=>onAuto('balanced')}>自动参数 · 均衡</button></div>
     <small>分析当前几何并填写参数，替换当前裁切方案、重新生成 UV；原始 UV 仍保留，可通过 Extract 对比。不是在保持贴图布局的前提下合并。</small>
+    <label>原始 UV 展示<select aria-label="Source UV layout" value={draft.sourceUVLayout??'materials'} onChange={e=>{const v={...draft,sourceUVLayout:e.target.value as 'materials'|'overlay'};setDraft(v);onChange(v);}}><option value="materials">按材质分框（默认，不改原 UV）</option><option value="overlay">所有材质叠加（仅诊断）</option></select></label>
+    <small>分框偏移只用于对应动画与显示；不是把多张材质贴图合成一张。导出保留原坐标及材质分组。</small>
     <label>分区策略<select aria-label="Chart policy" value={draft.chartPolicy??'large'} onChange={e=>patch({chartPolicy:e.target.value as UnwrapOptions['chartPolicy']})}><option value="large">大块优先 · 连通分区 + 短路径开缝</option><option value="balanced">均衡 · 更严格的形变限制</option><option value="legacy">传统碎片化参数（回归对比）</option></select></label>
     <label>参数化<select aria-label="UV solver" value={draft.method} onChange={e=>patch({method:e.target.value as UnwrapOptions['method']})}><option value="auto">LSCM + 有效性检查 + Tutte 回退</option><option value="lscm">仅 LSCM（无效时补切或报错）</option><option value="tutte">凸边界 Tutte（稳健，拉伸较大）</option></select></label>
     <label className="check"><input type="checkbox" checked={draft.autoCut} onChange={e=>patch({autoCut:e.target.checked})}/> 允许必要的拓扑 / 形变补切</label>

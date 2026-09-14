@@ -95,7 +95,7 @@ export default function App(){
     try{
       let data:ArrayBuffer;
       // A successful assets:download creates geometry-only files in public/assets/remote.
-      const local=await fetch(`${import.meta.env.BASE_URL}assets/remote/${asset.id}.glb`,{signal});
+      const local=await fetch(`${import.meta.env.BASE_URL}assets/remote/${asset.id}-domains-v2.glb`,{signal});
       if(local.ok&&!local.headers.get('content-type')?.includes('text/html'))data=await local.arrayBuffer();
       else data=(await downloadGeometryAsset(asset,{signal,onProgress:message=>{if(id===operation.current)setBusy(message);}})).data;
       if(id!==operation.current)return;
