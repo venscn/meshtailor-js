@@ -21,7 +21,6 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
       <label className="check"><input type="checkbox" checked={p.hingeWave} onChange={e=>p.setHingeWave(e.target.checked)}/> 由根面向外逐圈打开铰链</label>
       <label className="check"><input type="checkbox" checked={p.showHinges} onChange={e=>p.setShowHinges(e.target.checked)}/> 显示青色铰链轴与旋转提示</label>
       <label className="check"><input type="checkbox" checked={p.showTemporaryCuts} onChange={e=>p.setShowTemporaryCuts(e.target.checked)}/> 显示紫色临时断边（不导出）</label>
-      <label className="check"><input type="checkbox" checked={p.autoFrame} onChange={e=>p.setAutoFrame(e.target.checked)}/> 相机跟随当前面片范围</label>
       <small>70–80% 保持真实刚性展开网；80–92% 才进行向参数化 UV 的形变。曲面不被伪装成可以完全无损折纸的平面。</small>
     </>}
     <label>分离距离 <b>{p.separation.toFixed(2)}</b><input aria-label="Unfold separation" type="range" min="0" max="1.5" step=".05" value={p.separation} onChange={e=>p.setSeparation(+e.target.value)}/></label>
@@ -30,6 +29,9 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
     <label>未选择的岛<select aria-label="Unselected islands" value={p.context} onChange={e=>p.setContext(e.target.value as 'dim'|'hidden'|'solid')}><option value="dim">半透明留在原网格上</option><option value="hidden">隐藏（只看选中部分）</option><option value="solid">实体留在原网格上</option></select></label>
     <label className="check"><input type="checkbox" checked={p.checker} onChange={e=>p.setChecker(e.target.checked)}/> 两侧显示 UV 棋盘</label>
     <label className="check"><input type="checkbox" checked={p.labels} onChange={e=>p.setLabels(e.target.checked)}/> 岛编号（视图最多 48 个）</label>
+    <label className="check"><input aria-label="Follow unfolding camera" type="checkbox" checked={p.autoFrame} onChange={e=>p.setAutoFrame(e.target.checked)}/> 自动跟随面片（默认关闭）</label>
+    <small data-testid="camera-control-status">{p.autoFrame?'正在自动跟随；旋转、平移或缩放会立即关闭跟随，动画继续播放。':'手动相机：播放、反向、循环和拖动进度均保留视角。按钮仅适配一次，不锁定相机。'}</small>
+    <button onClick={()=>p.fit('current')}>适配当前面片（保留观察方向）</button>
     <div className="button-grid two"><button onClick={()=>p.fit('orbit')}>适配 3D 视角</button><button onClick={()=>p.fit('uv')}>UV 正视</button></div>
     <button disabled={!snapshot} onClick={onExport}>导出对应 OBJ + 目标 UV</button>
     <details open className="island-selector"><summary>岛列表 · {p.active.length} 已选</summary>
