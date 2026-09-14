@@ -9,6 +9,9 @@ try{
  const r=uv.unwrapMesh(mesh,edges,{},work);uv.buildUnfoldGeometry(mesh,r.packed,new Set(r.seams),work);
  for(const stage of ['validate','charts','topology','parameterize','quality','orient','pack','correspondence','hinge'])assert.ok(events.some(p=>p.stage===stage),stage);
  const counts=events.filter(p=>p.facesDone!==undefined).map(p=>p.facesDone);assert.ok(counts.every((x,i)=>!i||x>=counts[i-1]));assert.equal(counts.at(-1),mesh.faces.length);
+ assert.deepEqual(uv.unwrapMesh(mesh,edges),r);
+ const curved=core.makeComplexExample('knot','low');const instrumented=uv.unwrapMesh(curved,new Set(),{},work),plain=uv.unwrapMesh(curved,new Set());assert.deepEqual(instrumented,plain);
+ report.cases.push({name:'Instrumentation does not alter recursive distortion cuts or UV results',passed:true});
  report.cases.push({name:'Actual stages and monotonic accepted-face progress reported',passed:true});
  const stop=new uv.UVWorkStopped('injected deadline');
  const interrupt={check(){},report(p){if(p.stage==='quality')throw stop;}};

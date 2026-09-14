@@ -80,7 +80,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       partitions++;for(const fs of splitDisks(local,Math.max(1,Math.floor(faces.length/2)),true,work))solve(fs,sourceChart,depth+1);return;
     }
       const shape=shapeQuality(local,p.uv);
-      if(opts.autoCut&&faces.length>16&&(shape.aspect>opts.maxAspect||shape.fill<opts.minFill||shape.maxStretch>opts.maxStretch,work)){partitions++;for(const fs of splitDisks(local,Math.max(1,Math.floor(faces.length/2)),shape.maxStretch>opts.maxStretch,work))solve(fs,sourceChart,depth+1);return;}
+      if(opts.autoCut&&faces.length>16&&(shape.aspect>opts.maxAspect||shape.fill<opts.minFill||shape.maxStretch>opts.maxStretch)){partitions++;for(const fs of splitDisks(local,Math.max(1,Math.floor(faces.length/2)),shape.maxStretch>opts.maxStretch,work))solve(fs,sourceChart,depth+1);return;}
       const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();
       local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...p.uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
       const area3D=local.triangles.reduce((s,t)=>s+triangleArea(local.positions[t[0]]!,local.positions[t[1]]!,local.positions[t[2]]!),0),id=raw.length;
