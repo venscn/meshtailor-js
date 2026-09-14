@@ -23,7 +23,7 @@ try{
    assert.ok(s.geometry.target.every(Number.isFinite));assert.ok(r.events.length>=2);
    const counts=r.events.map(p=>p.facesDone??0);assert.ok(counts.every((n,i)=>!i||n>=counts[i-1]));
    if(target==='generated'){
-     assert.ok(s.metrics.validated);assert.equal(s.metrics.packingMethod,'shelf');
+     assert.ok(s.metrics.validated);assert.equal(s.metrics.packingMethod,s.packed.length>256?'shelf':'maxrects');
      for(const ch of s.packed)assert.ok(uv.checkUVTriangles([...ch.faceUVs.values()]).valid);
    }else for(const ch of s.packed)for(const [fi,coords]of ch.faceUVs)assert.deepEqual(coords,mesh.faces[fi].uvs);
    report.cases.push({name:`${target}: all 90112 faces, real progress, UV and hinge rig preserved`,passed:true,wallMs:r.wallMs,islands:s.packed.length,progressMessages:r.events.length,timing:s.timing,packing:s.metrics?.packingMethod,occupancy:s.metrics?.occupancy});

@@ -4,7 +4,9 @@ import { buildCharts, planarPackPreview, meshWithPreviewUV } from '@meshtailor/u
 /** Small deterministic, genuinely six-island demo. No external asset or model. */
 export function makeUnfoldDemo(){
   const original=makeCube();
-  const result=generateGeometricSeams(original,{structuralRings:0});
+  // A teaching fixture with a promised six-panel layout must not inherit the
+  // production auto-segmentation policy; cube dihedrals define its six sides.
+  const result=generateGeometricSeams(original,{strategy:'legacy',structuralRings:0});
   const packed=planarPackPreview(original,buildCharts(original,result.seamEdges));
   const mesh=meshWithPreviewUV(original,packed);mesh.name='Six-island correspondence cube';
   return {mesh,edges:result.seamEdges,chains:result.chains,frames:buildGenerationFrames(mesh,result.chains)};
