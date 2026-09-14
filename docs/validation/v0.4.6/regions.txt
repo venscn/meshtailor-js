@@ -1,0 +1,33 @@
+knot {
+  faces: 2304,
+  regions: 7,
+  merged: 11,
+  sizes: [
+    1009, 594,  64,
+     229, 260, 112,
+      36
+  ]
+}
+garment {
+  faces: 3072,
+  regions: 10,
+  merged: 4,
+  sizes: [
+    1121, 1121, 154, 154,
+      80,   80, 104, 104,
+      77,   77
+  ]
+}
+gear { faces: 1536, regions: 4, merged: 50, sizes: [ 672, 720, 94, 50 ] }
+assembly {
+  faces: 5632,
+  regions: 31,
+  merged: 139,
+  sizes: [
+    672, 718, 768, 576, 240, 128, 144, 72,
+     48,  48,  48,  48,  48,  48,  48, 48,
+     48,  72, 384, 384, 240, 128, 144, 90,
+     56,  90,  46,  56,  90,  46,  56
+  ]
+}
+27 connected-region checks passed.

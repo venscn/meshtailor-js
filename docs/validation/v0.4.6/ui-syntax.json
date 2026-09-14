@@ -1,0 +1,21 @@
+{
+  "kind": "Syntax transpilation ONLY; not type checking or installed Three/React validation",
+  "files": [
+    "apps/studio/src/App.tsx",
+    "apps/studio/src/MeshViewport.tsx",
+    "apps/studio/src/UVCanvas.tsx",
+    "apps/studio/src/importers/fbx.ts",
+    "apps/studio/src/importers/index.ts",
+    "apps/studio/src/importers/scene-mesh.ts",
+    "apps/studio/src/main.tsx",
+    "apps/studio/src/unfold/CorrespondenceInspector.tsx",
+    "apps/studio/src/unfold/UVJobStatus.tsx",
+    "apps/studio/src/unfold/UVSolverControls.tsx",
+    "apps/studio/src/unfold/UnfoldControls.tsx",
+    "apps/studio/src/unfold/UnfoldViewport.tsx",
+    "apps/studio/src/unfold/useUVSnapshot.tsx",
+    "apps/studio/src/unfold/useUnfoldPlayer.tsx",
+    "scripts/flight-helmet-smoke.ts"
+  ],
+  "diagnostics": []
+}

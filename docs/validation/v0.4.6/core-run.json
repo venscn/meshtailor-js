@@ -1,0 +1,152 @@
+[
+  {
+    "test": "core",
+    "exitCode": 0,
+    "seconds": 2.47,
+    "log": "core.log"
+  },
+  {
+    "test": "complex",
+    "exitCode": 0,
+    "seconds": 3.9,
+    "log": "complex.log"
+  },
+  {
+    "test": "unfold",
+    "exitCode": 0,
+    "seconds": 2.09,
+    "log": "unfold.log"
+  },
+  {
+    "test": "hinge",
+    "exitCode": 0,
+    "seconds": 1.66,
+    "log": "hinge.log"
+  },
+  {
+    "test": "orientation",
+    "exitCode": 0,
+    "seconds": 1.76,
+    "log": "orientation.log"
+  },
+  {
+    "test": "fit-orientation",
+    "exitCode": 0,
+    "seconds": 3.35,
+    "log": "fit-orientation.log"
+  },
+  {
+    "test": "regions",
+    "exitCode": 0,
+    "seconds": 2.11,
+    "log": "regions.log"
+  },
+  {
+    "test": "slits",
+    "exitCode": 0,
+    "seconds": 1.75,
+    "log": "slits.log"
+  },
+  {
+    "test": "seam-policy",
+    "exitCode": 0,
+    "seconds": 3.22,
+    "log": "seam-policy.log"
+  },
+  {
+    "test": "motion-timing",
+    "exitCode": 0,
+    "seconds": 1.63,
+    "log": "motion-timing.log"
+  },
+  {
+    "test": "motion-geometry",
+    "exitCode": 0,
+    "seconds": 1.68,
+    "log": "motion-geometry.log"
+  },
+  {
+    "test": "schedule",
+    "exitCode": 0,
+    "seconds": 1.7,
+    "log": "schedule.log"
+  },
+  {
+    "test": "material-domain",
+    "exitCode": 0,
+    "seconds": 1.63,
+    "log": "material-domain.log"
+  },
+  {
+    "test": "boundary-stitch",
+    "exitCode": 0,
+    "seconds": 1.65,
+    "log": "boundary-stitch.log"
+  },
+  {
+    "test": "source-layout",
+    "exitCode": 0,
+    "seconds": 1.51,
+    "log": "source-layout.log"
+  },
+  {
+    "test": "compact-layout",
+    "exitCode": 0,
+    "seconds": 1.62,
+    "log": "compact-layout.log"
+  },
+  {
+    "test": "fragmentation",
+    "exitCode": 0,
+    "seconds": 1.96,
+    "log": "fragmentation.log"
+  },
+  {
+    "test": "unwrap-guards",
+    "exitCode": 0,
+    "seconds": 2.09,
+    "log": "unwrap-guards.log"
+  },
+  {
+    "test": "uv-worker",
+    "exitCode": 0,
+    "seconds": 2.65,
+    "log": "uv-worker.log"
+  },
+  {
+    "test": "uv-job-client",
+    "exitCode": 0,
+    "seconds": 1.59,
+    "log": "uv-job-client.log"
+  },
+  {
+    "test": "uv-progress",
+    "exitCode": 0,
+    "seconds": 2.2,
+    "log": "uv-progress.log"
+  },
+  {
+    "test": "atlas",
+    "exitCode": 0,
+    "seconds": 3.5,
+    "log": "atlas.log"
+  },
+  {
+    "test": "parameterization",
+    "exitCode": 0,
+    "seconds": 1.63,
+    "log": "parameterization.log"
+  },
+  {
+    "test": "packing-large",
+    "exitCode": 0,
+    "seconds": 1.95,
+    "log": "packing-large.log"
+  },
+  {
+    "test": "camera-policy",
+    "exitCode": 0,
+    "seconds": 1.6,
+    "log": "camera-policy.log"
+  }
+]

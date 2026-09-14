@@ -1,0 +1,14 @@
+[
+  {
+    "test": "material-layout-browser",
+    "exitCode": 0,
+    "seconds": 6.23,
+    "log": "material-layout-browser.log"
+  },
+  {
+    "test": "large-charts-browser",
+    "exitCode": 0,
+    "seconds": 9.42,
+    "log": "large-charts-browser.log"
+  }
+]

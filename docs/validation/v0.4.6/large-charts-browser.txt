@@ -1,0 +1,15 @@
+PASS DPR 1: default gear is large valid charts, no tiny shards
+PASS DPR 1: auto button actually fills form values and solves
+PASS DPR 1: Extract shows original single island without adding cuts
+PASS DPR 1: resegmentation is explicit and source UV still retained
+PASS DPR 1: exact endpoints, common UV and valid WebGL
+PASS DPR 1: mirrored source atlas never collapses or flips during fit
+PASS DPR 1: no application errors
+PASS DPR 2: default gear is large valid charts, no tiny shards
+PASS DPR 2: auto button actually fills form values and solves
+PASS DPR 2: Extract shows original single island without adding cuts
+PASS DPR 2: resegmentation is explicit and source UV still retained
+PASS DPR 2: exact endpoints, common UV and valid WebGL
+PASS DPR 2: mirrored source atlas never collapses or flips during fit
+PASS DPR 2: no application errors
+14 large-chart/browser orientation checks passed.

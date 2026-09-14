@@ -1,0 +1,8 @@
+PASS Large solve exposes real progress while UI remains responsive
+PASS Cancel stops a busy solve and prevents late snapshot display
+PASS Retry succeeds after cancelling a large model
+PASS Real solver budget failure is visible and contains no stale atlas
+PASS Source-UV route completes the same large mesh without reparameterizing
+PASS Main-thread deadline actually terminates a Worker stuck in a synchronous loop
+PASS New generated job and rendering recover after all failures
+PASS 7 cases

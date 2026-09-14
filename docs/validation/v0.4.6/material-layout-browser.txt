@@ -1,0 +1,21 @@
+PASS DPR 1: six original material frames, exact raw UVs
+PASS DPR 1: frames have no positive-area intersection
+PASS DPR 1: real UV canvas mouse picks each corresponding material
+PASS DPR 1: deliberate overlay toggle is reversible and does not edit UV
+PASS DPR 1: normalized source and displayed target are exact endpoints
+PASS DPR 1: OBJ export keeps material identities and raw unshifted coordinates
+PASS DPR 1: separation is bounded and selection-independent
+PASS DPR 1: in-place control removes separation stage
+PASS DPR 1: diagnostic JSON contains no mesh positions or faces
+PASS DPR 1: clean WebGL and application errors
+PASS DPR 2: six original material frames, exact raw UVs
+PASS DPR 2: frames have no positive-area intersection
+PASS DPR 2: real UV canvas mouse picks each corresponding material
+PASS DPR 2: deliberate overlay toggle is reversible and does not edit UV
+PASS DPR 2: normalized source and displayed target are exact endpoints
+PASS DPR 2: OBJ export keeps material identities and raw unshifted coordinates
+PASS DPR 2: separation is bounded and selection-independent
+PASS DPR 2: in-place control removes separation stage
+PASS DPR 2: diagnostic JSON contains no mesh positions or faces
+PASS DPR 2: clean WebGL and application errors
+20 material-layout browser checks passed.
