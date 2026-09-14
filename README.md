@@ -1,29 +1,31 @@
-# MeshTailor-JS 0.3.0
+# MeshTailor-JS 0.4.0
 
-新增 **3D ↔ UV 岛展开对应动画**：可拖动进度，单个 / 多选 / 全部岛，逐个 / 同时展开，3D 与 UV 联动拾取，原始或生成 UV 目标，以及对应 UV 导出。原有遍历、复杂网格和 FBX 导入入口保留。这是独立的 TypeScript / JavaScript 研究工程，不是官方 MeshTailor 软件。
+新增 **真正的边铰链展开演示 + 拓扑 UV 参数化 + 面积感知排布**。不再把曲面直接投影并用顶点插值假装折开。原有遍历、复杂网格、FBX / GLB 导入入口继续保留；这是独立 JS / TypeScript 研究工程，不是官方 MeshTailor 软件。
 
-ZIP 直接包含完整 `.git/` 和 `.history/repository.bundle`。新版本为独立附注 tag **v0.3.0**；原 `v0.1.0`、`v0.1.1`、`v0.2.0` 指向不变。本版继续采用小步提交，约束见 `AGENTS.md`。上一次维护交接的历史情况仍保留在 `docs/GIT_HANDOFF.md`。
+ZIP 包含 `.git/` 和 `.history/repository.bundle`，使用独立附注 tag **v0.4.0**。`v0.1.0`、`v0.1.1`、`v0.2.0`、`v0.3.0` 不移动；各功能 / 修复 / 测试 / 文档小步提交，要求见 `AGENTS.md`。
 
-**验证边界：** 已执行严格非 React 数据/渲染层编译、真实原生 WebGL2 渲染与拾取、核心/复杂网格/对应关系/Node Worker/布局/Git 回归。npm 安装因 DNS 失败，因此完整 React/Vite 页面和浏览器 Worker 加载、全量 UI 类型检查、真实 FBXLoader 仍未认证。生成 UV 依旧是平面投影调试预览，动画不是求解器或物理展开。详见 [验证记录](docs/VALIDATION.md)。
+## 启动与快速体验
 
-## 启动
+**无需安装运行依赖**：打开根目录 `unfold-lab.html`，默认三块真实折角带。支持 WebGL2 的浏览器可以运行；本地文件被限制时执行 `node scripts/serve-unfold-lab.mjs`，使用显示的本地地址。实验页与主 Studio 共用求解、动画、渲染和导出模块，支持内置网格和 OBJ；不是另一套简化算法。其真实浏览器交互与 Worker 已测试，详见 [验证边界](docs/VALIDATION.md)。
 
-使用 Node.js **22.16.0 或更新版本**，在解压出的项目根目录运行：
+**完整 Studio** 使用 Node.js 22.16.0 或更新版本：
 
 ```bash
 npm install
 npm run dev
 ```
 
-打开 Vite 输出的地址。顶栏应显示 `Studio · 0.3.0`。启动脚本不依赖 Python；同一 npm 入口用于 macOS、Windows、Linux，但本次没有跨平台实机验证。
+打开 Vite 显示的地址，顶栏应为 `Studio · 0.4.0`。进入“3D ↔ UV 展开动画”，点“加载三块折角带示例”，先分块陈列，再拖动 28–70% 看沿边转动。单个 / 多选 / 全部与同时 / 逐个独立；反向播放、阶段按钮、铰链角度、临时断边、相机跟随和联动拾取均可控制。
 
-## 3D ↔ UV 展开预览
+**验证边界：** 核心、原生 WebGL、离线完整实验页、真实离线浏览器 Worker 及 Node Worker 已实测。npm registry DNS 失败导致完整 React/Vite 主界面、主界面 module Worker 加载、全量 UI 类型检查和真实 FBXLoader 仍未认证。不是把离线实验页测试称为完整 React 联调；也没有声称 macOS / Windows / Safari 实机认证。
 
-在主视口上方选择 **3D ↔ UV 展开动画**，点击左侧 **加载六岛立方体示例**，拖动下方 0–100% 进度或点击 **播放展开**。同色同编号的岛从网格移向右侧相同位置；选择 **UV 正视** 可直接比较最终布局。
+## UV 展平不再是平面投影
 
-“预览范围”提供单个、多选、全部岛；“播放方式”独立提供同时、逐个。可倒放、循环、调节时长和分离距离，或隐藏未选岛。点击两侧面片会联动选择，并显示逐角 3D / UV 坐标。
+生成目标使用：面角拓扑复制 → 盘检查与显式补切 → LSCM / Tutte → 翻面、退化、重叠检查 → 平均表面积密度统一 → 旋转与 MaxRects 装箱。左右视图及“导出对应 OBJ + 目标 UV”共用同一份结果。原始 UV 目标仍原样保留，不修复已有重叠。
 
-目标可选网格原始 UV，或完整接缝的生成预览 UV。两侧视图和 **导出对应 OBJ + 目标 UV** 共用同一份面角数据，100% 不会另算一套布局。原 UV 缺失会明确报错。使用自己的网格可以先生成接缝，也可直接选原 UV。详细操作、语义和限制见 [展开预览文档](docs/UNFOLD_PREVIEW.md)。
+动画将 **沿边刚性旋转** 与 **必要的 UV 非刚性形变** 分开；紫色断边只服务教学刚性展开，不导出。UV 求解的实际补切则进入两个视图和导出。阶段、算法、配置、利用率、截图与局限见 [展开与 UV 说明](docs/UNFOLDING_AND_UV.md)。
+
+MaxRects 不是全局最优求解器，当前不做凹形多边形嵌套。UI 区分有效 UV 面积占用和包围盒占用，不靠重叠或独立拉伸 U/V 刷满面积。当前刚性动画不是无碰撞纸片 / 材料仿真。
 
 ## 复杂网格
 
@@ -38,7 +40,7 @@ npm run dev
 
 Medium 版本已经保存为 `examples/complex/*.obj`，包含逐角 UV，可用于 CLI 或导入其他软件。Low/High 在 Studio 中实时生成。褶皱服装是程序生成的裙状测试曲面，不是现实服装扫描、缝纫版型或训练集样本。
 
-点击 **Generate baseline** → **Next / Play** 查看遍历，或点击 **Extract existing UV seams** 查看原有 UV 接缝。**Show all seams** 直接显示完整结果；首个 token 仅选择起点，还没有边。**Export current OBJ + UV** 导出当前原始网格和已有 UV，不是导出右侧 debug preview 的新参数化结果。
+点击 **Generate baseline** → **Next / Play** 查看遍历，或点击 **Extract existing UV seams** 查看原有 UV 接缝。**Show all seams** 直接显示完整结果；首个 token 仅选择起点，还没有边。**Export current OBJ + UV** 导出当前原始网格和已有 UV，不是导出新求解的目标 UV；目标 UV 使用展开页的专门导出按钮。
 
 重新生成随包资产：
 
@@ -91,6 +93,11 @@ npm run assets:download -- --only flight-helmet
 npm run test:core       # 已执行：21 项，严格 core/view-math 编译
 npm run test:complex    # 已执行：40 项，真实几何/UV/文件结构 + 模拟下载
 npm run test:unfold     # 已执行：33 项，逐角对应/端点/选择/导出
+npm run test:parameterization # LSCM / Tutte / slit topology
+npm run test:atlas      # 有效面积、拓扑补切、六个网格
+npm run test:hinge      # 17 项，真实铰链几何
+npm run test:uv-guards  # 11 项，保护和导出拓扑
+npm run test:lab        # 21 项，离线 UI + WebGL + 真实 Worker
 npm run test:uv-worker  # 已执行：4 项，真实生产 job 在 Node Worker 运行
 npm run test:unfold:browser # 原生 WebGL：本次 24 项通过，2 项浏览器 Worker 显式跳过
 npm run test:layout     # 已执行：13 项，原生 Chromium canvas/CSS，无 React/Three
@@ -114,7 +121,7 @@ npm run cli -- training-sample examples/cube_uv.obj cube-training.json
 npm run cli -- paper-spec
 ```
 
-没有增加或训练神经网络权重。`GeometricBaseline` 仍是几何启发式，`MeshTailorBackend` 仍是 learned-model 接口；生成目标仍为 planar debug preview；原 UV 目标保留已有 UV。两者都不代表加入了 ABF++/LSCM 产品级展开。复杂输入支持不代表论文效果已经复现。原有设计见 [模型后端](docs/MODEL_BACKEND.md) 和 [架构](docs/ARCHITECTURE.md)。
+没有增加或训练神经网络权重。`GeometricBaseline` 仍是几何启发式，`MeshTailorBackend` 仍是 learned-model 接口；生成目标现为本项目实现的 LSCM / Tutte + MaxRects；原 UV 目标保留已有 UV。没有加入 ABF++、ARAP、SLIM 或 xatlas 运行库；通过数值回归不等于所有输入已经产品级认证。复杂输入支持不代表论文效果已经复现。原有设计见 [模型后端](docs/MODEL_BACKEND.md) 和 [架构](docs/ARCHITECTURE.md)。
 
 ## 目录与历史
 
@@ -130,4 +137,4 @@ scripts/                        资产生成/下载、回归测试
 THIRD_PARTY_ASSETS.md            来源、许可与资产是否随包
 ```
 
-ZIP 从干净已提交的 Git HEAD 构建，`.history/repository.bundle` 保存小步提交历史，恢复方式见 [.history/README.md](.history/README.md)。[0.3.0 发布说明](docs/RELEASE-0.3.0.md)；[0.2.0 发布说明](docs/RELEASE-0.2.0.md)；[0.1.1 历史 README](docs/README-0.1.1.md)。
+ZIP 从干净已提交的 Git HEAD 构建，`.history/repository.bundle` 保存小步提交历史，恢复方式见 [.history/README.md](.history/README.md)。[0.4.0 发布说明](docs/RELEASE-0.4.0.md)；[0.3.0 发布说明](docs/RELEASE-0.3.0.md)；[0.2.0 发布说明](docs/RELEASE-0.2.0.md)；[0.1.1 历史 README](docs/README-0.1.1.md)。

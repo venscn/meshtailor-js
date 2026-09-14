@@ -1,3 +1,5 @@
+> v0.4.0 更新：UV 生产流程现为面角拓扑 → LSCM/Tutte → 检查 → 面积感知 MaxRects；动画独立使用边铰链。当前模块和限制见 [展开与 UV 架构说明](UNFOLDING_AND_UV.md)，下文保留早期工程背景。
+
 # Architecture mapping
 
 ## 1. Data path
