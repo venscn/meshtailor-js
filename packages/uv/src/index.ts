@@ -11,3 +11,5 @@ export * from './hinge.js';
 export * from './work.js';
 
 export * from "./unfold-schedule.js";
+
+export * from './motion-timing.js';

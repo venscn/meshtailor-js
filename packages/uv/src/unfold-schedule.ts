@@ -1,3 +1,4 @@
+import { motionProgress, motionSeek, sampleMotionTimeline, type MotionTimeline } from './motion-timing.js';
 /** Shared, seekable island timeline. Durations are in PER-ISLAND units, not
  * whole-mesh units. Geometry, labels and both players must use this mapping. */
 export type UnfoldOrder = 'relay' | 'sequential' | 'together';
@@ -14,15 +15,17 @@ export function unfoldHandoff(order: UnfoldOrder, handoff = DEFAULT_HANDOFF): nu
   if (!['relay', 'sequential', 'together'].includes(order)) throw new Error('Unknown unfolding order.');
   return order === 'sequential' ? 1 : Math.max(MIN_HANDOFF, Math.min(1, handoff));
 }
-export function unfoldSpan(count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF): number {
+export function unfoldSpan(count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF, timeline?: MotionTimeline): number {
+  if(timeline)return timeline.span;
   const step = unfoldHandoff(order, handoff);
   return size(count) ? 1 + (count - 1) * step : 0;
 }
-export function unfoldDuration(seconds: number, count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF): number {
+export function unfoldDuration(seconds: number, count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF, timeline?: MotionTimeline): number {
   if (finite(seconds, 'Island duration') <= 0) throw new Error('Island duration must be positive.');
-  return seconds * unfoldSpan(count, order, handoff);
+  return seconds * unfoldSpan(count, order, handoff, timeline);
 }
-export function islandProgress(progress: number, index: number, count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF): number {
+export function islandProgress(progress: number, index: number, count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF, timeline?: MotionTimeline): number {
+  if(timeline)return motionProgress(timeline,finite(progress, 'Progress'),index);
   const time = clamp(finite(progress, 'Progress')) * unfoldSpan(count, order, handoff);
   if (!Number.isInteger(index) || index < 0 || index >= count) return 0;
   // Explicit endpoints prevent a last island remaining at 99.999999%.
@@ -31,7 +34,8 @@ export function islandProgress(progress: number, index: number, count: number, o
   const local = time - index * unfoldHandoff(order, handoff);
   return local < 1e-12 ? 0 : local > 1 - 1e-12 ? 1 : clamp(local);
 }
-export function islandTimelineProgress(local: number, index: number, count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF): number {
+export function islandTimelineProgress(local: number, index: number, count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF, timeline?: MotionTimeline): number {
+  if(timeline)return motionSeek(timeline,finite(local, 'Local progress'),index);
   finite(local, 'Local progress');
   const span = unfoldSpan(count, order, handoff);
   if (!span || !Number.isInteger(index) || index < 0 || index >= count) return 0;
@@ -44,7 +48,8 @@ export interface UnfoldScheduleSample {
   focusIndex: number;
 }
 /** At most two active entries, even with thousands of islands. */
-export function sampleUnfoldSchedule(progress: number, count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF, reverse = false): UnfoldScheduleSample {
+export function sampleUnfoldSchedule(progress: number, count: number, order: UnfoldOrder, handoff = DEFAULT_HANDOFF, reverse = false, timeline?: MotionTimeline): UnfoldScheduleSample {
+  if(timeline)return sampleMotionTimeline(timeline,finite(progress, 'Progress'),reverse);
   finite(progress, 'Progress');
   const span = unfoldSpan(count, order, handoff), step = unfoldHandoff(order, handoff);
   if (!count) return { completed: 0, waiting: 0, active: [], focusIndex: -1 };
@@ -66,7 +71,7 @@ export function sampleUnfoldSchedule(progress: number, count: number, order: Unf
 export function advanceUnfoldPlayback(progress: number, elapsedMs: number, durationSeconds: number, reverse = false, loop = false): { progress: number; finished: boolean } {
   finite(progress, 'Progress'); finite(elapsedMs, 'Elapsed time'); finite(durationSeconds, 'Duration');
   if (elapsedMs < 0) throw new Error('Elapsed time must be nonnegative.');
-  if (durationSeconds <= 0) return { progress: clamp(progress), finished: true };
+  if (durationSeconds <= 0) return { progress: reverse ? 0 : 1, finished: true };
   const next = clamp(progress) + (reverse ? -1 : 1) * elapsedMs / (durationSeconds * 1000);
   if (loop && (next > 1 || next < 0)) return { progress: ((next % 1) + 1) % 1, finished: false };
   return { progress: clamp(next), finished: !loop && (reverse ? next <= 0 : next >= 1) };
