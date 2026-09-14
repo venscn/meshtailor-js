@@ -1,0 +1,147 @@
+{
+  "host": "CDP Page.setDocumentContent; no network; file navigation blocked by environment policy",
+  "suite": "Offline Hinge Lab: actual shared renderer, UI and offline classic browser Worker (same production source)",
+  "cases": [
+    {
+      "name": "DPR 1: real browser Worker returns validated LSCM atlas and hinge rig",
+      "passed": true,
+      "details": {
+        "n": 3,
+        "valid": true,
+        "ls": [
+          "lscm",
+          "lscm",
+          "lscm"
+        ],
+        "faces": 24,
+        "buffer": 24
+      }
+    },
+    {
+      "name": "DPR 1: WebGL2 shader renders without error",
+      "passed": true,
+      "details": {
+        "count": 67081,
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR 1: exact atlas endpoint and source endpoint",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: real phase controls expose separated pieces then hinge angles",
+      "passed": true,
+      "details": {
+        "labels": [
+          "↶ 106°",
+          "↶ 67°",
+          "↶ 99°"
+        ],
+        "hinges": 6,
+        "positions": true
+      }
+    },
+    {
+      "name": "DPR 1: single/multiple/all controls and sequential playback",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: play advances / scrubbing pauses / reverse moves backward",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: UV export uses exact target per-corner coordinates",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: Tutte solver selection actually reruns browser worker",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: invalid padding reports an error instead of keeping stale UV",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: recover after failure with the same canvas and clean console",
+      "passed": true
+    },
+    {
+      "name": "complex knot worker solve, temporary cuts visible only in hinge stage",
+      "passed": true,
+      "details": {
+        "faces": 2304,
+        "islands": 3,
+        "temp": 1816,
+        "valid": true,
+        "occ": 0.2956486589382228
+      }
+    },
+    {
+      "name": "DPR 2: real browser Worker returns validated LSCM atlas and hinge rig",
+      "passed": true,
+      "details": {
+        "n": 3,
+        "valid": true,
+        "ls": [
+          "lscm",
+          "lscm",
+          "lscm"
+        ],
+        "faces": 24,
+        "buffer": 24
+      }
+    },
+    {
+      "name": "DPR 2: WebGL2 shader renders without error",
+      "passed": true,
+      "details": {
+        "count": 260749,
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR 2: exact atlas endpoint and source endpoint",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: real phase controls expose separated pieces then hinge angles",
+      "passed": true,
+      "details": {
+        "labels": [
+          "↶ 106°",
+          "↶ 67°",
+          "↶ 99°"
+        ],
+        "hinges": 6,
+        "positions": true
+      }
+    },
+    {
+      "name": "DPR 2: single/multiple/all controls and sequential playback",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: play advances / scrubbing pauses / reverse moves backward",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: UV export uses exact target per-corner coordinates",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: Tutte solver selection actually reruns browser worker",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: invalid padding reports an error instead of keeping stale UV",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: recover after failure with the same canvas and clean console",
+      "passed": true
+    }
+  ],
+  "skipped": [],
+  "passed": 21
+}

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.3 — 2026-09-14
+
+- Default to ordered island relay: start the successor at 85% of its predecessor; bound overlap to adjacent pairs and retain strict serial mode.
+- Share local/global progress, duration, queue state, stage seeking, hinge angles and geometry scheduling in both Studio and offline lab. Legacy `together` inputs migrate to relay.
+- Make the stationary rigid-net hold opt-in, remove capped frame elapsed time and artificial loop hold, preserve exact source/UV endpoints and free-camera behavior.
+- Keep an explicitly inspected island pinned while using queue/stage controls; prioritize active island labels on fragmented meshes.
+- Add shared-timeline and actual RAF/WebGL regressions; update old tests to inspect local island stages instead of assuming synchronized whole-mesh poses. See versioned release and validation documents for measured results and build limitations.
+- Preserve all earlier release tags; release a new annotated v0.4.3 from clean committed HEAD.
+
 ## 0.4.2 — 2026-09-14
 
 - Default to a manual camera in Studio and the offline lab; animation progress no longer overwrites orbit, pan or zoom.

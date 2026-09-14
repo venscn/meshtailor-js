@@ -1,59 +1,58 @@
-# Validation — v0.4.2
+# Validation — v0.4.3
 
-日期：2026-09-14。上一版记录保存在 `VALIDATION-0.4.1.md`。本轮只修改相机控制及对应 UI，不更换 UV 求解器或动画的顶点变换数学。
+日期：2026-09-14。旧记录保存为 `VALIDATION-0.4.2.md`。本版修改每岛播放调度、停留映射、UI / 时钟 / 阶段控制，不更换 UV 求解、UV 装箱或相机控制策略。
 
-## 测试环境
+## 环境和限制
 
-Linux、Node.js 22.16.0、全局 TypeScript 5.8.3、Chromium 144.0.7559.96。浏览器使用 Xvfb 显示服务以及 ANGLE/SwiftShader 软件 WebGL，不是硬件 GPU 性能测试。最初默认 DISPLAY 无可用显示服务导致 WebGL 初始化失败；启动 Xvfb 后才执行下表真实渲染测试，没有用假渲染替代。
+Linux、Node.js 22.16.0、全局 TypeScript 5.8.3、Chromium 144.0.7559.96。浏览器使用 Xvfb + ANGLE/SwiftShader 软件 WebGL。环境的初始 DISPLAY 不可用，直接启动曾返回 WebGL2 unavailable；以下渲染回归在启动 Xvfb 后真实执行，没有伪造 WebGL。
 
-网络：`curl` 请求 registry.npmjs.org 失败，退出 6（Could not resolve host）。一次限制 25 秒的 npm install 未完成。依赖未安装；`npm run build` 实际失败于 `vite: not found`，退出 127。日志在 `validation/v0.4.2/npm-network-check.txt`、`full-build-attempt.txt`。没有声称安装、Vite 构建或完整 React 联调成功。
+一次 npm install 被 25 秒限时中止（退出 124）。单独 `npm view react version` 返回 `EAI_AGAIN registry.npmjs.org`。`npm run build` 实际退出 127，报 `vite: not found`。未伪造安装成功、锁文件或全量 React/Vite 类型检查结果。相关日志在 `validation/v0.4.3/`。
 
-## 原版问题实测
+## 已执行结果
 
-使用 v0.4.1 随包的原始 HTML，真实滚轮将距离 5.3240036324 改为 3.8275525682。进度 0.42 -> 0.43 后，距离被自动适配改为 5.3203332708。`before-camera-repro.json` 保存完整相机快照。
-
-## 本轮实际通过
-
-| 测试 | 通过 | 范围 |
+| 测试 | 通过数 | 实际范围 |
 |---|---:|---|
-| `test:camera` | 10 | 手动默认值、显式开启、手势中断、过期 props 防护、显式恢复。 |
-| `test:camera:browser` | 39 | DPR 1/2；真实 RAF 播放与鼠标输入；旋转、平移、缩放后严格比较全部相机参数；反向、循环、seek、单次 fit、UV 重算、上下文恢复。 |
-| `test:unfold:browser` | 24 | 真实 WebGL 像素、源/目标终点、拾取、90,112 面中间态、资源复用；另 2 项 module Worker 明确跳过。 |
-| `test:lab` | 21 | 共用生产算法的离线 UI、真实 classic Worker、阶段、播放、选择、导出、错误与恢复。 |
-| `test:layout` | 13 | CSS/canvas 尺寸与高 DPI 布局回归，不运行 React。 |
-| `test:core` | 21 | 核心严格编译与运行；另检查 TS/TSX 语法，不等于全量 UI 类型检查。 |
-| `test:complex` | 40 | 程序复杂网格、焊接、UV 与资产文件结构；不是真实 FBXLoader 解码。 |
-| `test:unfold` | 33 | 对应关系、逐个/同时、选择、终点、导出。 |
-| `test:hinge` | 17 | 三角形边长、共享边共点、阶段连续性、精确终点。 |
-| `test:uv-worker` | 4 | 生产 UV handler 在 Node worker_threads 的数据传输和错误路径。 |
-| `test:git` | 22 | Git 历史检查工具的正常与拒绝路径；正式发布审计在 tag 创建后另执行。 |
+| `test:relay` | 22 | 共享时钟、85% 交接、严格串行、0/1/3/97/2000 岛、最多两岛、逆映射、反向、无空尾、hold、慢帧累计、循环和输入校验。 |
+| `test:relay:browser` | 28 | DPR 1/2；真实 Worker、WebGL 位置缓冲、实际 RAF 完整正反播放、真实鼠标相机操作、滑杆、队列 / 阶段检查、全部 / 多选 / 空选择。 |
+| `test:hinge` | 17 | 改用每岛局部时刻；边长、父子共享端点、刚性平面、连续性、反向、终点与选择。 |
+| `test:camera:browser` | 39 | 真实相机旋转 / 平移 / 缩放、播放、反向循环、跟随中断、旧 props 防护、重算与上下文恢复。 |
+| `test:camera` | 10 | 相机所有权策略。 |
+| `test:unfold:browser` | 24 | 原生 WebGL、拾取、对应终点、资源和大网格中间态；另 2 项 module Worker 显式跳过。 |
+| `test:lab` | 21 | 实际离线 UI + 共用渲染器 + classic Worker，阶段、导出、求解选项和失败恢复。 |
+| `test:layout` | 13 | 原生 CSS / canvas 布局；不是 React 端到端布局测试。 |
+| `test:core` | 21 | 核心严格编译和运行、TS/TSX 语法；不是全量 UI 类型检查。 |
+| `test:complex` | 40 | 程序复杂网格、焊接、UV、资产文件结构；不是真实 FBXLoader。 |
+| `test:unfold` | 33 | 对应、精确源 / UV 终点、选择、导出和复杂网格。 |
+| `test:uv-worker` | 4 | 生产 UV handler 的 Node worker_threads 路径。 |
+| `test:git` | 22 | Git 工具拒绝 / 接受路径；正式发布审计在新 tag 创建后另执行。 |
 
-数据与日志保存在 `validation/v0.4.2/`。没有把各 suite 中含义不同的断言简单相加成“全部端到端用例”。
+JSON / 日志位于 `validation/v0.4.3/`。不同 suite 的计数不合并宣称为全量端到端测试。
 
-## 测试方式和未验证范围
+## 对新的行为做了什么检查
 
-浏览器通过 CDP `Page.setDocumentContent` 载入实际离线 HTML，运行相同的渲染器、计算模块和 classic Worker；相机交互使用 CDP 鼠标事件。取消指针场景另外发送真实 DOM PointerEvent；过期 props 场景故意延后 UI 的手动控制回调，检查渲染器锁存保护。
+真实浏览器测试按 81 个全局进度采样检查真实位置缓冲：未开始岛必须精确等于源坐标，完成岛必须精确等于 UV 目标；前岛未到交接点不能启动后岛，最多两岛活动。对三岛的实际 forward / reverse RAF 播放设置每岛 1 秒，期望队列 2.7 秒；记录真实耗时和重叠帧数，且三岛必须各自进入活动状态。最终位置再与 immutable endpoint 缓冲比较。
 
-该测试覆盖默认 hinge + camera follow 的真实组合，补上之前 staged/direct 视图测试没有覆盖的默认行为。暂停或进度静止时开启跟随，也有单独检查。
+额外测试了交接滑杆、严格串行、多选 [2,0] 顺序、队列导航后阶段按钮不误跟前岛、静止 hold 显式开关、真实相机鼠标拖动和空队列不可播放。数学铰链测试保留原边长 / 共点断言，但改成逐岛定位局部阶段；旧「所有岛在 global .75 都已经平面」断言不符合新需求，不能继续使用。
 
-受限宿主的两个原生 module Worker 检查沿用显式 `--skip-browser-worker`，未计为通过；离线 classic Worker 则确实运行并通过。未验证 Vite 模块加载、完整 React hook/DOM 端到端时序、主工程全量 UI 类型检查、FBXLoader、file:// 导航或 Safari/macOS/Windows 实机。本轮没有飞行头盔专项回归，不将程序网格视为该资产测试。
+没有重跑真实 Flight Helmet 资产。未验证完整 React hook / DOM 时序、Vite module Worker 加载、真实 FBXLoader、file:// 导航、Safari/macOS/Windows 或硬件 GPU。离线页通过 CDP Page.setDocumentContent 加载实际构建 HTML，不替换生产渲染与求解模块。
 
 ## 复跑
 
 ```bash
-npm run test:camera
+npm run test:relay
 npm run lab:build
+npm run test:relay:browser
+npm run test:hinge
 npm run test:camera:browser
 npm run test:lab
 npm run test:unfold:browser -- --skip-browser-worker
-npm run test:git
-npm run git:check -- --release v0.4.2
+npm run git:check -- --release v0.4.3
 ```
 
-相机策略、核心等轻量测试需要 TypeScript（本地或全局）。浏览器测试需要 Chrome/Chromium/Edge；`CHROME_PATH` 可指定程序。无图形 Linux 的软件渲染复跑示例：
+轻量测试需要本地或全局 TypeScript。完整主界面测试另外需要真正安装项目依赖。无图形 Linux 的真实软件 WebGL 示例：
 
 ```bash
-xvfb-run -a env CHROME_SOFTWARE_WEBGL=1 node scripts/camera-browser-smoke.mjs
+xvfb-run -a env CHROME_SOFTWARE_WEBGL=1 node scripts/relay-browser-smoke.mjs
 ```
 
-最终 ZIP 的独立解压、HEAD/tag、干净状态、旧 tag 身份、bundle 恢复及复跑结果另附交付验证文件，避免在被审计提交内写入自身提交哈希。
+最终 ZIP 解压复验、完整 HEAD/tag、旧 tag 指向、工作区及 bundle 恢复记录另附交付验证文件。

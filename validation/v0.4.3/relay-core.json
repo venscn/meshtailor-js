@@ -1,0 +1,94 @@
+{
+  "suite": "Shared late-relay island timeline",
+  "cases": [
+    {
+      "name": "Default is 85% relay, never a whole-mesh simultaneous start",
+      "passed": true
+    },
+    {
+      "name": "A legacy together value migrates to relay, not synchronous playback",
+      "passed": true
+    },
+    {
+      "name": "Per-island time determines real span (3 x 12s relay = 32.4s)",
+      "passed": true
+    },
+    {
+      "name": "Strict serial starts only after the preceding complete island",
+      "passed": true
+    },
+    {
+      "name": "Zero and one selection have no synthetic queue or empty tail",
+      "passed": true
+    },
+    {
+      "name": "First island only at initial interior time",
+      "passed": true
+    },
+    {
+      "name": "Second starts at predecessor 85%, with exact predecessor endpoint preserved",
+      "passed": true
+    },
+    {
+      "name": "Handoff is bounded to 75–100%, never arbitrary many concurrent islands",
+      "passed": true
+    },
+    {
+      "name": "No gaps, premature starts, early last completion, or >2 active islands (1)",
+      "passed": true
+    },
+    {
+      "name": "No gaps, premature starts, early last completion, or >2 active islands (3)",
+      "passed": true
+    },
+    {
+      "name": "No gaps, premature starts, early last completion, or >2 active islands (97)",
+      "passed": true
+    },
+    {
+      "name": "No gaps, premature starts, early last completion, or >2 active islands (2000)",
+      "passed": true
+    },
+    {
+      "name": "Local/global stage seeking round-trips through the same timeline",
+      "passed": true
+    },
+    {
+      "name": "Reverse playback is the exact forward timeline read backwards",
+      "passed": true
+    },
+    {
+      "name": "Stage focus stays on oldest unfinished island in overlap; reverse chooses newest",
+      "passed": true
+    },
+    {
+      "name": "Last island runs to exactly 100% without trailing empty slots",
+      "passed": true
+    },
+    {
+      "name": "No fixed hold by default; explicit hold preserves old geometric stage timing",
+      "passed": true
+    },
+    {
+      "name": "Finite frame elapsed time is never capped to 100ms",
+      "passed": true
+    },
+    {
+      "name": "Slow and fast frames integrate the same active elapsed time",
+      "passed": true
+    },
+    {
+      "name": "Non-looping endpoint stops immediately with no 650ms artificial wait",
+      "passed": true
+    },
+    {
+      "name": "Forward and reverse loops wrap with elapsed remainder",
+      "passed": true
+    },
+    {
+      "name": "Malformed timeline input fails explicitly, rather than NaN poses",
+      "passed": true
+    }
+  ],
+  "passed": 22
+}

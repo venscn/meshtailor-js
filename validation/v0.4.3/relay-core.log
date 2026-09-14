@@ -1,0 +1,22 @@
+PASS Default is 85% relay, never a whole-mesh simultaneous start
+PASS A legacy together value migrates to relay, not synchronous playback
+PASS Per-island time determines real span (3 x 12s relay = 32.4s)
+PASS Strict serial starts only after the preceding complete island
+PASS Zero and one selection have no synthetic queue or empty tail
+PASS First island only at initial interior time
+PASS Second starts at predecessor 85%, with exact predecessor endpoint preserved
+PASS Handoff is bounded to 75–100%, never arbitrary many concurrent islands
+PASS No gaps, premature starts, early last completion, or >2 active islands (1)
+PASS No gaps, premature starts, early last completion, or >2 active islands (3)
+PASS No gaps, premature starts, early last completion, or >2 active islands (97)
+PASS No gaps, premature starts, early last completion, or >2 active islands (2000)
+PASS Local/global stage seeking round-trips through the same timeline
+PASS Reverse playback is the exact forward timeline read backwards
+PASS Stage focus stays on oldest unfinished island in overlap; reverse chooses newest
+PASS Last island runs to exactly 100% without trailing empty slots
+PASS No fixed hold by default; explicit hold preserves old geometric stage timing
+PASS Finite frame elapsed time is never capped to 100ms
+PASS Slow and fast frames integrate the same active elapsed time
+PASS Non-looping endpoint stops immediately with no 650ms artificial wait
+PASS Forward and reverse loops wrap with elapsed remainder
+PASS Malformed timeline input fails explicitly, rather than NaN poses

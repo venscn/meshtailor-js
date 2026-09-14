@@ -1,0 +1,37 @@
+[
+  {
+    "suite": "core",
+    "exitCode": 0,
+    "elapsedMs": 2307
+  },
+  {
+    "suite": "complex",
+    "exitCode": 0,
+    "elapsedMs": 3358
+  },
+  {
+    "suite": "unfold",
+    "exitCode": 0,
+    "elapsedMs": 1783
+  },
+  {
+    "suite": "hinge",
+    "exitCode": 0,
+    "elapsedMs": 1455
+  },
+  {
+    "suite": "camera-policy",
+    "exitCode": 0,
+    "elapsedMs": 1360
+  },
+  {
+    "suite": "uv-worker",
+    "exitCode": 0,
+    "elapsedMs": 2309
+  },
+  {
+    "suite": "schedule",
+    "exitCode": 0,
+    "elapsedMs": 1301
+  }
+]

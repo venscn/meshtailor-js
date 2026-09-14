@@ -1,0 +1,4 @@
+2026-09-14: npm install --ignore-scripts --no-audit --no-fund --fetch-retries=0 --fetch-timeout=10000
+External timeout: 25 seconds. Exit 124; install did not complete.
+A separate npm view react version request failed with EAI_AGAIN; see npm-registry-attempt.log.
+No dependency lockfile was invented. Full build failed with vite: not found; see full-build-attempt.log.

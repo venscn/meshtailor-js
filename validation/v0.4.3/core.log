@@ -1,0 +1,98 @@
+{
+  "suite": "Strict core/view math compilation and executable regression",
+  "compiler": "5.8.3",
+  "node": "v22.16.0",
+  "cases": [
+    {
+      "name": "Cube: valid real-edge traversal, final seams and UV coverage",
+      "passed": true
+    },
+    {
+      "name": "Cube: normalized display preserves input and triangles",
+      "passed": true
+    },
+    {
+      "name": "Cylinder: valid real-edge traversal, final seams and UV coverage",
+      "passed": true
+    },
+    {
+      "name": "Cylinder: normalized display preserves input and triangles",
+      "passed": true
+    },
+    {
+      "name": "Torso-like tube: valid real-edge traversal, final seams and UV coverage",
+      "passed": true
+    },
+    {
+      "name": "Torso-like tube: normalized display preserves input and triangles",
+      "passed": true
+    },
+    {
+      "name": "OBJ per-corner UV extraction still finds the 12 cube seams",
+      "passed": true
+    },
+    {
+      "name": "training samples keep xyz+normal, sampled point count and EOS",
+      "passed": true
+    },
+    {
+      "name": "off-origin mesh is normalized before float32 conversion",
+      "passed": true
+    },
+    {
+      "name": "very small meshes do not collapse into fixed near-plane limits",
+      "passed": true
+    },
+    {
+      "name": "empty mesh has a clear validation failure",
+      "passed": true
+    },
+    {
+      "name": "NaN coordinates are rejected",
+      "passed": true
+    },
+    {
+      "name": "infinite coordinates are rejected",
+      "passed": true
+    },
+    {
+      "name": "out-of-range face index is rejected",
+      "passed": true
+    },
+    {
+      "name": "zero-extent mesh is rejected",
+      "passed": true
+    },
+    {
+      "name": "portrait camera fit uses horizontal FOV",
+      "passed": true
+    },
+    {
+      "name": "wide camera fit does not crop the vertical axis",
+      "passed": true
+    },
+    {
+      "name": "camera fit contains the entire bounding sphere",
+      "passed": true
+    },
+    {
+      "name": "invalid camera input is rejected",
+      "passed": true
+    },
+    {
+      "name": "DPR is clamped independently of CSS viewport size",
+      "passed": true
+    },
+    {
+      "name": "hidden or invalid viewport sizes are skipped",
+      "passed": true
+    }
+  ],
+  "strictCompile": "pass",
+  "syntaxOnly": {
+    "sourceFiles": 75,
+    "result": "pass",
+    "fullUITypecheck": "not performed by this script"
+  },
+  "passed": 21
+}
