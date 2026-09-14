@@ -1,0 +1,69 @@
+[
+  {
+    "name": "cube",
+    "faces": 12,
+    "islands": 6,
+    "occupancy": 0.6428826627994975,
+    "addedSeams": 0,
+    "methods": {
+      "lscm": 6
+    },
+    "ms": 6.967991999999867
+  },
+  {
+    "name": "closed-cube",
+    "faces": 12,
+    "islands": 6,
+    "occupancy": 0.6428826627994975,
+    "addedSeams": 12,
+    "methods": {
+      "lscm": 6
+    },
+    "ms": 2.967624999999998
+  },
+  {
+    "name": "knot",
+    "faces": 2304,
+    "islands": 3,
+    "occupancy": 0.2956486578897533,
+    "addedSeams": 40,
+    "methods": {
+      "lscm": 3
+    },
+    "ms": 589.2336290000001
+  },
+  {
+    "name": "garment",
+    "faces": 3072,
+    "islands": 2,
+    "occupancy": 0.33765583426240164,
+    "addedSeams": 32,
+    "methods": {
+      "lscm": 2
+    },
+    "ms": 281.5522139999998
+  },
+  {
+    "name": "gear",
+    "faces": 1536,
+    "islands": 72,
+    "occupancy": 0.5491984300611189,
+    "addedSeams": 521,
+    "methods": {
+      "lscm": 72
+    },
+    "ms": 416.97065999999995
+  },
+  {
+    "name": "assembly",
+    "faces": 5632,
+    "islands": 248,
+    "occupancy": 0.5465741390036023,
+    "addedSeams": 1610,
+    "methods": {
+      "lscm": 247,
+      "tutte": 1
+    },
+    "ms": 1949.453818
+  }
+]
