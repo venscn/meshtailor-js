@@ -46,6 +46,7 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     const rig=snapshot.geometry.hinge;
     if(rig?.islands.some(i=>i.targetOrientation<0))snapshot.warnings.push('镜像 UV 岛保持原坐标；动画在刚性转向阶段对齐其正反面，避免最后形变阶段翻面。');
     if(rig?.islands.some(i=>i.mixedOrientation))snapshot.warnings.push('部分原始 UV 岛内含混合翻面：这不是整岛朝向问题，原 UV 原样保留；需要重新生成 UV 才能修复内部折叠。');
+    if(rig?.islands.some(i=>i.rotationFit))snapshot.warnings.push('UV 形变对存在翻转风险的岛采用逐三角形旋转/正定伸缩插值；过程可能出现紫色临时断边，最终精确回到原目标 UV。这不是连续网格或物理布料模拟。');
     if(rig?.temporaryCuts.length)snapshot.warnings.push(`铰链教学动画有 ${rig.temporaryCuts.length/4} 条临时断边（紫色），用于解除曲面闭环；这些不是 UV 裁切，不写入导出。80–92% 单独显示向 UV 的非刚性形变。`);
     work.check();work.report({stage:'transfer',detail:'传回同一份 3D / UV 与铰链数据',facesDone:mesh.faces.length,facesTotal:mesh.faces.length,islandsDone:snapshot.packed.length});
     const buffers=new Set<ArrayBuffer>();

@@ -1,3 +1,4 @@
+import { triangleMorph, morphPoint } from './planar-morph.js';
 import { motionPose } from './motion-timing.js';
 import { islandProgress } from './unfold-schedule.js';
 import { uvProgress, type UVWork } from './work.js';
@@ -9,13 +10,15 @@ export interface HingeIsland {
   basis:Float64Array; turnAxis:Vec3; turnAngle:number;
   netCenter:Vec3; radius:number; uvScale:number;
   /** Atlas parity is a view orientation, never a destructive UV-coordinate edit. */
-  targetOrientation:1|-1; mixedOrientation:boolean;
+  targetOrientation:1|-1; mixedOrientation:boolean; rotationFit:boolean;
 }
 export interface HingeRig {
   parent:Int32Array; depth:Int32Array; edgeCorners:Int32Array; axis:Float64Array; pivot:Float64Array; angle:Float64Array;
   islands:HingeIsland[]; hingeEdges:Uint32Array; temporaryCuts:Uint32Array;
   /** Exact rigid triangle net before the separate UV distortion stage. */
   flat:Float32Array;
+  /** Eight polar-fit coefficients per face; present only when required. */
+  fitCoefficients?:Float64Array;
 }
 export const HINGE_STAGES=[
   {t:0,label:'原始 3D'}, {t:.18,label:'分块陈列'}, {t:.28,label:'转向观察'},
@@ -116,7 +119,7 @@ export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<s
     const origin=point(g.source,root*3),u=unit(sub(point(g.source,root*3+1),origin)),normalRoot=normal(root);
     const v=cross(normalRoot,u).map(x=>x*targetOrientation),n=normalRoot.map(x=>x*targetOrientation);
     const basis=new Float64Array([...u,...v,...n]),turn=axisAngle(basis);
-    const item:HingeIsland={id:island.id,order,root,maxDepth,basis,turnAxis:turn.axis,turnAngle:turn.angle,netCenter:[0,0,0],radius:0,uvScale:1,targetOrientation,mixedOrientation:positive&&negative};islands.push(item);
+    const item:HingeIsland={id:island.id,order,root,maxDepth,basis,turnAxis:turn.axis,turnAngle:turn.angle,netCenter:[0,0,0],radius:0,uvScale:1,targetOrientation,mixedOrientation:positive&&negative,rotationFit:false};islands.push(item);
   }
   const rig:HingeRig={parent,depth,edgeCorners,axis,pivot,angle,islands,hingeEdges:new Uint32Array(hinges),temporaryCuts:new Uint32Array(),flat};
   const pose=new Float32Array(g.source.length);
@@ -139,12 +142,31 @@ export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<s
       flat.set(p,fi*9+k*3);item.radius=Math.max(item.radius,Math.hypot(...p),Math.hypot(...q)*item.uvScale,Math.hypot(...sub(point(g.source,fi*3+k),source.sourceCenter)));
     }
   }
+  // Inspect the entire affine path analytically, not just its endpoints. When
+  // any triangle would cross zero area, use positive-Jacobian polar fitting for
+  // that island. Extra moving cracks are explicitly displayed below.
+  for(const item of islands){
+    const source=sourceIslands.get(item.id)!,fits:ReturnType<typeof triangleMorph>[]=[];let unsafe=false;
+    for(const fi of item.order){
+      const p=[0,1,2].map(k=>[flat[fi*9+k*3]!,flat[fi*9+k*3+1]!] as [number,number]);
+      const q=[0,1,2].map(k=>[(g.target[fi*9+k*3]!-source.targetCenter[0])*item.uvScale,(g.target[fi*9+k*3+1]!-source.targetCenter[1])*item.uvScale] as [number,number]);
+      const fit=triangleMorph(p,q);fits.push(fit);unsafe ||= fit?.unsafeLinear??false;
+    }
+    if(unsafe&&fits.every(f=>f!==null)){
+      item.rotationFit=true;rig.fitCoefficients??=new Float64Array(n*8);
+      item.order.forEach((fi,i)=>rig.fitCoefficients!.set(fits[i]!.coefficients,fi*8));
+    }
+  }
+  const fitMid=new Float32Array(flat);
+  for(const item of islands)if(item.rotationFit)for(const fi of item.order)for(let k=0;k<3;k++){
+    const i=fi*9+k*3,p=morphPoint(flat[i]!,flat[i+1]!,rig.fitCoefficients!,fi*8,.5);fitMid[i]=p[0];fitMid[i+1]=p[1];
+  }
   // Only expose non-tree edges that actually separate; coplanar cycles do not need
   // fake cracks. These are ANIMATION-ONLY cuts and are not exported as UV seams.
   const temporary:number[]=[];
-  for(const [key,e]of topology.edges){if(e.faces.length!==2||seams.has(key))continue;const [a,b]=e.faces as [number,number];if(g.faceChart[a]!==g.faceChart[b]||kept.has(edgeKey(a,b)))continue;
+  for(const [key,e]of topology.edges){if(e.faces.length!==2||seams.has(key))continue;const [a,b]=e.faces as [number,number];if(g.faceChart[a]!==g.faceChart[b])continue;
     const ca=mesh.faces[a]!.vertices.indexOf(e.a),cb=mesh.faces[b]!.vertices.indexOf(e.a),da=mesh.faces[a]!.vertices.indexOf(e.b),db=mesh.faces[b]!.vertices.indexOf(e.b);
-    if(Math.hypot(...sub(point(flat,a*3+ca),point(flat,b*3+cb)))>1e-5||Math.hypot(...sub(point(flat,a*3+da),point(flat,b*3+db)))>1e-5)temporary.push(a*3+ca,a*3+da,b*3+cb,b*3+db);
+    if(Math.hypot(...sub(point(flat,a*3+ca),point(flat,b*3+cb)))>1e-5||Math.hypot(...sub(point(flat,a*3+da),point(flat,b*3+db)))>1e-5||Math.hypot(...sub(point(fitMid,a*3+ca),point(fitMid,b*3+cb)))>1e-5||Math.hypot(...sub(point(fitMid,a*3+da),point(fitMid,b*3+db)))>1e-5)temporary.push(a*3+ca,a*3+da,b*3+cb,b*3+db);
   }
   rig.temporaryCuts=new Uint32Array(temporary);scratch.delete(rig);return rig;
 }
@@ -170,8 +192,11 @@ export function writeHingePositions(g:UnfoldGeometry,options:UnfoldOptions,ids:r
       for(const fi of item.order)for(let k=0;k<3;k++){const p=mv(r,sub(point(out,fi*3+k),island.sourceCenter));for(let a=0;a<3;a++)out[fi*9+k*3+a]=p[a]!-item.netCenter[a]!*smooth(fold)+displacement[a]!;}
     }else{
       const fit=smooth((t-.8)/.12),pack=smooth((t-.92)/.08);
-      for(const fi of item.order)for(let k=0;k<9;k++){const i=fi*9+k,a=k%3,d=g.target[i]!,targetLocal=(d-island.targetCenter[a]!)*item.uvScale;
-        const local=rig.flat[i]!+(targetLocal-rig.flat[i]!)*fit,work=local+center[a]!;out[i]=work+(d-work)*pack;
+      for(const fi of item.order)for(let corner=0;corner<3;corner++){
+        const base=fi*9+corner*3,xy=item.rotationFit&&fit>0&&fit<1?morphPoint(rig.flat[base]!,rig.flat[base+1]!,rig.fitCoefficients!,fi*8,fit):null;
+        for(let a=0;a<3;a++){const i=base+a,d=g.target[i]!,targetLocal=(d-island.targetCenter[a]!)*item.uvScale;
+          const local=xy&&a<2?xy[a]!:rig.flat[i]!+(targetLocal-rig.flat[i]!)*fit,work=local+center[a]!;out[i]=work+(d-work)*pack;
+        }
       }
     }
   }
