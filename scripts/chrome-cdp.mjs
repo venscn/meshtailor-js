@@ -69,7 +69,9 @@ export async function startChrome() {
   }
   if (process.platform === 'linux' && process.getuid?.() === 0) args.unshift('--no-sandbox');
   let child;
-  try { child = spawn(chromePath(), args, { stdio: ['ignore', 'ignore', 'pipe'] }); }
+  const env = { ...process.env };
+  if (process.platform === 'linux' && process.env.CHROME_SOFTWARE_WEBGL === '1') delete env.DISPLAY;
+  try { child = spawn(chromePath(), args, { env, stdio: ['ignore', 'ignore', 'pipe'] }); }
   catch (error) { await rm(profile, { recursive: true, force: true }); throw error; }
   let stderr = '';
   const ws = await new Promise((resolve, reject) => {
