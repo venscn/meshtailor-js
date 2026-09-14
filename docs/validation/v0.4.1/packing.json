@@ -1,0 +1,28 @@
+{
+  "suite": "Large fragmented atlas",
+  "cases": [
+    {
+      "name": "2000 islands use bounded shelf path and cover every chart",
+      "passed": true,
+      "elapsedMs": 90.61016199999995,
+      "occupancy": 0.5205335742677535
+    },
+    {
+      "name": "All triangles valid; no overlapping boxes; gutters and equal texel density preserved",
+      "passed": true
+    },
+    {
+      "name": "Packing deterministic",
+      "passed": true
+    },
+    {
+      "name": "Small atlas keeps MaxRects and explicit shelf is selectable",
+      "passed": true
+    },
+    {
+      "name": "Oversized expensive mode, impossible padding and malformed options fail explicitly",
+      "passed": true
+    }
+  ],
+  "passed": 5
+}

@@ -1,0 +1,48 @@
+{
+  "suite": "Actual browser UV progress/cancel/timeout/retry",
+  "cases": [
+    {
+      "name": "Large solve exposes real progress while UI remains responsive",
+      "passed": true,
+      "details": {
+        "events": 3,
+        "status": "检查源岛 1 的 24576 个面（补切层 0） · 已接受 0/90,112 面 · 已用 0.7 秒",
+        "faces": 90112
+      }
+    },
+    {
+      "name": "Cancel stops a busy solve and prevents late snapshot display",
+      "passed": true
+    },
+    {
+      "name": "Retry succeeds after cancelling a large model",
+      "passed": true
+    },
+    {
+      "name": "Real solver budget failure is visible and contains no stale atlas",
+      "passed": true
+    },
+    {
+      "name": "Source-UV route completes the same large mesh without reparameterizing",
+      "passed": true,
+      "details": {
+        "target": "source",
+        "faces": 90112,
+        "ms": 2213.600000000093
+      }
+    },
+    {
+      "name": "Main-thread deadline actually terminates a Worker stuck in a synchronous loop",
+      "passed": true,
+      "details": {
+        "code": "timeout",
+        "message": "UV 任务超过 0.2 秒，已强制终止。最后阶段：intentional test spin。可调整预算后重试或使用网格原始 UV。"
+      }
+    },
+    {
+      "name": "New generated job and rendering recover after all failures",
+      "passed": true
+    }
+  ],
+  "passed": 7
+}
