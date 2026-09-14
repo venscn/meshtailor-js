@@ -81,10 +81,14 @@ export function sourceUVPreview(mesh: MeshData, charts: UVChart[], layout:'mater
   const domains=[...new Set(mesh.faces.map(f=>f.uvSpace??'default'))];
   // A common, even-checker-cell pitch preserves checker phase. No per-island repack.
   let span=1;const lows=new Map<string,Vec2>();
-  for(const domain of domains){let minU=0,minV=0,maxU=1,maxV=1;
-    for(const f of mesh.faces)if((f.uvSpace??'default')===domain)for(const uv of f.uvs??[])if(uv){minU=Math.min(minU,uv[0]);minV=Math.min(minV,uv[1]);maxU=Math.max(maxU,uv[0]);maxV=Math.max(maxV,uv[1]);}
-    minU=Math.floor(minU*8)/8;minV=Math.floor(minV*8)/8;lows.set(domain,[minU,minV]);
-    span=Math.max(span,maxU-minU,maxV-minV);
+  // Accumulate domain bounds once, rather than rescanning all faces per material.
+  const extents=new Map<string,[number,number,number,number]>();
+  for(const f of mesh.faces){const domain=f.uvSpace??'default',b=extents.get(domain)??[0,0,1,1];
+    for(const q of f.uvs??[])if(q){b[0]=Math.min(b[0],q[0]);b[1]=Math.min(b[1],q[1]);b[2]=Math.max(b[2],q[0]);b[3]=Math.max(b[3],q[1]);}
+    extents.set(domain,b);
+  }
+  for(const [domain,b]of extents){const minU=Math.floor(b[0]*8)/8,minV=Math.floor(b[1]*8)/8;
+    lows.set(domain,[minU,minV]);span=Math.max(span,b[2]-minU,b[3]-minV);
   }
   const pitch=Math.ceil((span+.25)*8)/8,cols=Math.ceil(Math.sqrt(domains.length));
   const origins=new Map(domains.map((d,i)=>[d,(layout==='overlay'||domains.length===1)?[0,0] as Vec2:[i%cols*pitch-lows.get(d)![0],Math.floor(i/cols)*pitch-lows.get(d)![1]] as Vec2]));

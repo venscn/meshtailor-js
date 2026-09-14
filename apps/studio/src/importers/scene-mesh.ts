@@ -50,8 +50,8 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
         const known=!!domain?.id||!!material?.name;
         if(!known)unknownDomains=true;
         faces.push({vertices:ids,uvs:[corner(ids[0]),corner(ids[1]),corner(ids[2])],
-          uvSpace:domain?.id||(known?materialIds.get(material)!:`object:${parts.length}`),
-          uvSpaceName:domain?.name||(known?material.name:`${obj.name||'Mesh'} · 材质未知`),
+          uvSpace:domain?.id||(known&&material?materialIds.get(material)!:`object:${parts.length}`),
+          uvSpaceName:domain?.name||(known&&material?material.name:`${obj.name||'Mesh'} · 材质未知`),
           sourcePart:`object:${parts.length}`});
       }
       parts.push({name:`${obj.name||'Mesh'}${instances>1?` #${instance}`:''}`,positions,faces});
