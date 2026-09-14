@@ -1,0 +1,9 @@
+{
+  "suite": "Motion profiling for real high-density procedural geometry",
+  "triangles": 90112,
+  "islands": 4,
+  "analysisElapsedMs": 295.0254190000005,
+  "nominalSpan": 3.55,
+  "actualSpan": 3.5500000000000003,
+  "note": "Only profiling is timed; original UV input, not Flight Helmet; geometry/UV construction excluded."
+}

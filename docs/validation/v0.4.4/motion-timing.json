@@ -1,0 +1,42 @@
+{
+  "suite": "Motion-aware variable timeline",
+  "passed": 9,
+  "cases": [
+    {
+      "name": "Removed time is not redistributed to moving spans",
+      "passed": true
+    },
+    {
+      "name": "Skipped stage buttons collapse to the same physical instant",
+      "passed": true
+    },
+    {
+      "name": "Exact source and target endpoints preserved",
+      "passed": true
+    },
+    {
+      "name": "Zero-duration queue terminates even with looping requested",
+      "passed": true
+    },
+    {
+      "name": "Very short successor never overtakes a long predecessor",
+      "passed": true
+    },
+    {
+      "name": "Variable/zero durations: no dead tail, gaps or >2 active (relay)",
+      "passed": true
+    },
+    {
+      "name": "Variable/zero durations: no dead tail, gaps or >2 active (sequential)",
+      "passed": true
+    },
+    {
+      "name": "Stage seek and reverse read the same compacted timeline",
+      "passed": true
+    },
+    {
+      "name": "Malformed profile fails explicitly",
+      "passed": true
+    }
+  ]
+}

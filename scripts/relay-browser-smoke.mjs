@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import {readFile,writeFile} from 'node:fs/promises';
 import {startChrome,delay} from './chrome-cdp.mjs';
-const report={suite:'Per-island late relay in real browser playback',host:'Offline lab / production WebGL renderer / classic UV worker',cases:[]};
+const report={suite:'Fixed-time late relay diagnostics (automatic pruning disabled explicitly)',host:'Offline lab / production WebGL renderer / classic UV worker',cases:[]};
 const b=await startChrome();
 const check=async(name,fn)=>{const details=await fn();report.cases.push({name,passed:true,...(details?{details}:{})});console.log('PASS',name);};
 try{
@@ -17,6 +17,8 @@ try{
   const stats=()=>p.evaluate('({done:Number(lab.view.canvas.dataset.completed),waiting:Number(lab.view.canvas.dataset.waiting),active:JSON.parse(lab.view.canvas.dataset.animating)})');
   await p.evaluate(`window.poseErrors=()=>{const g=lab.snapshot.geometry,x=lab.view.getPositions();return g.islands.map(c=>{let source=0,target=0;for(const fi of c.faces)for(let k=0;k<9;k++){const j=fi*9+k;source=Math.max(source,Math.abs(x[j]-g.source[j]));target=Math.max(target,Math.abs(x[j]-g.target[j]));}return {id:c.id,source,target};});};`);
   await check(prefix+'relay defaults in UI and runtime; net hold and camera follow are off',async()=>{assert.equal(await p.evaluate('lab.options.order'),'relay');assert.equal(await p.evaluate('document.querySelector("#order").value'),'relay');assert.equal(await p.evaluate('lab.options.handoff'),.85);assert.equal(await p.evaluate('lab.options.holdNet'),false);assert.equal(await p.evaluate('lab.options.autoFrame'),false);assert.equal(await p.evaluate('document.querySelector("#order option[value=together]")'),null);});
+  // Legacy numeric timings remain testable through the explicit comparison switch.
+  await click('skip-static');
   await check(prefix+'first island deforms while every queued island remains EXACTLY at 3D',async()=>{await go(.6/2.7);const e=await p.evaluate('poseErrors()');assert.ok(e[0].source>0);assert.equal(e[1].source,0);assert.equal(e[2].source,0);const s=await stats();assert.equal(s.active.length,1);assert.equal(s.waiting,2);});
   await check(prefix+'overlap contains only predecessor at 90% and successor at 5%',async()=>{await go(.9/2.7);const s=await stats();assert.deepEqual(s.active.map(x=>x.id),[0,1]);assert.ok(Math.abs(s.active[0].progress-.9)<1e-8);assert.ok(Math.abs(s.active[1].progress-.05)<1e-8);assert.equal((await p.evaluate('poseErrors()'))[2].source,0);});
   await check(prefix+'completed island remains EXACTLY at UV while the next plays',async()=>{await go(1.4/2.7);const e=await p.evaluate('poseErrors()');assert.equal(e[0].target,0);assert.ok(e[1].source>0&&e[1].target>0);assert.equal(e[2].source,0);assert.equal((await stats()).done,1);});

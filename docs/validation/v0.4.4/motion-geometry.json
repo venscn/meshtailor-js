@@ -1,0 +1,58 @@
+{
+  "suite": "Actual geometry motion pruning",
+  "passed": 13,
+  "cases": [
+    {
+      "name": "Cube flat islands skip hinge stage without losing target UV",
+      "passed": true
+    },
+    {
+      "name": "Developable bent ribbons keep actual hinge motion and skip redundant UV deformation",
+      "passed": true
+    },
+    {
+      "name": "cube: every dropped span is unchanged throughout, not just at endpoints",
+      "passed": true
+    },
+    {
+      "name": "ribbon: every dropped span is unchanged throughout, not just at endpoints",
+      "passed": true
+    },
+    {
+      "name": "Stage-boundary scrub is continuous across removed time",
+      "passed": true
+    },
+    {
+      "name": "Explicit user hold is retained despite automatic skip",
+      "passed": true
+    },
+    {
+      "name": "Diagnostic skip-off retains the fixed-time schedule",
+      "passed": true
+    },
+    {
+      "name": "Analysis and rendering never mutate source, target, UV or hinge geometry",
+      "passed": true
+    },
+    {
+      "name": "Equal overall endpoints do not remove real intermediate separation",
+      "passed": true
+    },
+    {
+      "name": "Entirely motionless direct path has zero duration and no phantom wait",
+      "passed": true
+    },
+    {
+      "name": "Relative tolerance still detects small but real islands",
+      "passed": true
+    },
+    {
+      "name": "Changing selection and separation rebuilds the actual workbench motion",
+      "passed": true
+    },
+    {
+      "name": "Invalid tolerance fails explicitly",
+      "passed": true
+    }
+  ]
+}

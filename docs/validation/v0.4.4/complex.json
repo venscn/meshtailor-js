@@ -1,0 +1,250 @@
+{
+  "suite": "Complex mesh, import normalization, asset download and FBX fixture STRUCTURE regression",
+  "node": "v22.16.0",
+  "cases": [
+    {
+      "name": "Exact welding restores quad adjacency while retaining a UV seam",
+      "passed": true,
+      "elapsedMs": 1.06
+    },
+    {
+      "name": "Object welding scopes are isolated",
+      "passed": true,
+      "elapsedMs": 0.45
+    },
+    {
+      "name": "No-weld option keeps intentional coincident geometry separate",
+      "passed": true,
+      "elapsedMs": 0.07
+    },
+    {
+      "name": "Tolerance mode checks adjacent spatial cells",
+      "passed": true,
+      "elapsedMs": 1.49
+    },
+    {
+      "name": "Invalid positions, indices, UVs and limits are rejected",
+      "passed": true,
+      "elapsedMs": 24.34
+    },
+    {
+      "name": "Collapsed faces are dropped with an explicit report",
+      "passed": true,
+      "elapsedMs": 0.12
+    },
+    {
+      "name": "knot/low: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 6.72
+    },
+    {
+      "name": "knot/medium: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 9.76
+    },
+    {
+      "name": "knot: full real-edge baseline/traversal/UV pipeline",
+      "passed": true,
+      "elapsedMs": 149.6
+    },
+    {
+      "name": "knot: OBJ export/import preserves actual UV seams",
+      "passed": true,
+      "elapsedMs": 130.74
+    },
+    {
+      "name": "knot/high: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 24.04
+    },
+    {
+      "name": "garment/low: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 0.58
+    },
+    {
+      "name": "garment/medium: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 1.92
+    },
+    {
+      "name": "garment: full real-edge baseline/traversal/UV pipeline",
+      "passed": true,
+      "elapsedMs": 202.98
+    },
+    {
+      "name": "garment: OBJ export/import preserves actual UV seams",
+      "passed": true,
+      "elapsedMs": 123.02
+    },
+    {
+      "name": "garment/high: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 21.01
+    },
+    {
+      "name": "gear/low: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 0.48
+    },
+    {
+      "name": "gear/medium: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 1.02
+    },
+    {
+      "name": "gear: full real-edge baseline/traversal/UV pipeline",
+      "passed": true,
+      "elapsedMs": 94.49
+    },
+    {
+      "name": "gear: OBJ export/import preserves actual UV seams",
+      "passed": true,
+      "elapsedMs": 57.07
+    },
+    {
+      "name": "gear/high: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 13.32
+    },
+    {
+      "name": "assembly/low: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 1.15
+    },
+    {
+      "name": "assembly/medium: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 24.03
+    },
+    {
+      "name": "assembly: full real-edge baseline/traversal/UV pipeline",
+      "passed": true,
+      "elapsedMs": 405.1
+    },
+    {
+      "name": "assembly: OBJ export/import preserves actual UV seams",
+      "passed": true,
+      "elapsedMs": 243.57
+    },
+    {
+      "name": "assembly/high: finite, nondegenerate, edge-manifold geometry and valid UVs",
+      "passed": true,
+      "elapsedMs": 45.66
+    },
+    {
+      "name": "Lazy frame snapshots do not change after other frames are read or mutated",
+      "passed": true,
+      "elapsedMs": 1.04
+    },
+    {
+      "name": "OBJ roundtrip keeps explicitly overlapping but disconnected UV indices",
+      "passed": true,
+      "elapsedMs": 0.82
+    },
+    {
+      "name": "Geometry-only glTF strips texture dependencies without changing geometry or transforms",
+      "passed": true,
+      "elapsedMs": 0.98
+    },
+    {
+      "name": "GLB encode/decode roundtrip and damaged header rejection",
+      "passed": true,
+      "elapsedMs": 1.15
+    },
+    {
+      "name": "Downloader uses ONLY metadata and geometry; zero texture fetches (mock transport)",
+      "passed": true,
+      "elapsedMs": 23.18
+    },
+    {
+      "name": "Downloader rejects HTTP errors, external resource redirects in metadata and truncated bins",
+      "passed": true,
+      "elapsedMs": 1.17
+    },
+    {
+      "name": "examples/complex/knot.obj: distributed bytes match SHA256",
+      "passed": true,
+      "elapsedMs": 10.61
+    },
+    {
+      "name": "examples/complex/garment.obj: distributed bytes match SHA256",
+      "passed": true,
+      "elapsedMs": 20.76
+    },
+    {
+      "name": "examples/complex/gear.obj: distributed bytes match SHA256",
+      "passed": true,
+      "elapsedMs": 3.27
+    },
+    {
+      "name": "examples/complex/assembly.obj: distributed bytes match SHA256",
+      "passed": true,
+      "elapsedMs": 2.76
+    },
+    {
+      "name": "apps/studio/public/assets/fixtures/garment-ascii.fbx: distributed bytes match SHA256",
+      "passed": true,
+      "elapsedMs": 2.24
+    },
+    {
+      "name": "apps/studio/public/assets/fixtures/garment-binary.fbx: distributed bytes match SHA256",
+      "passed": true,
+      "elapsedMs": 0.49
+    },
+    {
+      "name": "ASCII FBX fixture contains real geometry and ByPolygonVertex UV0",
+      "passed": true,
+      "elapsedMs": 1.07
+    },
+    {
+      "name": "Binary FBX fixture: valid 7.4 node offsets and compressed geometry arrays (not a loader integration)",
+      "passed": true,
+      "elapsedMs": 5.59
+    }
+  ],
+  "meshes": [
+    {
+      "id": "knot",
+      "vertices": 4608,
+      "triangles": 9216,
+      "seamEdges": 750,
+      "steps": 894,
+      "charts": 1,
+      "pipelineMs": 149
+    },
+    {
+      "id": "garment",
+      "vertices": 6240,
+      "triangles": 12288,
+      "seamEdges": 750,
+      "steps": 838,
+      "charts": 1,
+      "pipelineMs": 203
+    },
+    {
+      "id": "gear",
+      "vertices": 3072,
+      "triangles": 6144,
+      "seamEdges": 750,
+      "steps": 1068,
+      "charts": 49,
+      "pipelineMs": 94
+    },
+    {
+      "id": "assembly",
+      "vertices": 11264,
+      "triangles": 22528,
+      "seamEdges": 750,
+      "steps": 1086,
+      "charts": 5,
+      "pipelineMs": 405
+    }
+  ],
+  "passed": 40,
+  "limitations": [
+    "No Three.js/FBXLoader execution in this suite",
+    "No live network requests in mocked downloader cases",
+    "No React/Vite or GPU rendering in this suite"
+  ]
+}
