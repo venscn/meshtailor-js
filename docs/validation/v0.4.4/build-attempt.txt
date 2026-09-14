@@ -1,0 +1,16 @@
+
+> meshtailor-js@0.4.3 build
+> npm --workspace @meshtailor/studio run build && npm run typecheck
+
+
+> @meshtailor/studio@0.4.3 build
+> vite build
+
+sh: 1: vite: not found
+npm error Lifecycle script `build` failed with error:
+npm error code 127
+npm error path /mnt/data/work-0.4.4/meshtailor-js/apps/studio
+npm error workspace @meshtailor/studio@0.4.3
+npm error location /mnt/data/work-0.4.4/meshtailor-js/apps/studio
+npm error command failed
+npm error command sh -c vite build
