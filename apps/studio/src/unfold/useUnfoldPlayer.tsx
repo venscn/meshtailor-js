@@ -8,6 +8,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const [scope,setScope]=useState<UnfoldScope>('all'),[selection,setSelection]=useState<number[]>([]);
   const [order,setOrder]=useState<UnfoldOrder>(DEFAULT_UNFOLD_ORDER),[path,setPath]=useState<UnfoldPath>('hinge');
   const [handoff,setHandoff]=useState(DEFAULT_HANDOFF),[holdNet,setHoldNet]=useState(false);
+  const [inspectionIndex,setInspectionIndex]=useState<number|null>(null);
   const [progress,setProgress]=useState(0),[playing,setPlaying]=useState(false),[seconds,setSeconds]=useState(12);
   const [reverse,setReverse]=useState(false),[loop,setLoop]=useState(false),[separation,setSeparation]=useState(.45);
   const [context,setContext]=useState<UnfoldDisplay['context']>('dim'),[checker,setChecker]=useState(false),[labels,setLabels]=useState(true);
@@ -19,8 +20,9 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const active=useMemo(()=>scope==='all'?all:scope==='single'?[selection.find(id=>all.includes(id))??all[0]].filter((id):id is number=>id!==undefined):selection.filter(id=>all.includes(id)),[all,scope,selection]);
   const duration=unfoldDuration(seconds,active.length,order,handoff);
   const schedule=sampleUnfoldSchedule(progress,active.length,order,handoff,reverse);
+  const focusIndex=!playing&&inspectionIndex!==null&&inspectionIndex<active.length?inspectionIndex:schedule.focusIndex;
   const remaining=duration*(reverse?progress:1-progress);
-  useEffect(()=>{setPlaying(false);setProgress(0);ref.current=0;setSelection(all.length?[all[0]!]:[]);setFocusFace(null);},[snapshot]);
+  useEffect(()=>{setPlaying(false);setProgress(0);ref.current=0;setSelection(all.length?[all[0]!]:[]);setFocusFace(null);setInspectionIndex(null);},[snapshot]);
   useEffect(()=>{
     if(!playing||!snapshot||!active.length)return;
     let raf=0,last:number|null=null,live=true;
@@ -37,7 +39,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
     document.addEventListener('visibilitychange',visibility);
     raf=requestAnimationFrame(tick);return()=>{live=false;cancelAnimationFrame(raf);document.removeEventListener('visibilitychange',visibility);};
   },[playing,snapshot,active.length,duration,reverse,loop]);
-  const seek=(value:number)=>{setPlaying(false);const t=Math.max(0,Math.min(1,value));ref.current=t;setProgress(t);};
+  const seek=(value:number)=>{setPlaying(false);setInspectionIndex(null);const t=Math.max(0,Math.min(1,value));ref.current=t;setProgress(t);};
   const reset=()=>seek(0);
   const select=(id:number,face:number|null=null,additive=false)=>{
     if(!all.includes(id))return;reset();setFocusFace(face);
@@ -54,12 +56,12 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const changeOrder=(value:UnfoldOrder)=>{reset();setOrder(value);};
   const changeHandoff=(value:number)=>{if(!Number.isFinite(value))return;reset();setHandoff(Math.max(MIN_HANDOFF,Math.min(1,value)));};
   const changeHoldNet=(value:boolean)=>{reset();setHoldNet(value);};
-  const seekStage=(pose:number)=>seek(islandTimelineProgress(hingePlaybackProgress(pose,holdNet),schedule.focusIndex,active.length,order,handoff));
-  const seekQueue=(direction:number)=>{const i=Math.max(0,Math.min(active.length-1,schedule.focusIndex+direction));seek(islandTimelineProgress(reverse?1:0,i,active.length,order,handoff));};
+  const seekStage=(pose:number)=>{seek(islandTimelineProgress(hingePlaybackProgress(pose,holdNet),focusIndex,active.length,order,handoff));setInspectionIndex(focusIndex);};
+  const seekQueue=(direction:number)=>{const i=Math.max(0,Math.min(active.length-1,focusIndex+direction));seek(islandTimelineProgress(reverse?1:0,i,active.length,order,handoff));setInspectionIndex(i);};
   const nextIsland=(direction:number)=>{const index=Math.max(0,all.indexOf(selection[0]??-1)),id=all[(index+direction+all.length)%all.length];if(id!==undefined)select(id);};
-  const toggle=()=>{if(!snapshot||!active.length)return;if(!playing&&(reverse?ref.current<=0:ref.current>=1)){ref.current=reverse?1:0;setProgress(ref.current);}setPlaying(x=>!x);};
+  const toggle=()=>{setInspectionIndex(null);if(!snapshot||!active.length)return;if(!playing&&(reverse?ref.current<=0:ref.current>=1)){ref.current=reverse?1:0;setProgress(ref.current);}setPlaying(x=>!x);};
   const fit=(kind:'orbit'|'uv'|'current')=>{setAutoFrame(false);setCameraCommand(c=>({kind,key:c.key+1}));};
-  return {handoff,changeHandoff,holdNet,changeHoldNet,schedule,remaining,seekStage,seekQueue,hingeWave,setHingeWave,showHinges,setShowHinges,showTemporaryCuts,setShowTemporaryCuts,autoFrame,setAutoFrame,scope,selection,active,all,order,path,progress,playing,seconds,duration,reverse,loop,separation,context,checker,labels,focusFace,cameraCommand,
+  return {handoff,changeHandoff,holdNet,changeHoldNet,schedule,focusIndex,remaining,seekStage,seekQueue,hingeWave,setHingeWave,showHinges,setShowHinges,showTemporaryCuts,setShowTemporaryCuts,autoFrame,setAutoFrame,scope,selection,active,all,order,path,progress,playing,seconds,duration,reverse,loop,separation,context,checker,labels,focusFace,cameraCommand,
     select,pick,changeScope,changeOrder,nextIsland,seek,toggle,fit,pause:()=>setPlaying(false),setPath,setSeconds,setReverse,setLoop,setSeparation,setContext,setChecker,setLabels,
     clear:()=>{reset();setScope('selected');setSelection([]);setFocusFace(null);}};
 }
