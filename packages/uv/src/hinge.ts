@@ -8,6 +8,8 @@ export interface HingeIsland {
   id:number; order:number[]; root:number; maxDepth:number;
   basis:Float64Array; turnAxis:Vec3; turnAngle:number;
   netCenter:Vec3; radius:number; uvScale:number;
+  /** Atlas parity is a view orientation, never a destructive UV-coordinate edit. */
+  targetOrientation:1|-1; mixedOrientation:boolean;
 }
 export interface HingeRig {
   parent:Int32Array; depth:Int32Array; edgeCorners:Int32Array; axis:Float64Array; pivot:Float64Array; angle:Float64Array;
@@ -103,8 +105,18 @@ export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<s
     // Source UVs with inconsistent connectivity may have several components under
     // one imported chart. Treat each disconnected root explicitly, never read junk transforms.
     for(const fi of island.faces)if(parent[fi]===-2){parent[fi]=-1;order.push(fi);}
-    const origin=point(g.source,root*3),u=unit(sub(point(g.source,root*3+1),origin)),normalRoot=normal(root),v=cross(normalRoot,u),basis=new Float64Array([...u,...v,...normalRoot]),turn=axisAngle(basis);
-    const item:HingeIsland={id:island.id,order,root,maxDepth,basis,turnAxis:turn.axis,turnAngle:turn.angle,netCenter:[0,0,0],radius:0,uvScale:1};islands.push(item);
+    // A mirrored imported UV chart has opposite winding. A 2D SO(2) fit cannot
+    // align it: blending then collapses the chart and turns it inside out at .86.
+    // Orient its *rigid* net to the atlas parity first, using a proper 3D rotation
+    // (reverse both V and the normal, determinant +1), not a reflection/UV edit.
+    let signed=0,positive=false,negative=false;
+    for(const fi of island.faces){const a=point(g.target,fi*3),b=point(g.target,fi*3+1),c=point(g.target,fi*3+2);
+      const area=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);signed+=area;positive ||= area>1e-12;negative ||= area< -1e-12;}
+    const targetOrientation:1|-1=signed<0?-1:1;
+    const origin=point(g.source,root*3),u=unit(sub(point(g.source,root*3+1),origin)),normalRoot=normal(root);
+    const v=cross(normalRoot,u).map(x=>x*targetOrientation),n=normalRoot.map(x=>x*targetOrientation);
+    const basis=new Float64Array([...u,...v,...n]),turn=axisAngle(basis);
+    const item:HingeIsland={id:island.id,order,root,maxDepth,basis,turnAxis:turn.axis,turnAngle:turn.angle,netCenter:[0,0,0],radius:0,uvScale:1,targetOrientation,mixedOrientation:positive&&negative};islands.push(item);
   }
   const rig:HingeRig={parent,depth,edgeCorners,axis,pivot,angle,islands,hingeEdges:new Uint32Array(hinges),temporaryCuts:new Uint32Array(),flat};
   const pose=new Float32Array(g.source.length);
