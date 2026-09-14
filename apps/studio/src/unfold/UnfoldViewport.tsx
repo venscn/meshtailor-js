@@ -17,6 +17,7 @@ export function UnfoldViewport({geometry,options,onPick,cameraCommand,status}:Pr
   return <div ref={host} className="viewport unfold-viewport" data-testid="unfold-viewport">
     {error?<div className="viewport-error" role="alert"><strong>展开视图不可用</strong><p>{error}</p><button onClick={()=>setRetry(n=>n+1)}>Retry unfold preview</button></div>:status?<div className="uv-status" role="status">{status}</div>:<>
       <div className="unfold-badge"><b>{Math.round(options.progress*100)}%</b><span>{options.order==='sequential'?'逐个展开':'同时展开'} · {options.selected.length} 个岛</span></div>
+      <div className="hinge-legend">黄色：UV 裁切 · 青色：铰链轴 · 紫色虚线：临时断边（不导出）</div>
       <div className="viewport-hint">拖动旋转 · 滚轮缩放 · 右键平移 · 点击选岛 · Shift/Ctrl/⌘ 多选</div>
     </>}
   </div>;

@@ -5,10 +5,11 @@ import type { UnfoldDisplay } from './webgl-view';
 export type UnfoldScope='all'|'single'|'selected';
 export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const [scope,setScope]=useState<UnfoldScope>('all'),[selection,setSelection]=useState<number[]>([]);
-  const [order,setOrder]=useState<UnfoldOrder>('together'),[path,setPath]=useState<UnfoldPath>('staged');
-  const [progress,setProgress]=useState(0),[playing,setPlaying]=useState(false),[seconds,setSeconds]=useState(5);
+  const [order,setOrder]=useState<UnfoldOrder>('together'),[path,setPath]=useState<UnfoldPath>('hinge');
+  const [progress,setProgress]=useState(0),[playing,setPlaying]=useState(false),[seconds,setSeconds]=useState(12);
   const [reverse,setReverse]=useState(false),[loop,setLoop]=useState(false),[separation,setSeparation]=useState(.45);
   const [context,setContext]=useState<UnfoldDisplay['context']>('dim'),[checker,setChecker]=useState(false),[labels,setLabels]=useState(true);
+  const [hingeWave,setHingeWave]=useState(true),[showHinges,setShowHinges]=useState(true),[showTemporaryCuts,setShowTemporaryCuts]=useState(true),[autoFrame,setAutoFrame]=useState(true);
   const [focusFace,setFocusFace]=useState<number|null>(null);
   const [cameraCommand,setCameraCommand]=useState({kind:'orbit' as 'orbit'|'uv',key:0});
   const ref=useRef(0);ref.current=progress;
@@ -49,7 +50,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const nextIsland=(direction:number)=>{const index=Math.max(0,all.indexOf(selection[0]??-1)),id=all[(index+direction+all.length)%all.length];if(id!==undefined)select(id);};
   const toggle=()=>{if(!snapshot||!active.length)return;if(!playing&&(reverse?ref.current<=0:ref.current>=1)){ref.current=reverse?1:0;setProgress(ref.current);}setPlaying(x=>!x);};
   const fit=(kind:'orbit'|'uv')=>setCameraCommand(c=>({kind,key:c.key+1}));
-  return {scope,selection,active,all,order,path,progress,playing,seconds,duration,reverse,loop,separation,context,checker,labels,focusFace,cameraCommand,
+  return {hingeWave,setHingeWave,showHinges,setShowHinges,showTemporaryCuts,setShowTemporaryCuts,autoFrame,setAutoFrame,scope,selection,active,all,order,path,progress,playing,seconds,duration,reverse,loop,separation,context,checker,labels,focusFace,cameraCommand,
     select,pick,changeScope,changeOrder,nextIsland,seek,toggle,fit,pause:()=>setPlaying(false),setPath,setSeconds,setReverse,setLoop,setSeparation,setContext,setChecker,setLabels,
     clear:()=>{reset();setScope('selected');setSelection([]);setFocusFace(null);}};
 }

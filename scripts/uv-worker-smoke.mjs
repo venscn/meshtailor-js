@@ -23,7 +23,7 @@ try{
   const mesh=core.parseOBJ(await readFile(join(compiled.root,'examples/cube_uv.obj'),'utf8')),edges=[...seams.extractSeamEdgesFromUV(mesh)];
   await check('Generated UV worker transfers exact shared geometry, typed arrays and Maps',async()=>{
     const data=await run({mesh,edges,target:'generated'});assert.equal(data.ok,true);const s=data.snapshot;assert.equal(s.geometry.islands.length,6);assert.ok(s.packed[0].faceUVs instanceof Map);assert.ok(s.geometry.target instanceof Float32Array);
-    const expected=uv.buildUnfoldGeometry(mesh,uv.planarPackPreview(mesh,uv.buildCharts(mesh,new Set(edges))),new Set(edges));assert.deepEqual(s.geometry.target,expected.target);assert.deepEqual(s.geometry.source,expected.source);
+    const expected=uv.buildUnfoldGeometry(mesh,uv.unwrapMesh(mesh,new Set(edges)).packed,new Set(edges));assert.deepEqual(s.geometry.target,expected.target);assert.deepEqual(s.geometry.source,expected.source);
   });
   await check('Original-UV worker ignores unrelated baseline edges and preserves face UVs',async()=>{
     const data=await run({mesh,edges:[],target:'source'});assert.equal(data.ok,true);assert.equal(data.snapshot.geometry.islands.length,6);assert.deepEqual(new Set(data.snapshot.seams),new Set(edges));

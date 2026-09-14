@@ -7,7 +7,7 @@ export interface HingeIsland {
   netCenter:Vec3; radius:number; uvScale:number;
 }
 export interface HingeRig {
-  parent:Int32Array; depth:Int32Array; axis:Float64Array; pivot:Float64Array; angle:Float64Array;
+  parent:Int32Array; depth:Int32Array; edgeCorners:Int32Array; axis:Float64Array; pivot:Float64Array; angle:Float64Array;
   islands:HingeIsland[]; hingeEdges:Uint32Array; temporaryCuts:Uint32Array;
   /** Exact rigid triangle net before the separate UV distortion stage. */
   flat:Float32Array;
@@ -57,6 +57,7 @@ function treePose(g:UnfoldGeometry,rig:HingeRig,island:HingeIsland,fold:number,w
 }
 export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<string>):HingeRig{
   const n=mesh.faces.length,parent=new Int32Array(n).fill(-2),depth=new Int32Array(n),axis=new Float64Array(n*3),pivot=new Float64Array(n*3),angle=new Float64Array(n),flat=new Float32Array(g.source.length);
+  const edgeCorners=new Int32Array(n*2).fill(-1);
   const topology=buildTopology(mesh),adj:{face:number;a:number;b:number}[][]=Array.from({length:n},()=>[]);
   for(const [key,e]of topology.edges){if(e.faces.length!==2||seams.has(key))continue;const [a,b]=e.faces as [number,number];if(g.faceChart[a]!==g.faceChart[b])continue;adj[a]!.push({face:b,a:e.a,b:e.b});adj[b]!.push({face:a,a:e.a,b:e.b});}
   const normal=(fi:number)=>unit(cross(sub(point(g.source,fi*3+1),point(g.source,fi*3)),sub(point(g.source,fi*3+2),point(g.source,fi*3))));
@@ -70,7 +71,7 @@ export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<s
       const fi=order[h]!;
       for(const edge of adj[fi]!){const child=edge.face;if(parent[child]!==-2)continue;parent[child]=fi;order.push(child);kept.add(edgeKey(fi,child));
         const f=mesh.faces[fi]!,a=fi*3+f.vertices.indexOf(edge.a),b=fi*3+f.vertices.indexOf(edge.b),A=point(g.source,a),B=point(g.source,b),ax=unit(sub(B,A)),np=normal(fi),nc=normal(child);
-        axis.set(ax,child*3);pivot.set(A,child*3);angle[child]=Math.atan2(dot(ax,cross(nc,np)),dot(nc,np));
+        edgeCorners.set([a,b],child*2);axis.set(ax,child*3);pivot.set(A,child*3);angle[child]=Math.atan2(dot(ax,cross(nc,np)),dot(nc,np));
         depth[child]=depth[fi]!+(Math.abs(angle[child]!)>.003?1:0);maxDepth=Math.max(maxDepth,depth[child]!);
         if(Math.abs(angle[child]!)>.003)hinges.push(a,b);
       }
@@ -81,7 +82,7 @@ export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<s
     const origin=point(g.source,root*3),u=unit(sub(point(g.source,root*3+1),origin)),normalRoot=normal(root),v=cross(normalRoot,u),basis=new Float64Array([...u,...v,...normalRoot]),turn=axisAngle(basis);
     const item:HingeIsland={id:island.id,order,root,maxDepth,basis,turnAxis:turn.axis,turnAngle:turn.angle,netCenter:[0,0,0],radius:0,uvScale:1};islands.push(item);
   }
-  const rig:HingeRig={parent,depth,axis,pivot,angle,islands,hingeEdges:new Uint32Array(hinges),temporaryCuts:new Uint32Array(),flat};
+  const rig:HingeRig={parent,depth,edgeCorners,axis,pivot,angle,islands,hingeEdges:new Uint32Array(hinges),temporaryCuts:new Uint32Array(),flat};
   const pose=new Float32Array(g.source.length);
   for(const item of islands){
     const source=g.islands.find(i=>i.id===item.id)!;treePose(g,rig,item,1,false,pose);
@@ -136,4 +137,12 @@ export function writeHingePositions(g:UnfoldGeometry,options:UnfoldOptions,ids:r
     }
   }
   return out;
+}
+
+/** Remaining signed dihedral at a displayed hinge, for the on-screen angle label. */
+export function hingeRemainingAngle(g:UnfoldGeometry,options:UnfoldOptions,fi:number):number {
+  const rig=g.hinge;if(!rig)return 0;const id=g.faceChart[fi]!,index=options.selected.indexOf(id),island=rig.islands.find(i=>i.id===id);if(index<0||!island)return rig.angle[fi]!;
+  const t=options.order==='sequential'?clamp(options.progress*options.selected.length-index):clamp(options.progress),fold=clamp((t-.28)/.42);
+  const local=options.hingeWave===false?smooth(fold):smooth(fold*1.6-rig.depth[fi]!/Math.max(1,island.maxDepth)*.6);
+  return rig.angle[fi]!*(1-local);
 }
