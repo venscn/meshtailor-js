@@ -1,0 +1,26 @@
+{
+  "suite": "UV core work progress and interruption",
+  "cases": [
+    {
+      "name": "Instrumentation does not alter recursive distortion cuts or UV results",
+      "passed": true
+    },
+    {
+      "name": "Actual stages and monotonic accepted-face progress reported",
+      "passed": true
+    },
+    {
+      "name": "Deadline during quality checks escapes both numerical fallback and recursive repair",
+      "passed": true
+    },
+    {
+      "name": "Iterative solver deadline is not swallowed by LSCM/Tutte retry",
+      "passed": true
+    },
+    {
+      "name": "Preflight and geometry building honor interruption",
+      "passed": true
+    }
+  ],
+  "passed": 5
+}

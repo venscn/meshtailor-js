@@ -1,0 +1,249 @@
+{
+  id: 'gear',
+  detail: 'low',
+  faces: 1536,
+  islands: 4,
+  tiny: 0,
+  smallest: 50,
+  largest: 720,
+  occupancy: 0.4135960879028578,
+  ms: 482.974876,
+  settings: {
+    chartPolicy: 'large',
+    method: 'auto',
+    iterations: 2000,
+    tolerance: 1e-9,
+    padding: 0.003,
+    rotate: true,
+    rotationSteps: 12,
+    autoCut: true,
+    maxChartFaces: 4096,
+    maxAspect: 24,
+    minFill: 0,
+    maxStretch: 30,
+    regionOptions: {
+      normalConeDegrees: 86.75230138188205,
+      maxChartFaces: 4096,
+      minRegionFaces: 20,
+      minRegionAreaRatio: 0.01
+    }
+  }
+}
+{
+  id: 'gear',
+  detail: 'medium',
+  faces: 6144,
+  islands: 3,
+  tiny: 0,
+  smallest: 340,
+  largest: 2944,
+  occupancy: 0.38764762706021477,
+  ms: 1551.173625,
+  settings: {
+    chartPolicy: 'large',
+    method: 'auto',
+    iterations: 2000,
+    tolerance: 1e-9,
+    padding: 0.003,
+    rotate: true,
+    rotationSteps: 12,
+    autoCut: true,
+    maxChartFaces: 7552,
+    maxAspect: 24,
+    minFill: 0,
+    maxStretch: 30,
+    regionOptions: {
+      normalConeDegrees: 80.28125000000004,
+      maxChartFaces: 7552,
+      minRegionFaces: 40,
+      minRegionAreaRatio: 0.01
+    }
+  }
+}
+{
+  id: 'garment',
+  detail: 'low',
+  faces: 3072,
+  islands: 10,
+  tiny: 0,
+  smallest: 77,
+  largest: 1121,
+  occupancy: 0.4594489002696051,
+  ms: 447.96505400000024,
+  settings: {
+    chartPolicy: 'large',
+    method: 'auto',
+    iterations: 2000,
+    tolerance: 1e-9,
+    padding: 0.003,
+    rotate: true,
+    rotationSteps: 12,
+    autoCut: true,
+    maxChartFaces: 5376,
+    maxAspect: 24,
+    minFill: 0,
+    maxStretch: 30,
+    regionOptions: {
+      normalConeDegrees: 83.67515277633967,
+      maxChartFaces: 5376,
+      minRegionFaces: 28,
+      minRegionAreaRatio: 0.01
+    }
+  }
+}
+{
+  id: 'garment',
+  detail: 'medium',
+  faces: 12288,
+  islands: 14,
+  tiny: 0,
+  smallest: 266,
+  largest: 3457,
+  occupancy: 0.49804163020034997,
+  ms: 2081.299277,
+  settings: {
+    chartPolicy: 'large',
+    method: 'auto',
+    iterations: 2000,
+    tolerance: 1e-9,
+    padding: 0.003,
+    rotate: true,
+    rotationSteps: 12,
+    autoCut: true,
+    maxChartFaces: 10752,
+    maxAspect: 24,
+    minFill: 0,
+    maxStretch: 30,
+    regionOptions: {
+      normalConeDegrees: 81.70916299927603,
+      maxChartFaces: 10752,
+      minRegionFaces: 56,
+      minRegionAreaRatio: 0.01
+    }
+  }
+}
+{
+  id: 'knot',
+  detail: 'low',
+  faces: 2304,
+  islands: 7,
+  tiny: 0,
+  smallest: 36,
+  largest: 1009,
+  occupancy: 0.14329255685722617,
+  ms: 456.66747100000066,
+  settings: {
+    chartPolicy: 'large',
+    method: 'auto',
+    iterations: 2000,
+    tolerance: 1e-9,
+    padding: 0.003,
+    rotate: true,
+    rotationSteps: 12,
+    autoCut: true,
+    maxChartFaces: 4608,
+    maxAspect: 24,
+    minFill: 0,
+    maxStretch: 30,
+    regionOptions: {
+      normalConeDegrees: 84.16531673658238,
+      maxChartFaces: 4608,
+      minRegionFaces: 24,
+      minRegionAreaRatio: 0.01
+    }
+  }
+}
+{
+  id: 'knot',
+  detail: 'medium',
+  faces: 9216,
+  islands: 32,
+  tiny: 0,
+  smallest: 34,
+  largest: 1046,
+  occupancy: 0.14954960227388472,
+  ms: 4253.110096,
+  settings: {
+    chartPolicy: 'large',
+    method: 'auto',
+    iterations: 2000,
+    tolerance: 1e-9,
+    padding: 0.003,
+    rotate: true,
+    rotationSteps: 12,
+    autoCut: true,
+    maxChartFaces: 9216,
+    maxAspect: 24,
+    minFill: 0,
+    maxStretch: 30,
+    regionOptions: {
+      normalConeDegrees: 82.08081319627209,
+      maxChartFaces: 9216,
+      minRegionFaces: 48,
+      minRegionAreaRatio: 0.01
+    }
+  }
+}
+{
+  id: 'assembly',
+  detail: 'low',
+  faces: 5632,
+  islands: 31,
+  tiny: 0,
+  smallest: 46,
+  largest: 768,
+  occupancy: 0.5883105326242897,
+  ms: 838.728396999999,
+  settings: {
+    chartPolicy: 'large',
+    method: 'auto',
+    iterations: 2000,
+    tolerance: 1e-9,
+    padding: 0.003,
+    rotate: true,
+    rotationSteps: 12,
+    autoCut: true,
+    maxChartFaces: 7296,
+    maxAspect: 24,
+    minFill: 0,
+    maxStretch: 30,
+    regionOptions: {
+      normalConeDegrees: 85.96857211882947,
+      maxChartFaces: 7296,
+      minRegionFaces: 38,
+      minRegionAreaRatio: 0.01
+    }
+  }
+}
+{
+  id: 'assembly',
+  detail: 'medium',
+  faces: 22528,
+  islands: 49,
+  tiny: 0,
+  smallest: 96,
+  largest: 3072,
+  occupancy: 0.5599595265106121,
+  ms: 5191.142371000002,
+  settings: {
+    chartPolicy: 'large',
+    method: 'auto',
+    iterations: 2000,
+    tolerance: 1e-9,
+    padding: 0.003,
+    rotate: true,
+    rotationSteps: 12,
+    autoCut: true,
+    maxChartFaces: 14464,
+    maxAspect: 24,
+    minFill: 0,
+    maxStretch: 30,
+    regionOptions: {
+      normalConeDegrees: 80.65878049131761,
+      maxChartFaces: 14464,
+      minRegionFaces: 76,
+      minRegionAreaRatio: 0.01
+    }
+  }
+}
+53 large-chart checks passed.

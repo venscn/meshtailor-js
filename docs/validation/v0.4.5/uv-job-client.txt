@@ -1,0 +1,50 @@
+{
+  "suite": "UV worker client lifecycle (fake transports)",
+  "cases": [
+    {
+      "name": "Progress does not settle the job; snapshot terminates once",
+      "passed": true
+    },
+    {
+      "name": "Silent Worker startup expires",
+      "passed": true
+    },
+    {
+      "name": "Progress heartbeat cannot keep a runaway job alive forever",
+      "passed": true
+    },
+    {
+      "name": "Cancel rejects promise, terminates Worker, ignores late snapshot",
+      "passed": true
+    },
+    {
+      "name": "onerror is terminal and releases transport",
+      "passed": true
+    },
+    {
+      "name": "onmessageerror is terminal and releases transport",
+      "passed": true
+    },
+    {
+      "name": "Construction error becomes a rejected job",
+      "passed": true
+    },
+    {
+      "name": "Structured-clone/postMessage error terminates the Worker",
+      "passed": true
+    },
+    {
+      "name": "Protocol error fails instead of leaving a spinner",
+      "passed": true
+    },
+    {
+      "name": "Worker deadline error retains its timeout classification",
+      "passed": true
+    },
+    {
+      "name": "New independent job completes after the previous one was cancelled",
+      "passed": true
+    }
+  ],
+  "passed": 11
+}

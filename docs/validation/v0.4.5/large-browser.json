@@ -1,0 +1,110 @@
+{
+  "suite": "Actual offline UI, WebGL and production UV Worker; not React/Vite E2E",
+  "cases": [
+    {
+      "name": "DPR 1: default gear is large valid charts, no tiny shards",
+      "passed": true,
+      "detail": {
+        "islands": 4,
+        "valid": true,
+        "min": 50,
+        "faces": 1536
+      }
+    },
+    {
+      "name": "DPR 1: auto button actually fills form values and solves",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: Extract shows original single island without adding cuts",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "added": 0,
+        "exact": true
+      }
+    },
+    {
+      "name": "DPR 1: resegmentation is explicit and source UV still retained",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: exact endpoints, common UV and valid WebGL",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: mirrored source atlas never collapses or flips during fit",
+      "passed": true,
+      "detail": {
+        "signs": [
+          -2.0000000764483694,
+          -2.0000000764483694,
+          -2.0126206156050657,
+          -2.016429269575182,
+          -2.004507255462805,
+          -2.000000096900081,
+          -3.244799761962895
+        ],
+        "orientation": -1,
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR 1: no application errors",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: default gear is large valid charts, no tiny shards",
+      "passed": true,
+      "detail": {
+        "islands": 4,
+        "valid": true,
+        "min": 50,
+        "faces": 1536
+      }
+    },
+    {
+      "name": "DPR 2: auto button actually fills form values and solves",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: Extract shows original single island without adding cuts",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "added": 0,
+        "exact": true
+      }
+    },
+    {
+      "name": "DPR 2: resegmentation is explicit and source UV still retained",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: exact endpoints, common UV and valid WebGL",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: mirrored source atlas never collapses or flips during fit",
+      "passed": true,
+      "detail": {
+        "signs": [
+          -2.0000000764483694,
+          -2.0000000764483694,
+          -2.0126206156050657,
+          -2.016429269575182,
+          -2.004507255462805,
+          -2.000000096900081,
+          -3.244799761962895
+        ],
+        "orientation": -1,
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR 2: no application errors",
+      "passed": true
+    }
+  ],
+  "passed": 14
+}

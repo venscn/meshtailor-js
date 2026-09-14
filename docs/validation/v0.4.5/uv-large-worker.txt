@@ -1,0 +1,52 @@
+{
+  "suite": "90112-face synthetic mesh in production UV Worker",
+  "cases": [
+    {
+      "name": "generated: all 90112 faces, real progress, UV and hinge rig preserved",
+      "passed": true,
+      "wallMs": 37227.450822,
+      "islands": 117,
+      "progressMessages": 192,
+      "timing": {
+        "elapsedMs": 35893.565367999996,
+        "stages": {
+          "validate": 1875.3861180000004,
+          "charts": 1991.7601800000002,
+          "topology": 3169.295479999986,
+          "parameterize": 18265.893812999995,
+          "quality": 6883.061975000011,
+          "orient": 535.2075320000004,
+          "pack": 287.13688899999397,
+          "correspondence": 1330.8619220000037,
+          "hinge": 1547.3995209999994,
+          "transfer": 7.542495000001509
+        }
+      },
+      "packing": "maxrects",
+      "occupancy": 0.5450495569717936
+    },
+    {
+      "name": "source: all 90112 faces, real progress, UV and hinge rig preserved",
+      "passed": true,
+      "wallMs": 4420.438621000001,
+      "islands": 4,
+      "progressMessages": 9,
+      "timing": {
+        "elapsedMs": 3172.9674100000047,
+        "stages": {
+          "validate": 481.34222800000134,
+          "charts": 733.7003499999992,
+          "correspondence": 623.2873440000039,
+          "hinge": 1325.2184379999962,
+          "transfer": 9.39965900000243
+        }
+      }
+    },
+    {
+      "name": "Real Worker budget exhaustion is a timeout, never a partial successful atlas",
+      "passed": true,
+      "error": "UV 计算达到 0.0 秒预算。最后阶段：Worker 已启动，检查输入。原网格未修改，可调整预算后重试或使用网格原始 UV。"
+    }
+  ],
+  "passed": 3
+}

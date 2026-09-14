@@ -1,0 +1,56 @@
+{
+  "version": "0.4.5",
+  "environment": {
+    "node": "22.16.0",
+    "chromium": "144.0.7559.96",
+    "platform": "Linux",
+    "webgl": "ANGLE/SwiftShader, explicit headless Ozone; no active X server needed"
+  },
+  "passed": {
+    "core": 21,
+    "complex": 40,
+    "parameterization": 10,
+    "hinge": 17,
+    "unwrap-guards": 11,
+    "orientation": 18,
+    "fit-orientation": 17,
+    "regions": 27,
+    "slits": 8,
+    "large-charts": 53,
+    "seam-policy": 13,
+    "unfold": 33,
+    "uv-worker": 4,
+    "uv-progress": 5,
+    "uv-job-client": 11,
+    "uv-large-worker": 3,
+    "motion-time": 9,
+    "motion": 13,
+    "relay": 22,
+    "camera-policy": 10,
+    "large-charts-browser": 14,
+    "camera-browser": 39,
+    "relay-browser": 28,
+    "motion-browser": 28,
+    "git-tools": 22
+  },
+  "otherPassed": [
+    "atlas area/packing and complex mesh checks",
+    "11 TSX syntax-only transpiles"
+  ],
+  "notVerified": [
+    "React/Vite E2E and production build (vite unavailable)",
+    "Full React UI typecheck",
+    "Real FlightHelmet geometry",
+    "Real FBXLoader decode",
+    "macOS/Windows/Safari hardware runs"
+  ],
+  "observedFailures": [
+    "Npm dependency fetch EAI_AGAIN",
+    "npm run build exit 127: vite not found",
+    "Direct FlightHelmet download failed"
+  ],
+  "fixedDuringDevelopment": [
+    "Software WebGL initially tried a stale DISPLAY; explicit child headless environment fixed this.",
+    "Teaching cube inherited adaptive baseline; explicit six-panel fixture restored. Original correspondence/motion tests rerun passed."
+  ]
+}

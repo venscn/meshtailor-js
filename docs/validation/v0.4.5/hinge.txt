@@ -1,0 +1,18 @@
+PASS Three bent islands retained; no automatic triangle-per-island proxy
+PASS Visible interior hinges actually exist
+PASS relay exact 3D endpoint
+PASS relay exact exported UV endpoint
+PASS sequential exact 3D endpoint
+PASS sequential exact exported UV endpoint
+PASS Every face edge length preserved throughout rigid phases (wave=false)
+PASS Parent-child hinge endpoints remain welded at every pose (wave=false)
+PASS Every face edge length preserved throughout rigid phases (wave=true)
+PASS Parent-child hinge endpoints remain welded at every pose (wave=true)
+PASS Rigid net is actually planar, not projection of folded vertices
+PASS Developable ribbons need NO temporary curvature cuts
+PASS All seven stage joins continuous
+PASS Backward scrub has no accumulated transform drift
+PASS Unselected islands do not move
+PASS Workbench islands have non-overlapping bounding spheres
+PASS Single-island workbench is centered instead of using old atlas slot
+17 hinge regressions passed.

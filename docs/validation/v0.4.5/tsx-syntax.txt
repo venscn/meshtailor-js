@@ -1,0 +1,1 @@
+11 TSX files transpile without syntax diagnostics; NOT a typecheck or React browser test.

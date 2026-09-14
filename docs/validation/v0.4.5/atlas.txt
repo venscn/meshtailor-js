@@ -1,0 +1,55 @@
+{
+  name: 'cube',
+  faces: 12,
+  islands: 2,
+  occupancy: 0.47425727800291184,
+  addedSeams: 0,
+  methods: { lscm: 2 },
+  ms: 8.07029300000022
+}
+{
+  name: 'closed-cube',
+  faces: 12,
+  islands: 2,
+  occupancy: 0.47425727800291184,
+  addedSeams: 4,
+  methods: { lscm: 2 },
+  ms: 3.2674349999997503
+}
+{
+  name: 'knot',
+  faces: 2304,
+  islands: 1,
+  occupancy: 0.13432028784511388,
+  addedSeams: 0,
+  methods: { lscm: 1 },
+  ms: 947.7768389999997
+}
+{
+  name: 'garment',
+  faces: 3072,
+  islands: 1,
+  occupancy: 0.3266810431483536,
+  addedSeams: 0,
+  methods: { lscm: 1 },
+  ms: 277.55751499999997
+}
+{
+  name: 'gear',
+  faces: 1536,
+  islands: 3,
+  occupancy: 0.46237208406245733,
+  addedSeams: 156,
+  methods: { lscm: 3 },
+  ms: 340.0647650000001
+}
+{
+  name: 'assembly',
+  faces: 5632,
+  islands: 40,
+  occupancy: 0.5822920916348071,
+  addedSeams: 667,
+  methods: { lscm: 40 },
+  ms: 1245.6043519999998
+}
+PASS: area-aware packing and all complex LOW assets.
