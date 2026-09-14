@@ -17,6 +17,8 @@ import { makeUnfoldDemo, makeHingeDemo } from './unfold/demo';
 import { useUVSnapshot } from './unfold/useUVSnapshot';
 import { useUnfoldPlayer } from './unfold/useUnfoldPlayer';
 import { UVSolverControls } from './unfold/UVSolverControls';
+import { UVJobStatus } from './unfold/UVJobStatus';
+import { describeUVProgress } from './unfold/uv-job-client';
 import { UnfoldControls, UnfoldTransport } from './unfold/UnfoldControls';
 import { UnfoldViewport } from './unfold/UnfoldViewport';
 import { CorrespondenceInspector } from './unfold/CorrespondenceInspector';
@@ -58,7 +60,8 @@ export default function App(){
   const displaySeams=useMemo(()=>new Set([...activeEdges,...(snapshot?.addedSeams??[])]),[activeEdges,snapshot]);
   const player = useUnfoldPlayer(snapshot);
   const chartCount = snapshot?.packed.length??null;
-  const uvStatus = uvState.error ? 'UV 预览失败：'+uvState.error : uvState.loading ? '正在计算同一份网格 / UV 对应数据…' : null;
+  const uvStatus=uvState.loading?describeUVProgress(uvState.progress,uvState.elapsedMs):uvState.error;
+  const hasSourceUV=useMemo(()=>mesh.faces.every(f=>f.uvs?.length===3&&f.uvs.every(p=>p?.length===2&&p.every(Number.isFinite))),[mesh]);
   const uvAll = useMemo(()=>snapshot?.geometry.islands.map(c=>c.id)??[],[snapshot]);
   useEffect(()=>{if(viewMode==='unfold')setPlaying(false);else player.pause();},[viewMode]);
   const exportTargetUV=()=>{if(!snapshot)return;try{saveFile('meshtailor-target-uv.obj',meshToOBJ(meshWithPreviewUV(mesh,snapshot.packed)),'text/plain');}catch(error){setLoadError(String(error));}};
@@ -71,7 +74,7 @@ export default function App(){
     if(step>=frames.length-1){setPlaying(false);return;}
     const timer=setTimeout(()=>setStep(s=>Math.min(frames.length-1,s+1)),420);return()=>clearTimeout(timer);
   },[playing,step,frames.length]);
-  const cancel=()=>{operation.current++;seamWorker.current?.terminate();seamWorker.current=null;abortDownload.current?.abort();abortDownload.current=null;setBusy(null);setPlaying(false);};
+  const cancel=()=>{uvState.cancel();operation.current++;seamWorker.current?.terminate();seamWorker.current=null;abortDownload.current?.abort();abortDownload.current=null;setBusy(null);setPlaying(false);};
   const begin=(message:string)=>{cancel();setLoadError(null);setBusy(message);return operation.current;};
   const replaceMesh=(m:MeshData,report:MeshImportReport|null=null)=>{
     prepareViewportMesh(m); // Reject malformed input before React/topology/Three see it.
@@ -132,10 +135,11 @@ export default function App(){
   const togglePlayback=()=>{if(!frames.length)return;if(!playing&&step>=frames.length-1)setStep(0);setPlaying(!playing);};
 
   return <div className="app-shell" onDragOver={e=>{e.preventDefault();}} onDrop={e=>{e.preventDefault();if(e.dataTransfer.files.length)void loadFiles(Array.from(e.dataTransfer.files));}}>
-    <header className="topbar"><div><div className="brand">MeshTailor-JS <span>Studio · 0.4.0</span></div><div className="subtitle">铰链展开 · LSCM / Tutte · 面积感知 UV 排布</div></div><div className="paper-pill">d={MESH_TAILOR_V2_SPEC.modelDimension} · {MESH_TAILOR_V2_SPEC.decoderLayers} decoder layers</div></header>
+    <header className="topbar"><div><div className="brand">MeshTailor-JS <span>Studio · 0.4.0</span></div><div className="subtitle">铰链展开 · LSCM / Tutte · 大网格进度 / 取消 · 面积感知 UV 排布</div></div><div className="paper-pill">d={MESH_TAILOR_V2_SPEC.modelDimension} · {MESH_TAILOR_V2_SPEC.decoderLayers} decoder layers</div></header>
     <main className="workspace">
       <aside className="sidebar">
         {viewMode==='unfold'&&<UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={setUVTarget} onExport={exportTargetUV} onDemo={loadUnfoldDemo} onHingeDemo={loadHingeDemo}/>}
+        <UVJobStatus state={uvState} hasSource={hasSourceUV} onUseSource={()=>{setUVTarget('source');setViewMode('unfold');if(snapshotTarget==='source')uvState.retry();}}/>
         <UVSolverControls value={uvConfig} onChange={setUVConfig} snapshot={snapshot}/>
         <section><h3>Mesh · 网格</h3><div className="button-grid"><button onClick={()=>resetForMesh(makeCube())}>Cube</button><button onClick={()=>resetForMesh(makeCylinder(20))}>Cylinder</button><button onClick={()=>resetForMesh(makeTorsoGrid())}>Torso</button></div>
           <label className="file-label">Load OBJ / FBX / GLB / GLTF<input type="file" multiple accept=".obj,.fbx,.glb,.gltf,.bin" onChange={e=>{const files=Array.from(e.target.files??[]);if(files.length)void loadFiles(files);e.target.value='';}}/></label>

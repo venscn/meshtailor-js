@@ -72,3 +72,10 @@ select{margin-top:5px}details{margin-top:10px;font-size:12px;line-height:1.55}su
 .hinge-legend { position:absolute; left:12px; top:48px; padding:5px 9px; border-radius:5px; background:#07121ac9; color:#bacde1; font-size:10px; pointer-events:none; }
 
 .hinge-angle { position:absolute; top:0; left:0; padding:2px 5px; border:1px solid #318da5; background:#062632d9; border-radius:4px; color:#85ecff; font:10px ui-monospace,monospace; white-space:nowrap; }
+
+/* The task lifecycle remains visible and operable in both traversal and unfold modes. */
+.uv-job-panel{border:1px solid #31506b;border-radius:8px;padding:10px;background:#101c29}
+.uv-job-panel [role]{font-size:12px;line-height:1.6;overflow-wrap:anywhere;margin-bottom:8px}
+.uv-job-panel progress{width:100%;height:8px;accent-color:#68cfd6}
+.uv-job-panel[data-phase="timeout"],.uv-job-panel[data-phase="error"]{border-color:#aa7648}
+.uv-job-panel small{font-size:11px;line-height:1.5}
