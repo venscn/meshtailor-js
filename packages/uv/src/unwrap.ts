@@ -1,7 +1,7 @@
 import { buildTopology, edgeKey, type MeshData, type Vec3, type Vec2 } from '@meshtailor/mesh-core';
 import { buildCharts } from './charts.js';
 import { cutLocalMesh, type CutMesh } from './cut-topology.js';
-import { parameterizeChart, triangleArea, type SolverOptions } from './parameterize.js';
+import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { signedArea2 } from './uv-quality.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
 export interface UnwrapOptions extends SolverOptions,PackOptions { autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number }
@@ -53,6 +53,7 @@ function shapeQuality(local:CutMesh,uv:Vec2[]){
 }
 export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Partial<UnwrapOptions>={}):UnwrapResult{
   const opts={...DEFAULT_UNWRAP,...options};
+  if(!['auto','lscm','tutte'].includes(opts.method)||typeof opts.autoCut!=='boolean'||typeof opts.rotate!=='boolean'||!Number.isFinite(opts.padding)||opts.padding<0||opts.padding>=.1||!Number.isInteger(opts.rotationSteps)||opts.rotationSteps<1||opts.rotationSteps>90)throw new Error('Invalid UV solver or packing settings.');
   if(!(opts.maxAspect>=1&&Number.isFinite(opts.maxAspect))||!(opts.minFill>=0&&opts.minFill<=1)||!(opts.maxStretch>=1&&Number.isFinite(opts.maxStretch))||!Number.isInteger(opts.maxChartFaces)||opts.maxChartFaces<8||opts.maxChartFaces>20000||!Number.isInteger(opts.iterations)||opts.iterations<1||opts.iterations>20000||!(opts.tolerance>0&&opts.tolerance<1))throw new Error('Invalid UV solver settings.');
   const mesh=normalizedMesh(input),topology=buildTopology(mesh),effective=new Set(seams),warnings:string[]=[];
   for(const [key,e]of topology.edges)if(e.faces.length>2){if(!opts.autoCut)throw new Error('Non-manifold edges require cuts or mesh repair.');effective.add(key);}
@@ -65,17 +66,19 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       const pieces=splitDisks(local,Math.min(opts.maxChartFaces,Math.max(1,faces.length-1)),!local.disk);partitions++;
       for(const fs of pieces)solve(fs,sourceChart,depth+1);return;
     }
-    try{
-      const p=parameterizeChart(local,opts),shape=shapeQuality(local,p.uv);
+    let p:Parameterization;
+    // Catch this chart's numerical failure only. Never catch a child recursion
+    // after it has appended solved siblings (that could duplicate source faces).
+    try{p=parameterizeChart(local,opts);}catch(error){
+      if(!opts.autoCut||faces.length<2||depth>20)throw error;
+      partitions++;for(const fs of splitDisks(local,Math.max(1,Math.floor(faces.length/2)),true))solve(fs,sourceChart,depth+1);return;
+    }
+      const shape=shapeQuality(local,p.uv);
       if(opts.autoCut&&faces.length>16&&(shape.aspect>opts.maxAspect||shape.fill<opts.minFill||shape.maxStretch>opts.maxStretch)){partitions++;for(const fs of splitDisks(local,Math.max(1,Math.floor(faces.length/2)),shape.maxStretch>opts.maxStretch))solve(fs,sourceChart,depth+1);return;}
       const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();
       local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...p.uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
       const area3D=local.triangles.reduce((s,t)=>s+triangleArea(local.positions[t[0]]!,local.positions[t[1]]!,local.positions[t[2]]!),0),id=raw.length;
       raw.push({id,faceUVs,area3D});diagnostics.push({id,sourceChart,faces:faces.length,method:p.method,...shape,iterations:p.iterations,residual:p.residual,...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});
-    }catch(error){
-      if(!opts.autoCut||faces.length<2||depth>20)throw error;
-      partitions++;for(const fs of splitDisks(local,Math.max(1,Math.floor(faces.length/2)),true))solve(fs,sourceChart,depth+1);
-    }
   };
   charts.forEach(chart=>solve(chart.faces,chart.id));
   const faceChart=new Int32Array(mesh.faces.length);raw.forEach(r=>{for(const fi of r.faceUVs.keys())faceChart[fi]=r.id;});

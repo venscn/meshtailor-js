@@ -174,15 +174,23 @@ export function islandColor(id: number): [number, number, number] {
 
 /** Export the SAME per-corner UVs used for the animation endpoint; keep source positions. */
 export function meshWithPreviewUV(mesh: MeshData, packed: PackedChart[]): MeshData {
-  const all = new Map<number, [Vec2, Vec2, Vec2]>();
+  const all = new Map<number, [Vec2, Vec2, Vec2]>(), charts=new Map<number,number>();
   for (const chart of packed) for (const [fi, uvs] of chart.faceUVs) {
     if (all.has(fi) || !mesh.faces[fi]) throw new Error('Invalid or duplicate atlas face.');
-    all.set(fi, uvs);
+    all.set(fi, uvs);charts.set(fi,chart.id);
   }
   if (all.size !== mesh.faces.length) throw new Error('Incomplete atlas.');
+  const identities=new Map<string,number>();
+  const original=mesh.faces.every((f,i)=>f.uvs?.every((p,k)=>p?.every((v,a)=>v===all.get(i)![k]![a])));
   return { ...mesh, faces: mesh.faces.map((f, i) => {
     const values = all.get(i)!;
     if (values.some(p => p.length !== 2 || !p.every(Number.isFinite))) throw new Error('Invalid UVs for export.');
-    return { vertices: [...f.vertices] as [number, number, number], uvs: values.map(p => [...p] as Vec2) as [Vec2, Vec2, Vec2] };
+    const uvIndices=values.map((p,k)=>{
+      // Distinct UV islands remain distinct even when imported coordinates overlap.
+      // Inside an island, do not invent a seam along every triangulation edge.
+      const key=`${charts.get(i)}:${f.vertices[k]}:${p.join(',')}:${original?f.uvIndices?.[k]??'':''}`;
+      let id=identities.get(key);if(id===undefined){id=identities.size;identities.set(key,id);}return id;
+    }) as [number,number,number];
+    return { vertices: [...f.vertices] as [number, number, number], uvs: values.map(p => [...p] as Vec2) as [Vec2, Vec2, Vec2],uvIndices };
   }) };
 }

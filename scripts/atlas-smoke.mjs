@@ -19,5 +19,5 @@ try{
  const packed=uv.packAtlas(raw,{padding:.001});assert.ok(packed.occupancy>.7);
  const densities=packed.packed.map((p,i)=>uv.checkUVTriangles([...p.faceUVs.values()]).area/raw[i].area3D);assert.ok(Math.max(...densities)-Math.min(...densities)<1e-10);
  console.log('PASS: area-aware packing and all complex LOW assets.');
- await writeFile('/mnt/data/atlas04-results.json',JSON.stringify(results,null,2));
+ const i=process.argv.indexOf('--report');if(i>=0)await writeFile(process.argv[i+1],JSON.stringify(results,null,2)+'\n');
 }finally{await c.cleanup();}
