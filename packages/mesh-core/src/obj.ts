@@ -5,6 +5,7 @@ export function parseOBJ(text: string, name = 'uploaded.obj'): MeshData {
   const positions: Vec3[] = [];
   const texcoords: Vec2[] = [];
   const faces: MeshFace[] = [];
+  let material: string | undefined;
 
   const resolveIndex = (raw: string, length: number): number => {
     const n = Number(raw);
@@ -16,7 +17,8 @@ export function parseOBJ(text: string, name = 'uploaded.obj'): MeshData {
     const line = rawLine.trim();
     if (!line || line.startsWith('#')) continue;
     const parts = line.split(/\s+/);
-    if (parts[0] === 'v' && parts.length >= 4) {
+    if (parts[0] === 'usemtl') { material=parts.slice(1).join(' '); }
+    else if (parts[0] === 'v' && parts.length >= 4) {
       positions.push([Number(parts[1]), Number(parts[2]), Number(parts[3])]);
     } else if (parts[0] === 'vt' && parts.length >= 3) {
       texcoords.push([Number(parts[1]), Number(parts[2])]);
@@ -34,6 +36,7 @@ export function parseOBJ(text: string, name = 'uploaded.obj'): MeshData {
         const tri = [corners[0]!, corners[i]!, corners[i + 1]!] as const;
         faces.push({
           vertices: [tri[0].v, tri[1].v, tri[2].v],
+          ...(material?{uvSpace:material,uvSpaceName:material}:{}),
           uvs: [tri[0].uv, tri[1].uv, tri[2].uv],
           uvIndices: [tri[0].uvIndex, tri[1].uvIndex, tri[2].uvIndex]
         });
@@ -51,12 +54,17 @@ export function parseOBJ(text: string, name = 'uploaded.obj'): MeshData {
 export function meshToOBJ(mesh: MeshData): string {
   const out: string[] = [`# ${mesh.name}`], uvLines:string[]=[], faceLines:string[]=[];
   for (const p of mesh.positions) out.push(`v ${p[0]} ${p[1]} ${p[2]}`);
-  const uvMap=new Map<string,number>();
+  const uvMap=new Map<string,number>();let activeMaterial:string|undefined;
   for(const f of mesh.faces){
+    const material=f.uvSpace;
+    if(material!==activeMaterial){
+      if(material!==undefined||activeMaterial!==undefined)faceLines.push('usemtl '+(material??'default').replace(/[\r\n\s]+/g,'_'));
+      activeMaterial=material;
+    }
     const corners=f.vertices.map((vertex,corner)=>{
       const uv=f.uvs?.[corner];if(!uv)return String(vertex+1);
       const source=f.uvIndices?.[corner];
-      const key=source!==null&&source!==undefined?`source:${source}:${uv[0]},${uv[1]}`:`value:${uv[0]},${uv[1]}`;
+      const key=(f.uvSpace??'default')+':'+(source!==null&&source!==undefined?`source:${source}:${uv[0]},${uv[1]}`:`value:${uv[0]},${uv[1]}`);
       let index=uvMap.get(key);
       if(index===undefined){index=uvMap.size+1;uvMap.set(key,index);uvLines.push(`vt ${uv[0]} ${uv[1]}`);}
       return `${vertex+1}/${index}`;

@@ -12,6 +12,7 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
   root.traverse(obj => { if ((obj as THREE.SkinnedMesh).isSkinnedMesh) (obj as THREE.SkinnedMesh).skeleton.update(); });
   const parts: RawMeshPart[] = [], warnings: string[] = [];
   let totalTriangles=0,totalSourceVertices=0,skinned=0;
+  const materialIds=new Map<THREE.Material,string>();let unknownDomains=false;
   const maxTriangles=options.maxTriangles??300_000;
   root.traverse(obj => {
     const mesh=obj as THREE.Mesh;
@@ -41,13 +42,24 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
         // A negative world scale reverses triangle winding, including corner UV order.
         if(mirrored)[ids[1],ids[2]]=[ids[2],ids[1]];
         const corner=(j:number):Vec2|null=>uv?[uv.getX(j),uv.getY(j)]:null;
-        faces.push({vertices:ids,uvs:[corner(ids[0]),corner(ids[1]),corner(ids[2])]});
+        // Material groups are in index-buffer coordinates, before mirrored winding.
+        const group=geometry.groups.find(g=>i>=g.start&&i<g.start+g.count);
+        const material=Array.isArray(mesh.material)?mesh.material[group?.materialIndex??0]:mesh.material;
+        const domain=material?.userData?.meshtailorUV as {id?:string;name?:string}|undefined;
+        if(material&&!materialIds.has(material))materialIds.set(material,`material:${materialIds.size}`);
+        const known=!!domain?.id||!!material?.name;
+        if(!known)unknownDomains=true;
+        faces.push({vertices:ids,uvs:[corner(ids[0]),corner(ids[1]),corner(ids[2])],
+          uvSpace:domain?.id||(known?materialIds.get(material)!:`object:${parts.length}`),
+          uvSpaceName:domain?.name||(known?material.name:`${obj.name||'Mesh'} · 材质未知`),
+          sourcePart:`object:${parts.length}`});
       }
       parts.push({name:`${obj.name||'Mesh'}${instances>1?` #${instance}`:''}`,positions,faces});
     }
   });
   if(skinned)warnings.push(`${skinned} skinned mesh(es) imported at the loaded initial pose. Animation playback is not part of this import.`);
   const result=assembleMeshParts(parts,name,options);
+  if(unknownDomains)warnings.push('Some material identities are unavailable. Their UV views are conservatively separated by source object; this is not a recovered original atlas. Old geometry-only caches should be downloaded again.');
   result.report.warnings.push(...warnings);
   return result;
 }

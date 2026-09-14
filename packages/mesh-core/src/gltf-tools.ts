@@ -14,9 +14,16 @@ const visual = (name: string) => name.startsWith('KHR_materials_') || name.start
 export function geometryOnlyGLTF(input: GLTFDocument): GLTFDocument {
   if (input.asset?.version !== '2.0') throw new Error('Only glTF 2.0 is supported.');
   const doc = structuredClone(input);
-  for (const key of ['materials','textures','images','samplers']) delete doc[key];
+  // Remove texture dependencies, not material-domain identity. The previous
+  // implementation erased primitive.material and overlaid unrelated atlases.
+  const materials = doc.materials as {name?:string; extras?:Record<string,unknown>}[] | undefined;
+  if (materials) doc.materials = materials.map((m, i) => ({
+    name: m.name || `Material ${i + 1}`,
+    extras: {...m.extras, meshtailorUV: {id: `material:${i}`, name: m.name || `Material ${i + 1}`}}
+  }));
+  for (const key of ['textures','images','samplers']) delete doc[key];
   for (const mesh of doc.meshes ?? []) for (const p of mesh.primitives) {
-    delete p.material;
+    // Keep the original material index pointing to the lightweight stub.
     if (p.extensions) for (const key of Object.keys(p.extensions)) if (visual(key)) delete p.extensions[key];
   }
   for (const key of ['extensionsUsed','extensionsRequired'] as const) if(doc[key]) doc[key] = doc[key]!.filter(n => !visual(n));

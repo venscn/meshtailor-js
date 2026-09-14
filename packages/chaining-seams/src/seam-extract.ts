@@ -19,6 +19,9 @@ export function extractSeamEdgesFromUV(mesh: MeshData, epsilon = 1e-6): SeamEdge
   for (const edge of topology.edges.values()) {
     if (edge.faces.length !== 2) continue;
     const [f0, f1] = edge.faces;
+    if ((mesh.faces[f0!]!.uvSpace ?? 'default') !== (mesh.faces[f1!]!.uvSpace ?? 'default')) {
+      seams.add(edgeKey(edge.a, edge.b)); continue;
+    }
     const a0 = uvAtVertex(mesh, f0!, edge.a), a1 = uvAtVertex(mesh, f1!, edge.a);
     const b0 = uvAtVertex(mesh, f0!, edge.b), b1 = uvAtVertex(mesh, f1!, edge.b);
     if (!a0.uv || !a1.uv || !b0.uv || !b1.uv) continue;
