@@ -1,4 +1,4 @@
-import { DEFAULT_UNFOLD_ORDER, hingePoseProgress, sampleUnfoldSchedule, hingeRemainingAngle, islandColor, islandProgress, selectedIslands, uvToWorld, writeUnfoldPositions, type UnfoldGeometry, type UnfoldOptions } from '@meshtailor/uv';
+import { DEFAULT_UNFOLD_ORDER, unfoldIslandPose, sampleUnfoldSchedule, hingeRemainingAngle, islandColor, islandProgress, selectedIslands, uvToWorld, writeUnfoldPositions, type UnfoldGeometry, type UnfoldOptions } from '@meshtailor/uv';
 import { viewportSize } from '../viewport-math.js';
 import { cameraBasis, cameraMatrix, pickFace, projectPoint, type OrbitCamera } from './camera-math.js';
 import type { Vec3 } from '@meshtailor/mesh-core';
@@ -171,7 +171,7 @@ export class UnfoldWebGLView {
     this.hingeCount=this.temporaryCount=0;
     if(options.path==='hinge'&&rig){
       const ranks=new Map(ids.map((id,i)=>[id,i]));
-      const indices=(source:Uint32Array,enabled:boolean,end:number)=>{const out:number[]=[];if(enabled)for(let i=0;i<source.length;i+=2){const id=data.faceChart[Math.floor(source[i]!/3)]!,rank=ranks.get(id),t=hingePoseProgress(islandProgress(options.progress,rank??-1,ids.length,options.order,options.handoff),options.holdNet);if(rank!==undefined&&t>.18&&t<end)out.push(source[i]!,source[i+1]!);}return new Uint32Array(out);};
+      const indices=(source:Uint32Array,enabled:boolean,end:number)=>{const out:number[]=[];if(enabled)for(let i=0;i<source.length;i+=2){const id=data.faceChart[Math.floor(source[i]!/3)]!,rank=ranks.get(id),t=unfoldIslandPose(options,rank??-1,ids.length);if(rank!==undefined&&t>.18&&t<end)out.push(source[i]!,source[i+1]!);}return new Uint32Array(out);};
       const hinges=indices(rig.hingeEdges,options.showHinges!==false,.8),cuts=indices(rig.temporaryCuts,options.showTemporaryCuts!==false,.92);
       gl.bindVertexArray(this.vao);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.hingeBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,hinges,gl.DYNAMIC_DRAW);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.temporaryBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,cuts,gl.DYNAMIC_DRAW);this.hingeCount=hinges.length;this.temporaryCount=cuts.length;
@@ -180,7 +180,7 @@ export class UnfoldWebGLView {
     this.canvas.dataset.progress=String(options.progress);this.canvas.dataset.selectedCount=String(ids.length);
     this.canvas.dataset.targetError=options.progress===1&&ids.length===data.islands.length?String(this.positions.reduce((m,v,i)=>Math.max(m,Math.abs(v-data.target[i]!)),0)):'not-at-all-target';
     this.canvas.dataset.sourceError=options.progress===0?String(this.positions.reduce((m,v,i)=>Math.max(m,Math.abs(v-data.source[i]!)),0)):'not-at-source';
-    const schedule=sampleUnfoldSchedule(options.progress,ids.length,options.order,options.handoff);
+    const schedule=sampleUnfoldSchedule(options.progress,ids.length,options.order,options.handoff,false,options.timeline);
     this.canvas.dataset.completed=String(schedule.completed);
     this.canvas.dataset.waiting=String(schedule.waiting);
     this.canvas.dataset.animating=JSON.stringify(schedule.active.map(a=>({id:ids[a.index],progress:a.progress})));
@@ -280,7 +280,7 @@ export class UnfoldWebGLView {
       label.el.hidden=!visible;if(p&&visible)label.el.style.transform=`translate(${p[0]}px,${p[1]}px) translate(-50%,-50%)`;
     }
     for(const label of this.hingeLabels){
-      const id=this.data.faceChart[label.face]!,rank=this.options.selected.indexOf(id),t=hingePoseProgress(islandProgress(this.options.progress,rank,this.options.selected.length,this.options.order,this.options.handoff),this.options.holdNet),rig=this.data.hinge!;
+      const id=this.data.faceChart[label.face]!,rank=this.options.selected.indexOf(id),t=unfoldIslandPose(this.options,rank),rig=this.data.hinge!;
       label.el.hidden=this.options.path!=='hinge'||t<.18||t>=.7||this.options.showHinges===false;
       if(label.el.hidden)continue;
       const a=rig.edgeCorners[label.face*2]!,b=rig.edgeCorners[label.face*2+1]!,center:Vec3=[0,0,0];for(let k=0;k<3;k++)center[k]=(this.positions[a*3+k]!+this.positions[b*3+k]!)/2;

@@ -16,7 +16,8 @@
 <h2>03 / 展开显示</h2><label>播放方式<select id="order"><option value="relay">逐岛尾段接力（最多相邻两岛）</option><option value="sequential">严格逐岛（完成后启动下一个）</option></select></label>
 <label><span id="handoff-label">前岛完成 85% 时接力</span><input id="handoff" aria-label="Island handoff" type="range" min=".75" max="1" step=".01" value=".85" style="max-width:110px"></label>
 <small>未启动的岛保持原位，已完成的岛留在 UV。没有全体同时启动模式。</small>
-<label>每个岛完整时长<input id="seconds" type="number" min=".5" step=".5" max="60" value="12"></label>
+<label>每岛基准时长（跳过前）<input id="seconds" type="number" min=".5" step=".5" max="60" value="12"></label>
+<label>自动跳过无变化区间<input id="skip-static" type="checkbox" checked></label><small id="motion-status" role="status"></small><details><summary>运动判定容差</summary><label>相对岛尺寸<input id="motion-tolerance" type="number" value="0.000001" min="0" max=".001" step=".000001"></label><small>按顶点及铰链变换判断；与相机、遮挡无关。绝对容差 1e-8 个归一化单位。</small></details>
 <label>平面网额外停留（默认关闭）<input id="hold-net" type="checkbox"></label><label>根面向外依次开铰链<input id="wave" type="checkbox" checked></label><label>自动跟随面片（默认关闭）<input id="frame" aria-label="Follow unfolding camera" type="checkbox"></label><label>显示青色铰链 / 角度<input id="hinges" type="checkbox" checked></label><label>显示紫色临时断边<input id="temporary" type="checkbox" checked></label><label>显示 UV 棋盘<input id="checker" type="checkbox"></label>
 <label>未选面片<select id="context"><option value="dim">半透明保留</option><option value="hidden">隐藏</option><option value="solid">实体保留</option></select></label>
 <small id="camera-status" role="status">手动相机：动画不改变视角。</small><button id="fit-current">适配当前面片（保留观察方向）</button><div class="row"><button id="orbit">适配 3D</button><button id="front">UV 正视</button></div>

@@ -16,7 +16,11 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
     <label>预览范围<select aria-label="Unfold scope" value={p.scope} onChange={e=>p.changeScope(e.target.value as UnfoldScope)}><option value="all">全部 UV 岛</option><option value="single">单个 UV 岛</option><option value="selected">多选 UV 岛</option></select></label>
     {p.scope==='single'&&<div className="button-grid two"><button disabled={!p.all.length} onClick={()=>p.nextIsland(-1)}>上一个岛</button><button disabled={!p.all.length} onClick={()=>p.nextIsland(1)}>下一个岛</button></div>}
     <label>播放方式<select aria-label="Unfold order" value={p.order} onChange={e=>p.changeOrder(e.target.value as UnfoldOrder)}><option value="relay">逐岛接力（仅相邻两岛尾段交叠）</option><option value="sequential">严格逐岛（完成后再启动下一岛）</option></select></label>
-    {p.order!=='sequential'&&<label>前岛完成 {Math.round(p.handoff*100)}% 时启动下一岛<input aria-label="Island handoff" type="range" min=".75" max="1" step=".01" value={p.handoff} onChange={e=>p.changeHandoff(+e.target.value)}/></label>}
+    <label className="check"><input aria-label="Skip unchanged animation spans" type="checkbox" checked={p.skipStatic} onChange={e=>p.changeSkipStatic(e.target.checked)}/> 自动跳过无变化区间</label>
+    <small data-testid="motion-time-savings">实际队列 {p.duration.toFixed(1)} 秒 · 固定阶段队列 {p.nominalDuration.toFixed(1)} 秒 · 缩短 {Math.max(0,p.nominalDuration-p.duration).toFixed(1)} 秒。保留动作不额外放慢。</small>
+    {p.timeline?.entries[p.focusIndex]&&<small data-testid="skipped-motion-spans">当前岛已跳过：{p.timeline.entries[p.focusIndex]!.profile.segments.filter(s=>!s.keep&&s.stage!=='主动观察停留').map(s=>s.stage).join('、')||'无'}</small>}
+    <details><summary>无变化判定容差</summary><label>相对岛尺寸<input aria-label="Motion relative tolerance" type="number" min="0" max=".001" step=".000001" value={p.motionTolerance} onChange={e=>p.changeMotionTolerance(+e.target.value)}/></label><small>按实际 3D 顶点运动判定，与相机和遮挡无关；绝对容差为 1e-8 个归一化单位。关闭跳过可对照固定时长。</small></details>
+    {p.order!=='sequential'&&<label>前岛有效进度至少 {Math.round(p.handoff*100)}% 时接力<input aria-label="Island handoff" type="range" min=".75" max="1" step=".01" value={p.handoff} onChange={e=>p.changeHandoff(+e.target.value)}/></label>}
     <small>按岛列表 / 多选的顺序接力；等待岛保持 3D，完成岛保留在 UV。不会全体同时启动。</small>
     <label>变换路径<select aria-label="Unfold path" value={p.path} onChange={e=>p.setPath(e.target.value as UnfoldPath)}><option value="hinge">分块陈列 → 铰链展平 → UV 形变 → 排布</option><option value="staged">旧：分离 + 顶点插值（对照）</option><option value="direct">直接插值到 UV</option></select></label>
     {p.path==='hinge'&&<>
@@ -27,7 +31,7 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
       <small>铰链旋转与 UV 形变仍为不同阶段；默认跳过静止停留。检查平面网可随时点阶段按钮暂停。</small>
     </>}
     <label>分离距离 <b>{p.separation.toFixed(2)}</b><input aria-label="Unfold separation" type="range" min="0" max="1.5" step=".05" value={p.separation} onChange={e=>p.setSeparation(+e.target.value)}/></label>
-    <label>每个岛的完整动画时长（秒）<input aria-label="Unfold duration" type="number" min=".5" max="60" step=".5" value={p.seconds} onChange={e=>{const v=+e.target.value;if(v>=.5&&v<=60)p.setSeconds(v);}}/></label>
+    <label>每岛基准时长（跳过前，秒）<input aria-label="Unfold duration" type="number" min=".5" max="60" step=".5" value={p.seconds} onChange={e=>{const v=+e.target.value;if(v>=.5&&v<=60)p.setSeconds(v);}}/></label>
     <small>本轮 {p.active.length} / {p.all.length} 个岛 · 总时长 {p.duration.toFixed(1)} 秒（按实际选择计算）</small>
     <label>未选择的岛<select aria-label="Unselected islands" value={p.context} onChange={e=>p.setContext(e.target.value as 'dim'|'hidden'|'solid')}><option value="dim">半透明留在原网格上</option><option value="hidden">隐藏（只看选中部分）</option><option value="solid">实体留在原网格上</option></select></label>
     <label className="check"><input type="checkbox" checked={p.checker} onChange={e=>p.setChecker(e.target.checked)}/> 两侧显示 UV 棋盘</label>
@@ -40,9 +44,9 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
     <details open className="island-selector"><summary>岛列表 · {p.active.length} 已选</summary>
       <div className="button-grid two"><button onClick={()=>p.changeScope('all')}>全部</button><button onClick={p.clear}>清空选择</button></div>
       <input aria-label="Filter island IDs" className="island-search" type="search" placeholder="按岛编号筛选" value={filter} onChange={e=>{setFilter(e.target.value);setPage(0);}}/>
-      <div className="island-list">{visible.map(c=>{const index=p.active.indexOf(c.id),t=islandProgress(p.progress,index,p.active.length,p.order,p.handoff);return <div key={c.id} className={`island-row ${index>=0?'selected':''}`}>
+      <div className="island-list">{visible.map(c=>{const index=p.active.indexOf(c.id),t=islandProgress(p.progress,index,p.active.length,p.order,p.handoff,p.timeline);return <div key={c.id} className={`island-row ${index>=0?'selected':''}`}>
         <input type="checkbox" aria-label={`Include island ${c.id+1}`} checked={index>=0} onChange={()=>p.select(c.id,null,true)}/>
-        <button onClick={()=>p.select(c.id)} title={`仅预览岛 ${c.id+1}`}><i style={{background:`rgb(${islandColor(c.id).map(x=>Math.round(x*255)).join(',')})`}}/><b>#{c.id+1}</b><span>{c.faces.length.toLocaleString()} 面</span><em>{index>=0?Math.round(t*100)+'%':'—'}</em></button>
+        <button onClick={()=>p.select(c.id)} title={`仅预览岛 ${c.id+1}`}><i style={{background:`rgb(${islandColor(c.id).map(x=>Math.round(x*255)).join(',')})`}}/><b>#{c.id+1}</b><span>{c.faces.length.toLocaleString()} 面</span><em title={p.timeline?.entries[index]?.profile.segments.filter(s=>!s.keep).map(s=>`${s.stage}：已跳过`).join('；')}>{index>=0?`${Math.round(t*100)}% · ${((p.timeline?.entries[index]?.profile.duration??1)*p.seconds).toFixed(1)}s`:'—'}</em></button>
       </div>;})}</div>
       {pages>1&&<div className="island-pagination"><button disabled={current===0} onClick={()=>setPage(current-1)}>上一页</button><span>{current+1}/{pages}</span><button disabled={current>=pages-1} onClick={()=>setPage(current+1)}>下一页</button></div>}
     </details>
