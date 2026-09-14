@@ -58,7 +58,7 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
     }
   });
   if(skinned)warnings.push(`${skinned} skinned mesh(es) imported at the loaded initial pose. Animation playback is not part of this import.`);
-  const result=assembleMeshParts(parts,name,options);
+  const result=assembleMeshParts(parts,name,{weld:'boundary',...options});
   if(unknownDomains)warnings.push('Some material identities are unavailable. Their UV views are conservatively separated by source object; this is not a recovered original atlas. Old geometry-only caches should be downloaded again.');
   result.report.warnings.push(...warnings);
   return result;

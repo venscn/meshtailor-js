@@ -1,3 +1,4 @@
+import { stitchBoundaryPairs } from './boundary-stitch.js';
 import type { MeshData, MeshFace, Vec3 } from './types.js';
 
 /** Renderer vertices are often duplicated at hard normals and UV seams.
@@ -6,23 +7,23 @@ import type { MeshData, MeshFace, Vec3 } from './types.js';
  * surfaces inside ONE object. Select 'off' for such assets.
  */
 export interface MeshImportOptions {
-  weld?: 'off' | 'exact' | 'tolerance';
+  weld?: 'off' | 'exact' | 'tolerance' | 'boundary';
   relativeTolerance?: number;
   maxTriangles?: number;
 }
 export interface RawMeshPart { name: string; positions: Vec3[]; faces: MeshFace[] }
 export interface MeshImportReport {
   parts: number; sourceVertices: number; vertices: number; triangles: number;
-  weldedVertices: number; droppedDegenerate: number; uvFaces: number;
+  weldedVertices: number; stitchedEdges?: number; stitchedVertices?: number; ambiguousBoundaryEdges?:number; droppedDegenerate: number; uvFaces: number;
   weld: NonNullable<MeshImportOptions['weld']>; warnings: string[];
 }
 export interface ImportedMesh { mesh: MeshData; report: MeshImportReport }
 
 export function assembleMeshParts(parts: RawMeshPart[], name: string, options: MeshImportOptions = {}): ImportedMesh {
   const weld = options.weld ?? 'exact';
-  const relativeTolerance = options.relativeTolerance ?? 1e-7;
+  const relativeTolerance = options.relativeTolerance ?? (weld==='boundary'?5e-7:1e-7);
   const maxTriangles = options.maxTriangles ?? 300_000;
-  if (!['off', 'exact', 'tolerance'].includes(weld)) throw new Error('Unknown weld mode.');
+  if (!['off', 'exact', 'tolerance', 'boundary'].includes(weld)) throw new Error('Unknown weld mode.');
   if (!(relativeTolerance > 0 && relativeTolerance <= .001 && Number.isFinite(relativeTolerance))) throw new Error('Relative weld tolerance must be > 0 and <= 0.001.');
   if (!Number.isInteger(maxTriangles) || maxTriangles < 1) throw new Error('Triangle limit must be a positive integer.');
   const inputFaces = parts.reduce((n, p) => n + p.faces.length, 0);
@@ -30,6 +31,7 @@ export function assembleMeshParts(parts: RawMeshPart[], name: string, options: M
   const positions: Vec3[] = [], faces: MeshFace[] = [];
   const report: MeshImportReport = { parts: parts.length, sourceVertices: 0, vertices: 0, triangles: 0, weldedVertices: 0, droppedDegenerate: 0, uvFaces: 0, weld, warnings: [] };
   for (const part of parts) {
+    const firstFace=faces.length;
     report.sourceVertices += part.positions.length;
     const min: Vec3 = [Infinity, Infinity, Infinity], max: Vec3 = [-Infinity, -Infinity, -Infinity];
     for (const p of part.positions) {
@@ -43,7 +45,7 @@ export function assembleMeshParts(parts: RawMeshPart[], name: string, options: M
     for (const p of part.positions) {
       let existing: number | undefined;
       const key = p.join(',');
-      if (weld === 'exact') existing = exact.get(key);
+      if ((weld === 'exact' || weld === 'boundary')) existing = exact.get(key);
       const cell = weld === 'tolerance' ? p.map((v, a) => Math.floor((v - min[a]!) / tolerance)) : [];
       if (weld === 'tolerance') {
         // Search neighboring cells as well, including points on bucket boundaries.
@@ -57,7 +59,7 @@ export function assembleMeshParts(parts: RawMeshPart[], name: string, options: M
       if (existing !== undefined) { remap.push(existing); report.weldedVertices++; continue; }
       const index = positions.length;
       positions.push([...p]); remap.push(index);
-      if (weld === 'exact') exact.set(key, index);
+      if ((weld === 'exact' || weld === 'boundary')) exact.set(key, index);
       if (weld === 'tolerance') { const k = cell.join(','); const bucket = buckets.get(k) ?? []; bucket.push(index); buckets.set(k, bucket); }
     }
     for (const f of part.faces) {
@@ -68,8 +70,16 @@ export function assembleMeshParts(parts: RawMeshPart[], name: string, options: M
       const area2 = Math.hypot(ab[1]! * ac[2]! - ab[2]! * ac[1]!, ab[2]! * ac[0]! - ab[0]! * ac[2]!, ab[0]! * ac[1]! - ab[1]! * ac[0]!);
       if (new Set(ids).size < 3 || area2 === 0) { report.droppedDegenerate++; continue; }
       if (f.uvs?.some(uv => uv !== null && !uv.every(Number.isFinite))) throw new Error(`${part.name}: non-finite UV coordinate.`);
-      faces.push({ ...f, vertices: ids });
+      faces.push({ ...f, sourcePart:f.sourcePart??`object:${parts.indexOf(part)}`, vertices: ids });
       if (f.uvs?.every(uv => uv !== null)) report.uvFaces++;
+    }
+    if(weld==='boundary'){
+      const repaired=stitchBoundaryPairs(positions,faces.slice(firstFace),tolerance);
+      for(let i=0;i<repaired.faces.length;i++)faces[firstFace+i]=repaired.faces[i]!;
+      report.stitchedEdges=(report.stitchedEdges??0)+repaired.stitchedEdges;
+      report.stitchedVertices=(report.stitchedVertices??0)+repaired.stitchedVertices;
+      report.ambiguousBoundaryEdges=(report.ambiguousBoundaryEdges??0)+repaired.ambiguousEdges;
+      if(repaired.rejected)report.warnings.push(`${part.name}: boundary repairs were rolled back to avoid degeneracy/non-manifold joins.`);
     }
   }
   if (!faces.length) throw new Error('No usable triangle geometry found. Curves, lights, cameras and animation-only files are not meshes.');
@@ -78,6 +88,7 @@ export function assembleMeshParts(parts: RawMeshPart[], name: string, options: M
   for (const f of faces) f.vertices = f.vertices.map(i => { if (!used.has(i)) { used.set(i, compact.length); compact.push(positions[i]!); } return used.get(i)!; }) as MeshFace['vertices'];
   report.vertices = compact.length; report.triangles = faces.length;
   if (report.droppedDegenerate) report.warnings.push(`Skipped ${report.droppedDegenerate} degenerate triangles.`);
+  if(weld==='boundary')report.warnings.push(`Boundary repair paired ${report.stitchedEdges??0} mutually unique edge pairs within ${relativeTolerance} × each source object's extent; ${report.ambiguousBoundaryEdges??0} ambiguous edges were not joined. No cross-object repair or UV-coordinate merge.`);
   if (weld !== 'off') report.warnings.push('Welding is per object. Coincident disconnected surfaces within one object may join; choose Off to preserve renderer indices.');
   return { mesh: { name, positions: compact, faces }, report };
 }

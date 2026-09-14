@@ -42,7 +42,7 @@ export default function App(){
   const [wireframe,setWireframe]=useState(false),[xray,setXray]=useState(true),[showAllSeams,setShowAllSeams]=useState(false),[cameraResetKey,setCameraResetKey]=useState(0);
   const [curvature,setCurvature]=useState(.82),[rings,setRings]=useState(2),[maxEdges,setMaxEdges]=useState(1500),[playing,setPlaying]=useState(false);
   const [detail,setDetail]=useState<MeshDetail>('medium'),[exampleId,setExampleId]=useState<ComplexExampleId>('garment');
-  const [weld,setWeld]=useState<SceneImportOptions['weld']>('exact'),[tolerance,setTolerance]=useState(1e-7);
+  const [weld,setWeld]=useState<SceneImportOptions['weld']>('boundary'),[tolerance,setTolerance]=useState(5e-7);
   const [busy,setBusy]=useState<string|null>(null),[notice,setNotice]=useState('Ready. Choose an offline mesh or import OBJ / FBX / GLB / GLTF.');
   const [liveUV,setLiveUV]=useState(false);
   const [viewMode,setViewMode]=useState<'traversal'|'unfold'>('traversal'),[uvTarget,setUVTarget]=useState<UVTarget>('generated');
@@ -148,8 +148,8 @@ export default function App(){
           <label className="file-label">Load OBJ / FBX / GLB / GLTF<input type="file" multiple accept=".obj,.fbx,.glb,.gltf,.bin" onChange={e=>{const files=Array.from(e.target.files??[]);if(files.length)void loadFiles(files);e.target.value='';}}/></label>
           <small>可拖入文件。glTF 与配套 .bin 请一起选择。只导入网格，不显示材质贴图。</small>
           <details><summary>导入选项 / Import settings</summary>
-            <label>位置焊接（FBX / glTF）<select aria-label="Weld mode" value={weld} onChange={e=>setWeld(e.target.value as SceneImportOptions['weld'])}><option value="exact">Exact · 精确同坐标（默认）</option><option value="tolerance">Tolerance · 容差</option><option value="off">Off · 保留渲染顶点索引</option></select></label>
-            {weld==='tolerance'&&<label>相对包围盒容差<input aria-label="Weld tolerance" type="number" min="1e-12" max="0.001" step="0.0000001" value={tolerance} onChange={e=>{const v=+e.target.value;if(v>0&&v<=.001)setTolerance(v);}}/></label>}
+            <label>位置焊接（FBX / glTF）<select aria-label="Weld mode" value={weld} onChange={e=>setWeld(e.target.value as SceneImportOptions['weld'])}><option value="boundary">Boundary · 微小断边配对（默认）</option><option value="exact">Exact · 仅精确同坐标</option><option value="tolerance">Tolerance · 容差</option><option value="off">Off · 保留渲染顶点索引</option></select></label>
+            {(weld==='tolerance'||weld==='boundary')&&<label>相对包围盒容差<input aria-label="Weld tolerance" type="number" min="1e-12" max="0.001" step="0.0000001" value={tolerance} onChange={e=>{const v=+e.target.value;if(v>0&&v<=.001)setTolerance(v);}}/></label>}
             <small>不跨对象焊接；同一对象内重合但独立的表面可能被连接。UV 保存在面角，不随位置焊接丢失。设置在下次导入生效。</small>
           </details>
         </section>
