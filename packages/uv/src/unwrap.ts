@@ -6,14 +6,14 @@ import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { signedArea2 } from './uv-quality.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
-export interface UnwrapOptions extends SolverOptions,PackOptions { chartPolicy?:ChartGoal|'legacy'; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
+export interface UnwrapOptions extends SolverOptions,PackOptions { chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
 export interface ChartDiagnostic {id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface UnwrapResult extends AtlasPacking { seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
 export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
 export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,chartPolicy:'large',maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
 export function recommendUnwrap(mesh:MeshData,goal:ChartGoal='large'):{options:UnwrapOptions;analysis:MeshAnalysis;regions:RegionOptions;reasons:string[]}{
   const r=recommendRegions(mesh,goal),large=goal==='large';
-  return{options:{...DEFAULT_UNWRAP,chartPolicy:goal,maxChartFaces:r.options.maxChartFaces,maxAspect:large?24:10,minFill:0,maxStretch:large?30:16},analysis:r.analysis,regions:r.options,reasons:[
+  return{options:{...DEFAULT_UNWRAP,chartPolicy:goal,regionOptions:{...r.options},maxChartFaces:r.options.maxChartFaces,maxAspect:large?24:10,minFill:0,maxStretch:large?30:16},analysis:r.analysis,regions:r.options,reasons:[
     '以连通区域和表面积合并小块，不把每条局部折角都当作接缝。',
     '单岛面数按输入规模设置，属于计算预算，不是期望岛大小。',
     '默认不为包围盒填充率切碎有效 UV；拓扑、翻面、退化和交叠检查仍执行。',
@@ -75,7 +75,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   for(let fi=0;fi<mesh.faces.length;fi++){if(fi%256===0)work?.check();const t=mesh.faces[fi]!.vertices;if(new Set(t).size!==3||t.some(v=>!mesh.positions[v])||triangleArea(mesh.positions[t[0]]!,mesh.positions[t[1]]!,mesh.positions[t[2]]!)<1e-15)throw new Error(`Face ${fi} is degenerate in 3D. Repair/remove it before unwrapping; no faces were silently dropped.`);}
   if(opts.autoCut&&opts.chartPolicy!=='legacy'&&seams.size===0){
     uvProgress(work,{stage:'charts',detail:'自动大块分区：合并相邻小区域'});
-    const regionOpts={...recommendRegions(mesh,opts.chartPolicy).options,maxChartFaces:opts.maxChartFaces};
+    const regionOpts={...recommendRegions(mesh,opts.chartPolicy).options,...opts.regionOptions,maxChartFaces:opts.maxChartFaces};
     const regions=segmentMeshRegions(mesh,regionOpts,effective,undefined,()=>work?.check(),topology);
     for(const key of regions.seamEdges)effective.add(key);
     warnings.push(`自动连通分区：${regions.regions.length} 个候选区域，合并 ${regions.mergedRegions} 个局部小区域；后续仍须通过 UV 验证。`);

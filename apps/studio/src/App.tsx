@@ -12,7 +12,7 @@ import { UVCanvas } from './UVCanvas';
 import { importMeshFiles, type SceneImportOptions } from './importers';
 import type { SeamJob, SeamResult } from './workers/seam.worker';
 import { prepareViewportMesh } from './viewport-math';
-import { meshWithPreviewUV, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
+import { meshWithPreviewUV, recommendUnwrap, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
 import { makeUnfoldDemo, makeHingeDemo } from './unfold/demo';
 import { useUVSnapshot } from './unfold/useUVSnapshot';
 import { useUnfoldPlayer } from './unfold/useUnfoldPlayer';
@@ -24,7 +24,7 @@ import { UnfoldViewport } from './unfold/UnfoldViewport';
 import { CorrespondenceInspector } from './unfold/CorrespondenceInspector';
 import type { UVTarget } from './workers/uv.worker';
 import './styles.css';
-const EMPTY_EDGES = new Set<string>();
+import { previewEdges, seamTarget } from './unfold/preview-policy';
 
 function describeMesh(mesh:MeshData){
   const t=buildTopology(mesh);
@@ -50,14 +50,14 @@ export default function App(){
   const frame=step>=0?frames[step]:undefined;
   const activeEdges=useMemo(()=>showAllSeams?seamEdges:frame?new Set(frame.revealedEdges):seamEdges,[frame,seamEdges,showAllSeams]);
   const stats=useMemo(()=>describeMesh(mesh),[mesh]);
-  const uvEdges=mesh.faces.length>20_000&&!liveUV?seamEdges:activeEdges;
+  const uvEdges=liveUV?activeEdges:seamEdges;
   // Unfolding always freezes the COMPLETE seam set. Traversal progress must not repack its target mid-animation.
-  const snapshotTarget = viewMode==='unfold'?uvTarget:'generated';
-  const snapshotEdges = snapshotTarget==='source'?EMPTY_EDGES:viewMode==='unfold'?seamEdges:uvEdges;
-  const [uvConfig,setUVConfig]=useState<UnwrapOptions>({...DEFAULT_UNWRAP});
+  const snapshotTarget = uvTarget;
+  const snapshotEdges = previewEdges(snapshotTarget,seamEdges,activeEdges,viewMode==='traversal'&&liveUV);
+  const [uvConfig,setUVConfig]=useState<UnwrapOptions>(()=>recommendUnwrap(mesh).options);
   const uvState = useUVSnapshot(mesh,snapshotEdges,snapshotTarget,uvConfig);
   const snapshot = uvState.snapshot;
-  const displaySeams=useMemo(()=>new Set([...activeEdges,...(snapshot?.addedSeams??[])]),[activeEdges,snapshot]);
+  const displaySeams=useMemo(()=>new Set(snapshotTarget==='source'?(snapshot?.seams??[]):[...activeEdges,...(snapshot?.addedSeams??[])]),[activeEdges,snapshot,snapshotTarget]);
   const player = useUnfoldPlayer(snapshot);
   const chartCount = snapshot?.packed.length??null;
   const uvStatus=uvState.loading?describeUVProgress(uvState.progress,uvState.elapsedMs):uvState.error;
@@ -78,7 +78,7 @@ export default function App(){
   const begin=(message:string)=>{cancel();setLoadError(null);setBusy(message);return operation.current;};
   const replaceMesh=(m:MeshData,report:MeshImportReport|null=null)=>{
     prepareViewportMesh(m); // Reject malformed input before React/topology/Three see it.
-    setMesh(m);setImportReport(report);setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
+    setMesh(m);setImportReport(report);setUVConfig(recommendUnwrap(m).options);setUVTarget('generated');setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
   };
   const loadUnfoldDemo=()=>{cancel();setLoadError(null);try{const demo=makeUnfoldDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setUVTarget('generated');setViewMode('unfold');setNotice('六岛立方体：拖动 0–100% 进度，观察同色编号的面片移入对应 UV 岛。');}catch(error){setLoadError(String(error));}};
   const loadHingeDemo=()=>{cancel();setLoadError(null);try{const demo=makeHingeDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setNotice('三块折角带：点“分块陈列”，再缓慢拖动 28–70%，看各铰链真实转动。');}catch(error){setLoadError(String(error));}};
@@ -114,7 +114,7 @@ export default function App(){
     finally{if(id===operation.current)setBusy(null);}
   };
   const runSeams=(kind:SeamJob['kind'])=>{
-    const id=begin(kind==='baseline'?'Generating baseline…':'Extracting UV seams…');
+    const id=begin(kind==='uv-seams'?'读取原始 UV（不再补切）…':'分析网格并生成连通分区…');
     try{
       const worker=new Worker(new URL('./workers/seam.worker.ts',import.meta.url),{type:'module'});seamWorker.current=worker;
       worker.onmessage=(event:MessageEvent<SeamResult>)=>{
@@ -122,13 +122,16 @@ export default function App(){
         const result=event.data;if(!result.ok){setLoadError(result.error);return;}
         try{
           const edges=new Set(result.edges),fs=buildGenerationFrames(mesh,result.chains);
+          setUVTarget(seamTarget(kind));
+          if(kind.startsWith('auto-')&&result.parameters)setUVConfig({...result.parameters,timeBudgetMs:uvConfig.timeBudgetMs,padding:uvConfig.padding});
           setSeamEdges(edges);setChains(result.chains);setFrames(fs);setShowAllSeams(false);setStep(fs.length?0:-1);setPlaying(false);
-          setNotice(`${kind==='baseline'?'Geometric baseline':'UV seams'}: ${edges.size} edges, ${result.chains.length} chains, ${fs.length} steps; worker ${result.elapsedMs.toFixed(0)} ms.${kind==='baseline'?` Budget: ${maxEdges} edges.`:''}`);
-          if(!edges.size)setNotice('No seam edges found. Adjust baseline settings or use a mesh with existing UV discontinuities.');
+          setNotice(kind==='uv-seams'?`已读取原始 UV 接缝：${edges.size} 条边。显示和动画直接使用原 UV，不重新分割。`:`${result.regionCount??'传统'} 个候选分区，合并 ${result.mergedCount??0} 个小区域；${edges.size} 条接缝。最终岛数由 UV 有效性检查决定。`);
+          if(kind.startsWith('auto-'))setShowAllSeams(true);
+          if(!edges.size&&kind!=='uv-seams')setNotice('候选区域无需分隔边；UV 求解按需开缝，仍保留所有面。');
         }catch(error){setLoadError(String(error));}
       };
       worker.onerror=event=>{worker.terminate();if(id===operation.current){setBusy(null);setLoadError('Seam worker failed: '+event.message);}};
-      worker.postMessage({kind,mesh,options:{curvatureQuantile:curvature,structuralRings:rings,maxEdges}} satisfies SeamJob);
+      worker.postMessage({kind,mesh,options:{strategy:uvConfig.chartPolicy==='legacy'?'legacy':'adaptive',goal:uvConfig.chartPolicy==='balanced'?'balanced':'large',regionOptions:{...uvConfig.regionOptions,maxChartFaces:uvConfig.maxChartFaces},curvatureQuantile:curvature,structuralRings:rings,maxEdges}} satisfies SeamJob);
     }catch(error){setBusy(null);setLoadError(String(error));}
   };
   const seek=(next:number)=>{setPlaying(false);setStep(Math.max(0,Math.min(frames.length-1,next)));};
@@ -140,7 +143,7 @@ export default function App(){
       <aside className="sidebar">
         {viewMode==='unfold'&&<UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={setUVTarget} onExport={exportTargetUV} onDemo={loadUnfoldDemo} onHingeDemo={loadHingeDemo}/>}
         <UVJobStatus state={uvState} hasSource={hasSourceUV} onUseSource={()=>{setUVTarget('source');setViewMode('unfold');if(snapshotTarget==='source')uvState.retry();}}/>
-        <UVSolverControls value={uvConfig} onChange={setUVConfig} snapshot={snapshot}/>
+        <UVSolverControls value={uvConfig} onChange={setUVConfig} snapshot={snapshot} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
         <section><h3>Mesh · 网格</h3><div className="button-grid"><button onClick={()=>resetForMesh(makeCube())}>Cube</button><button onClick={()=>resetForMesh(makeCylinder(20))}>Cylinder</button><button onClick={()=>resetForMesh(makeTorsoGrid())}>Torso</button></div>
           <label className="file-label">Load OBJ / FBX / GLB / GLTF<input type="file" multiple accept=".obj,.fbx,.glb,.gltf,.bin" onChange={e=>{const files=Array.from(e.target.files??[]);if(files.length)void loadFiles(files);e.target.value='';}}/></label>
           <small>可拖入文件。glTF 与配套 .bin 请一起选择。只导入网格，不显示材质贴图。</small>
@@ -161,17 +164,17 @@ export default function App(){
         <section><h3>公开模型 · Online</h3><small>CC0；优先使用已下载的本地副本，否则从原站获取几何和 UV，不下载贴图。</small>
           {REMOTE_MESH_ASSETS.map(asset=><div className="asset-card" key={asset.id}><button disabled={!!busy} onClick={()=>void loadRemote(asset)}>{asset.name}</button><small>{asset.description} <a href={asset.source} target="_blank" rel="noreferrer">来源 / 许可</a></small></div>)}
         </section>
-        <section><h3>Seam source</h3><button className="primary" disabled={!!busy} onClick={()=>runSeams('baseline')}>Generate baseline</button><button disabled={!!busy} onClick={()=>runSeams('uv-seams')}>Extract existing UV seams</button>
-          <label>Curvature quantile <b>{curvature.toFixed(2)}</b><input type="range" min="0.55" max="0.98" step="0.01" value={curvature} onChange={e=>setCurvature(+e.target.value)}/></label>
+        <section><h3>Seam source</h3><small>默认自动连通大块。已有 UV 提取只读取原布局，不会替你合并或补切。</small><button className="primary" disabled={!!busy} onClick={()=>runSeams('baseline')}>Generate baseline</button><button disabled={!!busy} onClick={()=>runSeams('uv-seams')}>Extract existing UV seams</button>
+          <details><summary>传统 baseline 参数（仅 legacy 策略生效）</summary><label>Curvature quantile <b>{curvature.toFixed(2)}</b><input type="range" min="0.55" max="0.98" step="0.01" value={curvature} onChange={e=>setCurvature(+e.target.value)}/></label>
           <label>Structural cross-sections <b>{rings}</b><input type="range" min="0" max="5" step="1" value={rings} onChange={e=>setRings(+e.target.value)}/></label>
-          <label>Baseline edge budget <input aria-label="Edge budget" type="number" min="50" max="20000" step="50" value={maxEdges} onChange={e=>{const n=Math.floor(+e.target.value);if(n>=50&&n<=20000)setMaxEdges(n);}}/></label><small>预算仅限制几何 baseline，不抽稀输入网格，不截断已有 UV 接缝。</small>
+          <label>Baseline edge budget <input aria-label="Edge budget" type="number" min="50" max="20000" step="50" value={maxEdges} onChange={e=>{const n=Math.floor(+e.target.value);if(n>=50&&n<=20000)setMaxEdges(n);}}/></label><small>仅限制传统 baseline；自动大块模式不截断区域边界，不抽稀网格。</small></details>
         </section>
         <section><h3>Display</h3><button onClick={()=>{setCameraResetKey(n=>n+1);if(viewMode==='unfold')player.fit('orbit');}}>Reset camera</button>
           <label className="check"><input type="checkbox" checked={wireframe} onChange={e=>setWireframe(e.target.checked)}/> wireframe</label>
           <label className="check"><input type="checkbox" checked={xray} onChange={e=>setXray(e.target.checked)}/> X-ray traversal</label>
           <label className="check"><input type="checkbox" checked={showAllSeams} onChange={e=>setShowAllSeams(e.target.checked)}/> Show all seams</label>
-          <label className="check"><input type="checkbox" checked={liveUV} onChange={e=>setLiveUV(e.target.checked)}/> 大网格也逐步更新 UV</label>
-          <small>超过 2 万面默认按完整接缝计算 UV，避免播放时反复计算；勾选后按当前步骤更新。</small>
+          <label className="check"><input type="checkbox" checked={liveUV} onChange={e=>setLiveUV(e.target.checked)}/> 按遍历步骤重新求解 UV（诊断）</label>
+          <small>默认所有网格都按完整接缝求解；播放只改变高亮。勾选后才会随步骤重新切分。</small>
           <div className="legend"><span><i className="dot seam"/>seam</span><span><i className="dot candidate"/>candidates</span><span><i className="dot current"/>current</span><span><i className="dot previous"/>previous</span></div>
         </section>
         <section className="stats"><h3>Topology</h3><dl><dt>Vertices</dt><dd>{stats.vertices.toLocaleString()}</dd><dt>Triangles</dt><dd>{stats.triangles.toLocaleString()}</dd><dt>Edges</dt><dd>{stats.edges.toLocaleString()}</dd><dt>Boundary</dt><dd>{stats.boundary.toLocaleString()}</dd><dt>Manifold*</dt><dd>{stats.manifold?'yes':'no'}</dd><dt>UV charts</dt><dd>{chartCount??'…'}</dd></dl><small>* edge-manifold check, not a repair guarantee</small></section>
@@ -185,7 +188,7 @@ export default function App(){
         {viewMode==='traversal'&&frames.length>0&&<div className="operation-summary">{notice}</div>}
       </section>
       <aside className="rightbar">
-        <div className="panel uv-panel"><div className="panel-title"><span>{viewMode==='unfold'?'目标 UV · 点击对应岛':'UV charts'}</span><span>{viewMode==='unfold'?(uvTarget==='source'?'原始 UV':'完整接缝'):uvEdges===seamEdges&&mesh.faces.length>20_000&&!liveUV?'full seams':'current step'}</span></div><UVCanvas snapshot={snapshot} status={uvStatus} selected={viewMode==='unfold'?player.active:uvAll} focusFace={viewMode==='unfold'?player.focusFace:null} checker={viewMode==='unfold'&&player.checker} wireframe={wireframe} onPick={viewMode==='unfold'?player.pick:undefined}/></div>
+        <div className="panel uv-panel"><div className="panel-title"><span>{viewMode==='unfold'?'目标 UV · 点击对应岛':'UV charts'}</span><span>{snapshotTarget==='source'?'原始 UV · 不重切':liveUV&&viewMode==='traversal'?'current step':'完整接缝 · 自动大块'}</span></div><UVCanvas snapshot={snapshot} status={uvStatus} selected={viewMode==='unfold'?player.active:uvAll} focusFace={viewMode==='unfold'?player.focusFace:null} checker={viewMode==='unfold'&&player.checker} wireframe={wireframe} onPick={viewMode==='unfold'?player.pick:undefined}/></div>
         {viewMode==='unfold'?<CorrespondenceInspector mesh={mesh} snapshot={snapshot} player={player}/>:<div className="panel timeline"><div className="panel-title"><span>Decode timeline</span><span>{chains.length} chains</span></div>{frames.length>100&&<small className="timeline-window">Showing {timelineStart+1}–{timelineStart+timelineFrames.length} of {frames.length}. Use slider to seek.</small>}<div className="timeline-scroll">{frames.length?timelineFrames.map((f,j)=>{const i=j+timelineStart;return <button key={i} className={i===step?'active':''} onClick={()=>seek(i)}><span>{String(i+1).padStart(3,'0')}</span><b>{f.tokenLabel}</b><em>{f.message}</em></button>;}):<p className="empty">Generate seams to inspect mesh-native pointer traversal.</p>}</div></div>}
       </aside>
     </main>

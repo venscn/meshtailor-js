@@ -6,7 +6,8 @@
   "include": [
     "packages/**/*.ts",
     "apps/studio/src/viewport-math.ts",
-    "apps/studio/src/unfold/*.ts"
+    "apps/studio/src/unfold/*.ts",
+    "apps/studio/src/workers/*.ts"
   ],
   "exclude": [
     "packages/**/__tests__/**"
