@@ -7,3 +7,4 @@ export * from './uv-quality.js';
 export * from './parameterize.js';
 export * from './atlas-pack.js';
 export * from './unwrap.js';
+export * from './hinge.js';

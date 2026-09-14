@@ -1,9 +1,10 @@
+import { buildHingeRig, writeHingePositions, type HingeRig } from './hinge.js';
 import { buildTopology, edgeKey, type MeshData, type Vec2, type Vec3 } from '@meshtailor/mesh-core';
 import type { UVChart } from './charts.js';
 import type { PackedChart } from './preview.js';
 
 export type UnfoldOrder = 'together' | 'sequential';
-export type UnfoldPath = 'staged' | 'direct';
+export type UnfoldPath = 'hinge' | 'staged' | 'direct';
 export interface AtlasFrame { min: Vec2; max: Vec2; center: Vec2; scale: number }
 export interface UnfoldIsland {
   id: number;
@@ -22,6 +23,7 @@ export interface UnfoldGeometry {
   islands: UnfoldIsland[];
   atlas: AtlasFrame;
   radius: number;
+  hinge?: HingeRig;
 }
 export interface UnfoldOptions {
   progress: number;
@@ -30,6 +32,7 @@ export interface UnfoldOptions {
   path: UnfoldPath;
   /** Display-only separation distance in normalized mesh coordinates. */
   separation: number;
+  hingeWave?: boolean;
 }
 const clamp = (x: number) => Math.max(0, Math.min(1, x));
 const smooth = (x: number) => { const t = clamp(x); return t * t * (3 - 2 * t); };
@@ -122,7 +125,9 @@ export function buildUnfoldGeometry(mesh: MeshData, packed: PackedChart[], seams
       if (seams.has(key) || neighbors.length !== 2 || neighbors.some(n => faceChart[n] !== faceChart[fi])) boundaries.push(fi * 3 + k, fi * 3 + (k + 1) % 3);
     }
   });
-  return { source, target, uv, faceChart, boundaries: new Uint32Array(boundaries), islands, atlas, radius };
+  const result:UnfoldGeometry={ source, target, uv, faceChart, boundaries: new Uint32Array(boundaries), islands, atlas, radius };
+  result.hinge=buildHingeRig(mesh,result,seams);
+  return result;
 }
 
 /** The selection order is meaningful. Unknown and repeated IDs are ignored. */
@@ -142,6 +147,7 @@ export function writeUnfoldPositions(geometry: UnfoldGeometry, options: UnfoldOp
   if (!Number.isFinite(options.separation) || options.separation < 0) throw new Error('Separation must be finite and nonnegative.');
   if (!Number.isFinite(options.progress)) throw new Error('Progress must be finite.');
   const ids = selectedIslands(geometry, options.selected), ranks = new Map(ids.map((id, i) => [id, i]));
+  if(options.path==='hinge')return writeHingePositions(geometry,options,ids,out);
   out.set(geometry.source);
   for (const island of geometry.islands) {
     const t = islandProgress(options.progress, ranks.get(island.id) ?? -1, ids.length, options.order);
