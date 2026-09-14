@@ -1,3 +1,4 @@
+import { islandProgress } from './unfold-schedule.js';
 import { uvProgress, type UVWork } from './work.js';
 import { buildTopology, edgeKey, type MeshData, type Vec3, type MeshTopology } from '@meshtailor/mesh-core';
 import type { UnfoldGeometry, UnfoldOptions } from './unfold.js';
@@ -18,6 +19,16 @@ export const HINGE_STAGES=[
   {t:.70,label:'铰链展平'}, {t:.80,label:'检查平面网'}, {t:.92,label:'UV 形变'}, {t:1,label:'Atlas 排布'}
 ] as const;
 const clamp=(v:number)=>Math.max(0,Math.min(1,v));
+/** Convert per-island clock progress to the existing geometric keyframes.
+ * Removing the hold is continuous: poses at .70 and .80 are the same rigid net. */
+export function hingePoseProgress(local:number,holdNet=false):number {
+  const t=clamp(local);if(holdNet)return t;
+  const moving=t*.9;return clamp(moving < .7 ? moving : moving+.1);
+}
+/** Inverse for stage buttons. Both edges of a skipped hold map to one instant. */
+export function hingePlaybackProgress(pose:number,holdNet=false):number {
+  const t=clamp(pose);return holdNet?t:clamp((t<=.7?t:t<.8?.7:t-.1)/.9);
+}
 const smooth=(v:number)=>{const t=clamp(v);return t*t*(3-2*t);};
 const sub=(a:ArrayLike<number>,b:ArrayLike<number>):Vec3=>[a[0]!-b[0]!,a[1]!-b[1]!,a[2]!-b[2]!];
 const cross=(a:ArrayLike<number>,b:ArrayLike<number>):Vec3=>[a[1]!*b[2]!-a[2]!*b[1]!,a[2]!*b[0]!-a[0]!*b[2]!,a[0]!*b[1]!-a[1]!*b[0]!];
@@ -130,7 +141,7 @@ export function writeHingePositions(g:UnfoldGeometry,options:UnfoldOptions,ids:r
   out.set(g.source);
   const sourceIslands=new Map(g.islands.map(i=>[i.id,i]));
   for(const item of rig.islands){const rank=ranks.get(item.id);if(rank===undefined)continue;
-    const t=options.order==='sequential'?clamp(options.progress*ids.length-rank):clamp(options.progress),island=sourceIslands.get(item.id)!,center=layout.get(item.id)!;
+    const t=hingePoseProgress(islandProgress(options.progress,rank,ids.length,options.order,options.handoff),options.holdNet),island=sourceIslands.get(item.id)!,center=layout.get(item.id)!;
     if(t===0)continue;if(t===1){for(const fi of item.order)out.set(g.target.subarray(fi*9,fi*9+9),fi*9);continue;}
     if(t<.8){
       const fold=clamp((t-.28)/.42),orient=smooth((t-.18)/.10),move=smooth(t/.18),r=rotation(item.turnAxis,item.turnAngle*orient),displacement:Vec3=island.sourceCenter.map((v,a)=>v+(center[a]!-v)*move) as Vec3;
@@ -149,7 +160,7 @@ export function writeHingePositions(g:UnfoldGeometry,options:UnfoldOptions,ids:r
 /** Remaining signed dihedral at a displayed hinge, for the on-screen angle label. */
 export function hingeRemainingAngle(g:UnfoldGeometry,options:UnfoldOptions,fi:number):number {
   const rig=g.hinge;if(!rig)return 0;const id=g.faceChart[fi]!,index=options.selected.indexOf(id),island=rig.islands.find(i=>i.id===id);if(index<0||!island)return rig.angle[fi]!;
-  const t=options.order==='sequential'?clamp(options.progress*options.selected.length-index):clamp(options.progress),fold=clamp((t-.28)/.42);
+  const t=hingePoseProgress(islandProgress(options.progress,index,options.selected.length,options.order,options.handoff),options.holdNet),fold=clamp((t-.28)/.42);
   const local=options.hingeWave===false?smooth(fold):smooth(fold*1.6-rig.depth[fi]!/Math.max(1,island.maxDepth)*.6);
   return rig.angle[fi]!*(1-local);
 }

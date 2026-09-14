@@ -9,3 +9,5 @@ export * from './atlas-pack.js';
 export * from './unwrap.js';
 export * from './hinge.js';
 export * from './work.js';
+
+export * from "./unfold-schedule.js";

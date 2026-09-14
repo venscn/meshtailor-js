@@ -4,7 +4,9 @@ import { buildTopology, edgeKey, type MeshData, type Vec2, type Vec3 } from '@me
 import type { UVChart } from './charts.js';
 import type { PackedChart } from './preview.js';
 
-export type UnfoldOrder = 'together' | 'sequential';
+import { islandProgress, type UnfoldOrder } from './unfold-schedule.js';
+export { islandProgress } from './unfold-schedule.js';
+export type { UnfoldOrder } from './unfold-schedule.js';
 export type UnfoldPath = 'hinge' | 'staged' | 'direct';
 export interface AtlasFrame { min: Vec2; max: Vec2; center: Vec2; scale: number }
 export interface UnfoldIsland {
@@ -34,6 +36,10 @@ export interface UnfoldOptions {
   /** Display-only separation distance in normalized mesh coordinates. */
   separation: number;
   hingeWave?: boolean;
+  /** Start the next island when its predecessor reaches this local progress. */
+  handoff?: number;
+  /** Optional teaching pause on the rigid net; disabled by default in both UIs. */
+  holdNet?: boolean;
 }
 const clamp = (x: number) => Math.max(0, Math.min(1, x));
 const smooth = (x: number) => { const t = clamp(x); return t * t * (3 - 2 * t); };
@@ -138,12 +144,6 @@ export function selectedIslands(geometry: UnfoldGeometry, ids: readonly number[]
   const valid = new Set(geometry.islands.map(c => c.id));
   return [...new Set(ids)].filter(id => valid.has(id));
 }
-export function islandProgress(progress: number, index: number, count: number, order: UnfoldOrder): number {
-  if (!Number.isFinite(progress)) throw new Error('Progress must be finite.');
-  if (index < 0 || count < 1 || index >= count) return 0;
-  const t = clamp(progress);
-  return order === 'sequential' ? clamp(t * count - index) : t;
-}
 /** Reversible presentation morph, NOT a physical cloth simulation or a UV-solver iteration. */
 export function writeUnfoldPositions(geometry: UnfoldGeometry, options: UnfoldOptions, out = new Float32Array(geometry.source.length)): Float32Array {
   if (out.length !== geometry.source.length || out.buffer === geometry.source.buffer || out.buffer === geometry.target.buffer) throw new Error('Output must be a separate, correctly sized position buffer.');
@@ -153,7 +153,7 @@ export function writeUnfoldPositions(geometry: UnfoldGeometry, options: UnfoldOp
   if(options.path==='hinge')return writeHingePositions(geometry,options,ids,out);
   out.set(geometry.source);
   for (const island of geometry.islands) {
-    const t = islandProgress(options.progress, ranks.get(island.id) ?? -1, ids.length, options.order);
+    const t = islandProgress(options.progress, ranks.get(island.id) ?? -1, ids.length, options.order, options.handoff);
     if (t === 0) continue;
     for (const fi of island.faces) for (let k = 0; k < 9; k++) {
       const i = fi * 9 + k, a = k % 3, s = geometry.source[i]!, d = geometry.target[i]!;
