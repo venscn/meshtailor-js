@@ -7,17 +7,32 @@ import { DEFAULT_AUTO_FRAME } from '/apps/studio/src/unfold/camera-policy.js';
 import { drawUVSnapshot, pickUVFace } from '/apps/studio/src/unfold/uv-drawing.js';
 import {startUVJob,describeUVProgress} from '/apps/studio/src/unfold/uv-job-client.js';
 const $=id=>document.getElementById(id);
-let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,last=0,sequence=0;
-const options={progress:0,selected:[],order:'together',path:'hinge',separation:.5,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
+let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,sequence=0;
+const options={progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:.5,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
 const view=new UnfoldWebGLView($('view'),(id,face,add)=>select(id,face,add),e=>{if(e)fail(e);},()=>{options.autoFrame=false;$('frame').checked=false;view.setOptions(options);cameraStatus();});
 function cameraStatus(){$('frame').checked=options.autoFrame;$('camera-status').textContent=options.autoFrame?'自动跟随中；操作相机会立即关闭跟随，动画继续。':'手动相机：动画不改变视角。适配按钮只执行一次。';}
 function fail(message){$('error').hidden=false;$('error').textContent=String(message);}
-function pause(){playing=false;$('play').textContent='播放展开';}
+function pause(){playing=false;clockLast=null;$('play').textContent='播放展开';}
 function drawUV(){if(!snapshot)return;const host=$('uvhost'),c=$('uv'),d=Math.min(devicePixelRatio,2),ctx=c.getContext('2d');c.width=Math.max(1,Math.round(host.clientWidth*d));c.height=Math.max(1,Math.round(host.clientHeight*d));ctx.setTransform(d,0,0,d,0,0);drawUVSnapshot(ctx,snapshot,host.clientWidth,host.clientHeight,options);}
 function list(){if(!snapshot)return;$('islands').replaceChildren();for(const island of snapshot.geometry.islands.slice(0,100)){const row=document.createElement('div');row.className='island';const box=document.createElement('input');box.type='checkbox';box.checked=options.selected.includes(island.id);box.setAttribute('aria-label','选中岛 '+(island.id+1));box.onchange=()=>select(island.id,null,true);const b=document.createElement('button');b.innerHTML=`<i style="background:rgb(${uv.islandColor(island.id).map(x=>Math.round(x*255)).join(',')})"></i>#${island.id+1} · ${island.faces.length} 面`;b.onclick=()=>select(island.id,null,false);row.append(box,b);$('islands').append(row);}}
 function select(id,face=null,add=false){pause();options.selected=add?(options.selected.includes(id)?options.selected.filter(x=>x!==id):[...options.selected,id]):[id];options.focusFace=face;options.progress=0;list();update();}
-function update(patch={}){Object.assign(options,patch);view.setOptions(options);cameraStatus();drawUV();$('progress').value=options.progress;$('percent').textContent=(options.progress*100).toFixed(1)+'%';const local=options.order==='sequential'?Math.min(1,options.progress===1?1:(options.progress*options.selected.length)%1):options.progress;$('phase').textContent=local<.18?'分离面片':local<.28?'转向观察':local<.70?'沿边铰链旋转':local<.80?'刚性平面网':local<.92?'UV 参数化形变':local<1?'面积感知排布':'目标 UV';}
+function update(patch={}){
+  Object.assign(options,patch);
+  view.setOptions(options);cameraStatus();drawUV();
+  $('progress').value=options.progress;$('percent').textContent=(options.progress*100).toFixed(1)+'%';
+  const reverse=$('reverse').checked,schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,reverse);
+  const local=uv.islandProgress(options.progress,schedule.focusIndex,options.selected.length,options.order,options.handoff);
+  const pose=uv.hingePoseProgress(local,options.holdNet);
+  $('phase').textContent=(schedule.focusIndex<0?'没有选择岛':`#${options.selected[schedule.focusIndex]+1} · `)+(pose<.18?'分离面片':pose<.28?'转向观察':pose<.70?'沿边铰链旋转':pose<.80?'刚性平面网':pose<.92?'UV 参数化形变':pose<1?'面积感知排布':'目标 UV');
+  const seconds=Math.max(.5,Math.min(60,Number($('seconds').value)||12));
+  const duration=uv.unfoldDuration(seconds,options.selected.length,options.order,options.handoff);
+  $('queue-status').textContent=`${reverse?'已折回':'已完成'} ${reverse?schedule.waiting:schedule.completed} / ${options.selected.length} · ${reverse?'待折回':'等待'} ${reverse?schedule.completed:schedule.waiting} · ${schedule.active.length?'播放中 '+schedule.active.map(a=>`#${options.selected[a.index]+1} (${(a.progress*100).toFixed(1)}%)`).join(' → '):'无活动岛'}\n总时长 ${duration.toFixed(1)} 秒 · 剩余 ${(duration*(reverse?options.progress:1-options.progress)).toFixed(1)} 秒`;
+  $('handoff-label').textContent=`前岛完成 ${Math.round(options.handoff*100)}% 时接力`;
+  $('handoff').disabled=options.order==='sequential';
+  $('queue-prev').disabled=schedule.focusIndex<=0;$('queue-next').disabled=schedule.focusIndex<0||schedule.focusIndex>=options.selected.length-1;
+}
+function seekQueue(direction){pause();const schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,$('reverse').checked),index=Math.max(0,Math.min(options.selected.length-1,schedule.focusIndex+direction));update({progress:uv.islandTimelineProgress($('reverse').checked?1:0,index,options.selected.length,options.order,options.handoff)});}
 function cancel(){sequence++;jobHandle?.cancel();jobHandle=null;$('cancel').disabled=true;$('solve').disabled=false;}
 async function solve(){
   cancel();pause();window.lab.ready=false;window.lab.progressEvents=[];
@@ -41,15 +56,27 @@ async function solve(){
   finally{clearInterval(clock);if(token===sequence){jobHandle=null;$('solve').disabled=false;$('cancel').disabled=true;}}
 }
 function load(demo){mesh=demo.mesh;seams=demo.edges;window.lab.ready=false;return solve();}
-for(const stage of uv.HINGE_STAGES){const b=document.createElement('button');b.textContent=stage.label;b.dataset.stage=stage.t;b.onclick=()=>{pause();let t=stage.t;if(options.order==='sequential'){const n=Math.max(1,options.selected.length);t=(Math.min(n-1,Math.floor(options.progress*n))+stage.t)/n;}update({progress:t});};$('stages').append(b);}
+for(const stage of uv.HINGE_STAGES){const b=document.createElement('button');b.textContent=stage.label;b.dataset.stage=stage.t;b.onclick=()=>{pause();const schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,$('reverse').checked);update({progress:uv.islandTimelineProgress(uv.hingePlaybackProgress(stage.t,options.holdNet),schedule.focusIndex,options.selected.length,options.order,options.handoff)});};$('stages').append(b);}
 $('ribbon').onclick=()=>load(makeHingeDemo());$('cube').onclick=()=>load(makeUnfoldDemo());$('complex').onclick=()=>{const m=core.makeComplexExample($('example').value,'low');load({mesh:m,edges:extractSeamEdgesFromUV(m)});};
 $('file').onchange=async e=>{try{const f=e.target.files?.[0];if(f){const m=core.parseOBJ(await f.text(),f.name);await load({mesh:m,edges:extractSeamEdgesFromUV(m)});}}catch(e){fail(e.message);}};
 $('solve').onclick=solve;$('cancel').onclick=()=>{cancel();$('status').textContent='已取消本次求解。';};$('target').onchange=solve;
-$('all').onclick=()=>{pause();options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update();};$('none').onclick=()=>{pause();options.selected=[];list();update();};
+$('all').onclick=()=>{pause();options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update({progress:0});};$('none').onclick=()=>{pause();options.selected=[];list();update({progress:0});};
 for(const [id,key]of [['wave','hingeWave'],['frame','autoFrame'],['hinges','showHinges'],['temporary','showTemporaryCuts'],['checker','checker']])$(id).onchange=()=>update({[key]:$(id).checked});
+$('handoff').oninput=()=>{pause();update({handoff:Number($('handoff').value),progress:0});};$('hold-net').onchange=()=>{pause();update({holdNet:$('hold-net').checked,progress:0});};$('queue-prev').onclick=()=>seekQueue(-1);$('queue-next').onclick=()=>seekQueue(1);$('seconds').onchange=()=>update();$('reverse').onchange=()=>update();
 $('order').onchange=()=>{pause();update({order:$('order').value,progress:0});};$('context').onchange=()=>update({context:$('context').value});$('fit-current').onclick=()=>view.fitCurrent();$('orbit').onclick=()=>view.fit('orbit');$('front').onclick=()=>view.fit('uv');
-$('progress').oninput=()=>{pause();update({progress:Number($('progress').value)});};$('play').onclick=()=>{if(playing){pause();return;}if(!snapshot||!options.selected.length)return;playing=true;const reverse=$('reverse').checked;if((!reverse&&options.progress===1)||(reverse&&options.progress===0))update({progress:reverse?1:0});last=performance.now();$('play').textContent='暂停';};
-function tick(now){if(playing){const sec=Math.max(1,Math.min(60,Number($('seconds').value)||12)),duration=sec*(options.order==='sequential'?Math.max(1,options.selected.length):1),dir=$('reverse').checked?-1:1;let t=options.progress+Math.min(.1,(now-last)/1000)/duration*dir;last=now;if(t>1||t<0){if($('loop').checked)t=dir>0?0:1;else{t=Math.max(0,Math.min(1,t));pause();}}update({progress:t});}requestAnimationFrame(tick);}requestAnimationFrame(tick);
+$('progress').oninput=()=>{pause();update({progress:Number($('progress').value)});};$('play').onclick=()=>{if(playing){pause();return;}if(!snapshot||!options.selected.length)return;playing=true;clockLast=null;const reverse=$('reverse').checked;if((!reverse&&options.progress===1)||(reverse&&options.progress===0))update({progress:reverse?1:0});$('play').textContent='暂停';};
+// Visibility resets the timestamp so time spent in a hidden tab is not replayed.
+let clockLast=null;document.addEventListener('visibilitychange',()=>{clockLast=null;});
+function tick(now){
+  if(playing&&!document.hidden){
+    const elapsed=clockLast===null?0:Math.max(0,now-clockLast);
+    const seconds=Math.max(.5,Math.min(60,Number($('seconds').value)||12));
+    const duration=uv.unfoldDuration(seconds,options.selected.length,options.order,options.handoff);
+    const next=uv.advanceUnfoldPlayback(options.progress,elapsed,duration,$('reverse').checked,$('loop').checked);
+    if(next.finished)pause();update({progress:next.progress});
+  }
+  clockLast=playing&&!document.hidden?now:null;requestAnimationFrame(tick);
+}requestAnimationFrame(tick);
 $('uv').onclick=e=>{if(!snapshot)return;const r=$('uv').getBoundingClientRect(),hit=pickUVFace(snapshot,r.width,r.height,e.clientX-r.left,e.clientY-r.top,options.selected);if(hit)select(hit.id,hit.face,e.shiftKey||e.ctrlKey||e.metaKey);};
 $('export').onclick=()=>{if(!snapshot)return;const text=core.meshToOBJ(uv.meshWithPreviewUV(mesh,snapshot.packed)),url=URL.createObjectURL(new Blob([text],{type:'text/plain'})),a=document.createElement('a');a.href=url;a.download='meshtailor-target-uv.obj';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 new ResizeObserver(drawUV).observe($('uvhost'));
