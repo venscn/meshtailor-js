@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -17,7 +17,7 @@
     "test:core": "node scripts/core-smoke.mjs",
     "test:layout": "node scripts/layout-smoke.mjs",
     "test:browser": "node scripts/studio-smoke.mjs",
-    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser && npm run test:parameterization && npm run test:atlas && npm run test:hinge && npm run test:uv-guards && npm run lab:build && npm run test:lab",
+    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser && npm run test:parameterization && npm run test:atlas && npm run test:hinge && npm run test:uv-guards && npm run lab:build && npm run test:lab && npm run test:packing-large && npm run test:uv-progress && npm run test:uv-client && npm run test:uv-large && npm run test:uv-lifecycle:browser",
     "assets:generate": "node scripts/generate-examples.mjs",
     "assets:download": "tsx scripts/download-assets.ts",
     "test:complex": "node scripts/complex-smoke.mjs",
@@ -33,7 +33,13 @@
     "test:uv-guards": "node scripts/unwrap-guards-smoke.mjs",
     "lab:build": "node scripts/build-unfold-lab.mjs",
     "lab:serve": "node scripts/serve-unfold-lab.mjs",
-    "test:lab": "node scripts/lab-browser-smoke.mjs"
+    "test:lab": "node scripts/lab-browser-smoke.mjs",
+    "test:packing-large": "node scripts/packing-large-smoke.mjs",
+    "test:uv-progress": "node scripts/uv-progress-smoke.mjs",
+    "test:uv-client": "node scripts/uv-job-client-smoke.mjs",
+    "test:uv-large": "node scripts/uv-large-worker-smoke.mjs",
+    "test:uv-lifecycle:browser": "node scripts/uv-lifecycle-browser-smoke.mjs",
+    "test:flight-helmet": "tsx scripts/flight-helmet-smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
