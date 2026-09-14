@@ -1,0 +1,46 @@
+{
+  "suite": "Camera follow ownership policy",
+  "cases": [
+    {
+      "name": "Studio and lab share a manual-camera default",
+      "passed": true
+    },
+    {
+      "name": "A new renderer never enables follow implicitly",
+      "passed": true
+    },
+    {
+      "name": "Ordinary progress updates keep manual mode",
+      "passed": true
+    },
+    {
+      "name": "An explicit enable requests an immediate fit even when paused",
+      "passed": true
+    },
+    {
+      "name": "First manual input interrupts follow and signals UI exactly once",
+      "passed": true
+    },
+    {
+      "name": "Stale enabled props cannot override the manual camera for later frames",
+      "passed": true
+    },
+    {
+      "name": "Acknowledging off does not itself resume follow",
+      "passed": true
+    },
+    {
+      "name": "Only an explicit off/on transition re-arms follow",
+      "passed": true
+    },
+    {
+      "name": "Manual input while already in manual mode is idempotent",
+      "passed": true
+    },
+    {
+      "name": "Explicitly disabling follow preserves manual ownership",
+      "passed": true
+    }
+  ],
+  "passed": 10
+}
