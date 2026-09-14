@@ -10,9 +10,27 @@ type Row={ids:number[];values:number[]};
 function leastSquares(rows:Row[],n:number,fixed:Map<number,number>,opts:SolverOptions){
   const free=Int32Array.from({length:n},()=>-1);let count=0;for(let i=0;i<n;i++)if(!fixed.has(i))free[i]=count++;
   const rRows:{ids:number[];values:number[];rhs:number}[]=rows.map(row=>{let rhs=0;const ids:number[]=[],values:number[]=[];row.ids.forEach((id,k)=>{if(fixed.has(id))rhs-=row.values[k]!*fixed.get(id)!;else{ids.push(free[id]!);values.push(row.values[k]!);}});return{ids,values,rhs};});
+  // Flatten once. Matrix-vector products execute thousands of times per chart;
+  // per-row callbacks and tiny objects here used to dominate large-mesh jobs.
+  const offsets=new Uint32Array(rRows.length+1);
+  for(let i=0;i<rRows.length;i++)offsets[i+1]=offsets[i]!+rRows[i]!.ids.length;
+  const columns=new Uint32Array(offsets[rRows.length]!),values=new Float64Array(columns.length);
   const diag=new Float64Array(count),b=new Float64Array(count);
-  for(const row of rRows)row.ids.forEach((id,k)=>{diag[id]+=row.values[k]!**2;b[id]+=row.values[k]!*row.rhs;});
-  const apply=(x:Float64Array,out:Float64Array)=>{out.fill(0);for(const row of rRows){let s=0;row.ids.forEach((id,k)=>s+=x[id]!*row.values[k]!);row.ids.forEach((id,k)=>out[id]+=row.values[k]!*s);}};
+  for(let i=0;i<rRows.length;i++){
+    const row=rRows[i]!;
+    for(let k=0;k<row.ids.length;k++){
+      const id=row.ids[k]!,value=row.values[k]!,j=offsets[i]!+k;
+      columns[j]=id;values[j]=value;diag[id]+=value*value;b[id]+=value*row.rhs;
+    }
+  }
+  const apply=(x:Float64Array,out:Float64Array)=>{
+    out.fill(0);
+    for(let i=0;i<rRows.length;i++){
+      const start=offsets[i]!,end=offsets[i+1]!;let sum=0;
+      for(let j=start;j<end;j++)sum+=x[columns[j]!]!*values[j]!;
+      for(let j=start;j<end;j++)out[columns[j]!]+=values[j]!*sum;
+    }
+  };
   const result=cg(b,diag,apply,opts);
   const full=Float64Array.from({length:n},(_,i)=>fixed.get(i)??result.x[free[i]!]!);
   return {...result,x:full};
