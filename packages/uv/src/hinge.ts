@@ -1,3 +1,4 @@
+import { motionPose } from './motion-timing.js';
 import { islandProgress } from './unfold-schedule.js';
 import { uvProgress, type UVWork } from './work.js';
 import { buildTopology, edgeKey, type MeshData, type Vec3, type MeshTopology } from '@meshtailor/mesh-core';
@@ -29,6 +30,14 @@ export function hingePoseProgress(local:number,holdNet=false):number {
 export function hingePlaybackProgress(pose:number,holdNet=false):number {
   const t=clamp(pose);return holdNet?t:clamp((t<=.7?t:t<.8?.7:t-.1)/.9);
 }
+
+/** One source of pose time for positions, angle labels and temporary cut lines. */
+export function unfoldIslandPose(options:UnfoldOptions,index:number,count=options.selected.length):number {
+  const local=islandProgress(options.progress,index,count,options.order,options.handoff,options.timeline);
+  const entry=options.timeline?.entries[index];
+  return entry?motionPose(entry.profile,local):options.path==='hinge'?hingePoseProgress(local,options.holdNet):local;
+}
+
 const smooth=(v:number)=>{const t=clamp(v);return t*t*(3-2*t);};
 const sub=(a:ArrayLike<number>,b:ArrayLike<number>):Vec3=>[a[0]!-b[0]!,a[1]!-b[1]!,a[2]!-b[2]!];
 const cross=(a:ArrayLike<number>,b:ArrayLike<number>):Vec3=>[a[1]!*b[2]!-a[2]!*b[1]!,a[2]!*b[0]!-a[0]!*b[2]!,a[0]!*b[1]!-a[1]!*b[0]!];
@@ -141,7 +150,7 @@ export function writeHingePositions(g:UnfoldGeometry,options:UnfoldOptions,ids:r
   out.set(g.source);
   const sourceIslands=new Map(g.islands.map(i=>[i.id,i]));
   for(const item of rig.islands){const rank=ranks.get(item.id);if(rank===undefined)continue;
-    const t=hingePoseProgress(islandProgress(options.progress,rank,ids.length,options.order,options.handoff),options.holdNet),island=sourceIslands.get(item.id)!,center=layout.get(item.id)!;
+    const t=unfoldIslandPose(options,rank,ids.length),island=sourceIslands.get(item.id)!,center=layout.get(item.id)!;
     if(t===0)continue;if(t===1){for(const fi of item.order)out.set(g.target.subarray(fi*9,fi*9+9),fi*9);continue;}
     if(t<.8){
       const fold=clamp((t-.28)/.42),orient=smooth((t-.18)/.10),move=smooth(t/.18),r=rotation(item.turnAxis,item.turnAngle*orient),displacement:Vec3=island.sourceCenter.map((v,a)=>v+(center[a]!-v)*move) as Vec3;
@@ -160,7 +169,7 @@ export function writeHingePositions(g:UnfoldGeometry,options:UnfoldOptions,ids:r
 /** Remaining signed dihedral at a displayed hinge, for the on-screen angle label. */
 export function hingeRemainingAngle(g:UnfoldGeometry,options:UnfoldOptions,fi:number):number {
   const rig=g.hinge;if(!rig)return 0;const id=g.faceChart[fi]!,index=options.selected.indexOf(id),island=rig.islands.find(i=>i.id===id);if(index<0||!island)return rig.angle[fi]!;
-  const t=hingePoseProgress(islandProgress(options.progress,index,options.selected.length,options.order,options.handoff),options.holdNet),fold=clamp((t-.28)/.42);
+  const t=unfoldIslandPose(options,index),fold=clamp((t-.28)/.42);
   const local=options.hingeWave===false?smooth(fold):smooth(fold*1.6-rig.depth[fi]!/Math.max(1,island.maxDepth)*.6);
   return rig.angle[fi]!*(1-local);
 }

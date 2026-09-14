@@ -1,3 +1,4 @@
+import { motionPose, type MotionTimeline } from './motion-timing.js';
 import { uvProgress, type UVWork } from './work.js';
 import { buildHingeRig, writeHingePositions, type HingeRig } from './hinge.js';
 import { buildTopology, edgeKey, type MeshData, type Vec2, type Vec3 } from '@meshtailor/mesh-core';
@@ -29,6 +30,8 @@ export interface UnfoldGeometry {
   hinge?: HingeRig;
 }
 export interface UnfoldOptions {
+  /** Precomputed for this geometry/selection/path. Never rebuilt per animation frame. */
+  timeline?: MotionTimeline;
   progress: number;
   selected: readonly number[];
   order: UnfoldOrder;
@@ -153,7 +156,8 @@ export function writeUnfoldPositions(geometry: UnfoldGeometry, options: UnfoldOp
   if(options.path==='hinge')return writeHingePositions(geometry,options,ids,out);
   out.set(geometry.source);
   for (const island of geometry.islands) {
-    const t = islandProgress(options.progress, ranks.get(island.id) ?? -1, ids.length, options.order, options.handoff);
+    const rank=ranks.get(island.id)??-1, local = islandProgress(options.progress, rank, ids.length, options.order, options.handoff, options.timeline);
+    const t=options.timeline&&rank>=0?motionPose(options.timeline.entries[rank]!.profile,local):local;
     if (t === 0) continue;
     for (const fi of island.faces) for (let k = 0; k < 9; k++) {
       const i = fi * 9 + k, a = k % 3, s = geometry.source[i]!, d = geometry.target[i]!;
