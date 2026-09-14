@@ -1,6 +1,5 @@
 import * as core from '/packages/mesh-core/src/index.js';
 import * as uv from '/packages/uv/src/index.js';
-import { extractSeamEdgesFromUV } from '/packages/chaining-seams/src/index.js';
 import { makeHingeDemo, makeUnfoldDemo } from '/apps/studio/src/unfold/demo.js';
 import { UnfoldWebGLView } from '/apps/studio/src/unfold/webgl-view.js';
 import { DEFAULT_AUTO_FRAME } from '/apps/studio/src/unfold/camera-policy.js';
@@ -8,6 +7,7 @@ import { drawUVSnapshot, pickUVFace } from '/apps/studio/src/unfold/uv-drawing.j
 import {startUVJob,describeUVProgress} from '/apps/studio/src/unfold/uv-job-client.js';
 const $=id=>document.getElementById(id);
 let inspectionIndex=null, timelineGeometry=null, timelineKey='';
+let chartConfig={...uv.DEFAULT_UNWRAP};
 let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,sequence=0;
 const options={skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:.5,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
@@ -57,7 +57,7 @@ async function solve(){
   const c=$('uv'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
   $('status').textContent='启动 UV Worker…';$('solve').disabled=true;$('cancel').disabled=false;
   try{
-    jobHandle=startUVJob({mesh,edges:[...seams],target:$('target').value,config:{...uv.DEFAULT_UNWRAP,method:$('solver').value,padding:Number($('padding').value),autoCut:$('autocut').checked,rotate:$('rotate').checked,packing:$('packing')?.value??'auto',timeBudgetMs:Number($('budget')?.value??120)*1000}},{
+    jobHandle=startUVJob({mesh,edges:[...seams],target:$('target').value,config:{...chartConfig,maxChartFaces:Number($('chart-faces').value),maxStretch:Number($('chart-stretch').value),regionOptions:{...chartConfig.regionOptions,normalConeDegrees:Number($('chart-cone').value)},method:$('solver').value,padding:Number($('padding').value),autoCut:$('autocut').checked,rotate:$('rotate').checked,packing:$('packing')?.value??'auto',timeBudgetMs:Number($('budget')?.value??120)*1000}},{
       createWorker:()=>{const url=window.labWorkerURL();try{return new Worker(url);}finally{URL.revokeObjectURL(url);}},
       onProgress:p=>{if(token!==sequence)return;lastProgress=p;window.lab.progressEvents.push(p);$('status').textContent=describeUVProgress(p,performance.now()-start);}
     });
@@ -71,10 +71,17 @@ async function solve(){
   }catch(e){if(token===sequence){fail(e.message);$('status').textContent='未生成结果，原网格未修改。';}}
   finally{clearInterval(clock);if(token===sequence){jobHandle=null;$('solve').disabled=false;$('cancel').disabled=true;}}
 }
-function load(demo){mesh=demo.mesh;seams=demo.edges;window.lab.ready=false;return solve();}
+function tune(goal='large'){
+ const r=uv.recommendUnwrap(mesh,goal);chartConfig=r.options;$('chart-faces').value=chartConfig.maxChartFaces;$('chart-cone').value=chartConfig.regionOptions.normalConeDegrees;$('chart-stretch').value=chartConfig.maxStretch;
+ $('auto-config').textContent=`自动填写：${goal==='large'?'大块优先':'均衡'} · ${r.analysis.components} 个连通分量 · 小区域面积比 ${chartConfig.regionOptions.minRegionAreaRatio} · 不为填充率补切`;
+}
+function load(demo){mesh=demo.mesh;seams=demo.edges;tune();$('extract-uv').disabled=!mesh.faces.every(f=>f.uvs?.every(p=>p?.length===2));window.lab.ready=false;return solve();}
+function autoCharts(goal){tune(goal);seams=new Set();$('target').value='generated';return solve();}
+$('auto-large').onclick=()=>autoCharts('large');$('auto-balanced').onclick=()=>autoCharts('balanced');
+$('extract-uv').onclick=()=>{$('target').value='source';return solve();};
 for(const stage of uv.HINGE_STAGES){const b=document.createElement('button');b.textContent=stage.label;b.dataset.stage=stage.t;b.onclick=()=>{pause();const schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,$('reverse').checked,options.timeline),index=inspectionIndex??schedule.focusIndex;update({progress:uv.islandTimelineProgress((options.timeline?.entries[index]?uv.motionLocal(options.timeline.entries[index].profile,stage.t):uv.hingePlaybackProgress(stage.t,options.holdNet)),index,options.selected.length,options.order,options.handoff,options.timeline)},index);};$('stages').append(b);}
-$('ribbon').onclick=()=>load(makeHingeDemo());$('cube').onclick=()=>load(makeUnfoldDemo());$('complex').onclick=()=>{const m=core.makeComplexExample($('example').value,'low');load({mesh:m,edges:extractSeamEdgesFromUV(m)});};
-$('file').onchange=async e=>{try{const f=e.target.files?.[0];if(f){const m=core.parseOBJ(await f.text(),f.name);await load({mesh:m,edges:extractSeamEdgesFromUV(m)});}}catch(e){fail(e.message);}};
+$('ribbon').onclick=()=>load(makeHingeDemo());$('cube').onclick=()=>load(makeUnfoldDemo());$('complex').onclick=()=>{const m=core.makeComplexExample($('example').value,'low');load({mesh:m,edges:new Set()});};
+$('file').onchange=async e=>{try{const f=e.target.files?.[0];if(f){const m=core.parseOBJ(await f.text(),f.name);await load({mesh:m,edges:new Set()});}}catch(e){fail(e.message);}};
 $('solve').onclick=solve;$('cancel').onclick=()=>{cancel();$('status').textContent='已取消本次求解。';};$('target').onchange=solve;
 $('all').onclick=()=>{pause();options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update({progress:0});};$('none').onclick=()=>{pause();options.selected=[];list();update({progress:0});};
 $('wave').onchange=()=>{pause();update({hingeWave:$('wave').checked,progress:0});};
