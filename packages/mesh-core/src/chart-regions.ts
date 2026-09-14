@@ -60,11 +60,15 @@ export function segmentMeshRegions(mesh:MeshData,options:RegionOptions,protected
   }
   const compArea=new Float64Array(n),visited=new Uint8Array(n);
   for(let i=0;i<n;i++)if(allowed[i]&&!visited[i]){let total=0;const queue=[i];visited[i]=1;for(let h=0;h<queue.length;h++){const fi=queue[h]!;total+=area[fi]!;for(const j of adj[fi]!)if(!visited[j]){visited[j]=1;queue.push(j);}}for(const fi of queue)compArea[fi]=total;}
-  const seeds=[...allowed.keys()].filter(i=>allowed[i]).sort((a,b)=>area[b]!-area[a]!||a-b),cos=Math.cos(o.normalConeDegrees*Math.PI/180),regions:Region[]=[];
+  // Quantized, scale-relative tie breaks prevent float roundoff / normalization
+  // from changing the seed of equal-area triangulations.
+  let maxArea=0;for(const a of area)maxArea=Math.max(maxArea,a);
+  const areaKey=(fi:number)=>Math.round(area[fi]!/Math.max(1e-30,maxArea)*1e10);
+  const seeds=[...allowed.keys()].filter(i=>allowed[i]).sort((a,b)=>areaKey(b)-areaKey(a)||a-b),cos=Math.cos(o.normalConeDegrees*Math.PI/180),regions:Region[]=[];
   const queued=new Int32Array(n).fill(-1);
   for(const seed of seeds){if(label[seed]>=0)continue;check();const id=regions.length,r:Region={faces:[],area:0,normal:[0,0,0],componentArea:compArea[seed]!,adj:new Map(),alive:true},queue=[seed];queued[seed]=id;
     for(let h=0;h<queue.length&&r.faces.length<o.maxChartFaces;h++){
-      const fi=queue[h]!;if(label[fi]>=0||dot3(normals[seed]!,normals[fi]!)<cos)continue;
+      const fi=queue[h]!;if(label[fi]>=0||Math.round(dot3(normals[seed]!,normals[fi]!)*1e10)/1e10<cos-1e-10)continue;
       label[fi]=id;r.faces.push(fi);r.area+=area[fi]!;for(let a=0;a<3;a++)r.normal[a]+=normals[fi]![a]!*area[fi]!;
       for(const j of adj[fi]!)if(label[j]<0&&queued[j]!==id){queue.push(j);queued[j]=id;}
     }
@@ -78,13 +82,13 @@ export function segmentMeshRegions(mesh:MeshData,options:RegionOptions,protected
   }
   let mergedRegions=0;
   for(let pass=0;pass<3;pass++){
-    let changed=false;const small=regions.map((r,i)=>({r,i})).filter(({r})=>r.alive).sort((a,b)=>a.r.area-b.r.area||a.i-b.i);
+    let changed=false;const small=regions.map((r,i)=>({r,i})).filter(({r})=>r.alive).sort((a,b)=>Math.round(a.r.area/Math.max(1e-30,a.r.componentArea)*1e10)-Math.round(b.r.area/Math.max(1e-30,b.r.componentArea)*1e10)||a.i-b.i);
     for(const {r,i}of small){if(!r.alive||r.faces.length>=o.minRegionFaces&&r.area>=r.componentArea*o.minRegionAreaRatio)continue;
       check();let best=-1,cost=Infinity;
       for(const [j,shared]of r.adj){const s=regions[j]!;if(!s.alive||s.faces.length+r.faces.length>o.maxChartFaces)continue;
         const d=dot3(r.normal,s.normal)/Math.max(1e-30,Math.hypot(...r.normal)*Math.hypot(...s.normal));
         // Prefer shared boundary length and normal coherence, not random edge rank.
-        const v=(1-d*.65)/Math.max(shared,1e-30);if(v<cost){cost=v;best=j;}}
+        const v=(1-d*.65)/Math.max(shared,1e-30);if(best<0||v<cost-Math.abs(cost)*1e-10||Math.abs(v-cost)<=Math.abs(cost)*1e-10&&j<best){cost=v;best=j;}}
       if(best<0)continue;const s=regions[best]!;s.faces.push(...r.faces);s.area+=r.area;for(let a=0;a<3;a++)s.normal[a]+=r.normal[a]!;
       for(const fi of r.faces)label[fi]=best;
       s.adj.delete(i);for(const [j,length]of r.adj){if(j===best)continue;const other=regions[j]!;other.adj.delete(i);if(!other.alive)continue;s.adj.set(j,(s.adj.get(j)??0)+length);other.adj.set(best,(other.adj.get(best)??0)+length);}

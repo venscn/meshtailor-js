@@ -9,6 +9,7 @@ try{
   for(const faces of r.regions){const allowed=new Set(faces),seen=new Set([faces[0]]),q=[faces[0]];for(let h=0;h<q.length;h++)for(const f of top.faceNeighbors[q[h]]??[])if(allowed.has(f)&&!seen.has(f)){seen.add(f);q.push(f);}assert.equal(seen.size,faces.length);}
   checks++;assert.equal(JSON.stringify(mesh),before);checks++;
   assert.deepEqual(core.segmentMeshRegions(mesh,rec.options).regions,r.regions);checks++;
+  const scaled={...mesh,positions:mesh.positions.map(p=>p.map(x=>x*17.3+123))};assert.deepEqual(core.segmentMeshRegions(scaled,core.recommendRegions(scaled).options).regions,r.regions);checks++;
   assert.ok(r.regions.length<40,`${id}: ${r.regions.length}`);checks++;
   console.log(id,{faces:mesh.faces.length,regions:r.regions.length,merged:r.mergedRegions,sizes:r.regions.map(r=>r.length)});
  }
