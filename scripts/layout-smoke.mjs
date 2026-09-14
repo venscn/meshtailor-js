@@ -16,6 +16,7 @@ try {
     const { frameTree } = await page.send('Page.getFrameTree');
     await page.send('Page.setDocumentContent', { frameId: frameTree.frame.id, html: html(css) });
     await page.evaluate(`(() => {
+      window.observer?.disconnect();
       window.samples=[];window.layoutErrors=[];
       window.addEventListener('error', event=>layoutErrors.push(event.message));
       const el=document.querySelector('.viewport'),canvas=el.querySelector('canvas');
@@ -34,6 +35,11 @@ try {
     await page.evaluate('new Promise(resolve=>setTimeout(resolve,300))');
   }
   await load(original, 2);
+  // A fixed sleep misses ResizeObserver frames on loaded CI hosts. Wait for the
+  // existing negative-control invariant; never lower the required growth.
+  try { await page.waitFor('samples.length >= 5',5000); } catch (error) {
+    throw new Error(`${error.message}; samples=${JSON.stringify(await page.evaluate('samples'))}`);
+  }
   const broken = await page.evaluate('samples');
   assert.ok(broken.length >= 5 && broken.at(-1).canvasW >= broken[0].hostW * 16, 'v0.1.0 must reproduce the HiDPI growth loop');
   report.cases.push({ name: 'v0.1.0 negative control: growing HiDPI canvas reproduced', samples: broken });
