@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -17,7 +17,7 @@
     "test:core": "node scripts/core-smoke.mjs",
     "test:layout": "node scripts/layout-smoke.mjs",
     "test:browser": "node scripts/studio-smoke.mjs",
-    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser",
+    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser && npm run test:parameterization && npm run test:atlas && npm run test:hinge && npm run test:uv-guards && npm run lab:build && npm run test:lab",
     "assets:generate": "node scripts/generate-examples.mjs",
     "assets:download": "tsx scripts/download-assets.ts",
     "test:complex": "node scripts/complex-smoke.mjs",
@@ -26,7 +26,14 @@
     "test:git": "node --test scripts/tests/git-history-check.test.mjs",
     "test:unfold": "node scripts/unfold-smoke.mjs",
     "test:unfold:browser": "node scripts/unfold-browser-smoke.mjs",
-    "test:uv-worker": "node scripts/uv-worker-smoke.mjs"
+    "test:uv-worker": "node scripts/uv-worker-smoke.mjs",
+    "test:parameterization": "node scripts/parameterization-smoke.mjs",
+    "test:atlas": "node scripts/atlas-smoke.mjs",
+    "test:hinge": "node scripts/hinge-smoke.mjs",
+    "test:uv-guards": "node scripts/unwrap-guards-smoke.mjs",
+    "lab:build": "node scripts/build-unfold-lab.mjs",
+    "lab:serve": "node scripts/serve-unfold-lab.mjs",
+    "test:lab": "node scripts/lab-browser-smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
