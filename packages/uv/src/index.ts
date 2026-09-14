@@ -1,3 +1,7 @@
 export * from './charts.js';
 export * from './preview.js';
 export * from './unfold.js';
+
+export * from './cut-topology.js';
+export * from './uv-quality.js';
+export * from './parameterize.js';

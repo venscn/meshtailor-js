@@ -1,0 +1,80 @@
+import type { Vec2,Vec3 } from '@meshtailor/mesh-core';
+import type { CutMesh } from './cut-topology.js';
+import { checkUVTriangles, type UVQuality, signedArea2 } from './uv-quality.js';
+export interface SolverOptions { iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte' }
+export interface Parameterization { uv:Vec2[]; method:'lscm'|'tutte'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
+export function triangleArea(a:Vec3,b:Vec3,c:Vec3):number{const u=b.map((x,i)=>x-a[i]!),v=c.map((x,i)=>x-a[i]!);return Math.hypot(u[1]!*v[2]!-u[2]!*v[1]!,u[2]!*v[0]!-u[0]!*v[2]!,u[0]!*v[1]!-u[1]!*v[0]!)*.5;}
+type Row={ids:number[];values:number[]};
+/** Matrix-free, diagonally preconditioned conjugate gradients on A^T A.
+ * Dirichlet/pin variables are eliminated, not weakly penalized. */
+function leastSquares(rows:Row[],n:number,fixed:Map<number,number>,opts:SolverOptions){
+  const free=Int32Array.from({length:n},()=>-1);let count=0;for(let i=0;i<n;i++)if(!fixed.has(i))free[i]=count++;
+  const rRows:{ids:number[];values:number[];rhs:number}[]=rows.map(row=>{let rhs=0;const ids:number[]=[],values:number[]=[];row.ids.forEach((id,k)=>{if(fixed.has(id))rhs-=row.values[k]!*fixed.get(id)!;else{ids.push(free[id]!);values.push(row.values[k]!);}});return{ids,values,rhs};});
+  const diag=new Float64Array(count),b=new Float64Array(count);
+  for(const row of rRows)row.ids.forEach((id,k)=>{diag[id]+=row.values[k]!**2;b[id]+=row.values[k]!*row.rhs;});
+  const apply=(x:Float64Array,out:Float64Array)=>{out.fill(0);for(const row of rRows){let s=0;row.ids.forEach((id,k)=>s+=x[id]!*row.values[k]!);row.ids.forEach((id,k)=>out[id]+=row.values[k]!*s);}};
+  const result=cg(b,diag,apply,opts);
+  const full=Float64Array.from({length:n},(_,i)=>fixed.get(i)??result.x[free[i]!]!);
+  return {...result,x:full};
+}
+function cg(b:Float64Array,diag:Float64Array,apply:(x:Float64Array,out:Float64Array)=>void,opts:SolverOptions){
+  const n=b.length,x=new Float64Array(n),r=b.slice(),z=new Float64Array(n),p=new Float64Array(n),ap=new Float64Array(n);
+  const dot=(a:Float64Array,b:Float64Array)=>{let s=0;for(let i=0;i<n;i++)s+=a[i]!*b[i]!;return s;};
+  const bnorm=Math.sqrt(dot(b,b));if(bnorm===0)return{x,iterations:0,residual:0};
+  for(let i=0;i<n;i++){z[i]=r[i]!/Math.max(diag[i]!,1e-30);p[i]=z[i]!;}
+  let rz=dot(r,z),residual=1,iterations=0;
+  for(;iterations<opts.iterations;iterations++){
+    apply(p,ap);const den=dot(p,ap);if(!(den>0)||!Number.isFinite(den))break;
+    const alpha=rz/den;for(let i=0;i<n;i++){x[i]+=alpha*p[i]!;r[i]-=alpha*ap[i]!;}
+    residual=Math.sqrt(dot(r,r))/bnorm;if(residual<opts.tolerance){iterations++;break;}
+    for(let i=0;i<n;i++)z[i]=r[i]!/Math.max(diag[i]!,1e-30);
+    const next=dot(r,z),beta=next/rz;for(let i=0;i<n;i++)p[i]=z[i]!+beta*p[i]!;rz=next;
+  }
+  return{x,iterations,residual};
+}
+function normalized(mesh:CutMesh):Vec3[]{
+  const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];for(const p of mesh.positions)for(let a=0;a<3;a++){min[a]=Math.min(min[a]!,p[a]!);max[a]=Math.max(max[a]!,p[a]!);}
+  const span=Math.max(...max.map((x,i)=>x-min[i]!));if(!(span>0))throw new Error('Zero-size UV chart');return mesh.positions.map(p=>p.map((x,i)=>(x-min[i]!)/span) as Vec3);
+}
+function lscm(mesh:CutMesh,opts:SolverOptions){
+  const ps=normalized(mesh),n=ps.length,rows:Row[]=[];
+  for(const t of mesh.triangles){const [a,b,c]=t.map(v=>ps[v]!) as [Vec3,Vec3,Vec3],ab=b.map((v,i)=>v-a[i]!),ac=c.map((v,i)=>v-a[i]!);const len=Math.hypot(...ab),area=triangleArea(a,b,c);
+    if(!(area>1e-15&&len>1e-15))throw new Error('Degenerate 3D triangle; repair input geometry first.');
+    const x=ac.reduce((s,v,i)=>s+v*ab[i]!,0)/len,y=2*area/len,den=len*y,weight=Math.sqrt(area);
+    const gx=[-y,y,0].map(v=>v/den*weight),gy=[x-len,-x,len].map(v=>v/den*weight),ids=[...t,...t.map(v=>v+n)];
+    rows.push({ids,values:[...gx,...gy.map(v=>-v)]},{ids,values:[...gy,...gx]});
+  }
+  const far=(v:number)=>mesh.boundary.reduce((best,k)=>{const d=(i:number)=>ps[i]!.reduce((s,x,j)=>s+(x-ps[v]![j]!)**2,0);return d(k)>d(best)?k:best;},mesh.boundary[0]!);
+  const a=far(mesh.boundary[0]!),b=far(a),fixed=new Map([[a,0],[a+n,0],[b,1],[b+n,0]]),solved=leastSquares(rows,n*2,fixed,opts);
+  return {uv:ps.map((_,i)=>[solved.x[i]!,solved.x[i+n]!] as Vec2),iterations:solved.iterations,residual:solved.residual};
+}
+/** Tutte uniform positive weights + strictly convex arc-length circle boundary.
+ * This is a robustness fallback, not an angle/area-optimal method. */
+function tutte(mesh:CutMesh,opts:SolverOptions){
+  const ps=normalized(mesh),n=ps.length,uv:Vec2[]=Array.from({length:n},()=>[0,0]);const boundary=new Set(mesh.boundary);
+  const lens=mesh.boundary.map((v,i)=>Math.hypot(...ps[v]!.map((x,j)=>x-ps[mesh.boundary[(i+1)%mesh.boundary.length]!]![j]!))),total=lens.reduce((s,x)=>s+x,0);let length=0;
+  mesh.boundary.forEach((v,i)=>{uv[v]=[Math.cos(2*Math.PI*length/total),Math.sin(2*Math.PI*length/total)];length+=lens[i]!;});
+  const adj:Set<number>[]=Array.from({length:n},()=>new Set());for(const t of mesh.triangles)for(let k=0;k<3;k++){const a=t[k]!,b=t[(k+1)%3]!;adj[a]!.add(b);adj[b]!.add(a);}
+  const free=new Map<number,number>();for(let i=0;i<n;i++)if(!boundary.has(i))free.set(i,free.size);
+  const entries=[...free.entries()],diag=Float64Array.from(entries.map(([v])=>adj[v]!.size));
+  const apply=(x:Float64Array,out:Float64Array)=>{for(const [v,id]of entries){let val=adj[v]!.size*x[id]!;for(const b of adj[v]!)if(free.has(b))val-=x[free.get(b)!]!;out[id]=val;}};
+  let iterations=0,residual=0;for(let a=0;a<2;a++){const rhs=Float64Array.from(entries.map(([v])=>[...adj[v]!].reduce((s,b)=>s+(boundary.has(b)?uv[b]![a]!:0),0))),r=cg(rhs,diag,apply,opts);iterations=Math.max(iterations,r.iterations);residual=Math.max(residual,r.residual);for(const [v,id]of entries)uv[v]![a]=r.x[id]!;}
+  return{uv,iterations,residual};
+}
+export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={}):Parameterization{
+  if(!mesh.disk)throw new Error(`UV chart is not a disk: Euler=${mesh.euler}, boundaries=${mesh.boundaryLoops}`);
+  const opts:SolverOptions={iterations:2000,tolerance:1e-9,method:'auto',...options};let reason='';
+  const finish=(r:ReturnType<typeof lscm>,method:'lscm'|'tutte'):Parameterization=>{
+    const signs=mesh.triangles.reduce((s,t)=>s+signedArea2(r.uv[t[0]]!,r.uv[t[1]]!,r.uv[t[2]]!),0);
+    if(signs<0)r.uv.forEach(p=>p[1]*=-1);
+    const quality=checkUVTriangles(mesh.triangles.map(t=>t.map(v=>r.uv[v]!) as [Vec2,Vec2,Vec2]));
+    return {...r,method,quality,...(reason?{fallbackReason:reason}:{})};
+  };
+  if(opts.method!=='tutte'){
+    try{const r=finish(lscm(mesh,opts),'lscm');if(r.quality.valid&&r.residual<1e-6)return r;reason=`LSCM rejected: residual=${r.residual.toExponential(2)}, flips=${r.quality.flipped}, degenerates=${r.quality.degenerate}, overlaps>=${r.quality.overlaps}`;}
+    catch(e){reason=String(e);}
+    if(opts.method==='lscm')throw new Error(reason);
+  }
+  const r=finish(tutte(mesh,opts),'tutte');if(!r.quality.valid||r.residual>1e-6)throw new Error(`Tutte validation failed; ${reason}; residual=${r.residual}, degenerates=${r.quality.degenerate}, overlaps=${r.quality.overlaps}`);
+  return r;
+}
