@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -17,7 +17,7 @@
     "test:core": "node scripts/core-smoke.mjs",
     "test:layout": "node scripts/layout-smoke.mjs",
     "test:browser": "node scripts/studio-smoke.mjs",
-    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser && npm run test:parameterization && npm run test:atlas && npm run test:hinge && npm run test:uv-guards && npm run lab:build && npm run test:lab && npm run test:packing-large && npm run test:uv-progress && npm run test:uv-client && npm run test:uv-large && npm run test:uv-lifecycle:browser && npm run test:camera && npm run test:camera:browser && npm run test:relay && npm run test:relay:browser && npm run test:motion-time && npm run test:motion && npm run test:motion:browser",
+    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser && npm run test:parameterization && npm run test:atlas && npm run test:hinge && npm run test:uv-guards && npm run lab:build && npm run test:lab && npm run test:packing-large && npm run test:uv-progress && npm run test:uv-client && npm run test:uv-large && npm run test:uv-lifecycle:browser && npm run test:camera && npm run test:camera:browser && npm run test:relay && npm run test:relay:browser && npm run test:motion-time && npm run test:motion && npm run test:motion:browser && npm run test:regions && npm run test:slits && npm run test:large-charts && npm run test:seam-policy && npm run test:orientation && npm run test:fit-orientation && npm run test:large-charts:browser",
     "assets:generate": "node scripts/generate-examples.mjs",
     "assets:download": "tsx scripts/download-assets.ts",
     "test:complex": "node scripts/complex-smoke.mjs",
@@ -46,7 +46,14 @@
     "test:relay:browser": "node scripts/relay-browser-smoke.mjs",
     "test:motion-time": "node scripts/motion-timing-smoke.mjs",
     "test:motion": "node scripts/motion-geometry-smoke.mjs",
-    "test:motion:browser": "node scripts/motion-browser-smoke.mjs"
+    "test:motion:browser": "node scripts/motion-browser-smoke.mjs",
+    "test:regions": "node scripts/regions-smoke.mjs",
+    "test:slits": "node scripts/slits-smoke.mjs",
+    "test:large-charts": "node scripts/large-charts-smoke.mjs",
+    "test:seam-policy": "node scripts/seam-policy-smoke.mjs",
+    "test:orientation": "node scripts/orientation-smoke.mjs",
+    "test:fit-orientation": "node scripts/fit-orientation-smoke.mjs",
+    "test:large-charts:browser": "node scripts/large-charts-browser-smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
