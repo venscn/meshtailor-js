@@ -1,9 +1,9 @@
-import { buildTopology, edgeKey, type MeshData } from '@meshtailor/mesh-core';
+import { buildTopology, edgeKey, type MeshData, type MeshTopology } from '@meshtailor/mesh-core';
 
 export interface UVChart { id:number; faces:number[]; vertices:number[] }
 
-export function buildCharts(mesh:MeshData,seamEdges:Set<string>):UVChart[]{
-  const topology=buildTopology(mesh);
+export function buildCharts(mesh:MeshData,seamEdges:Set<string>,cachedTopology?:MeshTopology):UVChart[]{
+  const topology=cachedTopology??buildTopology(mesh);
   const unvisited=new Set(mesh.faces.keys());
   const charts:UVChart[]=[];
   while(unvisited.size){

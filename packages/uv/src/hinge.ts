@@ -1,4 +1,5 @@
-import { buildTopology, edgeKey, type MeshData, type Vec3 } from '@meshtailor/mesh-core';
+import { uvProgress, type UVWork } from './work.js';
+import { buildTopology, edgeKey, type MeshData, type Vec3, type MeshTopology } from '@meshtailor/mesh-core';
 import type { UnfoldGeometry, UnfoldOptions } from './unfold.js';
 
 export interface HingeIsland {
@@ -55,19 +56,22 @@ function treePose(g:UnfoldGeometry,rig:HingeRig,island:HingeIsland,fold:number,w
     for(let k=0;k<3;k++){const p=mv(r,point(g.source,fi*3+k));for(let a=0;a<3;a++)out[fi*9+k*3+a]=p[a]!+translation[a]!;}
   }
 }
-export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<string>):HingeRig{
+export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<string>,work?:UVWork,cachedTopology?:MeshTopology):HingeRig{
   const n=mesh.faces.length,parent=new Int32Array(n).fill(-2),depth=new Int32Array(n),axis=new Float64Array(n*3),pivot=new Float64Array(n*3),angle=new Float64Array(n),flat=new Float32Array(g.source.length);
   const edgeCorners=new Int32Array(n*2).fill(-1);
-  const topology=buildTopology(mesh),adj:{face:number;a:number;b:number}[][]=Array.from({length:n},()=>[]);
+  uvProgress(work,{stage:'hinge',detail:'建立铰链邻接与展开树'});
+  const topology=cachedTopology??buildTopology(mesh),adj:{face:number;a:number;b:number}[][]=Array.from({length:n},()=>[]);
   for(const [key,e]of topology.edges){if(e.faces.length!==2||seams.has(key))continue;const [a,b]=e.faces as [number,number];if(g.faceChart[a]!==g.faceChart[b])continue;adj[a]!.push({face:b,a:e.a,b:e.b});adj[b]!.push({face:a,a:e.a,b:e.b});}
   const normal=(fi:number)=>unit(cross(sub(point(g.source,fi*3+1),point(g.source,fi*3)),sub(point(g.source,fi*3+2),point(g.source,fi*3))));
   const islands:HingeIsland[]=[],hinges:number[]=[],kept=new Set<string>();
   for(const island of g.islands){
+    work?.check();
     // Centermost triangle reduces propagation depth and makes the panel easy to inspect.
     const distance=(fi:number)=>{const c:Vec3=[0,0,0];for(let k=0;k<3;k++)for(let a=0;a<3;a++)c[a]+=g.source[fi*9+k*3+a]!/3;return Math.hypot(...sub(c,island.sourceCenter));};
     const root=island.faces.reduce((best,fi)=>distance(fi)<distance(best)?fi:best,island.faces[0]!),order=[root];parent[root]=-1;
     let maxDepth=0;
     for(let h=0;h<order.length;h++){
+      if(h%256===0)work?.check();
       const fi=order[h]!;
       for(const edge of adj[fi]!){const child=edge.face;if(parent[child]!==-2)continue;parent[child]=fi;order.push(child);kept.add(edgeKey(fi,child));
         const f=mesh.faces[fi]!,a=fi*3+f.vertices.indexOf(edge.a),b=fi*3+f.vertices.indexOf(edge.b),A=point(g.source,a),B=point(g.source,b),ax=unit(sub(B,A)),np=normal(fi),nc=normal(child);
@@ -84,8 +88,10 @@ export function buildHingeRig(mesh:MeshData,g:UnfoldGeometry,seams:ReadonlySet<s
   }
   const rig:HingeRig={parent,depth,edgeCorners,axis,pivot,angle,islands,hingeEdges:new Uint32Array(hinges),temporaryCuts:new Uint32Array(),flat};
   const pose=new Float32Array(g.source.length);
+  const sourceIslands=new Map(g.islands.map(i=>[i.id,i]));let done=0;
   for(const item of islands){
-    const source=g.islands.find(i=>i.id===item.id)!;treePose(g,rig,item,1,false,pose);
+    uvProgress(work,{stage:'hinge',detail:'构建刚性平面网和临时断边',current:++done,total:islands.length,unit:'岛'});
+    const source=sourceIslands.get(item.id)!;treePose(g,rig,item,1,false,pose);
     const netCenter:Vec3=[0,0,0];for(const fi of item.order)for(let k=0;k<3;k++){const p=mv(item.basis,sub(point(pose,fi*3+k),source.sourceCenter));for(let a=0;a<3;a++)netCenter[a]+=p[a]!/(item.order.length*3);}
     // Align the rigid net with target UV by a single least-squares in-plane rotation.
     let dp=0,cp=0,areaSource=0,areaUV=0;
@@ -122,8 +128,9 @@ export function writeHingePositions(g:UnfoldGeometry,options:UnfoldOptions,ids:r
   const rig=g.hinge;if(!rig)throw new Error('Missing hinge rig. Recompute UV snapshot.');
   const layout=hingeLayout(g,ids,options.separation),ranks=new Map(ids.map((id,i)=>[id,i]));
   out.set(g.source);
+  const sourceIslands=new Map(g.islands.map(i=>[i.id,i]));
   for(const item of rig.islands){const rank=ranks.get(item.id);if(rank===undefined)continue;
-    const t=options.order==='sequential'?clamp(options.progress*ids.length-rank):clamp(options.progress),island=g.islands.find(i=>i.id===item.id)!,center=layout.get(item.id)!;
+    const t=options.order==='sequential'?clamp(options.progress*ids.length-rank):clamp(options.progress),island=sourceIslands.get(item.id)!,center=layout.get(item.id)!;
     if(t===0)continue;if(t===1){for(const fi of item.order)out.set(g.target.subarray(fi*9,fi*9+9),fi*9);continue;}
     if(t<.8){
       const fold=clamp((t-.28)/.42),orient=smooth((t-.18)/.10),move=smooth(t/.18),r=rotation(item.turnAxis,item.turnAngle*orient),displacement:Vec3=island.sourceCenter.map((v,a)=>v+(center[a]!-v)*move) as Vec3;

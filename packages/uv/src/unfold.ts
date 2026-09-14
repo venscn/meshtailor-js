@@ -1,3 +1,4 @@
+import { uvProgress, type UVWork } from './work.js';
 import { buildHingeRig, writeHingePositions, type HingeRig } from './hinge.js';
 import { buildTopology, edgeKey, type MeshData, type Vec2, type Vec3 } from '@meshtailor/mesh-core';
 import type { UVChart } from './charts.js';
@@ -70,7 +71,8 @@ export function sourceUVPreview(mesh: MeshData, charts: UVChart[]): PackedChart[
   });
 }
 
-export function buildUnfoldGeometry(mesh: MeshData, packed: PackedChart[], seams: ReadonlySet<string> = new Set()): UnfoldGeometry {
+export function buildUnfoldGeometry(mesh: MeshData, packed: PackedChart[], seams: ReadonlySet<string> = new Set(), work?:UVWork): UnfoldGeometry {
+  uvProgress(work,{stage:'correspondence',detail:'建立逐面角 3D / UV 对应缓冲'});
   if (!mesh.positions.length || !mesh.faces.length) throw new Error('Cannot unfold an empty mesh.');
   const min: Vec3 = [Infinity, Infinity, Infinity], max: Vec3 = [-Infinity, -Infinity, -Infinity];
   for (const p of mesh.positions) {
@@ -87,6 +89,7 @@ export function buildUnfoldGeometry(mesh: MeshData, packed: PackedChart[], seams
   let radius = 0;
   for (const chart of packed) {
     if (!Number.isInteger(chart.id) || chart.id < 0 || chart.id > 0x7fffffff || ids.has(chart.id) || !chart.faceUVs.size) throw new Error('Invalid, duplicate, or empty UV island.');
+    work?.check();
     ids.add(chart.id);
     const cs: Vec3 = [0, 0, 0], ct: Vec3 = [0, 0, 0];
     const faces = [...chart.faceUVs.keys()];
@@ -126,7 +129,7 @@ export function buildUnfoldGeometry(mesh: MeshData, packed: PackedChart[], seams
     }
   });
   const result:UnfoldGeometry={ source, target, uv, faceChart, boundaries: new Uint32Array(boundaries), islands, atlas, radius };
-  result.hinge=buildHingeRig(mesh,result,seams);
+  result.hinge=buildHingeRig(mesh,result,seams,work,topology);
   return result;
 }
 
