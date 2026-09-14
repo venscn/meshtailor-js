@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -59,7 +59,8 @@
     "test:source-layout": "node scripts/source-layout-smoke.mjs",
     "test:compact-layout": "node scripts/compact-layout-smoke.mjs",
     "test:fragmentation": "node scripts/fragmentation-smoke.mjs",
-    "test:materials:browser": "node scripts/material-layout-browser-smoke.mjs"
+    "test:materials:browser": "node scripts/material-layout-browser-smoke.mjs",
+    "test:sample-asset": "tsx scripts/flight-helmet-smoke.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
