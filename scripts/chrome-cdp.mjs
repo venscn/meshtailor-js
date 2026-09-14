@@ -62,7 +62,11 @@ export async function startChrome() {
   const profile = await mkdtemp(join(tmpdir(), 'meshtailor-chrome-'));
   const args = ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
     '--no-first-run', '--no-default-browser-check', '--disable-dev-shm-usage', 'about:blank'];
-  if (process.env.CHROME_SOFTWARE_WEBGL === '1') args.unshift('--use-angle=swiftshader', '--enable-unsafe-swiftshader');
+  if (process.env.CHROME_SOFTWARE_WEBGL === '1') {
+    args.unshift('--use-angle=swiftshader', '--enable-unsafe-swiftshader');
+    // A stale DISPLAY in Linux CI must not make SwiftShader require an X server.
+    if (process.platform === 'linux') args.unshift('--ozone-platform=headless', '--use-gl=angle');
+  }
   if (process.platform === 'linux' && process.getuid?.() === 0) args.unshift('--no-sandbox');
   let child;
   try { child = spawn(chromePath(), args, { stdio: ['ignore', 'ignore', 'pipe'] }); }
