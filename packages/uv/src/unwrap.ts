@@ -93,6 +93,6 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   if(addedSeams.length)warnings.push(`自动新增 ${addedSeams.length} 条 UV 裁切边（原接缝保留），用于拓扑修复、控制求解规模或避免无效 UV。新增边已用于动画、2D 与导出。`);
   const fallbacks=diagnostics.filter(d=>d.method==='tutte').length;if(fallbacks)warnings.push(`${fallbacks} 个岛使用凸边界 Tutte；优先有效映射，可能有较大拉伸。`);
   const atlas=packAtlas(raw,opts);
-  warnings.push('占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 MaxRects 启发式，不宣称全局最优。');
+  warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
   return{...atlas,seams:[...effective],addedSeams,diagnostics,warnings};
 }
