@@ -1,12 +1,15 @@
-import { buildTopology, dot3, edgeKey, normalize3, sub3, triangleNormal, type MeshData, type Vec3 } from '@meshtailor/mesh-core';
+import { recommendRegions, segmentMeshRegions, type ChartGoal, type RegionOptions, buildTopology, dot3, edgeKey, normalize3, sub3, triangleNormal, type MeshData, type Vec3 } from '@meshtailor/mesh-core';
 import { canonicalOrder, traceSeamChains, type SeamChain } from '@meshtailor/chaining-seams';
 
 export interface GeometricBaselineOptions {
+  strategy?:'adaptive'|'legacy';
+  goal?:ChartGoal;
+  regionOptions?:Partial<RegionOptions>;
   curvatureQuantile?: number;
   structuralRings?: number;
   maxEdges?: number;
 }
-export interface GeometricBaselineResult { seamEdges:Set<string>; chains:SeamChain[]; scores:Map<string,number> }
+export interface GeometricBaselineResult { seamEdges:Set<string>; chains:SeamChain[]; scores:Map<string,number>; regions?:number; mergedRegions?:number; regionOptions?:RegionOptions }
 
 function quantile(values:number[],q:number):number{
   if(!values.length)return Infinity; const a=[...values].sort((x,y)=>x-y); const i=Math.max(0,Math.min(a.length-1,Math.floor(q*(a.length-1)))); return a[i]!;
@@ -19,6 +22,14 @@ function faceNormals(mesh:MeshData):Vec3[]{return mesh.faces.map((f)=>triangleNo
  * This is deliberately not presented as the paper's learned result.
  */
 export function generateGeometricSeams(mesh:MeshData,opts:GeometricBaselineOptions={}):GeometricBaselineResult{
+  if(opts.strategy!=='legacy'){
+    const recommended=recommendRegions(mesh,opts.goal??'large'),options={...recommended.options,...opts.regionOptions};
+    const result=segmentMeshRegions(mesh,options);
+    // Never truncate a connected region boundary to satisfy an edge budget.
+    // curvatureQuantile/structuralRings/maxEdges are legacy-only diagnostics.
+    return{seamEdges:result.seamEdges,chains:canonicalOrder(mesh,traceSeamChains(mesh,result.seamEdges)),scores:new Map(),regions:result.regions.length,mergedRegions:result.mergedRegions,regionOptions:options};
+  }
+
   const curvatureQuantile=opts.curvatureQuantile ?? 0.82;
   const structuralRings=opts.structuralRings ?? 2;
   const topology=buildTopology(mesh); const normals=faceNormals(mesh); const scores=new Map<string,number>();

@@ -14,3 +14,5 @@ export * from "./unfold-schedule.js";
 
 export * from './motion-timing.js';
 export * from './unfold-motion.js';
+
+export * from './topology-slits.js';

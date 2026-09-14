@@ -1,14 +1,25 @@
 import { uvProgress, rethrowUVStop, type UVWork } from './work.js';
-import { buildTopology, edgeKey, type MeshData, type Vec3, type Vec2 } from '@meshtailor/mesh-core';
+import { buildTopology, edgeKey, recommendRegions, segmentMeshRegions, type ChartGoal, type MeshAnalysis, type RegionOptions, type MeshData, type Vec3, type Vec2 } from '@meshtailor/mesh-core';
 import { buildCharts } from './charts.js';
+import { openChartWithSlits } from './topology-slits.js';
 import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { signedArea2 } from './uv-quality.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
-export interface UnwrapOptions extends SolverOptions,PackOptions { autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
+export interface UnwrapOptions extends SolverOptions,PackOptions { chartPolicy?:ChartGoal|'legacy'; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
 export interface ChartDiagnostic {id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface UnwrapResult extends AtlasPacking { seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
-export const DEFAULT_UNWRAP:UnwrapOptions={method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
+export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
+export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,chartPolicy:'large',maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
+export function recommendUnwrap(mesh:MeshData,goal:ChartGoal='large'):{options:UnwrapOptions;analysis:MeshAnalysis;regions:RegionOptions;reasons:string[]}{
+  const r=recommendRegions(mesh,goal),large=goal==='large';
+  return{options:{...DEFAULT_UNWRAP,chartPolicy:goal,maxChartFaces:r.options.maxChartFaces,maxAspect:large?24:10,minFill:0,maxStretch:large?30:16},analysis:r.analysis,regions:r.options,reasons:[
+    '以连通区域和表面积合并小块，不把每条局部折角都当作接缝。',
+    '单岛面数按输入规模设置，属于计算预算，不是期望岛大小。',
+    '默认不为包围盒填充率切碎有效 UV；拓扑、翻面、退化和交叠检查仍执行。',
+    `输入有 ${r.analysis.components} 个面连通分量；不会跨独立部件焊接。`,
+  ]};
+}
 /** Connected, disk-preserving region growth. Existing seam edges are never crossed.
  * For non-disks this intentionally adds visible cuts rather than silently projecting
  * a closed surface, annulus, pinched or inconsistently oriented mesh. */
@@ -54,21 +65,40 @@ function shapeQuality(local:CutMesh,uv:Vec2[]){
   const w=maxX-minX,h=maxY-minY;return{aspect:Math.max(w/h,h/w),fill:area/(w*h),maxStretch};
 }
 export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Partial<UnwrapOptions>={},work?:UVWork):UnwrapResult{
-  const opts={...DEFAULT_UNWRAP,...options};
+  const opts={...(options.chartPolicy==='legacy'?LEGACY_UNWRAP:recommendUnwrap(input,options.chartPolicy??'large').options),...options};
+  if(!['large','balanced','legacy'].includes(opts.chartPolicy??''))throw new Error('Invalid chart policy.');
   if(!['auto','lscm','tutte'].includes(opts.method)||typeof opts.autoCut!=='boolean'||typeof opts.rotate!=='boolean'||!Number.isFinite(opts.padding)||opts.padding<0||opts.padding>=.1||!Number.isInteger(opts.rotationSteps)||opts.rotationSteps<1||opts.rotationSteps>90)throw new Error('Invalid UV solver or packing settings.');
   if(!(opts.maxAspect>=1&&Number.isFinite(opts.maxAspect))||!(opts.minFill>=0&&opts.minFill<=1)||!(opts.maxStretch>=1&&Number.isFinite(opts.maxStretch))||!Number.isInteger(opts.maxChartFaces)||opts.maxChartFaces<8||opts.maxChartFaces>20000||!Number.isInteger(opts.iterations)||opts.iterations<1||opts.iterations>20000||!(opts.tolerance>0&&opts.tolerance<1))throw new Error('Invalid UV solver settings.');
   uvProgress(work,{stage:'validate',detail:'检查输入几何',facesDone:0,facesTotal:input.faces.length,islandsDone:0});
   const mesh=normalizedMesh(input),topology=buildTopology(mesh),effective=new Set(seams),warnings:string[]=[];
   for(const [key,e]of topology.edges)if(e.faces.length>2){if(!opts.autoCut)throw new Error('Non-manifold edges require cuts or mesh repair.');effective.add(key);}
   for(let fi=0;fi<mesh.faces.length;fi++){if(fi%256===0)work?.check();const t=mesh.faces[fi]!.vertices;if(new Set(t).size!==3||t.some(v=>!mesh.positions[v])||triangleArea(mesh.positions[t[0]]!,mesh.positions[t[1]]!,mesh.positions[t[2]]!)<1e-15)throw new Error(`Face ${fi} is degenerate in 3D. Repair/remove it before unwrapping; no faces were silently dropped.`);}
+  if(opts.autoCut&&opts.chartPolicy!=='legacy'&&seams.size===0){
+    uvProgress(work,{stage:'charts',detail:'自动大块分区：合并相邻小区域'});
+    const regionOpts={...recommendRegions(mesh,opts.chartPolicy).options,maxChartFaces:opts.maxChartFaces};
+    const regions=segmentMeshRegions(mesh,regionOpts,effective,undefined,()=>work?.check(),topology);
+    for(const key of regions.seamEdges)effective.add(key);
+    warnings.push(`自动连通分区：${regions.regions.length} 个候选区域，合并 ${regions.mergedRegions} 个局部小区域；后续仍须通过 UV 验证。`);
+  }
   uvProgress(work,{stage:'charts',detail:'按接缝拆分连通岛'});
   const charts=buildCharts(mesh,effective,topology),raw:RawChart[]=[],diagnostics:ChartDiagnostic[]=[];let partitions=0,facesDone=0;
   const solve=(faces:number[],sourceChart:number,depth=0)=>{
     uvProgress(work,{stage:'topology',detail:`检查源岛 ${sourceChart+1} 的 ${faces.length} 个面（补切层 ${depth}）`,facesDone,facesTotal:mesh.faces.length,islandsDone:raw.length});
-    const local=cutLocalMesh(mesh,faces,effective);
+    let local=cutLocalMesh(mesh,faces,effective);
+    if(opts.autoCut&&opts.chartPolicy!=='legacy'&&!local.disk&&faces.length<=opts.maxChartFaces){
+      const opened=openChartWithSlits(mesh,faces,effective,local,work);
+      if(opened){local=opened.local;for(const key of opened.added)effective.add(key);}
+    }
+    const partition=(maxFaces:number,normalLimit:boolean)=>{
+      if(opts.chartPolicy==='legacy')return splitDisks(local,maxFaces,normalLimit,work);
+      const r=segmentMeshRegions(mesh,{normalConeDegrees:normalLimit?70:170,maxChartFaces:maxFaces,minRegionFaces:Math.min(64,Math.max(8,Math.floor(faces.length*.01))),minRegionAreaRatio:.01},effective,faces,()=>work?.check(),topology);
+      // Recursive children inherit region boundaries through their face subsets;
+      // final exported cuts are computed from actual solved chart membership.
+      return r.regions.length>1?r.regions:splitDisks(local,maxFaces,normalLimit,work);
+    };
     if(!local.disk||faces.length>opts.maxChartFaces){
       if(!opts.autoCut)throw new Error(`Chart ${sourceChart+1}: requires additional cuts (Euler ${local.euler}, ${local.boundaryLoops} boundaries, ${faces.length} faces). Enable automatic cuts or edit seams.`);
-      const pieces=splitDisks(local,Math.min(opts.maxChartFaces,Math.max(1,faces.length-1)),!local.disk,work);partitions++;
+      const pieces=partition(Math.min(opts.maxChartFaces,Math.max(1,faces.length-1)),!local.disk);partitions++;
       for(const fs of pieces)solve(fs,sourceChart,depth+1);return;
     }
     let p:Parameterization;
@@ -77,10 +107,10 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     try{p=parameterizeChart(local,opts,work);}catch(error){
       rethrowUVStop(error);
       if(!opts.autoCut||faces.length<2||depth>20)throw error;
-      partitions++;for(const fs of splitDisks(local,Math.max(1,Math.floor(faces.length/2)),true,work))solve(fs,sourceChart,depth+1);return;
+      partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),true))solve(fs,sourceChart,depth+1);return;
     }
       const shape=shapeQuality(local,p.uv);
-      if(opts.autoCut&&faces.length>16&&(shape.aspect>opts.maxAspect||shape.fill<opts.minFill||shape.maxStretch>opts.maxStretch)){partitions++;for(const fs of splitDisks(local,Math.max(1,Math.floor(faces.length/2)),shape.maxStretch>opts.maxStretch,work))solve(fs,sourceChart,depth+1);return;}
+      if(opts.autoCut&&faces.length>16&&(shape.aspect>opts.maxAspect||shape.fill<opts.minFill||shape.maxStretch>opts.maxStretch)){partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),shape.maxStretch>opts.maxStretch))solve(fs,sourceChart,depth+1);return;}
       const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();
       local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...p.uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
       const area3D=local.triangles.reduce((s,t)=>s+triangleArea(local.positions[t[0]]!,local.positions[t[1]]!,local.positions[t[2]]!),0),id=raw.length;
