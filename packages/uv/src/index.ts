@@ -30,3 +30,4 @@ export * from './spatial-neighbors.js';
 
 export * from './source-repair.js';
 export * from './chart-join.js';
+export * from './rigid-uv-join.js';

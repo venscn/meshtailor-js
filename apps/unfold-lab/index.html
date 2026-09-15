@@ -76,6 +76,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
 </details>
 <details open><summary>面积与空间邻居</summary>
 <label>局部修复无效原 UV<input id="source-repair" type="checkbox" checked></label><small>只重做含内部重叠/混合翻面/退化的原岛；其余形状保留，原输入不变。</small><p id="repair-summary" role="status"></p>
+<label>允许保留形状缝合<input id="reuse-uv-shape" type="checkbox" checked></label>
 <label>整理时尝试缝合<input id="source-merge" type="checkbox" checked></label>
 <label>放置顺序<select id="packing-order"><option value="area">3D 面积由大到小</option><option value="legacy">旧长边 / 包围盒策略</option></select></label>
 <label>小岛目标面积占比 %<input id="tiny-fraction" type="number" min="0" max="10" step=".01" value="0"></label>
