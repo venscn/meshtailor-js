@@ -1,0 +1,6 @@
+{
+  "coreBatch": "25 suites exited 0; first outer batch timed out after 15, remaining 10 run separately",
+  "cameraBatch": "39 cases written to report; combined command hit 120-second outer budget after report while closing browser, final camera process exit not observed",
+  "fullReactStudio": "NOT passed; npm dependencies missing",
+  "remoteAssets": "Real Corset and FlightHelmet not run"
+}

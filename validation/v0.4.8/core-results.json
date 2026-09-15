@@ -1,0 +1,127 @@
+[
+  {
+    "suite": "core-smoke",
+    "exitCode": 0,
+    "seconds": 2.882
+  },
+  {
+    "suite": "complex-smoke",
+    "exitCode": 0,
+    "seconds": 4.24
+  },
+  {
+    "suite": "unfold-smoke",
+    "exitCode": 0,
+    "seconds": 2.343
+  },
+  {
+    "suite": "hinge-smoke",
+    "exitCode": 0,
+    "seconds": 1.789
+  },
+  {
+    "suite": "parameterization-smoke",
+    "exitCode": 0,
+    "seconds": 1.678
+  },
+  {
+    "suite": "unwrap-guards-smoke",
+    "exitCode": 0,
+    "seconds": 2.28
+  },
+  {
+    "suite": "atlas-smoke",
+    "exitCode": 0,
+    "seconds": 3.491
+  },
+  {
+    "suite": "uv-worker-smoke",
+    "exitCode": 0,
+    "seconds": 2.737
+  },
+  {
+    "suite": "uv-job-client-smoke",
+    "exitCode": 0,
+    "seconds": 1.721
+  },
+  {
+    "suite": "uv-progress-smoke",
+    "exitCode": 0,
+    "seconds": 2.178
+  },
+  {
+    "suite": "regions-smoke",
+    "exitCode": 0,
+    "seconds": 2.033
+  },
+  {
+    "suite": "slits-smoke",
+    "exitCode": 0,
+    "seconds": 1.629
+  },
+  {
+    "suite": "source-layout-smoke",
+    "exitCode": 0,
+    "seconds": 1.721
+  },
+  {
+    "suite": "material-domain-smoke",
+    "exitCode": 0,
+    "seconds": 1.722
+  },
+  {
+    "suite": "boundary-stitch-smoke",
+    "exitCode": 0,
+    "seconds": 1.579
+  },
+  {
+    "suite": "fragmentation-smoke",
+    "exitCode": 0,
+    "seconds": 1.882
+  },
+  {
+    "suite": "compact-layout-smoke",
+    "exitCode": 0,
+    "seconds": 1.686
+  },
+  {
+    "suite": "selection-smoke",
+    "exitCode": 0,
+    "seconds": 1.674
+  },
+  {
+    "suite": "schedule-smoke",
+    "exitCode": 0,
+    "seconds": 1.57
+  },
+  {
+    "suite": "motion-timing-smoke",
+    "exitCode": 0,
+    "seconds": 1.671
+  },
+  {
+    "suite": "motion-geometry-smoke",
+    "exitCode": 0,
+    "seconds": 1.771
+  },
+  {
+    "suite": "orientation-smoke",
+    "exitCode": 0,
+    "seconds": 1.681
+  },
+  {
+    "suite": "fit-orientation-smoke",
+    "exitCode": 0,
+    "seconds": 2.937
+  },
+  {
+    "suite": "chart-merge-smoke",
+    "exitCode": 0,
+    "seconds": 1.922
+  },
+  {
+    "suite": "atlas-pages-smoke",
+    "exitCode": 0,
+    "seconds": 1.629
+  }
+]

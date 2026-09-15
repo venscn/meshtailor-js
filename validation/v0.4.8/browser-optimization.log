@@ -1,0 +1,17 @@
+PASS Read synthetic fragmented overlapping source, do not disguise it as two visible sheets
+PASS Original source positions and UVs are immutable
+PASS Only repacking removes between-island overlap WITHOUT reducing 12 islands
+PASS Stitch current snapshot joins geometric neighbors to 2 islands, not 1 across disconnected sheets
+PASS Actual final seams were removed and display reflects them
+PASS Source mesh and original UVs are still identical after post processing
+PASS Two pages share one texel density and have real export identities
+PASS 3D animation reaches same page positions; selection remains island-first
+PASS Repeated post operation is idempotent when all valid neighbors are already joined
+PASS Extract restores the genuine source: twelve islands and detected overlaps
+PASS Connected-first operation starts from source topology, not current UV seams
+PASS Invalid page setting fails visibly and restores previous post snapshot
+PASS Recover after failure and keep manually chosen camera position
+PASS Internally folded raw island is rejected for repack, never counted as valid UV
+PASS Source audit is visible in UI and new controls do not overflow canvas
+PASS No unhandled browser errors
+{"passed":16}

@@ -1,0 +1,3 @@
+npm install exit: 124
+npm build exit: 127
+typecheck exit: 2

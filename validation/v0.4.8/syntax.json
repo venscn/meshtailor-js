@@ -1,0 +1,10 @@
+{
+  "files": [
+    "apps/studio/src/App.tsx",
+    "apps/studio/src/unfold/UVSolverControls.tsx",
+    "apps/studio/src/unfold/useUVSnapshot.tsx",
+    "apps/studio/src/unfold/UnfoldControls.tsx",
+    "scripts/flight-helmet-smoke.ts"
+  ],
+  "result": "syntax transpilation passed; NOT dependency-aware typecheck or React execution"
+}

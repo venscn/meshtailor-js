@@ -1,0 +1,76 @@
+{
+  "suite": "Connected-first plus validated stitching: procedural LOW benchmarks (not remote assets)",
+  "cases": [
+    {
+      "id": "gear",
+      "faces": 1536,
+      "oldIslands": 4,
+      "newIslands": 2,
+      "initialRegions": 1,
+      "beforeMerge": 3,
+      "merges": 1,
+      "attempts": 3,
+      "budgetExhausted": false,
+      "rejectionReasons": {
+        "topology": 2
+      },
+      "occupancy": 0.4074530380432437,
+      "oldMs": 162.4987000000001,
+      "currentMs": 227.39722599999982,
+      "allFacesAndValidUV": true
+    },
+    {
+      "id": "garment",
+      "faces": 3072,
+      "oldIslands": 10,
+      "newIslands": 1,
+      "initialRegions": 1,
+      "beforeMerge": 1,
+      "merges": 0,
+      "attempts": 0,
+      "budgetExhausted": false,
+      "rejectionReasons": {},
+      "occupancy": 0.3346916124878896,
+      "oldMs": 139.94116200000008,
+      "currentMs": 203.3409059999999,
+      "allFacesAndValidUV": true
+    },
+    {
+      "id": "knot",
+      "faces": 2304,
+      "oldIslands": 7,
+      "newIslands": 2,
+      "initialRegions": 1,
+      "beforeMerge": 12,
+      "merges": 10,
+      "attempts": 20,
+      "budgetExhausted": false,
+      "rejectionReasons": {
+        "topology": 10
+      },
+      "occupancy": 0.18465694239794284,
+      "oldMs": 173.81292299999996,
+      "currentMs": 945.504692,
+      "allFacesAndValidUV": true
+    },
+    {
+      "id": "assembly",
+      "faces": 5632,
+      "oldIslands": 31,
+      "newIslands": 8,
+      "initialRegions": 4,
+      "beforeMerge": 45,
+      "merges": 37,
+      "attempts": 74,
+      "budgetExhausted": false,
+      "rejectionReasons": {
+        "topology": 7,
+        "distortion": 30
+      },
+      "occupancy": 0.5591322722831105,
+      "oldMs": 232.53681800000004,
+      "currentMs": 2534.6940160000004,
+      "allFacesAndValidUV": true
+    }
+  ]
+}
