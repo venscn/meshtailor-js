@@ -9,6 +9,8 @@ const c=await compileCore();try{
   modules['/lab-entry.js']=await readFile(join(c.root,'apps/unfold-lab/main.mjs'),'utf8');
   const worker=classicWorkerBundle(modules,'/apps/studio/src/workers/uv.worker.js');
   const boot=moduleBootstrap(modules)+`;window.labWorkerURL=()=>URL.createObjectURL(new Blob([${JSON.stringify(worker)}],{type:'text/javascript'}));`+`;import(moduleURL('/lab-entry.js')).catch(e=>{document.getElementById('error').hidden=false;document.getElementById('error').textContent=e.stack;});`;
-  const html=(await readFile(join(c.root,'apps/unfold-lab/index.html'),'utf8')).replace('<!--BOOTSTRAP-->','<script>'+boot.replace(/<\/script/gi,'<\\/script')+'</script>');
+  const theme=await readFile(join(c.root,'apps/studio/src/workspace-theme.css'),'utf8');
+  const css=(await readFile(join(c.root,'apps/studio/src/styles.css'),'utf8')).replace("@import './workspace-theme.css';",theme);
+  const html=(await readFile(join(c.root,'apps/unfold-lab/index.html'),'utf8')).replace('/*WORKSPACE_STYLES*/',css).replace('<!--BOOTSTRAP-->','<script>'+boot.replace(/<\/script/gi,'<\\/script')+'</script>');
   const dest=resolve(process.argv[2]||join(c.root,'unfold-lab.html'));await writeFile(dest,html);console.log('Built '+dest+' ('+Buffer.byteLength(html)+' bytes)');
 }finally{await c.cleanup();}

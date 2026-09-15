@@ -18,7 +18,7 @@ function cameraStatus(){$('frame').checked=options.autoFrame;$('camera-status').
 function fail(message){$('error').hidden=false;$('error').textContent=String(message);}
 function pause(){playing=false;clockLast=null;$('play').textContent='播放展开';}
 function drawUV(){if(!snapshot)return;const host=$('uvhost'),c=$('uv'),d=Math.min(devicePixelRatio,2),ctx=c.getContext('2d');c.width=Math.max(1,Math.round(host.clientWidth*d));c.height=Math.max(1,Math.round(host.clientHeight*d));ctx.setTransform(d,0,0,d,0,0);drawUVSnapshot(ctx,snapshot,host.clientWidth,host.clientHeight,options);}
-function list(){if(!snapshot)return;$('islands').replaceChildren();for(const island of snapshot.geometry.islands.slice(0,100)){const row=document.createElement('div');row.className='island';const box=document.createElement('input');box.type='checkbox';box.checked=options.selected.includes(island.id);box.setAttribute('aria-label','选中岛 '+(island.id+1));box.onchange=()=>select(island.id,null,true);const b=document.createElement('button');b.innerHTML=`<i style="background:rgb(${uv.islandColor(island.id).map(x=>Math.round(x*255)).join(',')})"></i>#${island.id+1} · ${island.faces.length} 面`;b.onclick=()=>select(island.id,null,false);row.append(box,b);$('islands').append(row);}}
+function list(){if(!snapshot)return;$('islands').replaceChildren();for(const island of snapshot.geometry.islands.slice(0,100)){const row=document.createElement('div');row.className='island'+(inspection.islands.includes(island.id)?' selected':'');const box=document.createElement('input');box.type='checkbox';box.checked=options.selected.includes(island.id);box.setAttribute('aria-label','选中岛 '+(island.id+1));box.onchange=()=>select(island.id,null,true);const b=document.createElement('button');b.innerHTML=`<i style="background:rgb(${uv.islandColor(island.id).map(x=>Math.round(x*255)).join(',')})"></i>#${island.id+1} · ${island.faces.length} 面`;b.onclick=()=>select(island.id,null,false);row.append(box,b);$('islands').append(row);}}
 function clearFace(){inspection={...inspection,face:null};options.focusFace=null;update();}
 function select(id,_face=null,add=false){
   if(!snapshot)return;
@@ -42,6 +42,13 @@ function selectionStatus(){
     : '未选择 UV 岛 · 先点选岛，再点选三角形';
   el.dataset.islands=JSON.stringify(inspection.islands);el.dataset.face=String(options.focusFace??'');
   if($('clear-face'))$('clear-face').disabled=options.focusFace===null;
+  const coordinates=$('selection-coordinates');
+  if(coordinates){
+    const fi=options.focusFace,chart=fi===null?null:snapshot?.packed.find(c=>c.faceUVs.has(fi));
+    const uvs=fi===null?null:chart?.faceUVs.get(fi),face=fi===null?null:mesh?.faces[fi];
+    coordinates.hidden=!face||!uvs;
+    coordinates.textContent=face&&uvs?face.vertices.map((vi,k)=>`角 ${k+1} · 顶点 ${vi}\n3D  ${mesh.positions[vi].map(x=>Number(x.toPrecision(5))).join(', ')}\nUV  ${uvs[k].map(x=>Number(x.toPrecision(5))).join(', ')}`).join('\n\n'):'';
+  }
 }
 window.addEventListener('keydown',e=>{
   if(e.key!=='Escape'||e.defaultPrevented||e.target?.closest('input,textarea,select,[contenteditable=true]'))return;
@@ -139,4 +146,13 @@ $('diagnostic').onclick=()=>{if(!snapshot)return;const report={version:'0.4.6',a
 new ResizeObserver(drawUV).observe($('uvhost'));
 if($('clear-face'))$('clear-face').onclick=clearFace;
 window.lab={ready:false,view,options,errors,update,select,pick,clearFace,get inspection(){return inspection;},load,solve,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
+for(const button of document.querySelectorAll('[data-tool]'))button.onclick=()=>{
+  for(const tab of document.querySelectorAll('[data-tool]')){
+    const selected=tab===button;tab.setAttribute('aria-selected',String(selected));
+    document.getElementById('lab-tools-'+tab.dataset.tool).hidden=!selected;
+  }
+};
+if($('header-import'))$('header-import').onclick=()=>$('file').click();
+if($('header-export'))$('header-export').onclick=()=>$('export').click();
+if($('clear-inspection'))$('clear-inspection').onclick=()=>$('none').click();
 await load(makeHingeDemo());

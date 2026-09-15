@@ -1,12 +1,64 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MeshTailor-JS · Hinge Lab</title><style>
-*{box-sizing:border-box}body{margin:0;background:#0b1017;color:#dbe5ef;font:13px system-ui,sans-serif;height:100vh;display:flex;flex-direction:column}button,select,input{font:inherit}button,select{border:1px solid #34465b;border-radius:6px;background:#192635;color:#dbe5ef;padding:7px 9px}button{cursor:pointer}button:hover{background:#29415a}button:disabled{opacity:.45;cursor:default}input[type=number]{width:85px;background:#101923;border:1px solid #34465b;color:#dbe5ef;padding:5px;border-radius:4px}input[type=checkbox]{accent-color:#68cfd6}header{padding:13px 20px;border-bottom:1px solid #293749;display:flex;gap:16px;align-items:center}header h1{margin:0;font-size:18px;letter-spacing:.04em}header span{color:#8a9db3;font-size:12px}.layout{display:grid;grid-template-columns:272px minmax(0,1fr) 320px;gap:10px;padding:10px;min-height:0;flex:1}aside{overflow:auto;background:#101923;border:1px solid #293749;border-radius:10px;padding:12px}h2{font-size:13px;color:#8ee0e7;margin:14px 0 8px}h2:first-child{margin-top:0}label{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:9px 0;font-size:12px}label:has(select){display:grid;gap:5px}small{display:block;line-height:1.6;color:#91a5bd}.row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.primary{background:#145763;border-color:#258698}.center{display:flex;flex-direction:column;gap:9px;min-width:0;min-height:0}.panel{border:1px solid #293749;border-radius:10px;overflow:hidden;min-height:0;display:flex;flex-direction:column;background:#090e15}.panel-title{font-size:12px;padding:10px 13px;background:#13202e;display:flex;justify-content:space-between}.center>.panel{flex:1}#view,#uvhost{position:relative;min-height:0;flex:1;overflow:hidden}#uv{position:absolute;inset:0;width:100%;height:100%}.right{display:flex;flex-direction:column;gap:10px;min-height:0}.right>.panel{flex:1;min-height:260px}.status{white-space:pre-wrap;font:11px/1.65 system-ui;color:#b6c9dd;overflow:auto;max-height:225px;border:1px solid #293749;padding:10px;border-radius:9px;background:#101923}#error{color:#ffc29d}.transport{padding:10px;background:#111d2b;border:1px solid #293749;border-radius:10px}#stages{display:flex;flex-wrap:wrap;gap:5px}#stages button{font-size:11px;padding:5px 7px}.progress{display:flex;align-items:center;gap:10px;margin:11px 0}#progress{flex:1;min-width:20px;accent-color:#67d3db}.transport .row{align-items:center;justify-content:space-between}.transport label{margin:0}.legend{font-size:11px;line-height:1.8;padding:9px 12px;border-top:1px solid #293749;color:#9cb1c9}.legend b{color:#8deafa}.legend em{color:#d194ff;font-style:normal}.unfold-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}.unfold-labels[hidden]{display:none}.unfold-labels button{position:absolute;left:0;top:0;pointer-events:auto;font:11px monospace;background:#0b1723e8;color:white;padding:2px 5px;border:1px solid #699db1;border-radius:4px}.hinge-angle{position:absolute;left:0;top:0;padding:2px 5px;border:1px solid #318da5;background:#062632e8;border-radius:4px;color:#85ecff;font:11px monospace;white-space:nowrap}.island{display:flex;gap:5px;align-items:center;margin:4px 0}.island button{flex:1;text-align:left;font-size:11px;padding:5px 8px}.island i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px}#islands{max-height:210px;overflow:auto}.phase{color:#8ee0e7;font-size:12px}footer{padding:5px 16px 9px;color:#8399b2;font-size:11px;line-height:1.5}@media(max-width:1050px){.layout{grid-template-columns:230px minmax(0,1fr) 265px}header span{display:none}}@media(max-width:820px){body{height:auto;min-height:100vh}.layout{grid-template-columns:1fr}.center{height:680px}.right{height:600px}aside{max-height:440px}}@media(max-height:760px){.status{max-height:140px}.transport{padding:6px}.legend{padding:6px}.panel-title{padding:7px 10px}}
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MeshTailor · 离线展开实验页</title><style>/*WORKSPACE_STYLES*/
+
+/* Offline lab uses the same workbench tokens, not a competing visual theme. */
+.layout{flex:1;min-height:0;display:grid;grid-template-columns:264px minmax(0,1fr) minmax(280px,25%)}
+body{display:flex;flex-direction:column;overflow:hidden}
+.layout>aside{display:flex;flex-direction:column;min-height:0;background:var(--panel-bg);border-right:1px solid var(--line)}
+.lab-tool-content{overflow:auto;min-height:0;flex:1;padding:14px}
+.lab-tool-content h3{font-size:12px;font-weight:600;margin:0 0 12px}
+.lab-tool-content .section-divider{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.lab-tool-content label{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:11px 0;font-size:12px;color:var(--muted)}
+.lab-tool-content label:has(select){display:grid;gap:5px}
+.lab-tool-content input[type=number]{width:86px}
+.lab-tool-content input[type=range]{width:96px}
+.lab-tool-content small{margin:7px 0;font-size:11px}
+.lab-tool-content button{font-size:12px;max-width:100%}
+.lab-tool-content .row button{flex:1}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;align-items:center}
+#view,#uvhost{position:relative;min-width:0;min-height:0;flex:1;overflow:hidden}
+#view>canvas,#uv{position:absolute;inset:0;width:100%;height:100%;display:block}
+#view>canvas{touch-action:none}
+#uv{cursor:crosshair}
+.center>.scene-panel{display:flex;flex-direction:column;flex:1}
+.lab-mode{color:var(--quiet);font-size:10px;margin-left:auto;padding-right:12px}
+.legend{display:flex;justify-content:space-between;padding:7px 12px;margin:0;border-top:1px solid var(--line-soft);font-size:10px;line-height:1.5;color:var(--quiet)}
+.legend>span{display:none}
+.phase{color:#c9b692!important;font-family:var(--mono)}
+.transport{background:var(--panel-bg);border-top:1px solid var(--line);padding:9px 12px;flex:none}
+#queue-status{font:10px/1.5 var(--mono);color:var(--muted);max-height:36px;overflow:hidden}
+#queue-prev,#queue-next{min-height:23px;font-size:10px;padding:3px 7px}
+#stages{display:flex;gap:1px}
+#stages button{flex:1;min-height:23px;font-size:10px;border:0;background:#2c2e30;border-radius:0;padding:3px}
+.progress{display:flex;align-items:center;gap:10px;font:11px var(--mono);color:var(--muted);margin:8px 0}
+#progress{flex:1;min-width:0;width:100%}
+#percent{min-width:44px;text-align:right;color:#d9c7a7}
+.transport>.row{justify-content:space-between;margin:7px 0}
+.transport>.row label{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.transport>small:last-child{font-size:10px}
+.right{display:grid;grid-template-rows:minmax(200px,1.25fr) minmax(180px,1fr);min-width:0;min-height:0;background:var(--panel-bg)}
+.right>.uv-panel{display:flex;flex-direction:column}
+.right>.uv-panel>.panel-title{flex:0 0 32px}
+#status{white-space:pre-wrap;font-size:11px;line-height:1.65;color:var(--muted);overflow-wrap:anywhere}
+#error{white-space:pre-wrap;font-size:12px;color:var(--danger);margin:10px 0;overflow-wrap:anywhere}
+#selection-status{display:block;line-height:1.6;font-size:14px;color:var(--text);margin:7px 0;overflow-wrap:anywhere}
+#selection-coordinates{font:11px/1.7 var(--mono);color:var(--muted);white-space:pre-wrap;border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+.island{display:flex;align-items:center;gap:7px;border-left:2px solid transparent;padding:1px 4px;margin:2px 0}
+.island.selected{border-left-color:var(--accent);background:#37352f}
+.island input{margin:0}
+.island button{flex:1;text-align:left;min-height:26px;border:0;background:transparent;font:11px var(--mono);padding:4px}
+.island i{display:inline-block;width:7px;height:7px;margin-right:8px}
+#islands{max-height:190px;overflow:auto;margin:8px -4px 12px}
+@media(max-width:1180px){.layout{grid-template-columns:238px minmax(0,1fr) 280px}.legend{font-size:9px}#stages button{font-size:9px}}
+@media(max-width:920px){.layout{grid-template-columns:220px minmax(0,1fr);grid-template-rows:minmax(360px,1fr) minmax(210px,.6fr)}.layout>aside{grid-row:1/3}.right{grid-column:2;grid-template-columns:1fr 1fr;grid-template-rows:1fr;border-top:1px solid var(--line)}.right>.uv-panel{border-right:1px solid var(--line)}}
+@media(max-width:620px){body{height:auto;overflow:auto}.layout{display:flex;flex-direction:column}.layout>aside{max-height:360px}.center{height:620px;flex:none}.right{height:390px;flex:none}.topbar{gap:8px}.lab-mode{display:none}}
 </style></head><body>
-<header><h1>MeshTailor-JS <span>v0.4.6</span> · 铰链展开实验页</h1><span>离线 HTML · 与主 Studio 共用求解、动画、导出和渲染代码</span></header>
-<main class="layout"><aside>
-<h2>01 / 载入网格</h2><div class="row"><button id="ribbon" class="primary">三块折角带</button><button id="cube">六岛立方体</button></div>
+<header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">M</span>MeshTailor <span class="version">0.4.6</span></div><div class="document-name">离线展开实验页</div><div class="header-actions"><button id="header-import">导入 OBJ</button><button id="header-export">导出 OBJ + UV</button></div></header>
+<main class="layout"><aside><nav class="tool-tabs" role="tablist" aria-label="工具分类"><button role="tab" data-tool="mesh" aria-controls="lab-tools-mesh" aria-selected="false">模型</button><button role="tab" data-tool="uv" aria-controls="lab-tools-uv" aria-selected="false">UV</button><button role="tab" data-tool="animation" aria-controls="lab-tools-animation" aria-selected="true">动画</button></nav><div class="lab-tool-content">
+<div id="lab-tools-mesh" role="tabpanel" hidden><h3>本地与内置模型</h3><div class="row"><button id="ribbon" class="primary">三块折角带</button><button id="cube">六岛立方体</button></div>
 <label>复杂样例<select id="example"><option value="garment">褶皱服装 · Low</option><option value="knot">三叶结 · Low</option><option value="gear">齿轮 · Low</option><option value="assembly">机械件 · Low</option></select></label><button id="complex">载入复杂样例</button>
 <label>本地 OBJ<input id="file" type="file" accept=".obj" style="max-width:170px"></label><small>此离线页支持 OBJ；FBX / GLB 等仍在主 Studio 导入。内置样例均不需要联网。</small>
-<h2>02 / 参数化与排布</h2><div class="row"><button id="auto-large" class="primary">自动参数 · 大块重分割</button><button id="auto-balanced">自动 · 均衡</button><button id="extract-uv">Extract existing UV seams</button></div>
+</div>
+<div id="lab-tools-uv" role="tabpanel" hidden><h3>裁切与展开</h3><div class="row"><button id="auto-large" class="primary">自动参数 · 大块重分割</button><button id="auto-balanced">自动 · 均衡</button><button id="extract-uv">Extract existing UV seams</button></div>
 <small>自动重分割替换当前裁切，原始 UV 仍保留。Extract 只读取原布局，不重切。</small><small id="auto-config" role="status"></small>
 <label>单岛面数预算<input id="chart-faces" type="number" min="8" max="20000" step="128" value="8192"></label>
 <label>区域法线锥角<input id="chart-cone" type="number" min="1" max="178" value="80"></label>
@@ -17,18 +69,21 @@
 <label>UV 每侧留白<input id="padding" type="number" value=".003" min="0" max=".05" step=".001"></label>
 <label>允许拓扑 / 形变补切<input id="autocut" type="checkbox" checked></label><label>允许旋转排布<input id="rotate" type="checkbox" checked></label>
 <button id="solve" class="primary">应用并重新展开</button><button id="cancel" disabled>取消</button>
-<h2>03 / 展开显示</h2><label>播放方式<select id="order"><option value="relay">逐岛尾段接力（最多相邻两岛）</option><option value="sequential">严格逐岛（完成后启动下一个）</option></select></label>
+</div>
+<div id="lab-tools-animation" role="tabpanel"><h3>UV 岛</h3><small>先选 UV 岛，再点击岛内三角形；重复点击该面取消。Shift 增减岛。</small><div class="row"><button id="all">全部</button><button id="none">清空</button></div><div id="islands"></div><button id="export">导出原始 3D + 目标 UV</button><button id="diagnostic">导出分割诊断（不含几何）</button>
+<h3 class="section-divider">播放与显示</h3><label>播放方式<select id="order"><option value="relay">逐岛尾段接力（最多相邻两岛）</option><option value="sequential">严格逐岛（完成后启动下一个）</option></select></label>
 <label><span id="handoff-label">前岛完成 85% 时接力</span><input id="handoff" aria-label="Island handoff" type="range" min=".75" max="1" step=".01" value=".85" style="max-width:110px"></label>
 <small>未启动的岛保持原位，已完成的岛留在 UV。没有全体同时启动模式。</small>
 <label>每岛基准时长（跳过前）<input id="seconds" type="number" min=".5" step=".5" max="60" value="12"></label>
 <label>自动跳过无变化区间<input id="skip-static" type="checkbox" checked></label><small id="motion-status" role="status"></small><details><summary>运动判定容差</summary><label>相对岛尺寸<input id="motion-tolerance" type="number" value="0.000001" min="0" max=".001" step=".000001"></label><small>按顶点及铰链变换判断；与相机、遮挡无关。绝对容差 1e-8 个归一化单位。</small></details>
-<label>向外分离 / 模型最长边比例<input id="separation" type="range" min="0" max=".5" step=".01" value=".12"></label><button id="in-place">原位展开（不飞出）</button><small>默认 12%，与岛数无关；0 禁用分离，不修改相机。</small><label>平面网额外停留（默认关闭）<input id="hold-net" type="checkbox"></label><label>根面向外依次开铰链<input id="wave" type="checkbox" checked></label><label>自动跟随面片（默认关闭）<input id="frame" aria-label="Follow unfolding camera" type="checkbox"></label><label>显示青色铰链 / 角度<input id="hinges" type="checkbox" checked></label><label>显示紫色临时断边<input id="temporary" type="checkbox" checked></label><label>显示 UV 棋盘<input id="checker" type="checkbox"></label>
+<label>向外分离 / 模型最长边比例<input id="separation" type="range" min="0" max=".5" step=".01" value=".12"></label><button id="in-place">原位展开（不飞出）</button><small>默认 12%，与岛数无关；0 禁用分离，不修改相机。</small><details><summary>显示与阶段选项</summary><label>平面网额外停留（默认关闭）<input id="hold-net" type="checkbox"></label><label>根面向外依次开铰链<input id="wave" type="checkbox" checked></label><label>自动跟随面片（默认关闭）<input id="frame" aria-label="Follow unfolding camera" type="checkbox"></label><label>显示青色铰链 / 角度<input id="hinges" type="checkbox" checked></label><label>显示紫色临时断边<input id="temporary" type="checkbox" checked></label><label>显示 UV 棋盘<input id="checker" type="checkbox"></label>
 <label>未选面片<select id="context"><option value="dim">半透明保留</option><option value="hidden">隐藏</option><option value="solid">实体保留</option></select></label>
-<small id="camera-status" role="status">手动相机：动画不改变视角。</small><button id="fit-current">适配当前面片（保留观察方向）</button><div class="row"><button id="orbit">适配 3D</button><button id="front">UV 正视</button></div>
-<h2>04 / 单个或多选岛</h2><small>点编号只看一块；勾选多个，或在两侧画面 Shift 点选。最多显示前 100 项；“全部”包含所有岛。</small><div class="row"><button id="all">全部</button><button id="none">清空</button></div><div id="islands"></div><button id="export">导出原始 3D + 目标 UV</button><button id="diagnostic">导出分割诊断（不含几何）</button>
-</aside><div class="center"><section class="panel"><div class="panel-title"><span id="title">正在载入</span><span id="phase" class="phase"></span></div><div id="view"></div><div class="legend">黄色：真实 UV 边界　<b>青色：共享边铰链 + 剩余角度</b>　<em>紫色虚线：演示用临时断边</em><br>播放时也可左键旋转、滚轮缩放、右键平移；手动操作会关闭自动跟随。每岛独立沿边展开后再做 UV 形变；默认跳过静止停留，可点阶段按钮检查。</div></section>
-<div class="transport"><small id="queue-status" role="status" style="white-space:pre-line"></small><div class="row"><button id="queue-prev">队列上一个岛</button><button id="queue-next">队列下一个岛</button></div><div id="stages"></div><div class="progress"><span>3D</span><input id="progress" type="range" min="0" max="1" step=".001" value="0"><span id="percent">0.0%</span><span>UV</span></div><div class="row"><button id="play" class="primary">播放展开</button><label><input id="reverse" type="checkbox">反向折回</label><label><input id="loop" type="checkbox">循环</label></div><small>先分块陈列 → 转向观察 → 沿边铰链旋转 → 刚性平面网（可选停留） → UV 形变 → 排布</small></div></div>
-<div class="right"><section class="panel"><div class="panel-title">目标 UV / 共用同一份面角坐标</div><div id="uvhost"><canvas id="uv"></canvas></div></section><div id="status" class="status"></div><div id="error" class="status" hidden></div></div></main>
-<footer>曲面一般不能同时无拉伸、无补切地折成平面；刚性演示与 UV 参数化是两个独立阶段。不保证中间运动无碰撞，也不保证全局最优装箱。</footer>
+</details><small id="camera-status" role="status">手动相机：动画不改变视角。</small><button id="fit-current">适配当前面片（保留观察方向）</button><div class="row"><button id="orbit">适配 3D</button><button id="front">UV 正视</button></div>
+</div></div><div class="sidebar-foot"><span class="status-dot"></span>本地计算 · 不上传几何</div></aside><div class="center"><div class="view-tabs"><button aria-selected="true">3D ↔ UV 展开</button><span class="lab-mode">离线实验页</span></div><section class="panel scene-panel"><div class="panel-title"><span id="title">正在载入</span><span id="phase" class="phase"></span></div><div id="view"></div><div class="legend">黄色 · 裁切边　青色 · 铰链　紫色 · 动画临时断边<span>左键旋转 · 右键平移 · 滚轮缩放</span></div></section>
+<div class="transport"><small id="queue-status" role="status" style="white-space:pre-line"></small><div class="row"><button id="queue-prev">队列上一个岛</button><button id="queue-next">队列下一个岛</button></div><div id="stages"></div><div class="progress"><span>3D</span><input id="progress" type="range" min="0" max="1" step=".001" value="0"><span id="percent">0.0%</span><span>UV</span></div><div class="row"><button id="play" class="primary">播放展开</button><label><input id="reverse" type="checkbox">反向折回</label><label><input id="loop" type="checkbox">循环</label></div><small>阶段按钮只定位当前岛 · 拖动进度暂停播放</small></div></div>
+
+<div class="right"><section class="panel uv-panel"><div class="panel-title"><span>UV 编辑器</span><span>U → · V ↑</span></div><div id="uvhost"><canvas id="uv" aria-label="UV chart preview"></canvas></div></section>
+<section class="panel correspondence-panel"><div class="panel-title"><span>选择与对应</span><span>岛 / 三角形</span></div><div class="correspondence-content"><span class="eyebrow">当前选择</span><strong id="selection-status"></strong><p class="selection-help">先选岛，再点三角形；重复点击取消面。Esc 逐级取消。播放范围不等于已选对象。</p><div class="button-grid two"><button id="clear-face" disabled>取消三角形</button><button id="clear-inspection">清空选择</button></div><div id="selection-coordinates" hidden></div><details><summary>UV 计算与质量</summary><div id="status"></div></details><div id="error" hidden></div><details><summary>使用说明</summary><p>同色同编号是同一个 UV 岛。选面不改变相机、进度或队列。</p><p>紫色边是动画临时断边，不写入导出；动画不处理自碰撞。</p></details></div></section></div></main>
+<footer><span>MeshTailor-JS · 离线实验页</span><span>左键旋转 · 右键平移 · 滚轮缩放</span><span>先选岛，再选面 · Esc 取消</span></footer>
 <!--BOOTSTRAP-->
 </body></html>
