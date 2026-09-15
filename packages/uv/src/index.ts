@@ -20,3 +20,5 @@ export * from './topology-slits.js';
 export * from './presentation.js';
 
 export * from './distortion-budget.js';
+export * from './chart-adjacency.js';
+export * from './source-audit.js';
