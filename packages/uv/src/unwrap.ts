@@ -8,7 +8,7 @@ import { openChartWithSlits } from './topology-slits.js';
 import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
-export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions { sourceAtlasMerge?:boolean; initialSegmentation?:'regions'|'connected'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
+export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions { sourceRepairPolicy?:'repair'|'reject'; sourceAtlasMerge?:boolean; initialSegmentation?:'regions'|'connected'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
 export interface ChartDiagnostic {areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;

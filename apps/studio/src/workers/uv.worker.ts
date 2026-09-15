@@ -3,6 +3,7 @@ import { extractSeamEdgesFromUV } from '@meshtailor/chaining-seams';
 import { auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,auditSourceUV, postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildCharts, buildUnfoldGeometry, unwrapMesh, sourceUVPreview, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
 export type UVTarget = 'generated' | 'source' | 'stitch' | 'repack' | 'source-atlas';
 export interface UVSnapshot {
+  repair?:import('@meshtailor/uv').SourceRepairReport;
   areaAudit?:AreaAudit;sourceAreaAudit?:AreaAudit;spatialReport?:SpatialReport;packingReport?:AtlasPacking['packingReport'];
   packed:PackedChart[]; geometry:UnfoldGeometry; seams:string[]; target:UVTarget; warnings:string[];
   fragmentation?:FragmentationReport; sourceAudit?:SourceUVAudit; merge?:MergeReport; pageReport?:PageReport; removedSeams?:string[];
@@ -48,17 +49,17 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
         snapshot={packed,sourceAudit,sourceAreaAudit,geometry:buildUnfoldGeometry(mesh,packed,seams,work),seams:[...seams],target,warnings:sourceWarnings};
       }else{
         work.report({stage:'charts',detail:'整理原 UV：验证当前岛、面积归一、邻岛缝合与大岛优先排布'});
-        const result=postprocessUV(mesh,packed,seams,config?.sourceAtlasMerge===false?'repack':'stitch',config,work);
+        const result=postprocessUV(mesh,packed,seams,config?.sourceAtlasMerge===false?'repack':'stitch',{sourceRepairPolicy:'repair',...config},work);
         seams=new Set(result.seams);
         snapshot={target,sourceAudit,sourceAreaAudit,packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,
           warnings:['当前显示的是整理后的新 atlas，不是未经修改的源 UV。可用“原样检查”回到原坐标。',...result.warnings],
-          merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,
+          repair:result.repair,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,
           metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
       }
     }else if(target==='stitch'||target==='repack'){
       if(!seedCharts?.length)throw new Error('后处理需要当前已完成的 UV 快照。先生成或提取 UV，再执行邻岛缝合/只重排。');
       const result=postprocessUV(mesh,seedCharts,seams,target,config,work);seams=new Set(result.seams);
-      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
+      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,repair:result.repair,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
     }else{
       const result=unwrapMesh(mesh,seams,config,work);seams=new Set(result.seams);
       snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,fragmentation:result.fragmentation,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.merge?.removedSeams,addedSeams:result.addedSeams,diagnostics:result.diagnostics,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};

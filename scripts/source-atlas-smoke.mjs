@@ -25,7 +25,8 @@ try{
  const restored=await run({mesh,edges:[],target:'source'});assert.ok(restored.ok);assert.deepEqual(restored.snapshot.packed,raw.snapshot.packed);checks++;
  assert.deepEqual(mesh,original);checks++;
  const bad=structuredClone(mesh);bad.faces[0].uvs=[[0,0],[0,0],[0,0]];
- const failure=await run({mesh:bad,edges:[],target:'source-atlas'});assert.equal(failure.ok,false);assert.match(failure.error,/内部/);checks++;
+ const repaired=await run({mesh:bad,edges:[],target:'source-atlas'});assert.ok(repaired.ok,repaired.error);assert.equal(repaired.snapshot.repair.repaired,1);checks++;
+ const failure=await run({mesh:bad,edges:[],target:'source-atlas',config:{sourceRepairPolicy:'reject'}});assert.equal(failure.ok,false);assert.match(failure.error,/内部/);checks++;
  const stopped=await run({mesh,edges:[],target:'source-atlas',config:{timeBudgetMs:1}});assert.equal(stopped.ok,false);assert.equal(stopped.code,'timeout');checks++;
- console.log(`${checks} production source-atlas Worker checks passed: 12 raw overlaps -> 2 validated islands; original UV and mesh preserved; repack-only stays 12; timeout and invalid source rejected.`);
+ console.log(`${checks} production source-atlas Worker checks passed: 12 raw overlaps -> 2 validated islands; original UV and mesh preserved; repack-only stays 12; invalid source locally repaired, strict rejection and timeout retained.`);
 }finally{await c.cleanup();}
