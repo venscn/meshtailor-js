@@ -25,3 +25,4 @@ export * from './source-audit.js';
 export * from './chart-merge.js';
 export * from './atlas-pages.js';
 export * from './postprocess.js';
+export * from './area-audit.js';
