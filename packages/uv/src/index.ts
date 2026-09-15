@@ -29,3 +29,4 @@ export * from './area-audit.js';
 export * from './spatial-neighbors.js';
 
 export * from './source-repair.js';
+export * from './chart-join.js';
