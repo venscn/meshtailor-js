@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.8 — 2026-09-15
+
+- Audit actual source island counts and across-island overlaps within each source UV domain.
+- Add connected-first presegmentation and transactional adjacent-island stitching; reject invalid candidates without weakening validation or replacing source data.
+- Separate snapshot stitching from repacking and geometric-connectivity page grouping; preserve common page density and new export page identities.
+- Expose measured attempts, rejection reasons, page membership and occupancy. Keep original UV extraction, camera, selection and playback behavior.
+- Add procedural benchmark and actual offline-browser regressions; explicitly retain real-asset and full React/Vite validation limitations.
+- Release from existing small-commit history with a new immutable annotated v0.4.8 tag. For 0.4.5–0.4.7 details, see the versioned release documents.
+
 ## 0.4.4 — 2026-09-14
 
 - Analyze each island's actual transform spans; remove static time instead of redistributing it.
