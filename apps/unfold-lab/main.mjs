@@ -1,6 +1,6 @@
 import * as core from '/packages/mesh-core/src/index.js';
 import * as uv from '/packages/uv/src/index.js';
-import { makeHingeDemo, makeUnfoldDemo, makeFragmentationDemo } from '/apps/studio/src/unfold/demo.js';
+import { makeHingeDemo, makeUnfoldDemo, makeFragmentationDemo, makeOverlapDemo } from '/apps/studio/src/unfold/demo.js';
 import { UnfoldWebGLView } from '/apps/studio/src/unfold/webgl-view.js';
 import { DEFAULT_AUTO_FRAME } from '/apps/studio/src/unfold/camera-policy.js';
 import { drawUVSnapshot, pickUVFace } from '/apps/studio/src/unfold/uv-drawing.js';
@@ -12,7 +12,7 @@ let inspectionIndex=null, timelineGeometry=null, timelineKey='';
 let chartConfig={...uv.DEFAULT_UNWRAP};
 let postSeed;
 let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,sequence=0;
-const options={skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
+const options={overlapMode:'coplanar',overlapTolerance:.0001,overlapOpacity:.72,faceTones:true,skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
 const view=new UnfoldWebGLView($('view'),(id,face,add)=>pick(id,face,add),e=>{if(e)fail(e);},()=>{options.autoFrame=false;$('frame').checked=false;view.setOptions(options);cameraStatus();});
 function cameraStatus(){$('frame').checked=options.autoFrame;$('camera-status').textContent=options.autoFrame?'自动跟随中；操作相机会立即关闭跟随，动画继续。':'手动相机：动画不改变视角。适配按钮只执行一次。';}
@@ -68,6 +68,7 @@ function update(patch={},focus=null){
   if(Object.hasOwn(patch,"progress"))inspectionIndex=focus;
   Object.assign(options,patch);
   rebuildTimeline();
+  $('overlap-mode').value=options.overlapMode;$('overlap-opacity').value=options.overlapOpacity;$('face-tones').checked=options.faceTones;$('overlap-tolerance').value=options.overlapTolerance*100;
   view.setOptions(options);cameraStatus();drawUV();selectionStatus();
   $('progress').value=options.progress;$('percent').textContent=(options.progress*100).toFixed(1)+'%';
   const reverse=$('reverse').checked,schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,reverse,options.timeline);
@@ -133,8 +134,12 @@ $('source-layout').onchange=()=>{chartConfig.sourceUVLayout=$('source-layout').v
 $('solve').onclick=solve;$('cancel').onclick=()=>{cancel();$('status').textContent='已取消本次求解。';};$('target').onchange=solve;
 $('all').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update({progress:0});};$('none').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=[];list();update({progress:0});};
 $('separation').oninput=()=>{pause();update({separation:Number($('separation').value),progress:0});};$('in-place').onclick=()=>{pause();$('separation').value='0';update({separation:0,progress:0});};
+$('overlap-mode').onchange=()=>update({overlapMode:$('overlap-mode').value});
+$('overlap-opacity').oninput=()=>update({overlapOpacity:Number($('overlap-opacity').value)});
+$('overlap-tolerance').onchange=()=>{const n=Number($('overlap-tolerance').value);if(Number.isFinite(n)&&n>=.0001&&n<=1)update({overlapTolerance:n/100});};
+$('overlap-demo').onclick=()=>{$('target').value='source';return load(makeOverlapDemo());};
 $('wave').onchange=()=>{pause();update({hingeWave:$('wave').checked,progress:0});};
-for(const [id,key]of [['frame','autoFrame'],['hinges','showHinges'],['temporary','showTemporaryCuts'],['checker','checker']])$(id).onchange=()=>update({[key]:$(id).checked});
+for(const [id,key]of [['face-tones','faceTones'],['frame','autoFrame'],['hinges','showHinges'],['temporary','showTemporaryCuts'],['checker','checker']])$(id).onchange=()=>update({[key]:$(id).checked});
 $('handoff').oninput=()=>{pause();update({handoff:Number($('handoff').value),progress:0});};$('skip-static').onchange=()=>{pause();update({skipStatic:$('skip-static').checked,progress:0});};$('motion-tolerance').onchange=()=>{const v=Number($('motion-tolerance').value);if(Number.isFinite(v)&&v>=0&&v<=.001){pause();update({motionTolerance:v,progress:0});}};$('hold-net').onchange=()=>{pause();update({holdNet:$('hold-net').checked,progress:0});};$('queue-prev').onclick=()=>seekQueue(-1);$('queue-next').onclick=()=>seekQueue(1);$('seconds').onchange=()=>update();$('reverse').onchange=()=>update();
 $('order').onchange=()=>{pause();update({order:$('order').value,progress:0});};$('context').onchange=()=>update({context:$('context').value});$('fit-current').onclick=()=>view.fitCurrent();$('orbit').onclick=()=>view.fit('orbit');$('front').onclick=()=>view.fit('uv');
 $('progress').oninput=()=>{pause();update({progress:Number($('progress').value)});};$('play').onclick=()=>{if(playing){pause();return;}if(!snapshot||!options.selected.length)return;playing=true;inspectionIndex=null;clockLast=null;const reverse=$('reverse').checked;if((!reverse&&options.progress===1)||(reverse&&options.progress===0))update({progress:reverse?1:0});$('play').textContent='暂停';};

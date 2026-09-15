@@ -42,3 +42,13 @@ export function makeFragmentationDemo(parts=1):ReturnType<typeof makeUnfoldDemo>
   }
   return {mesh:{name:'Overlapped fragmented sheets · 合成测试片',positions,faces},edges:new Set(),chains:[],frames:[]};
 }
+
+/** A four-triangle saddle has angle excess at its center: the rigid hinge net
+ * overlaps while its supplied diamond UV is valid. A teaching fixture, not a real asset. */
+export function makeOverlapDemo(): ReturnType<typeof makeUnfoldDemo> {
+  const positions:MeshData['positions']=[[0,0,0],[1,0,1],[0,1,-1],[-1,0,1],[0,-1,-1]];
+  const points:[number,number][]=[[.5,.5],[1,.5],[.5,1],[0,.5],[.5,0]];
+  const indices:[number,number,number][]=[[0,1,2],[0,2,3],[0,3,4],[0,4,1]];
+  const mesh:MeshData={name:'Saddle hinge overlap · 马鞍铰链重叠示例',positions,faces:indices.map(vertices=>({vertices,uvs:vertices.map(i=>[...points[i]!]) as [[number,number],[number,number],[number,number]]}))};
+  return {mesh,edges:new Set(),chains:[],frames:[]};
+}

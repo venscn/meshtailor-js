@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { islandColor, islandProgress, HINGE_STAGES, type UnfoldOrder, type UnfoldPath } from '@meshtailor/uv';
 import type { UVSnapshot, UVTarget } from '../workers/uv.worker';
+import type { OverlapMode } from './overlap-policy';
 import type { UnfoldPlayer, UnfoldScope } from './useUnfoldPlayer';
 
-export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDemo,onHingeDemo}:{player:UnfoldPlayer;snapshot:UVSnapshot|null;target:UVTarget;onTarget:(v:UVTarget)=>void;onExport:()=>void;onDemo:()=>void;onHingeDemo:()=>void}){
+export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDemo,onHingeDemo,onOverlapDemo}:{player:UnfoldPlayer;snapshot:UVSnapshot|null;target:UVTarget;onTarget:(v:UVTarget)=>void;onExport:()=>void;onDemo:()=>void;onHingeDemo:()=>void;onOverlapDemo:()=>void}){
   const [page,setPage]=useState(0),[filter,setFilter]=useState('');
   const islands=useMemo(()=>snapshot?.geometry.islands.filter(c=>!filter||String(c.id+1).includes(filter))??[],[snapshot,filter]);
   const pages=Math.max(1,Math.ceil(islands.length/40)),current=Math.min(page,pages-1),visible=islands.slice(current*40,current*40+40);
@@ -44,6 +45,15 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
       <label className="check"><input type="checkbox" checked={p.hingeWave} onChange={e=>p.setHingeWave(e.target.checked)}/>从根面依次打开铰链</label>
       <label className="check"><input aria-label="Hold rigid net" type="checkbox" checked={p.holdNet} onChange={e=>p.changeHoldNet(e.target.checked)}/>平面网额外停留</label>
       <small>仅相邻两岛尾段交叠。等待岛留在 3D，完成岛留在 UV。</small>
+    </details>
+    <details open className="overlap-controls" data-testid="overlap-controls"><summary>重叠与面片识别</summary>
+      <label>重叠提示<select aria-label="Overlap visualization" value={p.overlapMode} onChange={e=>p.setOverlapMode(e.target.value as OverlapMode)}><option value="coplanar">同岛近共面重叠 · 默认</option><option value="projected">视线叠层 · 含前后遮挡</option><option value="off">关闭</option></select></label>
+      <small>{p.overlapMode==='projected'?'视线叠层包含普通遮挡，不代表几何相交。':'近共面提示只检测当前可见表层附近的同岛面片。'}</small>
+      <label className="check"><input aria-label="Triangle tone variation" type="checkbox" checked={p.faceTones} onChange={e=>p.setFaceTones(e.target.checked)}/>三角形明暗分色（保留岛色）</label>
+      <label>条纹强度 <b>{Math.round(p.overlapOpacity*100)}%</b><input aria-label="Overlap hatch opacity" type="range" min=".1" max="1" step=".01" value={p.overlapOpacity} onChange={e=>p.setOverlapOpacity(+e.target.value)}/></label>
+      <details><summary>检测容差</summary><label>距离 / 模型最长边 %<input aria-label="Overlap relative tolerance percent" type="number" min=".0001" max="1" step=".001" value={p.overlapTolerance*100} onChange={e=>{const v=+e.target.value;if(Number.isFinite(v)&&v>=.0001&&v<=1)p.setOverlapTolerance(v/100);}}/></label><small>默认 0.01%。过大会把靠得很近的平行面算作重叠；不是精确自交验证。</small></details>
+      <button onClick={onOverlapDemo}>加载铰链重叠示例</button>
+      <small>橙色斜纹 = 2 层；玫红交叉纹 = 3 层及以上。可配合视口“线框”。切换提示不暂停、不重新展开。</small>
     </details>
     <details><summary>显示与相机</summary>
       <label>未选择的岛<select aria-label="Unselected islands" value={p.context} onChange={e=>p.setContext(e.target.value as 'dim'|'hidden'|'solid')}><option value="dim">半透明</option><option value="hidden">隐藏</option><option value="solid">实体</option></select></label>
