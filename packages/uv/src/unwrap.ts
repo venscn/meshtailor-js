@@ -1,19 +1,19 @@
-import { areaDistortionBudget } from './distortion-budget.js';
+import { mergeAdjacentCharts, type MergeOptions, type MergeReport } from './chart-merge.js';
+import { normalizedMesh, shapeQuality } from './chart-quality.js';
 import { uvProgress, rethrowUVStop, type UVWork } from './work.js';
 import { buildTopology, edgeKey, recommendRegions, segmentMeshRegions, type ChartGoal, type MeshAnalysis, type RegionOptions, type MeshData, type Vec3, type Vec2 } from '@meshtailor/mesh-core';
 import { buildCharts } from './charts.js';
 import { openChartWithSlits } from './topology-slits.js';
 import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
-import { signedArea2 } from './uv-quality.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
-export interface UnwrapOptions extends SolverOptions,PackOptions { sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
+export interface UnwrapOptions extends SolverOptions,PackOptions { initialSegmentation?:'regions'|'connected'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
 export interface ChartDiagnostic {areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
 }
-export interface UnwrapResult extends AtlasPacking { fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
+export interface UnwrapResult extends AtlasPacking { merge?:MergeReport; fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
 export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
 export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,chartPolicy:'large',stretchAreaPercentile:.99,maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
 export function recommendUnwrap(mesh:MeshData,goal:ChartGoal='large'):{options:UnwrapOptions;analysis:MeshAnalysis;regions:RegionOptions;reasons:string[]}{
@@ -52,24 +52,6 @@ function splitDisks(local:CutMesh,maxFaces:number,limitNormals:boolean,work?:UVW
   }
   return result;
 }
-function normalizedMesh(mesh:MeshData):MeshData{
-  const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];for(const p of mesh.positions)for(let a=0;a<3;a++){if(!Number.isFinite(p[a]))throw new Error('Nonfinite mesh coordinate.');min[a]=Math.min(min[a]!,p[a]!);max[a]=Math.max(max[a]!,p[a]!);}
-  const span=Math.max(...max.map((v,i)=>v-min[i]!));if(!(span>0&&Number.isFinite(span)))throw new Error('Zero/invalid mesh extent.');
-  return{...mesh,positions:mesh.positions.map(p=>p.map((v,i)=>(v-min[i]!)/span) as [number,number,number])};
-}
-function shapeQuality(local:CutMesh,uv:Vec2[],percentile:number,limit:number){
-  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity,area=0,maxStretch=1;
-  const distortion:{area:number;stretch:number}[]=[];
-  for(const [x,y]of uv){minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
-  for(const t of local.triangles){
-    const [a,b,c]=t.map(v=>local.positions[v]!) as [Vec3,Vec3,Vec3],ab=b.map((x,i)=>x-a[i]!),ac=c.map((x,i)=>x-a[i]!),l=Math.hypot(...ab),x=ab.reduce((s,v,i)=>s+v*ac[i]!,0)/l,y=2*triangleArea(a,b,c)/l;
-    const [A,B,C]=t.map(v=>uv[v]!) as [Vec2,Vec2,Vec2];area+=Math.abs(signedArea2(A,B,C))*.5;
-    const j00=(B[0]-A[0])/l,j10=(B[1]-A[1])/l,j01=((C[0]-A[0])-j00*x)/y,j11=((C[1]-A[1])-j10*x)/y;
-    const tr=j00*j00+j10*j10+j01*j01+j11*j11,det=(j00*j11-j01*j10)**2,hi=(tr+Math.sqrt(Math.max(0,tr*tr-4*det)))/2,lo=det/Math.max(hi,1e-30);
-    const stretch=Math.sqrt(hi/Math.max(lo,1e-30));maxStretch=Math.max(maxStretch,stretch);distortion.push({area:triangleArea(a,b,c),stretch:Math.max(1,stretch)});
-  }
-  const w=maxX-minX,h=maxY-minY;return{aspect:Math.max(w/h,h/w),fill:area/(w*h),...areaDistortionBudget(distortion,percentile,limit)};
-}
 export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Partial<UnwrapOptions>={},work?:UVWork):UnwrapResult{
   const opts={...(options.chartPolicy==='legacy'?LEGACY_UNWRAP:recommendUnwrap(input,options.chartPolicy??'large').options),...options};
   if(!Number.isFinite(opts.stretchAreaPercentile??1)||(opts.stretchAreaPercentile??1)<.9||(opts.stretchAreaPercentile??1)>1)throw new Error('Stretch area percentile must be 0.9..1.');
@@ -80,7 +62,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   const mesh=normalizedMesh(input),topology=buildTopology(mesh),effective=new Set(seams),warnings:string[]=[];
   for(const [key,e]of topology.edges)if(e.faces.length>2){if(!opts.autoCut)throw new Error('Non-manifold edges require cuts or mesh repair.');effective.add(key);}
   for(let fi=0;fi<mesh.faces.length;fi++){if(fi%256===0)work?.check();const t=mesh.faces[fi]!.vertices;if(new Set(t).size!==3||t.some(v=>!mesh.positions[v])||triangleArea(mesh.positions[t[0]]!,mesh.positions[t[1]]!,mesh.positions[t[2]]!)<1e-15)throw new Error(`Face ${fi} is degenerate in 3D. Repair/remove it before unwrapping; no faces were silently dropped.`);}
-  if(opts.autoCut&&opts.chartPolicy!=='legacy'&&seams.size===0){
+  if(opts.autoCut&&opts.chartPolicy!=='legacy'&&seams.size===0&&opts.initialSegmentation!=='connected'){
     uvProgress(work,{stage:'charts',detail:'自动大块分区：合并相邻小区域'});
     const regionOpts={...recommendRegions(mesh,opts.chartPolicy).options,...opts.regionOptions,maxChartFaces:opts.maxChartFaces};
     const regions=segmentMeshRegions(mesh,regionOpts,effective,undefined,()=>work?.check(),topology);
@@ -131,6 +113,8 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       raw.push({id,faceUVs,area3D});diagnostics.push({id,sourceChart,faces:faces.length,method:p.method,...shape,iterations:p.iterations,residual:p.residual,...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});
   };
   charts.forEach(chart=>solve(chart.faces,chart.id));
+  let merge:MergeReport|undefined;
+  if(opts.postMerge){const m=mergeAdjacentCharts(mesh,raw,effective,opts,diagnostics,work);raw.splice(0,raw.length,...m.raw);diagnostics.splice(0,diagnostics.length,...m.diagnostics);effective.clear();for(const key of m.seams)effective.add(key);merge=m.report;warnings.push(`后处理邻岛缝合：${merge.before} → ${merge.after} 岛；接受 ${merge.accepted} 次，尝试 ${merge.attempts} 次；${merge.budgetExhausted?'达到预算，不代表全局最少岛':'保留未通过拓扑/形变检查的边界'}。`);}
   const faceChart=new Int32Array(mesh.faces.length);raw.forEach(r=>{for(const fi of r.faceUVs.keys())faceChart[fi]=r.id;});
   for(const [key,e]of topology.edges){
     if(e.faces.length!==2){if(e.faces.length>1)effective.add(key);continue;}
@@ -148,5 +132,5 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   if(tolerated.length)warnings.push(`${tolerated.length} 个岛含超过软形变阈值的微小细节；采用 ${((opts.stretchAreaPercentile??1)*100).toFixed(1)}% 源表面积分位数避免整块反复切碎。最坏值仍报告；不豁免翻面、退化或交叠。`);
   const atlas=packAtlas(raw,opts,work);
   warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
-  return{...atlas,fragmentation,seams:[...effective],addedSeams,diagnostics,warnings};
+  return{...atlas,merge,fragmentation,seams:[...effective],addedSeams,diagnostics,warnings};
 }
