@@ -5,19 +5,49 @@ import { UnfoldWebGLView } from '/apps/studio/src/unfold/webgl-view.js';
 import { DEFAULT_AUTO_FRAME } from '/apps/studio/src/unfold/camera-policy.js';
 import { drawUVSnapshot, pickUVFace } from '/apps/studio/src/unfold/uv-drawing.js';
 import {startUVJob,describeUVProgress} from '/apps/studio/src/unfold/uv-job-client.js';
+import { EMPTY_INSPECTION, selectInspectionIsland, resolveInspectionPick } from '/apps/studio/src/unfold/selection-policy.js';
+let inspection=EMPTY_INSPECTION;
 const $=id=>document.getElementById(id);
 let inspectionIndex=null, timelineGeometry=null, timelineKey='';
 let chartConfig={...uv.DEFAULT_UNWRAP};
 let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,sequence=0;
 const options={skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
-const view=new UnfoldWebGLView($('view'),(id,face,add)=>select(id,face,add),e=>{if(e)fail(e);},()=>{options.autoFrame=false;$('frame').checked=false;view.setOptions(options);cameraStatus();});
+const view=new UnfoldWebGLView($('view'),(id,face,add)=>pick(id,face,add),e=>{if(e)fail(e);},()=>{options.autoFrame=false;$('frame').checked=false;view.setOptions(options);cameraStatus();});
 function cameraStatus(){$('frame').checked=options.autoFrame;$('camera-status').textContent=options.autoFrame?'自动跟随中；操作相机会立即关闭跟随，动画继续。':'手动相机：动画不改变视角。适配按钮只执行一次。';}
 function fail(message){$('error').hidden=false;$('error').textContent=String(message);}
 function pause(){playing=false;clockLast=null;$('play').textContent='播放展开';}
 function drawUV(){if(!snapshot)return;const host=$('uvhost'),c=$('uv'),d=Math.min(devicePixelRatio,2),ctx=c.getContext('2d');c.width=Math.max(1,Math.round(host.clientWidth*d));c.height=Math.max(1,Math.round(host.clientHeight*d));ctx.setTransform(d,0,0,d,0,0);drawUVSnapshot(ctx,snapshot,host.clientWidth,host.clientHeight,options);}
 function list(){if(!snapshot)return;$('islands').replaceChildren();for(const island of snapshot.geometry.islands.slice(0,100)){const row=document.createElement('div');row.className='island';const box=document.createElement('input');box.type='checkbox';box.checked=options.selected.includes(island.id);box.setAttribute('aria-label','选中岛 '+(island.id+1));box.onchange=()=>select(island.id,null,true);const b=document.createElement('button');b.innerHTML=`<i style="background:rgb(${uv.islandColor(island.id).map(x=>Math.round(x*255)).join(',')})"></i>#${island.id+1} · ${island.faces.length} 面`;b.onclick=()=>select(island.id,null,false);row.append(box,b);$('islands').append(row);}}
-function select(id,face=null,add=false){pause();options.selected=add?(options.selected.includes(id)?options.selected.filter(x=>x!==id):[...options.selected,id]):[id];options.focusFace=face;options.progress=0;list();update();}
+function clearFace(){inspection={...inspection,face:null};options.focusFace=null;update();}
+function select(id,_face=null,add=false){
+  if(!snapshot)return;
+  const all=snapshot.geometry.islands.map(i=>i.id);
+  inspection=selectInspectionIsland(add?{islands:options.selected,face:null}:inspection,id,all,add);
+  pause();options.selected=[...inspection.islands];options.focusFace=null;options.progress=0;list();update();
+}
+function pick(id,face=null,add=false){
+  if(!snapshot)return;
+  const result=resolveInspectionPick(inspection,{id,face,additive:add},snapshot.geometry.islands.map(i=>i.id),snapshot.geometry.faceChart);
+  if(result.kind==='none')return;
+  if(result.kind==='face'){inspection=result.state;options.focusFace=inspection.face;update();return;}
+  const local=uv.islandProgress(options.progress,options.selected.indexOf(id),options.selected.length,options.order,options.handoff,options.timeline);
+  pause();inspection=result.state;options.selected=[...inspection.islands];options.focusFace=null;
+  list();update({progress:add?0:local});
+}
+function selectionStatus(){
+  const el=$('selection-status');if(!el)return;
+  el.textContent=inspection.islands.length
+    ? `UV 岛 ${inspection.islands.map(id=>'#'+(id+1)).join(', ')} · ${options.focusFace===null?'未选择三角形':`三角形 ${options.focusFace}`}`
+    : '未选择 UV 岛 · 先点选岛，再点选三角形';
+  el.dataset.islands=JSON.stringify(inspection.islands);el.dataset.face=String(options.focusFace??'');
+  if($('clear-face'))$('clear-face').disabled=options.focusFace===null;
+}
+window.addEventListener('keydown',e=>{
+  if(e.key!=='Escape'||e.defaultPrevented||e.target?.closest('input,textarea,select,[contenteditable=true]'))return;
+  if(inspection.face!==null){e.preventDefault();clearFace();}
+  else if(inspection.islands.length){e.preventDefault();$('none').click();}
+});
 function rebuildTimeline(){
   if(!snapshot){options.timeline=undefined;timelineGeometry=null;return;}
   const key=JSON.stringify([options.selected,options.order,options.handoff,options.holdNet,options.path,options.separation,options.hingeWave,options.skipStatic,options.motionTolerance]);
@@ -30,7 +60,7 @@ function update(patch={},focus=null){
   if(Object.hasOwn(patch,"progress"))inspectionIndex=focus;
   Object.assign(options,patch);
   rebuildTimeline();
-  view.setOptions(options);cameraStatus();drawUV();
+  view.setOptions(options);cameraStatus();drawUV();selectionStatus();
   $('progress').value=options.progress;$('percent').textContent=(options.progress*100).toFixed(1)+'%';
   const reverse=$('reverse').checked,schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,reverse,options.timeline);
   const focusIndex=!playing&&inspectionIndex!==null&&inspectionIndex<options.selected.length?inspectionIndex:schedule.focusIndex;
@@ -53,7 +83,7 @@ function cancel(){sequence++;jobHandle?.cancel();jobHandle=null;$('cancel').disa
 async function solve(){
   cancel();pause();window.lab.ready=false;window.lab.progressEvents=[];
   const token=sequence,start=performance.now();let lastProgress=null,clock;
-  $('error').hidden=true;snapshot=null;view.setGeometry(null);$('islands').replaceChildren();
+  $('error').hidden=true;snapshot=null;inspection=EMPTY_INSPECTION;options.focusFace=null;selectionStatus();view.setGeometry(null);$('islands').replaceChildren();
   const c=$('uv'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
   $('status').textContent='启动 UV Worker…';$('solve').disabled=true;$('cancel').disabled=false;
   try{
@@ -63,7 +93,7 @@ async function solve(){
     });
     clock=setInterval(()=>{if(token===sequence)$('status').textContent=describeUVProgress(lastProgress,performance.now()-start);},500);
     const result=await jobHandle.result;if(token!==sequence)return;
-    snapshot=result;jobHandle=null;options.selected=snapshot.geometry.islands.map(i=>i.id);options.progress=0;options.focusFace=null;
+    snapshot=result;inspection=EMPTY_INSPECTION;jobHandle=null;options.selected=snapshot.geometry.islands.map(i=>i.id);options.progress=0;options.focusFace=null;
     rebuildTimeline();view.setOptions(options);view.setGeometry(snapshot.geometry,{resetCamera:framedMesh!==mesh});framedMesh=mesh;list();update();const m=snapshot.metrics;
     $('title').textContent=`${mesh.name} · ${mesh.faces.length.toLocaleString()} 三角面 · ${snapshot.packed.length} 岛`;
     $('status').textContent=(m?`生成 UV：翻面 / 退化 / 正面积重叠检查通过\n有效面积占用 ${(m.occupancy*100).toFixed(1)}% · 包围盒 ${(m.boxOccupancy*100).toFixed(1)}%\n${m.packingMethod} 排布 · 新增 ${snapshot.addedSeams.length} 条 UV 补切\n`:'原始 UV：未修复、未重新排布\n')+`Worker 完成 · ${(snapshot.timing.elapsedMs/1000).toFixed(2)} 秒\n`+snapshot.warnings.join('\n')+(snapshot.fragmentation?`\n分割诊断：${snapshot.fragmentation.inputComponents} 个源分量 → ${snapshot.fragmentation.initialCharts} 个初始区域 → ${snapshot.fragmentation.outputCharts} 岛；小于16面的岛 ${snapshot.fragmentation.tinyCharts}\n补切原因：${JSON.stringify(snapshot.fragmentation.reasons)}`:'');
@@ -84,7 +114,7 @@ $('ribbon').onclick=()=>load(makeHingeDemo());$('cube').onclick=()=>load(makeUnf
 $('file').onchange=async e=>{try{const f=e.target.files?.[0];if(f){const m=core.parseOBJ(await f.text(),f.name);await load({mesh:m,edges:new Set()});}}catch(e){fail(e.message);}};
 $('source-layout').onchange=()=>{chartConfig.sourceUVLayout=$('source-layout').value;if($('target').value==='source')solve();};
 $('solve').onclick=solve;$('cancel').onclick=()=>{cancel();$('status').textContent='已取消本次求解。';};$('target').onchange=solve;
-$('all').onclick=()=>{pause();options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update({progress:0});};$('none').onclick=()=>{pause();options.selected=[];list();update({progress:0});};
+$('all').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update({progress:0});};$('none').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=[];list();update({progress:0});};
 $('separation').oninput=()=>{pause();update({separation:Number($('separation').value),progress:0});};$('in-place').onclick=()=>{pause();$('separation').value='0';update({separation:0,progress:0});};
 $('wave').onchange=()=>{pause();update({hingeWave:$('wave').checked,progress:0});};
 for(const [id,key]of [['frame','autoFrame'],['hinges','showHinges'],['temporary','showTemporaryCuts'],['checker','checker']])$(id).onchange=()=>update({[key]:$(id).checked});
@@ -103,9 +133,10 @@ function tick(now){
   }
   clockLast=playing&&!document.hidden?now:null;requestAnimationFrame(tick);
 }requestAnimationFrame(tick);
-$('uv').onclick=e=>{if(!snapshot)return;const r=$('uv').getBoundingClientRect(),hit=pickUVFace(snapshot,r.width,r.height,e.clientX-r.left,e.clientY-r.top,options.selected);if(hit)select(hit.id,hit.face,e.shiftKey||e.ctrlKey||e.metaKey);};
+$('uv').onclick=e=>{if(!snapshot)return;const r=$('uv').getBoundingClientRect(),hit=pickUVFace(snapshot,r.width,r.height,e.clientX-r.left,e.clientY-r.top,options.selected);if(hit)pick(hit.id,hit.face,e.shiftKey||e.ctrlKey||e.metaKey);};
 $('export').onclick=()=>{if(!snapshot)return;const text=core.meshToOBJ(uv.meshWithPreviewUV(mesh,snapshot.packed)),url=URL.createObjectURL(new Blob([text],{type:'text/plain'})),a=document.createElement('a');a.href=url;a.download='meshtailor-target-uv.obj';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 $('diagnostic').onclick=()=>{if(!snapshot)return;const report={version:'0.4.6',asset:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},config:chartConfig,fragmentation:snapshot.fragmentation,uvSpaces:snapshot.geometry.atlas.spaces,metrics:snapshot.metrics,warnings:snapshot.warnings,timing:snapshot.timing};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='meshtailor-diagnostic.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 new ResizeObserver(drawUV).observe($('uvhost'));
-window.lab={ready:false,view,options,errors,update,select,load,solve,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
+if($('clear-face'))$('clear-face').onclick=clearFace;
+window.lab={ready:false,view,options,errors,update,select,pick,clearFace,get inspection(){return inspection;},load,solve,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
 await load(makeHingeDemo());
