@@ -68,5 +68,12 @@
     "commit": "f9668506a90a88c381a43bbd473af21e0414f7e3",
     "tagType": "tag",
     "commitsSincePrevious": 14
+  },
+  {
+    "tag": "v0.4.6",
+    "refObject": "db7c0e2857f9c4705e58f09a7ffb6341dac97649",
+    "commit": "ad37ab96bd625548545c05ebb5d0cc33c983a629",
+    "tagType": "tag",
+    "commitsSincePrevious": 10
   }
 ]
