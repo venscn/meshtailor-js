@@ -80,7 +80,7 @@ export default function App(){
   const begin=(message:string)=>{cancel();setLoadError(null);setBusy(message);return operation.current;};
   const replaceMesh=(m:MeshData,report:MeshImportReport|null=null)=>{
     prepareViewportMesh(m); // Reject malformed input before React/topology/Three see it.
-    setUVSeed(undefined);setMesh(m);setImportReport(report);setUVConfig(recommendUnwrap(m).options);setUVTarget('generated');setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
+    setUVSeed(undefined);setMesh(m);setImportReport(report);setUVConfig(recommendUnwrap(m).options);setUVTarget(m.faces.every(f=>f.uvs?.length===3&&f.uvs.every(v=>v?.every(Number.isFinite)))?'source-atlas':'generated');setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
   };
   const loadUnfoldDemo=()=>{cancel();setLoadError(null);try{const demo=makeUnfoldDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setUVTarget('generated');setViewMode('unfold');setToolTab('animation');setNotice('六岛立方体：拖动 0–100% 进度，观察同色编号的面片移入对应 UV 岛。');}catch(error){setLoadError(String(error));}};
   const loadHingeDemo=()=>{cancel();setLoadError(null);try{const demo=makeHingeDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice('三块折角带：点“分块陈列”，再缓慢拖动 28–70%，看各铰链真实转动。');}catch(error){setLoadError(String(error));}};
@@ -116,7 +116,7 @@ export default function App(){
     }catch(error){if(id===operation.current)setLoadError(error instanceof Error?error.message:String(error));}
     finally{if(id===operation.current)setBusy(null);}
   };
-  const runSeams=(kind:SeamJob['kind'])=>{
+  const runSeams=(kind:SeamJob['kind'],organizeSource=true)=>{
     const id=begin(kind==='uv-seams'?'读取原始 UV（不再补切）…':'分析网格并生成连通分区…');
     try{
       const worker=new Worker(new URL('./workers/seam.worker.ts',import.meta.url),{type:'module'});seamWorker.current=worker;
@@ -125,10 +125,10 @@ export default function App(){
         const result=event.data;if(!result.ok){setLoadError(result.error);return;}
         try{
           const edges=new Set(result.edges),fs=buildGenerationFrames(mesh,result.chains);
-          setUVSeed(undefined);setUVTarget(seamTarget(kind));
+          setUVSeed(undefined);setUVTarget(kind==='uv-seams'&&organizeSource?'source-atlas':seamTarget(kind));
           if(kind.startsWith('auto-')&&result.parameters)setUVConfig({...result.parameters,timeBudgetMs:uvConfig.timeBudgetMs,padding:uvConfig.padding});
           setSeamEdges(edges);setChains(result.chains);setFrames(fs);setShowAllSeams(false);setStep(fs.length?0:-1);setPlaying(false);
-          setNotice(kind==='uv-seams'?`已读取原始 UV 接缝：${edges.size} 条边。显示和动画直接使用原 UV，不重新分割。`:`输入 ${result.analysis?.components??'?'} 个独立连通部件（不跨部件焊接）；${result.regionCount??'传统'} 个候选分区，合并 ${result.mergedCount??0} 个小区域；${edges.size} 条接缝。最终岛数由 UV 有效性检查决定。`);
+          setNotice(kind==='uv-seams'?`已读取原始 UV 接缝：${edges.size} 条边。${organizeSource?'将继续面积校正、验证缝合和去叠放；生成新 atlas。':'原样检查，不修正面积或叠放。'}`:`输入 ${result.analysis?.components??'?'} 个独立连通部件（不跨部件焊接）；${result.regionCount??'传统'} 个候选分区，合并 ${result.mergedCount??0} 个小区域；${edges.size} 条接缝。最终岛数由 UV 有效性检查决定。`);
           if(kind.startsWith('auto-'))setShowAllSeams(true);
           if(!edges.size&&kind!=='uv-seams')setNotice('候选区域无需分隔边；UV 求解按需开缝，仍保留所有面。');
         }catch(error){setLoadError(String(error));}
@@ -190,14 +190,14 @@ export default function App(){
         {importReport&&<section className="import-report"><h3>Import report</h3><p>{importReport.parts} parts · {importReport.sourceVertices.toLocaleString()} source vertices → {importReport.vertices.toLocaleString()} topology vertices</p><p>{importReport.weldedVertices.toLocaleString()} welded · {importReport.uvFaces.toLocaleString()} faces with UV</p><details><summary>导入说明 / Warnings</summary>{importReport.warnings.map((w,i)=><p key={i}>{w}</p>)}</details></section>}
           </div>
           <div id="tools-uv" role="tabpanel" aria-labelledby="tool-uv" hidden={toolTab!=='uv'}>
-        <section><h3>裁切方案</h3><small>重新生成裁切，或读取模型原有 UV。</small><button className="primary" disabled={!!busy} onClick={()=>runSeams('baseline')}>Generate baseline</button><button disabled={!!busy} onClick={()=>runSeams('uv-seams')}>Extract existing UV seams</button>
+        <section><h3>裁切方案</h3><small>重新生成裁切，或读取模型原有 UV。</small><button className="primary" disabled={!!busy} onClick={()=>runSeams('baseline')}>Generate baseline</button><button disabled={!!busy} onClick={()=>runSeams('uv-seams')}>Extract + 整理原 UV</button><button disabled={!!busy} onClick={()=>runSeams('uv-seams',false)}>原样检查（不修正 UV）</button><small>整理会生成新 UV：统一面积比例、尝试缝合、大岛优先去叠放。旧贴图需重新烘焙；原样检查仍保留原坐标。</small>
           <details><summary>传统 baseline 参数（仅 legacy 策略生效）</summary><label>Curvature quantile <b>{curvature.toFixed(2)}</b><input type="range" min="0.55" max="0.98" step="0.01" value={curvature} onChange={e=>setCurvature(+e.target.value)}/></label>
           <label>Structural cross-sections <b>{rings}</b><input type="range" min="0" max="5" step="1" value={rings} onChange={e=>setRings(+e.target.value)}/></label>
           <label>Baseline edge budget <input aria-label="Edge budget" type="number" min="50" max="20000" step="50" value={maxEdges} onChange={e=>{const n=Math.floor(+e.target.value);if(n>=50&&n<=20000)setMaxEdges(n);}}/></label><small>仅限制传统 baseline；自动大块模式不截断区域边界，不抽稀网格。</small></details>
         </section>
             <UVSolverControls value={uvConfig} onChange={setUVConfig} snapshot={snapshot} onProcess={processUV} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
             <UVJobStatus state={uvState} hasSource={hasSourceUV} onUseSource={()=>{setUVTarget('source');setViewMode('unfold');if(snapshotTarget==='source')uvState.retry();}}/>
-            <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.9',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,fragmentation:snapshot?.fragmentation,sourceAudit:snapshot?.sourceAudit,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
+            <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.9',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,fragmentation:snapshot?.fragmentation,sourceAudit:snapshot?.sourceAudit,areaAudit:snapshot?.areaAudit,sourceAreaAudit:snapshot?.sourceAreaAudit,spatialReport:snapshot?.spatialReport,packingReport:snapshot?.packingReport,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
           </div>
           <div id="tools-animation" role="tabpanel" aria-labelledby="tool-animation" hidden={toolTab!=='animation'}>
             <UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={setUVTarget} onExport={exportTargetUV} onDemo={loadUnfoldDemo} onHingeDemo={loadHingeDemo} onOverlapDemo={loadOverlapDemo}/>

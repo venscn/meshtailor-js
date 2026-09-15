@@ -59,13 +59,13 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <label>复杂样例<select id="example"><option value="garment">褶皱服装 · Low</option><option value="knot">三叶结 · Low</option><option value="gear">齿轮 · Low</option><option value="assembly">机械件 · Low</option></select></label><button id="complex">载入复杂样例</button>
 <label>本地 OBJ<input id="file" type="file" accept=".obj" style="max-width:170px"></label><small>此离线页支持 OBJ；FBX / GLB 等仍在主 Studio 导入。内置样例均不需要联网。</small>
 </div>
-<div id="lab-tools-uv" role="tabpanel" hidden><h3>裁切与展开</h3><div class="row"><button id="auto-large" class="primary">自动参数 · 大块重分割</button><button id="auto-balanced">自动 · 均衡</button><button id="extract-uv">Extract existing UV seams</button></div>
-<small>自动重分割替换当前裁切，原始 UV 仍保留。Extract 只读取原布局，不重切。</small><small id="auto-config" role="status"></small>
+<div id="lab-tools-uv" role="tabpanel" hidden><h3>裁切与展开</h3><div class="row"><button id="auto-large" class="primary">自动参数 · 大块重分割</button><button id="auto-balanced">自动 · 均衡</button><button id="extract-uv">Extract + 整理原 UV</button><button id="inspect-source">原样检查（不修正）</button></div>
+<small>自动重分割替换当前裁切，原始 UV 仍保留。整理生成新 atlas；原样检查才保留原布局。</small><small id="auto-config" role="status"></small>
 <details open><summary>前处理 / 后处理</summary>
 <button id="pre-connected" class="primary">前处理：连通优先重分割 + 自动缝合</button>
 <div class="row"><button id="post-stitch">后处理：缝合当前邻岛</button><button id="post-repack">只重排当前岛</button></div>
-<small>缝合会移除接缝并重新求解；重排不减少岛数。新 UV 需要重烘焙；Extract 不改原 UV。</small>
-<label>新 UV 页分配<select id="atlas-page-mode"><option value="single">单页</option><option value="adjacency">连接紧密的岛优先同页</option><option value="components">每个几何连通组一页</option></select></label>
+<small>缝合会移除接缝并重新求解；重排不减少岛数。新 UV 需要重烘焙；原输入不变，原样检查可恢复原坐标。</small>
+<label>新 UV 页分配<select id="atlas-page-mode"><option value="single">单页</option><option value="adjacency">连接紧密的岛优先同页</option><option value="components">每个几何连通组一页</option><option value="spatial">空间邻近 + 共享边优先同页</option></select></label>
 <label>目标页数（软目标）<input id="atlas-page-count" type="number" min="1" max="64" value="2"></label>
 <label>初始分割<select id="initial-segmentation"><option value="regions">法线区域（原策略）</option><option value="connected">几何连通块优先</option></select></label>
 <label>生成后自动缝合<input id="post-merge" type="checkbox"></label>
@@ -74,9 +74,19 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <label>后处理保留材质边界<input id="merge-materials" type="checkbox"></label>
 <small id="audit-summary" role="status"></small><small id="post-summary" role="status"></small>
 </details>
+<details open><summary>面积与空间邻居</summary>
+<label>整理时尝试缝合<input id="source-merge" type="checkbox" checked></label>
+<label>放置顺序<select id="packing-order"><option value="area">3D 面积由大到小</option><option value="legacy">旧长边 / 包围盒策略</option></select></label>
+<label>小岛目标面积占比 %<input id="tiny-fraction" type="number" min="0" max="10" step=".01" value="0"></label>
+<label>小岛面积放大上限<input id="tiny-cap" type="number" min="1" max="4" step=".1" value="1"></label>
+<small>默认严格等密度；2 倍面积只放大 √2 倍边长。全岛共同缩放。</small>
+<label>空间邻居辅助排布<input id="spatial-neighbors" type="checkbox" checked></label>
+<label>邻近距离 % 模型最长边<input id="neighbor-distance" type="number" min="0" max="20" step=".1" value="2"></label>
+<small id="area-summary" role="status"></small><small id="neighbor-summary" role="status"></small>
+</details>
 <label>单岛面数预算<input id="chart-faces" type="number" min="8" max="20000" step="128" value="8192"></label>
 <label>区域法线锥角<input id="chart-cone" type="number" min="1" max="178" value="80"></label>
-<label>最大角形变比<input id="chart-stretch" type="number" min="1" max="1000" value="30"></label><label>UV 来源<select id="target"><option value="generated">重新展开 + 面积感知排布</option><option value="source">保留原始 UV（不修复 / 不重排）</option><option value="stitch" disabled>当前邻岛缝合结果</option><option value="repack" disabled>当前重排结果</option></select></label>
+<label>最大角形变比<input id="chart-stretch" type="number" min="1" max="1000" value="30"></label><label>UV 来源<select id="target"><option value="generated">重新展开 + 面积感知排布</option><option value="source-atlas">整理原 UV · 新 atlas</option><option value="source">保留原始 UV（不修复 / 不重排）</option><option value="stitch" disabled>当前邻岛缝合结果</option><option value="repack" disabled>当前重排结果</option></select></label>
 <label>原 UV 显示<select id="source-layout"><option value="materials">材质分框（不改原坐标）</option><option value="overlay">原位叠加（诊断）</option></select></label><label>求解方式<select id="solver"><option value="auto">LSCM → 检查 → Tutte 回退</option><option value="lscm">仅 LSCM</option><option value="tutte">凸边界 Tutte</option></select></label>
 <label>排布策略<select id="packing"><option value="auto">自动 MaxRects / Shelf</option><option value="maxrects">MaxRects（≤1024 岛）</option><option value="shelf">Shelf 大岛数快速排布</option></select></label>
 <label>UV 任务预算（秒）<input id="budget" type="number" min="5" max="900" step="5" value="120"></label>
@@ -104,7 +114,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <div class="transport"><small id="queue-status" role="status" style="white-space:pre-line"></small><div class="row"><button id="queue-prev">队列上一个岛</button><button id="queue-next">队列下一个岛</button></div><div id="stages"></div><div class="progress"><span>3D</span><input id="progress" type="range" min="0" max="1" step=".001" value="0"><span id="percent">0.0%</span><span>UV</span></div><div class="row"><button id="play" class="primary">播放展开</button><label><input id="reverse" type="checkbox">反向折回</label><label><input id="loop" type="checkbox">循环</label></div><small>阶段按钮只定位当前岛 · 拖动进度暂停播放</small></div></div>
 
 <div class="right"><section class="panel uv-panel"><div class="panel-title"><span>UV 编辑器</span><span>U → · V ↑</span></div><div id="uvhost"><canvas id="uv" aria-label="UV chart preview"></canvas></div></section>
-<section class="panel correspondence-panel"><div class="panel-title"><span>选择与对应</span><span>岛 / 三角形</span></div><div class="correspondence-content"><span class="eyebrow">当前选择</span><strong id="selection-status"></strong><p class="selection-help">先选岛，再点三角形；重复点击取消面。Esc 逐级取消。播放范围不等于已选对象。</p><div class="button-grid two"><button id="clear-face" disabled>取消三角形</button><button id="clear-inspection">清空选择</button></div><div id="selection-coordinates" hidden></div><details><summary>UV 计算与质量</summary><div id="status"></div></details><div id="error" hidden></div><details><summary>使用说明</summary><p>同色同编号是同一个 UV 岛。选面不改变相机、进度或队列。</p><p>紫色边是动画临时断边，不写入导出；动画不处理自碰撞。</p></details></div></section></div></main>
+<section class="panel correspondence-panel"><div class="panel-title"><span>选择与对应</span><span>岛 / 三角形</span></div><div class="correspondence-content"><span class="eyebrow">当前选择</span><strong id="selection-status"></strong><p class="selection-help">先选岛，再点三角形；重复点击取消面。Esc 逐级取消。播放范围不等于已选对象。</p><div class="button-grid two"><button id="clear-face" disabled>取消三角形</button><button id="clear-inspection">清空选择</button></div><div id="selection-area" class="selection-help"></div><div id="selection-neighbors" class="selection-help"></div><div id="selection-coordinates" hidden></div><details><summary>UV 计算与质量</summary><div id="status"></div></details><div id="error" hidden></div><details><summary>使用说明</summary><p>同色同编号是同一个 UV 岛。选面不改变相机、进度或队列。</p><p>紫色边是动画临时断边，不写入导出；动画不处理自碰撞。</p></details></div></section></div></main>
 <footer><span>MeshTailor-JS · 离线实验页</span><span>左键旋转 · 右键平移 · 滚轮缩放</span><span>先选岛，再选面 · Esc 取消</span></footer>
 <!--BOOTSTRAP-->
 </body></html>
