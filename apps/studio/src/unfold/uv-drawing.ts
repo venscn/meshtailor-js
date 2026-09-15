@@ -9,7 +9,7 @@ export function uvScreenFrame(atlas:AtlasFrame,width:number,height:number){
 export function drawUVSnapshot(ctx:CanvasRenderingContext2D,snapshot:UVSnapshot,width:number,height:number,options:UVDisplay){
   const {packed,geometry}=snapshot,{scale,ox,oy}=uvScreenFrame(geometry.atlas,width,height);
   const active=new Set(options.selected);
-  ctx.fillStyle='#090c11';ctx.fillRect(0,0,width,height);
+  ctx.fillStyle='#1b1d1f';ctx.fillRect(0,0,width,height);
   const point=(u:number,v:number)=>[ox+u*scale,oy-v*scale];
   ctx.strokeStyle='#344352';ctx.lineWidth=1;
   ctx.strokeRect(ox+geometry.atlas.min[0]*scale,oy-geometry.atlas.max[1]*scale,(geometry.atlas.max[0]-geometry.atlas.min[0])*scale,(geometry.atlas.max[1]-geometry.atlas.min[1])*scale);
@@ -39,14 +39,14 @@ export function drawUVSnapshot(ctx:CanvasRenderingContext2D,snapshot:UVSnapshot,
   for(const chart of packed.filter(c=>active.has(c.id)).slice(0,48)){
     const x=ox+((chart.bounds[0]+chart.bounds[2])/2+(chart.displayOffset?.[0]??0))*scale,y=oy-((chart.bounds[1]+chart.bounds[3])/2+(chart.displayOffset?.[1]??0))*scale;
     const label='#'+(chart.id+1),w=ctx.measureText(label).width+8;
-    ctx.fillStyle='#09111bd9';ctx.fillRect(x-w/2,y-8,w,16);ctx.fillStyle='#e0edff';ctx.fillText(label,x,y);
+    ctx.fillStyle='#242628e8';ctx.fillRect(x-w/2,y-8,w,16);ctx.fillStyle='#e0edff';ctx.fillText(label,x,y);
   }
   for(const space of geometry.atlas.spaces??[]){
     ctx.strokeStyle='#8498b4';ctx.lineWidth=1;ctx.strokeRect(ox+space.min[0]*scale,oy-space.max[1]*scale,(space.max[0]-space.min[0])*scale,(space.max[1]-space.min[1])*scale);
     ctx.font='10px sans-serif';ctx.textAlign='left';ctx.fillStyle='#e0edff';ctx.fillText(space.name,ox+space.min[0]*scale+3,oy-space.max[1]*scale-8);
   }
   ctx.textAlign='left';ctx.fillStyle='#bac7db';ctx.fillText(`${packed.length} 个 UV 岛 · 同色同编号`,12,17);
-  ctx.fillStyle='#73849a';ctx.font='10px ui-monospace, monospace';ctx.fillText('U →  ·  V ↑  ·  点击面片联动 / Shift 多选',12,height-12);
+  ctx.fillStyle='#73849a';ctx.font='10px ui-monospace, monospace';ctx.fillText('U →  ·  V ↑  ·  先选岛，再选面 / 重复点击取消',12,height-12);
 }
 /** Match draw ordering (selected charts are on top); list selection handles overlapping islands. */
 export function pickUVFace(snapshot:UVSnapshot,width:number,height:number,x:number,y:number,selected:readonly number[]):{id:number;face:number}|null{

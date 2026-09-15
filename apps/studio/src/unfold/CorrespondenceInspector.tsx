@@ -2,16 +2,29 @@ import type { MeshData } from '@meshtailor/mesh-core';
 import type { UVSnapshot } from '../workers/uv.worker';
 import type { UnfoldPlayer } from './useUnfoldPlayer';
 export function CorrespondenceInspector({mesh,snapshot,player:p}:{mesh:MeshData;snapshot:UVSnapshot|null;player:UnfoldPlayer}){
-  const fi=p.focusFace,face=fi===null?null:mesh.faces[fi],chart=fi===null?null:snapshot?.packed.find(c=>c.faceUVs.has(fi));
-  const coords=fi===null?null:chart?.faceUVs.get(fi),fmt=(v:readonly number[])=>v.map(x=>Number(x.toPrecision(5))).join(', ');
-  return <div className="panel correspondence-panel"><div className="panel-title"><span>对应关系 · Correspondence</span><span>{snapshot?.target==='source'?'原始 UV':'LSCM / Tutte 目标 UV'}</span></div><div className="correspondence-content">
-    <div className="correspondence-callout">同色、同编号表示同一个 UV 岛。点击任一视图的面片，可以查看它在另一侧的对应位置。</div>
-    {face&&coords&&chart?<><h4>UV 岛 #{chart.id+1} · 面片 {fi}</h4>{chart.uvSpace&&<p>材质空间：{chart.uvSpaceName??chart.uvSpace}。下方是原坐标；画框偏移不写入导出。</p>}{face.vertices.map((vi,k)=><div key={k} className="corner-correspondence"><b>角 {k+1} · 顶点 {vi}</b><code>3D [{fmt(mesh.positions[vi]!)}]</code><code>UV [{fmt(coords[k]!)}]</code></div>)}<small>面片和顶点索引从 0 开始；岛的显示编号从 1 开始。3D 坐标是导入网格的坐标，非视口归一化坐标。</small></>:<p>点击 3D / UV 中的一个三角面，查看逐角坐标。单独查看某个岛，也可直接使用左侧岛列表。</p>}
-    <p><strong>一条 3D 接缝通常对应 UV 中的两条边。</strong>它们分别属于接缝的两侧；动画使用独立面角，让两边各自移动到正确位置。</p>
-    <p>未选择的岛保留原网格位置；“隐藏”仅影响显示，不会删除几何或修改导出的 UV。</p>
-    {snapshot?.metrics&&<p><b>有效 UV 占用 {(snapshot.metrics.occupancy*100).toFixed(1)}%</b> · 包围盒占用 {(snapshot.metrics.boxOccupancy*100).toFixed(1)}% · 所有输出三角形已检查翻面 / 退化 / 岛内重叠，岛间包围盒不相交。</p>}
-    {chart&&snapshot?.diagnostics&&<p>该岛求解：{snapshot.diagnostics.find(d=>d.id===chart.id)?.method} · 最大角形变比 {snapshot.diagnostics.find(d=>d.id===chart.id)?.maxStretch.toFixed(2)}</p>}
-    {snapshot?.warnings.map((w,i)=><p className="unfold-warning" key={i}>{w}</p>)}
-    <p className="unfold-disclaimer">铰链模式的 0–80% 保留三角面边长，70–80% 停留在展开网；80–92% 明确展示非刚性的 UV 形变。紫色边仅为曲面闭环在教学动画中的临时断开，不是导出裁切。动画不处理自碰撞。</p>
-  </div></div>;
+  const fi=p.focusFace,face=fi===null?null:mesh.faces[fi];
+  const chart=fi===null?snapshot?.packed.find(c=>c.id===p.selection[0]):snapshot?.packed.find(c=>c.faceUVs.has(fi));
+  const coords=fi===null?null:chart?.faceUVs.get(fi);
+  const fmt=(v:readonly number[])=>v.map(x=>Number(x.toPrecision(5))).join(', ');
+  const diagnostic=chart?snapshot?.diagnostics?.find(d=>d.id===chart.id):undefined;
+  return <div className="panel correspondence-panel">
+    <div className="panel-title"><span>选择与对应</span><span>{face?'三角形':p.selection.length?'UV 岛':'未选择'}</span></div>
+    <div className="correspondence-content">
+      <div className="selection-readout" data-testid="inspection-selection" data-islands={JSON.stringify(p.selection)} data-face={fi??''}>
+        <span className="eyebrow">当前选择</span>
+        <strong>{p.selection.length?`UV 岛 ${p.selection.map(id=>`#${id+1}`).join(', ')}`:'未选择 UV 岛'}</strong>
+        <span>{fi===null?'未选择三角形':`三角形 ${fi}`}</span>
+      </div>
+      <p className="selection-help">{p.selection.length?'在已选岛内点击三角形查看坐标；再次点击该面取消。':'点击任一视图或岛列表选择 UV 岛，再点击岛内三角形。'}</p>
+      <div className="button-grid two"><button disabled={fi===null} onClick={p.clearFace}>取消三角形</button><button disabled={!p.selection.length} onClick={p.clear}>清空选择</button></div>
+      {chart&&<dl className="property-list"><dt>UV 岛</dt><dd>#{chart.id+1}</dd><dt>三角面</dt><dd>{chart.faceUVs.size.toLocaleString()}</dd><dt>材质空间</dt><dd>{chart.uvSpaceName??chart.uvSpace??'默认'}</dd>{diagnostic&&<><dt>求解方式</dt><dd>{diagnostic.method}</dd><dt>最大形变比</dt><dd>{diagnostic.maxStretch.toFixed(2)}</dd></>}</dl>}
+      {face&&coords&&<div className="coordinate-table"><h4>面角坐标</h4>{face.vertices.map((vi,k)=><div className="corner-correspondence" key={k}><b>角 {k+1} <span>顶点 {vi}</span></b><code><i>3D</i>{fmt(mesh.positions[vi]!)}</code><code><i>UV</i>{fmt(coords[k]!)}</code></div>)}</div>}
+      <details><summary>对应规则</summary><p>同色、同编号表示同一个 UV 岛。三角形和顶点索引从 0 开始；岛编号从 1 开始。显示分框不修改导出的原 UV 坐标。</p><p>Esc 先取消三角形，再取消岛。Shift / Ctrl / ⌘ 点击增减岛，不选择面。</p><p>三角形选择不会改变播放范围、动画进度或相机位置。</p></details>
+      <details><summary>UV 质量与说明{snapshot?.warnings.length?` · ${snapshot.warnings.length} 条`:''}</summary>
+        {snapshot?.metrics&&<p>有效面积 {(snapshot.metrics.occupancy*100).toFixed(1)}% · 包围盒 {(snapshot.metrics.boxOccupancy*100).toFixed(1)}%</p>}
+        {snapshot?.warnings.map((w,i)=><p className="unfold-warning" key={i}>{w}</p>)}
+        <p>紫色临时断边只用于展开动画，不写入导出。刚性展开与 UV 参数化为不同阶段，动画不处理自碰撞。</p>
+      </details>
+    </div>
+  </div>;
 }

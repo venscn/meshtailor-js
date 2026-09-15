@@ -251,7 +251,7 @@ export class UnfoldWebGLView {
     const size=viewportSize(this.host.clientWidth,this.host.clientHeight,window.devicePixelRatio);if(!size.visible)return;
     const gl=this.gl;
     if(size.width!==this.size.width||size.height!==this.size.height||size.dpr!==this.size.dpr){this.canvas.width=Math.max(1,Math.round(size.width*size.dpr));this.canvas.height=Math.max(1,Math.round(size.height*size.dpr));this.size=size;}
-    gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.clearColor(.035,.045,.064,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.clearColor(.106,.114,.122,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     if(!this.data)return;
     const mvp=cameraMatrix(this.camera,size.width/size.height);
     gl.useProgram(this.program);gl.uniform1i(this.uniform('dashed'),0);gl.uniformMatrix4fv(this.uniform('mvp'),false,mvp);

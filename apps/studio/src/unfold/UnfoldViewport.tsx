@@ -29,7 +29,7 @@ export function UnfoldViewport({geometry,options,onPick,cameraCommand,sceneKey,o
     {error?<div className="viewport-error" role="alert"><strong>展开视图不可用</strong><p>{error}</p><button onClick={()=>setRetry(n=>n+1)}>Retry unfold preview</button></div>:status?<div className="uv-status" role="status">{status}</div>:<>
       <div className="unfold-badge"><b>{Math.round(options.progress*100)}%</b><span>{options.order==='sequential'?'严格逐岛':'尾段接力'} · {options.selected.length} 个岛</span></div>
       <div className="hinge-legend">黄色：UV 裁切 · 青色：铰链轴 · 紫色虚线：临时断边（不导出）</div>
-      <div className="viewport-hint">播放时也可自由操作：拖动旋转 · 滚轮缩放 · 右键平移 · 点击选岛 · Shift/Ctrl/⌘ 多选</div>
+      <div className="viewport-hint">播放时也可自由操作：拖动旋转 · 滚轮缩放 · 右键平移 · 先选岛，再选面 · 重复点击取消面 · Shift 多选</div>
     </>}
   </div>;
 }

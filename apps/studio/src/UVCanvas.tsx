@@ -21,7 +21,7 @@ export function UVCanvas({snapshot,status,selected,focusFace=null,checker=false,
       const dpr=Math.min(window.devicePixelRatio||1,2),width=Math.max(1,Math.round(w*dpr)),height=Math.max(1,Math.round(h*dpr));
       if(c.width!==width)c.width=width;if(c.height!==height)c.height=height;
       ctx.setTransform(width/w,0,0,height/h,0,0);
-      ctx.fillStyle='#090c11';ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#1b1d1f';ctx.fillRect(0,0,w,h);
       if(snapshot)drawUVSnapshot(ctx,snapshot,w,h,{selected,focusFace,checker,wireframe});
     };
     const observer=new ResizeObserver(draw);observer.observe(el);window.addEventListener('resize',draw);draw();

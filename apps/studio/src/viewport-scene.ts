@@ -48,7 +48,7 @@ export class ViewportScene {
     canvas.setAttribute('aria-label', '3D mesh traversal canvas');
     canvas.dataset.testid = 'mesh-canvas';
     this.host.appendChild(canvas);
-    this.scene.background = new THREE.Color(0x0b0d12);
+    this.scene.background = new THREE.Color(0x1b1d1f);
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.addEventListener('change', this.recordCamera);
