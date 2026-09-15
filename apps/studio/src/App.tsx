@@ -153,7 +153,7 @@ export default function App(){
 
   return <div className="app-shell" onDragOver={e=>{e.preventDefault();}} onDrop={e=>{e.preventDefault();if(e.dataTransfer.files.length)void loadFiles(Array.from(e.dataTransfer.files));}}>
     <header className="topbar">
-      <div className="brand"><span className="brand-mark" aria-hidden="true">M</span>MeshTailor <span className="version">0.4.10</span></div>
+      <div className="brand"><span className="brand-mark" aria-hidden="true">M</span>MeshTailor <span className="version">0.4.11</span></div>
       <div className="document-name" title={mesh.name}>{mesh.name}<span>{stats.triangles.toLocaleString()} 面</span></div>
       <div className="header-actions"><button onClick={()=>importInput.current?.click()}>导入网格</button><button disabled={!snapshot} onClick={exportTargetUV}>导出 OBJ + UV</button></div>
     </header>
@@ -197,7 +197,7 @@ export default function App(){
         </section>
             <UVSolverControls value={uvConfig} onChange={setUVConfig} snapshot={snapshot} onProcess={processUV} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
             <UVJobStatus state={uvState} hasSource={hasSourceUV} onUseSource={()=>{setUVTarget('source');setViewMode('unfold');if(snapshotTarget==='source')uvState.retry();}}/>
-            <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.10',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,fragmentation:snapshot?.fragmentation,repair:snapshot?.repair,sourceAudit:snapshot?.sourceAudit,areaAudit:snapshot?.areaAudit,sourceAreaAudit:snapshot?.sourceAreaAudit,spatialReport:snapshot?.spatialReport,packingReport:snapshot?.packingReport,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
+            <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.11',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,fragmentation:snapshot?.fragmentation,repair:snapshot?.repair,sourceAudit:snapshot?.sourceAudit,areaAudit:snapshot?.areaAudit,sourceAreaAudit:snapshot?.sourceAreaAudit,spatialReport:snapshot?.spatialReport,packingReport:snapshot?.packingReport,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
           </div>
           <div id="tools-animation" role="tabpanel" aria-labelledby="tool-animation" hidden={toolTab!=='animation'}>
             <UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={setUVTarget} onExport={exportTargetUV} onDemo={loadUnfoldDemo} onHingeDemo={loadHingeDemo} onOverlapDemo={loadOverlapDemo}/>
