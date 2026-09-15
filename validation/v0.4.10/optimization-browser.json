@@ -1,0 +1,406 @@
+{
+  "suite": "Actual browser Worker: source overlap, captured-snapshot stitching and connected pages",
+  "host": "Offline workbench with production core/Worker/renderer, not React Studio",
+  "cases": [
+    {
+      "name": "Read synthetic fragmented overlapping source, do not disguise it as two visible sheets",
+      "passed": true,
+      "details": {
+        "faces": 12,
+        "islands": 12,
+        "audit": {
+          "islandOverlaps": [
+            {
+              "a": 0,
+              "b": 2,
+              "trianglePairs": 1
+            },
+            {
+              "a": 1,
+              "b": 3,
+              "trianglePairs": 1
+            },
+            {
+              "a": 0,
+              "b": 4,
+              "trianglePairs": 1
+            },
+            {
+              "a": 2,
+              "b": 4,
+              "trianglePairs": 1
+            },
+            {
+              "a": 1,
+              "b": 5,
+              "trianglePairs": 1
+            },
+            {
+              "a": 3,
+              "b": 5,
+              "trianglePairs": 1
+            },
+            {
+              "a": 0,
+              "b": 6,
+              "trianglePairs": 1
+            },
+            {
+              "a": 2,
+              "b": 6,
+              "trianglePairs": 1
+            },
+            {
+              "a": 4,
+              "b": 6,
+              "trianglePairs": 1
+            },
+            {
+              "a": 1,
+              "b": 7,
+              "trianglePairs": 1
+            },
+            {
+              "a": 3,
+              "b": 7,
+              "trianglePairs": 1
+            },
+            {
+              "a": 5,
+              "b": 7,
+              "trianglePairs": 1
+            },
+            {
+              "a": 0,
+              "b": 8,
+              "trianglePairs": 1
+            },
+            {
+              "a": 2,
+              "b": 8,
+              "trianglePairs": 1
+            },
+            {
+              "a": 4,
+              "b": 8,
+              "trianglePairs": 1
+            },
+            {
+              "a": 6,
+              "b": 8,
+              "trianglePairs": 1
+            },
+            {
+              "a": 1,
+              "b": 9,
+              "trianglePairs": 1
+            },
+            {
+              "a": 3,
+              "b": 9,
+              "trianglePairs": 1
+            },
+            {
+              "a": 5,
+              "b": 9,
+              "trianglePairs": 1
+            },
+            {
+              "a": 7,
+              "b": 9,
+              "trianglePairs": 1
+            },
+            {
+              "a": 0,
+              "b": 10,
+              "trianglePairs": 1
+            },
+            {
+              "a": 2,
+              "b": 10,
+              "trianglePairs": 1
+            },
+            {
+              "a": 4,
+              "b": 10,
+              "trianglePairs": 1
+            },
+            {
+              "a": 6,
+              "b": 10,
+              "trianglePairs": 1
+            },
+            {
+              "a": 8,
+              "b": 10,
+              "trianglePairs": 1
+            },
+            {
+              "a": 1,
+              "b": 11,
+              "trianglePairs": 1
+            },
+            {
+              "a": 3,
+              "b": 11,
+              "trianglePairs": 1
+            },
+            {
+              "a": 5,
+              "b": 11,
+              "trianglePairs": 1
+            },
+            {
+              "a": 7,
+              "b": 11,
+              "trianglePairs": 1
+            },
+            {
+              "a": 9,
+              "b": 11,
+              "trianglePairs": 1
+            }
+          ],
+          "domains": [
+            {
+              "id": "intentional-stack",
+              "name": "故意重叠的测试 UV",
+              "islands": 12,
+              "triangles": 12,
+              "overlapPairs": 30,
+              "overlapCountCapped": false,
+              "degenerate": 0,
+              "negativeTriangles": 0
+            }
+          ],
+          "hasOverlaps": true,
+          "hasDegenerate": false,
+          "overlapLimit": 100
+        }
+      }
+    },
+    {
+      "name": "Original source positions and UVs are immutable",
+      "passed": true
+    },
+    {
+      "name": "Only repacking removes between-island overlap WITHOUT reducing 12 islands",
+      "passed": true
+    },
+    {
+      "name": "Stitch current snapshot joins geometric neighbors to 2 islands, not 1 across disconnected sheets",
+      "passed": true,
+      "details": {
+        "islands": 2,
+        "merge": {
+          "before": 12,
+          "after": 2,
+          "attempts": 10,
+          "accepted": 10,
+          "removedSeams": [
+            "1:5",
+            "0:5",
+            "2:6",
+            "1:6",
+            "2:7",
+            "9:13",
+            "8:13",
+            "10:14",
+            "9:14",
+            "10:15"
+          ],
+          "reasons": {},
+          "budgetExhausted": false,
+          "events": [
+            {
+              "a": 0,
+              "b": 1,
+              "faces": 2,
+              "sharedLength": 0.4738361643995544,
+              "affinity": 0.41421674117189133,
+              "accepted": true
+            },
+            {
+              "a": 6,
+              "b": 7,
+              "faces": 2,
+              "sharedLength": 0.4738361643995544,
+              "affinity": 0.4142167411718912,
+              "accepted": true
+            },
+            {
+              "a": 2,
+              "b": 3,
+              "faces": 2,
+              "sharedLength": 0.4727927572133382,
+              "affinity": 0.4142146052870963,
+              "accepted": true
+            },
+            {
+              "a": 8,
+              "b": 9,
+              "faces": 2,
+              "sharedLength": 0.4727927572133382,
+              "affinity": 0.41421460528709625,
+              "accepted": true
+            },
+            {
+              "a": 4,
+              "b": 5,
+              "faces": 2,
+              "sharedLength": 0.4716626518112147,
+              "affinity": 0.41421359869039376,
+              "accepted": true
+            },
+            {
+              "a": 10,
+              "b": 11,
+              "faces": 2,
+              "sharedLength": 0.4716626518112147,
+              "affinity": 0.41421359869039376,
+              "accepted": true
+            },
+            {
+              "a": 2,
+              "b": 4,
+              "faces": 4,
+              "sharedLength": 0.3333333333333333,
+              "affinity": 0.24938848707899322,
+              "accepted": true
+            },
+            {
+              "a": 8,
+              "b": 10,
+              "faces": 4,
+              "sharedLength": 0.33333333333333337,
+              "affinity": 0.24938848707899322,
+              "accepted": true
+            },
+            {
+              "a": 0,
+              "b": 2,
+              "faces": 6,
+              "sharedLength": 0.3333333333333333,
+              "affinity": 0.2033189330355925,
+              "accepted": true
+            },
+            {
+              "a": 6,
+              "b": 8,
+              "faces": 6,
+              "sharedLength": 0.33333333333333337,
+              "affinity": 0.20331893303559245,
+              "accepted": true
+            }
+          ]
+        },
+        "pages": {
+          "mode": "components",
+          "requested": 2,
+          "actual": 2,
+          "geometryComponents": 2,
+          "associationComponents": 2,
+          "retainedSharedBoundaryRatio": 1,
+          "pages": [
+            {
+              "id": 0,
+              "charts": [
+                0
+              ],
+              "faces": 6,
+              "sourceMaterials": [
+                "intentional-stack"
+              ],
+              "occupancy": 0.3162350410037368,
+              "boxOccupancy": 0.3777634045585463,
+              "scale": 0.9712240559742051
+            },
+            {
+              "id": 1,
+              "charts": [
+                1
+              ],
+              "faces": 6,
+              "sourceMaterials": [
+                "intentional-stack"
+              ],
+              "occupancy": 0.3162350410037368,
+              "boxOccupancy": 0.37776340455854673,
+              "scale": 0.9712240559742051
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Actual final seams were removed and display reflects them",
+      "passed": true
+    },
+    {
+      "name": "Source mesh and original UVs are still identical after post processing",
+      "passed": true
+    },
+    {
+      "name": "Two pages share one texel density and have real export identities",
+      "passed": true,
+      "details": {
+        "scale": [
+          0.9712240559742051,
+          0.9712240559742051
+        ],
+        "spaces": [
+          "atlas-page-1",
+          "atlas-page-2"
+        ]
+      }
+    },
+    {
+      "name": "3D animation reaches same page positions; selection remains island-first",
+      "passed": true
+    },
+    {
+      "name": "Repeated post operation is idempotent when all valid neighbors are already joined",
+      "passed": true
+    },
+    {
+      "name": "Raw inspect restores the genuine source: twelve islands and detected overlaps",
+      "passed": true
+    },
+    {
+      "name": "Connected-first operation starts from source topology, not current UV seams",
+      "passed": true,
+      "details": {
+        "initial": 2,
+        "islands": 2,
+        "faces": 12
+      }
+    },
+    {
+      "name": "Invalid page setting fails visibly and restores previous post snapshot",
+      "passed": true
+    },
+    {
+      "name": "Recover after failure and keep manually chosen camera position",
+      "passed": true
+    },
+    {
+      "name": "Internally folded raw island is rejected for repack, never counted as valid UV",
+      "passed": true
+    },
+    {
+      "name": "Source audit is visible in UI and new controls do not overflow canvas",
+      "passed": true,
+      "details": {
+        "text": "原输入真实岛数 12；故意重叠的测试 UV：12 岛，30 对重叠、0 个退化面",
+        "width": 1500,
+        "scroll": 1500,
+        "canvas": 589
+      }
+    },
+    {
+      "name": "No unhandled browser errors",
+      "passed": true
+    }
+  ],
+  "passed": 16
+}

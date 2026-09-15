@@ -1,0 +1,48 @@
+[
+  {
+    "name": "npm-install",
+    "command": [
+      "npm",
+      "install",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund"
+    ],
+    "exitCode": 124,
+    "seconds": 12.021
+  },
+  {
+    "name": "full-build",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exitCode": 127,
+    "seconds": 0.815,
+    "version": "0.4.10"
+  },
+  {
+    "name": "full-typecheck",
+    "command": [
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "exitCode": 2,
+    "seconds": 1.998,
+    "version": "0.4.10"
+  },
+  {
+    "name": "registry-check",
+    "command": [
+      "curl",
+      "-I",
+      "--max-time",
+      "3",
+      "https://registry.npmjs.org/react"
+    ],
+    "exitCode": 6,
+    "seconds": 0.041
+  }
+]

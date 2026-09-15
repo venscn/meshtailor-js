@@ -1,0 +1,329 @@
+{
+  "suite": "Island-first selection and graphite workspace",
+  "host": "Offline lab with production renderer, worker and shared selection policy; NOT full React Studio",
+  "cases": [
+    {
+      "name": "DPR 1: default playback-all is not an explicit inspection selection",
+      "passed": true,
+      "details": {
+        "islands": [],
+        "face": null,
+        "active": [
+          0,
+          1,
+          2
+        ],
+        "progress": 0,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 1: first real UV click selects island only",
+      "passed": true,
+      "details": {
+        "islands": [
+          0
+        ],
+        "face": null,
+        "active": [
+          0
+        ],
+        "progress": 0,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 1: second click selects triangle without changing geometry camera or progress",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: repeated click cancels triangle and preserves island",
+      "passed": true,
+      "details": {
+        "islands": [
+          0
+        ],
+        "face": null,
+        "active": [
+          0
+        ],
+        "progress": 0.58,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 1: another triangle replaces the selected face",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: first click on another island clears face and never auto-selects a new one",
+      "passed": true,
+      "details": {
+        "islands": [
+          1
+        ],
+        "face": null,
+        "active": [
+          1
+        ],
+        "progress": 0,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 1: island-list click and number label never choose a triangle",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: modifier selection adds an island without selecting face",
+      "passed": true,
+      "details": {
+        "islands": [
+          0,
+          1
+        ],
+        "face": null,
+        "active": [
+          0,
+          1
+        ],
+        "progress": 0,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 1: picking a triangle in a multiselection does not collapse its queue",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: modifier deselects island and removes stale triangle focus",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: Escape first removes triangle then islands",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: real 3D ray pick selects triangle only after explicit island selection; UV click cancels it",
+      "passed": true,
+      "details": {
+        "x": 944.6741663395937,
+        "y": 381.2450693342268,
+        "fi": 0
+      }
+    },
+    {
+      "name": "DPR 1: face toggles during playback keep the clock and queue running",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: dragging camera never selects a triangle",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: switching tool tabs keeps the mesh UV and camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: new UV snapshot clears all face and island inspection",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: bounded canvas drawing buffers and independent scroll panels",
+      "passed": true,
+      "details": {
+        "w": 860,
+        "h": 589.453125,
+        "cw": 860,
+        "ch": 589,
+        "bw": 860,
+        "bh": 589,
+        "body": 1500,
+        "width": 1500,
+        "sidebar": "auto",
+        "background": "none"
+      }
+    },
+    {
+      "name": "responsive 1117px: no horizontal overflow and visible canvas",
+      "passed": true,
+      "details": {
+        "body": 1117,
+        "width": 1117,
+        "h": 591,
+        "w": 598
+      }
+    },
+    {
+      "name": "responsive 900px: no horizontal overflow and visible canvas",
+      "passed": true,
+      "details": {
+        "body": 900,
+        "width": 900,
+        "h": 258,
+        "w": 679
+      }
+    },
+    {
+      "name": "responsive 600px: no horizontal overflow and visible canvas",
+      "passed": true,
+      "details": {
+        "body": 590,
+        "width": 600,
+        "h": 323,
+        "w": 589
+      }
+    },
+    {
+      "name": "DPR 1: no uncaught browser errors and successful GPU draw",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: default playback-all is not an explicit inspection selection",
+      "passed": true,
+      "details": {
+        "islands": [],
+        "face": null,
+        "active": [
+          0,
+          1,
+          2
+        ],
+        "progress": 0,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 2: first real UV click selects island only",
+      "passed": true,
+      "details": {
+        "islands": [
+          0
+        ],
+        "face": null,
+        "active": [
+          0
+        ],
+        "progress": 0,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 2: second click selects triangle without changing geometry camera or progress",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: repeated click cancels triangle and preserves island",
+      "passed": true,
+      "details": {
+        "islands": [
+          0
+        ],
+        "face": null,
+        "active": [
+          0
+        ],
+        "progress": 0.58,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 2: another triangle replaces the selected face",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: first click on another island clears face and never auto-selects a new one",
+      "passed": true,
+      "details": {
+        "islands": [
+          1
+        ],
+        "face": null,
+        "active": [
+          1
+        ],
+        "progress": 0,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 2: island-list click and number label never choose a triangle",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: modifier selection adds an island without selecting face",
+      "passed": true,
+      "details": {
+        "islands": [
+          0,
+          1
+        ],
+        "face": null,
+        "active": [
+          0,
+          1
+        ],
+        "progress": 0,
+        "playing": false
+      }
+    },
+    {
+      "name": "DPR 2: picking a triangle in a multiselection does not collapse its queue",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: modifier deselects island and removes stale triangle focus",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: Escape first removes triangle then islands",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: real 3D ray pick selects triangle only after explicit island selection; UV click cancels it",
+      "passed": true,
+      "details": {
+        "x": 944.6741663395937,
+        "y": 381.2450693342268,
+        "fi": 0
+      }
+    },
+    {
+      "name": "DPR 2: face toggles during playback keep the clock and queue running",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: dragging camera never selects a triangle",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: switching tool tabs keeps the mesh UV and camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: new UV snapshot clears all face and island inspection",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: bounded canvas drawing buffers and independent scroll panels",
+      "passed": true,
+      "details": {
+        "w": 860,
+        "h": 589.453125,
+        "cw": 860,
+        "ch": 589,
+        "bw": 1720,
+        "bh": 1178,
+        "body": 1500,
+        "width": 1500,
+        "sidebar": "auto",
+        "background": "none"
+      }
+    },
+    {
+      "name": "DPR 2: no uncaught browser errors and successful GPU draw",
+      "passed": true
+    }
+  ],
+  "passed": 39
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "suite": "camera-browser-smoke",
+    "exitCode": 0,
+    "seconds": 76.553,
+    "report": "camera-browser.json"
+  },
+  {
+    "suite": "relay-browser-smoke",
+    "exitCode": 0,
+    "seconds": 33.615,
+    "report": "relay-browser.json"
+  },
+  {
+    "suite": "motion-browser-smoke",
+    "exitCode": 0,
+    "seconds": 31.881,
+    "report": "motion-browser.json"
+  },
+  {
+    "suite": "selection-browser-smoke",
+    "exitCode": 0,
+    "seconds": 21.238,
+    "report": "selection-browser.json"
+  },
+  {
+    "suite": "overlap-browser-smoke",
+    "exitCode": 0,
+    "seconds": 37.413,
+    "report": "overlap-browser.json"
+  }
+]

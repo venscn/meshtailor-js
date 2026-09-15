@@ -1,53 +1,57 @@
-# Validation — v0.4.9
+# Validation — v0.4.10
 
-日期：2026-09-15。历史 v0.4.8 验证保存在 `VALIDATION-0.4.8.md`。本版修改生产WebGL显示、重叠设置与教学示例，不改UV/铰链几何算法。
+日期：2026-09-15。旧记录完整保存在 `VALIDATION-0.4.9.md`。下表只列本轮实际执行，不用旧数字代替新回归。
 
-## 实际执行结果
+## 已执行的本轮回归
 
-所有证据路径相对于 `validation/v0.4.9/`。日志只移除末尾多余空行以通过Git空白检查，命令输出内容不改写。仅本表列出的本轮执行可称为本轮通过，不沿用旧包数字充数。
+证据路径相对于根目录 `validation/v0.4.10/`。
 
 | 套件 | 结果 | 证据 |
 |---|---:|---|
-| 重叠策略 | 12项，退出0 | `overlap-policy.json` |
-| 生产重叠GPU通道 | 42项，退出0 | `overlap-gpu.json`，DPR1/2、真实着色器/计数像素 |
-| 实际马鞍铰链与新控件 | 17项，退出0 | `overlap-workbench.json`，生产classic UV Worker与生产renderer |
-| 两级选择浏览器 | 39项，退出0 | `selection-browser.json` |
-| 自由相机浏览器 | 39项，退出0 | `camera-browser.json` |
-| 接力浏览器 | 28项，退出0 | `relay-browser.json` |
-| 静止跳过浏览器 | 28项，退出0 | `motion-browser.json` |
-| 通用原生WebGL | 24项通过，2项跳过，退出0 | `unfold-browser.json`，显式 `--skip-browser-worker` |
-| 核心 | 21项，退出0 | `core.log` |
-| 铰链 | 17项，退出0 | `hinge.log` |
-| 纯选择策略 | 20项，退出0 | `selection.log` |
-| 邻岛缝合 | 21项，退出0 | `chart-merge.log` |
-| 连接分页与导出 | 14项，退出0 | `atlas-pages.log` |
-| Node生产UV Worker | 4项，退出0 | `uv-worker.log` |
-| 真实布局 | 13项，退出0 | `layout.log` |
-| Git工具单元测试 | 22项，退出0 | `git-tools.log` |
-| 严格核心TS类型检查 | 退出0 | `strict-core-typecheck.log`（无输出） |
-| 3个修改TSX入口 | 0语法错误 | `tsx-syntax.json`，不是全量类型检查 |
-| 独立离线页面构建 | 退出0 | `lab-build.log` |
+| 面积审计、真实大岛优先、受限小岛增益 | 22项通过 | `area-allocation-smoke.log` |
+| 真实邻接与空间关联分离、分页与取消 | 17项通过 | `spatial-neighbors-smoke.log` |
+| 生产source-atlas Worker（非模拟算法） | 13项通过 | `source-atlas-smoke.log` |
+| 新入口/面积/邻居/导出真实浏览器 | 15项通过 | `area-spatial-browser.json` |
+| 旧前后处理工作流浏览器 | 16项通过 | `optimization-browser.json` |
+| 自由相机浏览器 | 39项通过 | `camera-browser.json` |
+| 逐岛接力浏览器 | 28项通过 | `relay-browser.json` |
+| 静止跳过浏览器 | 28项通过 | `motion-browser.json` |
+| 两级选择浏览器 | 39项通过 | `selection-browser.json` |
+| 重叠真实WebGL像素通道 | 42项通过 | `overlap-browser.json` |
+| 连接分页与导出 | 14项通过 | `atlas-pages-smoke.log` |
+| 邻岛缝合 | 21项通过 | `chart-merge-smoke.log` |
+| 核心 | 21项通过 | `core-smoke.log` |
+| 复杂网格 | 退出0，范围见原始报告 | `complex-smoke.log` |
+| 铰链 | 17项通过 | `hinge-smoke.log` |
+| 朝向 | 18项通过 | `orientation-smoke.log` |
+| 纯选择策略 | 20项通过 | `selection-smoke.log` |
+| Node生产UV Worker | 4项通过 | `uv-worker-smoke.log` |
+| 2000岛装箱 | 5项通过 | `packing-large.json` |
+| Git工具单元测试 | 22项通过 | `git-tools.log` |
+| 严格核心TS类型检查 | 退出0 | `strict-core-typecheck.log` |
+| 修改的5个TSX文件 | 0语法错误，不是完整类型检查 | `tsx-syntax.json` |
+| 独立实验页构建 | 退出0 | `lab-build.log` |
 
-原生通用WebGL的2个module Worker检查因opaque-origin测试宿主被显式跳过，不计为通过。新的工作台套件在HTTP宿主运行真正的classic UV Worker并通过，并不替代Vite module Worker。测试全程是Linux Chromium + ANGLE/SwiftShader软件WebGL，不是硬件GPU实机认证。
+浏览器为Linux Chromium + ANGLE/SwiftShader软件WebGL；新工作台测试实际执行生产classic UV Worker和生产几何/渲染/导出模块。它们不是主Studio React/Vite端到端认证。浏览器回归需要较长时间，第一轮工具时间上限曾打断组合任务/相机任务；后续独立执行完整通过。重复执行不相加计数。`browser-results.json` 记录后续五套命令的真实退出码和耗时。日志只修剪行尾空白以便Git检查，结果文本不改写。
 
-首批组合执行曾受工具单次时间上限影响；之后将每个套件作为独立进程运行并记录退出码，表中均有实际成功结果。`summary.json` 记录命令、耗时和退出状态；着色器导数求值被移至拒绝分支前之后，重叠GPU42项与工作台17项再次退出0并覆盖对应最终报告。截图按0.4.9标签重新生成。重复执行不重复相加计数。
+## 对用户问题的具体证据
 
-## 针对用户问题的证据
+1. **不再把异常源比例当成已归一结果。** 合成三角片的最小源3D面积占比约0.0999%，却拥有超过900倍于平均的原UV密度。新atlas得到每岛密度比1；原输入不变。可选2倍增益实测为面积2倍，不是边长2倍。
+2. **真实减少与仅分组分开。** 生产Worker中12个重叠源岛来自两个真实连通面板；整理+验证缝合得到2岛，纯重排仍12岛。3个真正断开的近邻面板保持3岛，只成为2个关联组/空间页。没有靠改计数或重叠显示冒充合并。
+3. **操作与坐标一致。** 新主按钮生成source-atlas，原样按钮恢复原12岛与重叠；逐三角形检查新atlas无交叠，动画最终顶点和新UV精确一致，OBJ导出回读保持相同坐标。岛/三角形选择不触发重排。
+4. **大岛优先和共同缩放。** MaxRects和Shelf均检查实际放置顺序，包含小岛提升导致目标面积相同时仍按3D面积排序的情况。诊断记录多次试装和失败轮，不只写一个固定成功标记。
+5. **性能边界。** 2000个合成矩形岛使用生产Shelf，测得装箱约276.5ms、占用约42.67%；这是单独装箱阶段、无真实模型求解，不是Corset或FlightHelmet性能结论。全部2000岛检查非叠放、留白、比例与确定性。新邻居索引避免每个候选位置扫描所有已放岛，但邻近搜索仍有明确比较上限。
 
-原生GPU套件验证了完全叠合2层、部分叠合、3层、反绕序、共享边不误报、不同岛不混计、普通前后遮挡在默认模式中排除且在明确的视线模式中计入、法向非平行拒绝、容差内外、相机转动、FBO状态恢复、禁用与显式错误重试。不是只检查着色器字符串存在。
+截图 `docs/images/area-spatial-0.4.10.png` 来自实际离线页面，标题明确为“面积比例与空间邻居 · 合成测试片”，不是服装人台或头盔；没有使用生成式设计图替代运行截图。
 
-马鞍是4个相连三角形/1个UV岛，使用真实铰链树：铰链末段出现橙纹，最终有效菱形UV无重叠提示。测试验证源与目标端点、动画播放不被设置打断、相机和面选择不变。真实WebGL上下文丢失/恢复后验证重叠资源、几何和相机；离线宿主恢复后错误横幅的清理沿用测试宿主处理，不将该项扩写成完整Studio恢复UI已认证。
+## 未通过/未完成的范围
 
-截图 `docs/images/overlap-0.4.9.png` 为本版真实离线工作台：条纹只在重叠三角区域，右侧显示无重叠菱形UV。没有生成式设计图，没有拿合成例冒充头盔/服装人台。
+本轮实际执行 `npm install --ignore-scripts --no-audit --no-fund`，12秒上限终止，未获得可用依赖；`npm run build` 退出127（vite: not found），全量 `npm run typecheck` 退出2（缺少node类型定义）。另行registry访问退出6（DNS无法解析）。命令、退出码和耗时记录在 `build-attempts.json`，各自原始输出见同名log。不能把独立curl结果伪称为npm安装输出。
 
-## 构建、依赖和未验证边界
+真实Corset/FlightHelmet的几何二进制未取得；公开glTF元数据不能证明具体UV面积、岛数或重叠原因。**没有测量用户的98岛，也没有确认#1/#75为何叠放，不能声称它们已变成某个岛数。** 新GLB诊断脚本路径已接入source-atlas和相应报告，但依赖/资产缺失时不计通过。未执行macOS、Windows、Safari、硬件GPU实机认证。
 
-`npm run build` 实际退出127，`vite: not found`，日志 `full-build.log`；`npm run typecheck` 实际退出2，缺少node类型定义，日志 `full-typecheck.log`。另行 `curl -I --max-time 6 https://registry.npmjs.org/react` 返回6，无法解析域名，日志 `registry-check.log`；不能把这一curl错误说成npm安装日志。
+空间邻居是有限采样近似，不是精确最近面/语义部件识别；新atlas依旧矩形装箱而非凹多边形嵌套。平均岛密度归一不能修复岛内部局部形变或原始自折叠。未连接的岛不会仅因接近被焊接；小岛/关联组数减少不冒充真实岛数减少。全部面有效性检查继续执行，错误/超时不发布伪成功半成品。
 
-本轮未再次成功安装依赖，未通过完整React/Vite构建、React主页面端到端、FBX/glTF导入或module Worker联调。主Studio和离线页均接入同一生产渲染与选择模块，但两者不是同一个UI运行时。严格核心TS不包含React TSX依赖检查，语法转译也不证明React hooks或props全量正确。
+## 发布验证另行记录
 
-没有测试真实Corset/FlightHelmet的二进制，亦未测试macOS/Windows/Safari/硬件GPU或真实显存耗尽。新通道是可见表层附近的近共面采样诊断，不是精确/全局几何交叠审计；非平行自交、深处和亚像素重叠可能不显示。
-
-## 最终交付
-
-内部记录对应打包前实际测试。发布使用干净提交HEAD、新附注tag v0.4.9、保留旧tag；最终ZIP解压、跟踪文件一致性、Git发布检查与bundle独立恢复，以及从解压包重跑关键测试，单独记录在外部交付验证文件。不在尚未打包前预先写“最终ZIP已通过”。
+本轮在现有Git历史上小步提交，版本0.4.10使用独立附注tag，所有旧tag保留。本内部文档是打包前记录；最终ZIP跟踪文件一致性、干净工作区、Git发布检查、bundle恢复，以及解压包关键回归，放入外部交付验证文件。没有在打包前预填“最终ZIP已通过”。

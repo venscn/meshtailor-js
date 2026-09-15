@@ -1,0 +1,108 @@
+{
+  "version": "0.4.10",
+  "completed": [
+    {
+      "evidence": "area-allocation-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 22
+    },
+    {
+      "evidence": "spatial-neighbors-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 17
+    },
+    {
+      "evidence": "source-atlas-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 13
+    },
+    {
+      "evidence": "atlas-pages-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 14
+    },
+    {
+      "evidence": "chart-merge-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 21
+    },
+    {
+      "evidence": "core-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 21
+    },
+    {
+      "evidence": "complex-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": null
+    },
+    {
+      "evidence": "hinge-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 17
+    },
+    {
+      "evidence": "orientation-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 18
+    },
+    {
+      "evidence": "selection-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 20
+    },
+    {
+      "evidence": "uv-worker-smoke.log",
+      "exitCode": 0,
+      "reportedChecks": 4
+    },
+    {
+      "evidence": "git-tools.log",
+      "exitCode": 0,
+      "reportedChecks": 22
+    },
+    {
+      "evidence": "motion-browser.json",
+      "exitCode": 0,
+      "reportedChecks": 28
+    },
+    {
+      "evidence": "selection-browser.json",
+      "exitCode": 0,
+      "reportedChecks": 39
+    },
+    {
+      "evidence": "camera-browser.json",
+      "exitCode": 0,
+      "reportedChecks": 39
+    },
+    {
+      "evidence": "optimization-browser.json",
+      "exitCode": 0,
+      "reportedChecks": 16
+    },
+    {
+      "evidence": "overlap-browser.json",
+      "exitCode": 0,
+      "reportedChecks": 42
+    },
+    {
+      "evidence": "relay-browser.json",
+      "exitCode": 0,
+      "reportedChecks": 28
+    },
+    {
+      "evidence": "area-spatial-browser.json",
+      "exitCode": 0,
+      "reportedChecks": 15
+    },
+    {
+      "evidence": "packing-large.json",
+      "exitCode": 0,
+      "reportedChecks": 5
+    }
+  ],
+  "fullBuildPassed": false,
+  "actualCorsetFlightHelmetTested": false,
+  "limitations": "See docs/VALIDATION.md; browser tests use offline workbench and production common modules, not full React."
+}
