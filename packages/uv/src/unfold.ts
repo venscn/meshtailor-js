@@ -217,6 +217,7 @@ export function meshWithPreviewUV(mesh: MeshData, packed: PackedChart[]): MeshDa
     all.set(fi, uvs);charts.set(fi,chart.id);
   }
   if (all.size !== mesh.faces.length) throw new Error('Incomplete atlas.');
+  const atlasPages=new Map<number,number>();for(const chart of packed)if(chart.atlasPage!==undefined)for(const fi of chart.faceUVs.keys())atlasPages.set(fi,chart.atlasPage);
   const identities=new Map<string,number>();
   const original=mesh.faces.every((f,i)=>f.uvs?.every((p,k)=>p?.every((v,a)=>v===all.get(i)![k]![a])));
   return { ...mesh, faces: mesh.faces.map((f, i) => {
@@ -228,6 +229,6 @@ export function meshWithPreviewUV(mesh: MeshData, packed: PackedChart[]): MeshDa
       const key=`${charts.get(i)}:${f.vertices[k]}:${p.join(',')}:${original?f.uvIndices?.[k]??'':''}`;
       let id=identities.get(key);if(id===undefined){id=identities.size;identities.set(key,id);}return id;
     }) as [number,number,number];
-    return { ...f, vertices: [...f.vertices] as [number, number, number], uvs: values.map(p => [...p] as Vec2) as [Vec2, Vec2, Vec2],uvIndices };
+    return { ...f, ...(atlasPages.has(i)?{uvSpace:`atlas-page-${atlasPages.get(i)!+1}`,uvSpaceName:`UV 页 ${atlasPages.get(i)!+1}`}:{ }), vertices: [...f.vertices] as [number, number, number], uvs: values.map(p => [...p] as Vec2) as [Vec2, Vec2, Vec2],uvIndices };
   }) };
 }

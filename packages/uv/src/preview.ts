@@ -2,6 +2,8 @@ import type { MeshData, Vec2, Vec3 } from '@meshtailor/mesh-core';
 import type { UVChart } from './charts.js';
 
 export interface PackedChart {
+  /** New atlas page identity, distinct from old source material domain. */
+  atlasPage?:number;
   /** Display-only domain offset. Stored/exported faceUVs are always unchanged. */
   displayOffset?:Vec2; uvSpace?:string; uvSpaceName?:string;
   id:number; polygon:Vec2[]; faceUVs:Map<number,[Vec2,Vec2,Vec2]>; bounds:[number,number,number,number] }

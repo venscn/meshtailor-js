@@ -1,3 +1,4 @@
+import { packConnectedAtlas, type PageOptions, type PageReport } from './atlas-pages.js';
 import { mergeAdjacentCharts, type MergeOptions, type MergeReport } from './chart-merge.js';
 import { normalizedMesh, shapeQuality } from './chart-quality.js';
 import { uvProgress, rethrowUVStop, type UVWork } from './work.js';
@@ -7,13 +8,13 @@ import { openChartWithSlits } from './topology-slits.js';
 import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
-export interface UnwrapOptions extends SolverOptions,PackOptions { initialSegmentation?:'regions'|'connected'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
+export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions { initialSegmentation?:'regions'|'connected'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
 export interface ChartDiagnostic {areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
 }
-export interface UnwrapResult extends AtlasPacking { merge?:MergeReport; fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
+export interface UnwrapResult extends AtlasPacking { pageReport?:PageReport; merge?:MergeReport; fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
 export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
 export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,chartPolicy:'large',stretchAreaPercentile:.99,maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
 export function recommendUnwrap(mesh:MeshData,goal:ChartGoal='large'):{options:UnwrapOptions;analysis:MeshAnalysis;regions:RegionOptions;reasons:string[]}{
@@ -130,7 +131,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   warnings.push(`碎片诊断：输入 ${fragmentation.inputComponents} 个几何连通分量 → ${fragmentation.initialCharts} 个初始区域 → ${raw.length} 个最终岛（${fragmentation.tinyCharts} 个小于16面）。补切原因：${JSON.stringify(fragmentation.reasons)}。详细事件可导出诊断。`);
   const tolerated=diagnostics.filter(d=>d.maxStretch>opts.maxStretch&&d.areaStretch!<=opts.maxStretch);
   if(tolerated.length)warnings.push(`${tolerated.length} 个岛含超过软形变阈值的微小细节；采用 ${((opts.stretchAreaPercentile??1)*100).toFixed(1)}% 源表面积分位数避免整块反复切碎。最坏值仍报告；不豁免翻面、退化或交叠。`);
-  const atlas=packAtlas(raw,opts,work);
+  const atlas=packConnectedAtlas(mesh,raw,opts,work);
   warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
   return{...atlas,merge,fragmentation,seams:[...effective],addedSeams,diagnostics,warnings};
 }

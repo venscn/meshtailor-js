@@ -3,7 +3,7 @@ import type { Vec2 } from '@meshtailor/mesh-core';
 import type { PackedChart } from './preview.js';
 export interface RawChart {id:number; faceUVs:Map<number,[Vec2,Vec2,Vec2]>; area3D:number}
 export type PackingMethod = 'auto'|'maxrects'|'shelf';
-export interface PackOptions { padding:number; rotate:boolean; rotationSteps:number; packing?:PackingMethod }
+export interface PackOptions { /** Internal common texel density for multiple pages. */ fixedScale?:number; padding:number; rotate:boolean; rotationSteps:number; packing?:PackingMethod }
 export interface AtlasPacking {packed:PackedChart[]; occupancy:number; boxOccupancy:number; scale:number; padding:number; packingMethod:'maxrects'|'shelf'}
 interface Rect {x:number;y:number;w:number;h:number}
 interface OrientedChart {id:number;coords:Map<number,[Vec2,Vec2,Vec2]>;w:number;h:number;area:number}
@@ -88,7 +88,10 @@ export function packAtlas(charts:RawChart[],options:Partial<PackOptions>={},work
   const place=packingMethod==='shelf'?shelfAttempt:attempt;
   const raw=charts.map((c,i)=>{uvProgress(work,{stage:'orient',detail:'按表面积统一纹素密度与旋转方向',current:i+1,total:charts.length,unit:'岛'});return orient(c,opts.rotate?opts.rotationSteps:1);});
   let best:Placement[]|null=null,bestScale=0;
-  for(let sort=0;sort<2;sort++){
+  if(opts.fixedScale!==undefined){
+    if(!(opts.fixedScale>0&&Number.isFinite(opts.fixedScale)))throw new Error('Invalid fixed atlas scale.');
+    for(let sort=0;sort<2&&!best;sort++){best=place(raw,opts.fixedScale,opts.padding,opts.rotate,sort,work);if(best)bestScale=opts.fixedScale;}
+  }else for(let sort=0;sort<2;sort++){
     let lo=0,hi=Math.sqrt(1/raw.reduce((s,r)=>s+r.w*r.h,0));
     for(let i=0;i<28;i++){uvProgress(work,{stage:'pack',detail:`${packingMethod==='shelf'?'Shelf 大岛数快速排布':'MaxRects 排布'} · ${raw.length} 个岛`,current:sort*28+i+1,total:56,unit:'搜索轮'});const mid=(lo+hi)/2,p=place(raw,mid,opts.padding,opts.rotate,sort,work);if(p){lo=mid;if(mid>bestScale){bestScale=mid;best=p;}}else hi=mid;}
   }
