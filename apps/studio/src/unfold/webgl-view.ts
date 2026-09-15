@@ -156,6 +156,7 @@ export class UnfoldWebGLView {
     this.invalidate();
   }
   setOptions(options:UnfoldDisplay){
+    if(overlapSettings(this.options).mode==='off'&&overlapSettings(options).mode!=='off')this.overlapFailure=null;
     this.options=options;
     const followStarted=this.cameraFollow.setRequested(options.autoFrame===true);
     this.canvas.dataset.cameraMode=this.cameraFollow.active?'follow':'manual';

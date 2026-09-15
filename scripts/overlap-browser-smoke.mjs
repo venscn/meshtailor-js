@@ -67,6 +67,12 @@ try{
    await page.evaluate('useTriangles([tri,shift(tri,.55,.1),shift(tri,.2,.35)]);update({wireframe:true,faceTones:true})');await delay(80);
    const i=process.argv.indexOf('--screenshot');if(i>=0)await writeFile(process.argv[i+1],Buffer.from((await page.send('Page.captureScreenshot',{format:'png'})).data,'base64'));
   }
+  await check(prefix+'diagnostic allocation/render failure never disables the mesh viewport',async()=>{
+   await page.evaluate('window.keptPositions=[...view.getPositions()];view.overlapPass.render=()=>{throw Error("simulated diagnostic failure")};update({overlapMode:"coplanar"})');
+   assert.match(await page.evaluate('view.getOverlapState().error'),/simulated/);assert.ok(await page.evaluate('keptPositions.every((v,i)=>v===view.getPositions()[i])'));
+   assert.equal(await page.evaluate('view.canvas.dataset.overlapMode'),'unavailable');assert.equal(await page.evaluate('view.gl.getError()'),0);
+  });
+  await check(prefix+'off and on explicitly retries diagnostic failure',async()=>{await page.evaluate('update({overlapMode:"off"})');const r=await page.evaluate('update({overlapMode:"coplanar"})');assert.equal(r.state.error,null);assert.ok(r.max>=2);return r;});
   await check(prefix+'no uncaught errors or silently failed diagnostics',async()=>{assert.deepEqual(await page.evaluate('errors'),[]);assert.equal(await page.evaluate('view.getOverlapState().error'),null);});
   await page.evaluate('view.dispose()');page.close();
  }
