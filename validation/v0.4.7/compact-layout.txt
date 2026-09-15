@@ -1,0 +1,5 @@
+
+> meshtailor-js@0.4.6 test:compact-layout
+> node scripts/compact-layout-smoke.mjs
+
+11 compact-layout checks passed

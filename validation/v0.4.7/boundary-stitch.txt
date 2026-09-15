@@ -1,0 +1,5 @@
+
+> meshtailor-js@0.4.6 test:boundary-stitch
+> node scripts/boundary-stitch-smoke.mjs
+
+10 boundary-stitch checks passed

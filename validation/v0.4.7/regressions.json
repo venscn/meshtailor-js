@@ -1,0 +1,82 @@
+[
+  {
+    "suite": "core",
+    "exitCode": 0,
+    "elapsedSeconds": 4.105
+  },
+  {
+    "suite": "complex",
+    "exitCode": 0,
+    "elapsedSeconds": 5.381
+  },
+  {
+    "suite": "unfold",
+    "exitCode": 0,
+    "elapsedSeconds": 3.145
+  },
+  {
+    "suite": "hinge",
+    "exitCode": 0,
+    "elapsedSeconds": 2.87
+  },
+  {
+    "suite": "camera",
+    "exitCode": 0,
+    "elapsedSeconds": 2.435
+  },
+  {
+    "suite": "relay",
+    "exitCode": 0,
+    "elapsedSeconds": 2.501
+  },
+  {
+    "suite": "motion-time",
+    "exitCode": 0,
+    "elapsedSeconds": 2.309
+  },
+  {
+    "suite": "motion",
+    "exitCode": 0,
+    "elapsedSeconds": 3.864
+  },
+  {
+    "suite": "source-layout",
+    "exitCode": 0,
+    "elapsedSeconds": 4.658
+  },
+  {
+    "suite": "compact-layout",
+    "exitCode": 0,
+    "elapsedSeconds": 4.299
+  },
+  {
+    "suite": "fragmentation",
+    "exitCode": 0,
+    "elapsedSeconds": 4.945
+  },
+  {
+    "suite": "materials",
+    "exitCode": 0,
+    "elapsedSeconds": 4.021
+  },
+  {
+    "suite": "boundary-stitch",
+    "exitCode": 0,
+    "elapsedSeconds": 3.375
+  },
+  {
+    "suite": "orientation",
+    "exitCode": 0,
+    "elapsedSeconds": 3.942
+  },
+  {
+    "suite": "fit-orientation",
+    "exitCode": 0,
+    "elapsedSeconds": 7.577
+  },
+  {
+    "suite": "git",
+    "exitCode": 0,
+    "elapsedSeconds": 8.843
+  }
+]

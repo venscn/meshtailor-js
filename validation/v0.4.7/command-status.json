@@ -1,0 +1,24 @@
+{
+  "npmInstall": {
+    "exitCode": 124,
+    "timeoutSeconds": 25,
+    "dependenciesAvailable": false
+  },
+  "build": {
+    "exitCode": 127,
+    "message": "vite: not found"
+  },
+  "typecheck": {
+    "exitCode": 2,
+    "message": "Cannot find type definition file for 'node'"
+  },
+  "selectionReact": {
+    "exitCode": 1,
+    "testsExecuted": 0,
+    "reason": "missing real React/Vite dependencies"
+  },
+  "networkProbe": {
+    "exitCode": 6,
+    "message": "Could not resolve host: registry.npmjs.org"
+  }
+}

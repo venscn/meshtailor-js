@@ -1,0 +1,5 @@
+
+> meshtailor-js@0.4.6 test:source-layout
+> node scripts/source-layout-smoke.mjs
+
+12 source-material layout checks passed

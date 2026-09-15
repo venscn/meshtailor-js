@@ -1,0 +1,5 @@
+
+> meshtailor-js@0.4.6 test:fragmentation
+> node scripts/fragmentation-smoke.mjs
+
+12 distortion-budget and fragmentation checks passed

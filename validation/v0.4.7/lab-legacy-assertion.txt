@@ -1,0 +1,22 @@
+PASS DPR 1: real browser Worker returns validated LSCM atlas and hinge rig
+PASS DPR 1: WebGL2 shader renders without error
+PASS DPR 1: exact atlas endpoint and source endpoint
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(Math.abs((await page.evaluate('lab.options.progress'))-(.18/.9)/2.7)<1e-9)
+
+    at file:///mnt/data/work-047/meshtailor-js/scripts/lab-browser-smoke.mjs:19:184
+    at async check (file:///mnt/data/work-047/meshtailor-js/scripts/lab-browser-smoke.mjs:9:44)
+    at async file:///mnt/data/work-047/meshtailor-js/scripts/lab-browser-smoke.mjs:19:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '=='
+}
+
+Node.js v22.16.0

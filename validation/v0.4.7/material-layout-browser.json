@@ -1,0 +1,116 @@
+{
+  "suite": "Synthetic six-material source UVs, production Worker/WebGL and offline DOM",
+  "cases": [
+    {
+      "name": "DPR 1: six original material frames, exact raw UVs",
+      "passed": true,
+      "detail": {
+        "spaces": 6,
+        "charts": 6,
+        "lines": 48,
+        "raw": true
+      }
+    },
+    {
+      "name": "DPR 1: frames have no positive-area intersection",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: real UV canvas mouse picks each corresponding material",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: deliberate overlay toggle is reversible and does not edit UV",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: normalized source and displayed target are exact endpoints",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: OBJ export keeps material identities and raw unshifted coordinates",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: separation is bounded and selection-independent",
+      "passed": true,
+      "detail": {
+        "max": 0.240000028354143,
+        "same": true
+      }
+    },
+    {
+      "name": "DPR 1: in-place control removes separation stage",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: diagnostic JSON contains no mesh positions or faces",
+      "passed": true,
+      "detail": {
+        "version": "0.4.6",
+        "hasGeometry": false,
+        "spaces": 6
+      }
+    },
+    {
+      "name": "DPR 1: clean WebGL and application errors",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: six original material frames, exact raw UVs",
+      "passed": true,
+      "detail": {
+        "spaces": 6,
+        "charts": 6,
+        "lines": 48,
+        "raw": true
+      }
+    },
+    {
+      "name": "DPR 2: frames have no positive-area intersection",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: real UV canvas mouse picks each corresponding material",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: deliberate overlay toggle is reversible and does not edit UV",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: normalized source and displayed target are exact endpoints",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: OBJ export keeps material identities and raw unshifted coordinates",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: separation is bounded and selection-independent",
+      "passed": true,
+      "detail": {
+        "max": 0.240000028354143,
+        "same": true
+      }
+    },
+    {
+      "name": "DPR 2: in-place control removes separation stage",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: diagnostic JSON contains no mesh positions or faces",
+      "passed": true,
+      "detail": {
+        "version": "0.4.6",
+        "hasGeometry": false,
+        "spaces": 6
+      }
+    },
+    {
+      "name": "DPR 2: clean WebGL and application errors",
+      "passed": true
+    }
+  ],
+  "passed": 20
+}

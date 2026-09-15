@@ -1,0 +1,86 @@
+{
+  "suite": "Two-level inspection selection",
+  "passed": 20,
+  "cases": [
+    {
+      "name": "empty inspection even when all islands can be in the playback queue",
+      "passed": true
+    },
+    {
+      "name": "first triangle hit selects only its island",
+      "passed": true
+    },
+    {
+      "name": "second hit on an explicitly selected island selects the triangle",
+      "passed": true
+    },
+    {
+      "name": "third hit on the same triangle clears only the face",
+      "passed": true
+    },
+    {
+      "name": "selecting another face replaces the current face",
+      "passed": true
+    },
+    {
+      "name": "new island clears the previous face without selecting its hit face",
+      "passed": true
+    },
+    {
+      "name": "list selection ignores ray-hit face entirely",
+      "passed": true
+    },
+    {
+      "name": "label click on the same island clears face without toggling the island",
+      "passed": true
+    },
+    {
+      "name": "modifier adds an island but never selects its face",
+      "passed": true
+    },
+    {
+      "name": "face pick inside a multiselection keeps all islands",
+      "passed": true
+    },
+    {
+      "name": "modifier deselects an island and clears triangle focus",
+      "passed": true
+    },
+    {
+      "name": "Escape clears triangle before islands",
+      "passed": true
+    },
+    {
+      "name": "reject unknown island",
+      "passed": true
+    },
+    {
+      "name": "reject negative face",
+      "passed": true
+    },
+    {
+      "name": "reject wrong owner",
+      "passed": true
+    },
+    {
+      "name": "reject out of range",
+      "passed": true
+    },
+    {
+      "name": "reject noninteger",
+      "passed": true
+    },
+    {
+      "name": "reject NaN",
+      "passed": true
+    },
+    {
+      "name": "repeated select/deselect does not mutate source state",
+      "passed": true
+    },
+    {
+      "name": "rapid consecutive picks use sequential state, not a double-click special case",
+      "passed": true
+    }
+  ]
+}

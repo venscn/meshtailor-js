@@ -1,0 +1,25 @@
+
+> meshtailor-js@0.4.6 test:motion
+> node scripts/motion-geometry-smoke.mjs
+
+cube per-island seconds at base 12: [
+  4.800000000000001,
+  4.800000000000001,
+  4.800000000000001,
+  4.800000000000001,
+  4.800000000000001,
+  4.800000000000001
+]
+PASS Cube flat islands skip hinge stage without losing target UV
+PASS Developable bent ribbons keep actual hinge motion and skip redundant UV deformation
+PASS cube: every dropped span is unchanged throughout, not just at endpoints
+PASS ribbon: every dropped span is unchanged throughout, not just at endpoints
+PASS Stage-boundary scrub is continuous across removed time
+PASS Explicit user hold is retained despite automatic skip
+PASS Diagnostic skip-off retains the fixed-time schedule
+PASS Analysis and rendering never mutate source, target, UV or hinge geometry
+PASS Equal overall endpoints do not remove real intermediate separation
+PASS Entirely motionless direct path has zero duration and no phantom wait
+PASS Relative tolerance still detects small but real islands
+PASS Changing selection and separation rebuilds the actual workbench motion
+PASS Invalid tolerance fails explicitly

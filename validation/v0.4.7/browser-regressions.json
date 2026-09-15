@@ -1,0 +1,27 @@
+[
+  {
+    "suite": "camera-browser",
+    "exitCode": 0,
+    "elapsedSeconds": 49.169
+  },
+  {
+    "suite": "relay-browser",
+    "exitCode": 0,
+    "elapsedSeconds": 21.016
+  },
+  {
+    "suite": "motion-browser",
+    "exitCode": 0,
+    "elapsedSeconds": 18.868
+  },
+  {
+    "suite": "lab-browser",
+    "exitCode": 1,
+    "elapsedSeconds": 2.601
+  },
+  {
+    "suite": "material-layout-browser",
+    "exitCode": 0,
+    "elapsedSeconds": 6.99
+  }
+]

@@ -1,0 +1,213 @@
+{
+  "suite": "Chromium native canvas CSS-layout regression (no React/Three.js dependencies)",
+  "cases": [
+    {
+      "name": "v0.1.0 negative control: growing HiDPI canvas reproduced",
+      "samples": [
+        {
+          "hostW": 828,
+          "hostH": 652,
+          "canvasW": 1656,
+          "canvasH": 1304,
+          "bufferW": 1656,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 1656,
+          "hostH": 652,
+          "canvasW": 3312,
+          "canvasH": 1304,
+          "bufferW": 3312,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 3312,
+          "hostH": 652,
+          "canvasW": 6624,
+          "canvasH": 1304,
+          "bufferW": 6624,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 6624,
+          "hostH": 652,
+          "canvasW": 13248,
+          "canvasH": 1304,
+          "bufferW": 13248,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 13248,
+          "hostH": 652,
+          "canvasW": 26496,
+          "canvasH": 1304,
+          "bufferW": 26496,
+          "bufferH": 1304
+        },
+        {
+          "hostW": 26496,
+          "hostH": 652,
+          "canvasW": 52992,
+          "canvasH": 1304,
+          "bufferW": 52992,
+          "bufferH": 1304
+        }
+      ]
+    },
+    {
+      "name": "fixed CSS at DPR 1",
+      "samples": [
+        {
+          "hostW": 815,
+          "hostH": 722,
+          "canvasW": 815,
+          "canvasH": 722,
+          "bufferW": 815,
+          "bufferH": 722
+        }
+      ]
+    },
+    {
+      "name": "fixed CSS at DPR 1.25",
+      "samples": [
+        {
+          "hostW": 815,
+          "hostH": 722,
+          "canvasW": 815,
+          "canvasH": 722,
+          "bufferW": 1018,
+          "bufferH": 902
+        }
+      ]
+    },
+    {
+      "name": "fixed CSS at DPR 2",
+      "samples": [
+        {
+          "hostW": 815,
+          "hostH": 722,
+          "canvasW": 815,
+          "canvasH": 722,
+          "bufferW": 1630,
+          "bufferH": 1444
+        }
+      ]
+    },
+    {
+      "name": "fixed CSS at DPR 3",
+      "samples": [
+        {
+          "hostW": 815,
+          "hostH": 722,
+          "canvasW": 815,
+          "canvasH": 722,
+          "bufferW": 1630,
+          "bufferH": 1444
+        }
+      ]
+    },
+    {
+      "name": "window resize 1100x700",
+      "state": {
+        "w": 581,
+        "h": 530,
+        "cw": 581,
+        "ch": 530,
+        "bw": 1162,
+        "bh": 1060,
+        "count": 2
+      }
+    },
+    {
+      "name": "window resize 1920x1080",
+      "state": {
+        "w": 1175,
+        "h": 902,
+        "cw": 1175,
+        "ch": 902,
+        "bw": 2350,
+        "bh": 1804,
+        "count": 3
+      }
+    },
+    {
+      "name": "window resize 1280x800",
+      "state": {
+        "w": 695,
+        "h": 622,
+        "cw": 695,
+        "ch": 622,
+        "bw": 1390,
+        "bh": 1244,
+        "count": 4
+      }
+    },
+    {
+      "name": "hidden panel becomes visible without intrinsic canvas growth",
+      "passed": true
+    },
+    {
+      "name": "complex-mesh controls and populated timeline stay bounded at 1100x700",
+      "state": {
+        "sceneHeight": 524,
+        "centerBottom": 676,
+        "summaryBottom": 676,
+        "noticeHeight": 38,
+        "timelineBottom": 676,
+        "scrollBottom": 676,
+        "scrollHeight": 240.859375,
+        "contentHeight": 4208,
+        "canvasWidth": 581,
+        "hostWidth": 581
+      }
+    },
+    {
+      "name": "complex-mesh controls and populated timeline stay bounded at 1920x1080",
+      "state": {
+        "sceneHeight": 868,
+        "centerBottom": 1056,
+        "summaryBottom": 1056,
+        "noticeHeight": 66,
+        "timelineBottom": 1055.984375,
+        "scrollBottom": 1055.984375,
+        "scrollHeight": 396.171875,
+        "contentHeight": 4208,
+        "canvasWidth": 1175,
+        "hostWidth": 1175
+      }
+    },
+    {
+      "name": "unfold transport, island list and correspondence inspector stay bounded at 1100x700",
+      "state": {
+        "sceneHeight": 468.40625,
+        "barBottom": 646,
+        "centerBottom": 676,
+        "listHeight": 208,
+        "listScroll": 1200,
+        "contentBottom": 676,
+        "panelBottom": 676,
+        "contentScroll": 922,
+        "contentHeight": 270.859375,
+        "canvasWidth": 581,
+        "hostWidth": 581
+      }
+    },
+    {
+      "name": "unfold transport, island list and correspondence inspector stay bounded at 1440x900",
+      "state": {
+        "sceneHeight": 654.40625,
+        "barBottom": 846,
+        "centerBottom": 876,
+        "listHeight": 208,
+        "listScroll": 1200,
+        "contentBottom": 875.984375,
+        "panelBottom": 875.984375,
+        "contentScroll": 922,
+        "contentHeight": 344.359375,
+        "canvasWidth": 815,
+        "hostWidth": 815
+      }
+    }
+  ],
+  "passed": 13
+}

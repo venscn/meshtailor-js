@@ -1,46 +1,49 @@
-# Validation — v0.4.6
+# Validation — v0.4.7
 
-日期：2026-09-14。旧记录原样归档 `VALIDATION-0.4.5.md`。此次代码包括材质归属、显示坐标与源UV分离、保守断边配对、软形变面积控制、分裂诊断和紧凑分离布局。
+日期：2026-09-15。v0.4.6 原记录归档为 `VALIDATION-0.4.6.md`。本次范围是岛/面两级选择、React hook 接线、离线事件接线及石墨灰工作台 UI；没有改变 UV/铰链/分割/导出算法。
 
-## 已执行
+## 实际通过
 
 | 套件 | 通过项 | 范围 |
 |---|---:|---|
-| material-domain | 9 | glTF轻量材质、重复转换稳定性、材质接缝和OBJ标签/坐标 |
-| boundary-stitch | 10 | 唯一边配对、尺度、歧义保护、不跨对象、UV不变 |
-| source-layout | 12 | 多材质分框、原值不改、拾取、导出、框外坐标 |
-| compact-layout | 11 | 平移上限、0距离、选择不跳、半径不影响、精确端点 |
-| fragmentation | 12 | 面积加权极值、真实补切计数、全部面与有效性、预算 |
-| material-layout-browser | 20 | 两种DPR，真实原生WebGL与Worker、六材质测试片、鼠标拾取、叠加切换、导出诊断 |
-| large-charts | 53 | 四类内置Low/Medium网格完整求解；不是Corset/FlightHelmet |
-| large-charts-browser | 14 | 真实离线UI的自动按钮、Extract、镜像方向 |
-| core / complex | 21 / 40 | 核心TS严格编译、网格导入核心、模型结构和mock下载 |
-| unfold / hinge / orientation / fit-orientation | 33 / 17 / 18 / 17 | 对应、刚性、端点、方向和UV形变 |
-| regions / slits / seam-policy | 27 / 8 / 13 | 连通分区、窄缝、生产Node Worker策略 |
-| motion-time / motion / relay | 9 / 13 / 22 | 静止压缩、相邻接力、有效时长 |
-| camera-policy / camera-browser | 10 / 39 | 手动相机、真实播放和鼠标、同源重算不复位 |
-| relay-browser / motion-browser | 28 / 28 | 真RAF、正反播放、相机、压缩时间线 |
-| uv-worker / uv-progress / uv-job-client | 4 / 5 / 11 | 生命周期、进度、超时取消 |
-| uv-large-worker | 3 | 90,112面程序机械件，生成/源UV/预算失败 |
-| layout / uv-lifecycle-browser | 13 / 7 | 高DPI布局，真实Worker取消/失败/重试 |
-| git-tools | 22 | 发布检查工具正反回归 |
+| selection | 20 | 首次选岛、再次选面、重复取消、跨岛清空、多选、非法索引、快速连续动作 |
+| selection-browser | 39 | 两种DPR，真实2D/3D鼠标输入、双向取消、播放/相机/队列隔离、Esc；1117/900/600宽度无水平溢出 |
+| camera-browser | 39 | 真实播放时自由旋转/平移/缩放、上下文恢复、一次性适配 |
+| relay-browser / motion-browser | 28 / 28 | 实际RAF逐岛接力、压缩时间线、正反播放 |
+| material-layout-browser | 20 | 生产Worker、六材质分框、拾取、原坐标和导出不变 |
+| lab-browser | 21 | 真实离线流程、阶段跳转、Tutte、无效参数/恢复、复杂结网格 |
+| layout | 13 | 旧DPR尺寸爆炸负控制、当前画布稳定性、约束视口/滚动 |
+| core / complex / unfold | 21 / 40 / 33 | 严格核心TS编译、网格和对应 |
+| hinge / orientation / fit-orientation | 17 / 18 / 17 | 刚性、方向、端点 |
+| camera / relay / motion-time / motion | 10 / 22 / 9 / 13 | 策略、独立时序与静止检测 |
+| source-layout / compact-layout | 12 / 11 | 多材质源UV与展示位置、距离约束 |
+| materials / boundary-stitch / fragmentation | 9 / 10 / 12 | 材质归属、边界修复保护、分裂诊断 |
+| git-tools | 22 | 发布工具正反测试 |
 
-另外执行了parameterization、atlas、packing-large、unwrap-guards回归。各实际JSON/TXT位于 `docs/validation/v0.4.6/`。语法转译列表见 `ui-syntax.json`，不等于完整UI类型检查。
+报告位于根目录 `validation/v0.4.7/`。`ui-syntax.json` 记录所有 Studio TSX（包括开发测试页）的语法转译，不是完整UI类型检查。`lab-build.txt` 为真正生成单文件实验页的输出。
 
-90,112面程序机械件：本轮生成117岛，Worker往返约14.86秒；原UV4岛约3.01秒。保留全部90,112面和UV对应；数值是此Linux环境的一次测量，不是两件远端模型的速度或岛数保证。
+浏览器为 Linux Chromium + 明确开启的 ANGLE/SwiftShader 软件WebGL。离线页使用共用生产求解、几何、渲染和经典浏览器Worker；其交互状态采用与React相同的纯策略，但不是React运行时。因此离线通过不能替代React hook/Studio主界面认证。
 
-六材质测试片是本工程构造的12面回归输入，刻意让六套原UV坐标重合以验证分框。不是头盔网格，截图标题也明确标记了这一点。
+截图 `images/workbench-0.4.7.png` 为实际离线页面，不是设计概念图。
 
-浏览器使用Linux + Chromium + ANGLE/SwiftShader，在真实离线HTML/共用生产模块/Blob Worker上执行。不是完整React/Vite主界面E2E，更不是macOS/Windows/Safari实机认证。
+## 失败、修正和未验证
 
-## 未验证与执行中断
+原 `lab-browser` 用 `.18/.9/2.7` 固定常数验证阶段位置，不适用于现有按每岛运动压缩的时间线。本轮首次运行在该断言失败，记录保留在 `lab-legacy-assertion.txt`；测试改成检查阶段按钮是否映射到实际有效时间线，仍检查铰链角度与真实顶点，随后完整21项通过。没有为了此断言改变动画算法。
 
-本轮未成功获取Corset和FlightHelmet几何二进制。公开glTF的材质信息可以读取，不能凭此计算真实连通性、求解成功率、最终岛数或真实动画效果。真实资产专项脚本已更新，但未宣称实测。
+选择浏览器测试开发时，120毫秒固定等待在软件渲染下不足以保证出现下一帧，改为等待实际播放进度增加并设置超时。DPR缓冲尺寸按canvas整数clientWidth/clientHeight计算，与生产renderer一致；DOMRect可以有亚像素，不能把小于1 CSS像素的取整差当成布局循环。窄窗口允许纵向滚动条占据宽度，但仍禁止横向溢出。这些修正没有替换真实事件或渲染器。
 
-npm安装尝试未在工具上限内完成，也未产生可用依赖；随后实际运行 `npm run build` 退出127，`vite: not found`。因此完整React/Vite构建、全量UI类型检查、真实Three场景/FBXLoader/glTF导入新增集成用例未执行通过。新增Vitest用例不计入上表通过数。
+npm install 在25秒外层预算处退出124，没有得到依赖，日志为空；独立curl记录实际DNS错误。随后执行：
 
-两个批量命令在外层工具时限处中断；缺少成功结果的套件分别补跑，以单套JSON/TXT而不是不完整批次清单为准。浏览器生命周期7项已输出完整报告，包含它的后续批量命令在之后任务中超时。安装日志为空，不把它描述成特定DNS错误。
+| 命令 | 真实结果 |
+|---|---|
+| npm run build | 退出127，vite: not found |
+| npm run typecheck | 退出2，缺少 node 类型定义 |
+| npm run test:selection:react | 退出1，真实React/Vite依赖检查失败，未运行内部用例 |
 
-开发期间修正了单材质框外坐标被平移的回归，以及浏览器测试脚本全局const重声明。早先未启用软件WebGL的浏览器启动超时，最终记录使用明确的软件渲染参数。原先两项“所有岛必须铺成不重叠大网格”的断言随设计变更改成有界平移及选择不变性；刚性边长、端点和共享边等断言保留。
+完整React/Vite主界面、主页面module Worker、真实React hook集成和FBX/glTF导入本轮未认证；没有使用替代React或类型存根声称成功。开发测试页包含11条待依赖就绪后执行的用例，不纳入通过数。
 
-最终ZIP再解压的提交/tag/工作区、关键回归和bundle恢复记录随交付单独提供，不用本文件预先冒充最终包已经验证。
+本轮没有重新获取或实测真实Corset / FlightHelmet，也未做macOS、Windows、Safari实机测试。未重跑的其他套件不能从旧版记录累加为本轮通过项。
+
+`browser-regressions.json` 是第一轮批次的原始退出记录，其中lab失败是上述过期断言；以更新后的 `lab-browser.json` 21项成功和本说明解释复跑，不篡改最初批次结果。
+
+最终ZIP将再解压检查tag、clean worktree、bundle及关键回归，结果由交付验证文件记录，不用这里预先宣称最终包已测试。

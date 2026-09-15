@@ -1,0 +1,53 @@
+{
+  "scope": "TSX syntax transpilation ONLY; not full module resolution or React type checking",
+  "cases": [
+    {
+      "path": "apps/studio/src/App.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/MeshViewport.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/UVCanvas.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/main.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/CorrespondenceInspector.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/UVJobStatus.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/UVSolverControls.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/UnfoldControls.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/UnfoldViewport.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/useUVSnapshot.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/useUnfoldPlayer.tsx",
+      "syntaxErrors": []
+    },
+    {
+      "path": "apps/studio/tests/selection-hook.tsx",
+      "syntaxErrors": []
+    }
+  ]
+}

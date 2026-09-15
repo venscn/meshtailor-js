@@ -1,0 +1,292 @@
+{
+  "suite": "Motion-aware playback: real offline UI / production renderer",
+  "passed": 28,
+  "cases": [
+    {
+      "name": "DPR 1: default automatically skips unchanged spans with camera independent",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: geometry profiling is cached, not rerun on every frame",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: flat cube skips hinge and UV fit, reducing 12s base to 4.8s per island",
+      "passed": true,
+      "details": {
+        "islands": [
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "DPR 1: skipped stage buttons collapse to one displayed pose",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: scrub uses identical compact clocks for poses, state and phase labels",
+      "passed": true,
+      "details": {
+        "samples": 201,
+        "maxActive": 2
+      }
+    },
+    {
+      "name": "DPR 1: no long motionless interior intervals across dense whole-queue sampling",
+      "passed": true,
+      "details": {
+        "maxStaticSamples": 0
+      }
+    },
+    {
+      "name": "DPR 1: skip switch restores fixed 12s stages for comparison, then re-enables compaction",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: manual teaching hold remains opt-in even with automatic pruning enabled",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: variable duration settings invalidate cached profile once",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: selection order and strict mode use actual selected durations",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: actual forward RAF playback finishes on shortened clock with no tail",
+      "passed": true,
+      "details": {
+        "elapsed": 2.186,
+        "expected": 2.0999999999999996,
+        "frames": 49,
+        "maximum": 2,
+        "islands": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    },
+    {
+      "name": "DPR 1: actual reverse RAF playback finishes on shortened clock with no tail",
+      "passed": true,
+      "details": {
+        "elapsed": 2.1781999999999533,
+        "expected": 2.0999999999999996,
+        "frames": 52,
+        "maximum": 2,
+        "islands": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "name": "DPR 1: endpoints exactly match source and exported target positions",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: no runtime errors or WebGL errors",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: default automatically skips unchanged spans with camera independent",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: geometry profiling is cached, not rerun on every frame",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: flat cube skips hinge and UV fit, reducing 12s base to 4.8s per island",
+      "passed": true,
+      "details": {
+        "islands": [
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          },
+          {
+            "seconds": 4.800000000000001,
+            "skipped": [
+              "铰链",
+              "主动观察停留",
+              "UV 形变"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "DPR 2: skipped stage buttons collapse to one displayed pose",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: scrub uses identical compact clocks for poses, state and phase labels",
+      "passed": true,
+      "details": {
+        "samples": 201,
+        "maxActive": 2
+      }
+    },
+    {
+      "name": "DPR 2: no long motionless interior intervals across dense whole-queue sampling",
+      "passed": true,
+      "details": {
+        "maxStaticSamples": 0
+      }
+    },
+    {
+      "name": "DPR 2: skip switch restores fixed 12s stages for comparison, then re-enables compaction",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: manual teaching hold remains opt-in even with automatic pruning enabled",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: variable duration settings invalidate cached profile once",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: selection order and strict mode use actual selected durations",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: actual forward RAF playback finishes on shortened clock with no tail",
+      "passed": true,
+      "details": {
+        "elapsed": 2.129899999999907,
+        "expected": 2.0999999999999996,
+        "frames": 25,
+        "maximum": 2,
+        "islands": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    },
+    {
+      "name": "DPR 2: actual reverse RAF playback finishes on shortened clock with no tail",
+      "passed": true,
+      "details": {
+        "elapsed": 2.2826999999999535,
+        "expected": 2.0999999999999996,
+        "frames": 30,
+        "maximum": 2,
+        "islands": [
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "name": "DPR 2: endpoints exactly match source and exported target positions",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: no runtime errors or WebGL errors",
+      "passed": true
+    }
+  ]
+}
