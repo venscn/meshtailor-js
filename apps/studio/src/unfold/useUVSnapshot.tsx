@@ -16,7 +16,7 @@ export function useUVSnapshot(mesh:MeshData,edges:Set<string>,target:UVTarget,co
     let disposed=false,done=false,job:ReturnType<typeof startUVJob>|undefined;
     const start=performance.now();
     const identity={mesh,edges,target,config,seedCharts};
-    const backup=(target==='stitch'||target==='repack')&&completed.current?.mesh===mesh?completed.current.snapshot:null;
+    const backup=(target==='stitch'||target==='repack'||target==='source-atlas')&&completed.current?.mesh===mesh?completed.current.snapshot:null;
     setState({...identity,snapshot:backup,error:null,phase:'starting',progress:null,elapsedMs:0});
     const finish=(snapshot:UVSnapshot|null,error:string|null,phase:UVPhase)=>{
       if(disposed||done)return;done=true;clearInterval(clock);
