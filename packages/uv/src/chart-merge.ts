@@ -40,7 +40,7 @@ export function mergeAdjacentCharts(mesh:MeshData,input:RawChart[],inputSeams:Re
   const settings={...DEFAULT_MERGE,...opts.mergeOptions};
   if(!Number.isInteger(settings.maxAttempts)||settings.maxAttempts<0||settings.maxAttempts>2000||!Number.isInteger(settings.targetCharts)||settings.targetCharts<1||typeof settings.respectMaterials!=='boolean'||!Array.isArray(settings.protectedSeams))throw new Error('Invalid chart merge options.');
   const topology=buildTopology(mesh),graph=buildChartGraph(mesh,input.map(c=>({id:c.id,faces:[...c.faceUVs.keys()]})),topology,work);
-  const locked=new Set(settings.protectedSeams);for(const key of locked)if(!topology.edges.has(key))throw new Error('Protected seam is not a mesh edge: '+key);
+  const locked=new Set(settings.protectedSeams);for(const key of locked){const e=topology.edges.get(key);if(!e)throw new Error('Protected seam is not a mesh edge: '+key);if(e.faces.length===2&&graph.faceChart[e.faces[0]!]===graph.faceChart[e.faces[1]!]&&!inputSeams.has(key))throw new Error('Protected seam must already be a UV cut: '+key);}
   let effective=new Set(inputSeams);for(const key of locked)effective.add(key);
   // Original inter-chart cuts are explicit, including when caller supplied none.
   for(const link of graph.links)for(const key of link.edges)effective.add(key);

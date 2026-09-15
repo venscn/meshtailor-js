@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -17,7 +17,7 @@
     "test:core": "node scripts/core-smoke.mjs",
     "test:layout": "node scripts/layout-smoke.mjs",
     "test:browser": "node scripts/studio-smoke.mjs",
-    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser && npm run test:parameterization && npm run test:atlas && npm run test:hinge && npm run test:uv-guards && npm run lab:build && npm run test:lab && npm run test:packing-large && npm run test:uv-progress && npm run test:uv-client && npm run test:uv-large && npm run test:uv-lifecycle:browser && npm run test:camera && npm run test:camera:browser && npm run test:relay && npm run test:relay:browser && npm run test:motion-time && npm run test:motion && npm run test:motion:browser && npm run test:regions && npm run test:slits && npm run test:large-charts && npm run test:seam-policy && npm run test:orientation && npm run test:fit-orientation && npm run test:large-charts:browser && npm run test:materials && npm run test:boundary-stitch && npm run test:source-layout && npm run test:compact-layout && npm run test:fragmentation && npm run test:materials:browser && npm run test:selection && npm run test:selection:browser && npm run test:selection:react",
+    "check:full": "npm run check && npm run test:core && npm run test:complex && npm run test:unfold && npm run test:uv-worker && npm run test:layout && npm run test:unfold:browser && npm run test:browser && npm run test:parameterization && npm run test:atlas && npm run test:hinge && npm run test:uv-guards && npm run lab:build && npm run test:lab && npm run test:packing-large && npm run test:uv-progress && npm run test:uv-client && npm run test:uv-large && npm run test:uv-lifecycle:browser && npm run test:camera && npm run test:camera:browser && npm run test:relay && npm run test:relay:browser && npm run test:motion-time && npm run test:motion && npm run test:motion:browser && npm run test:regions && npm run test:slits && npm run test:large-charts && npm run test:seam-policy && npm run test:orientation && npm run test:fit-orientation && npm run test:large-charts:browser && npm run test:materials && npm run test:boundary-stitch && npm run test:source-layout && npm run test:compact-layout && npm run test:fragmentation && npm run test:materials:browser && npm run test:selection && npm run test:selection:browser && npm run test:selection:react && npm run test:chart-merge && npm run test:atlas-pages && npm run test:optimization-quality && npm run test:optimization:browser",
     "assets:generate": "node scripts/generate-examples.mjs",
     "assets:download": "tsx scripts/download-assets.ts",
     "test:complex": "node scripts/complex-smoke.mjs",
@@ -63,7 +63,11 @@
     "test:sample-asset": "tsx scripts/flight-helmet-smoke.ts",
     "test:selection": "node scripts/selection-smoke.mjs",
     "test:selection:browser": "node scripts/selection-browser-smoke.mjs",
-    "test:selection:react": "node scripts/selection-react-smoke.mjs"
+    "test:selection:react": "node scripts/selection-react-smoke.mjs",
+    "test:chart-merge": "node scripts/chart-merge-smoke.mjs",
+    "test:atlas-pages": "node scripts/atlas-pages-smoke.mjs",
+    "test:optimization-quality": "node scripts/optimization-quality-smoke.mjs",
+    "test:optimization:browser": "node scripts/uv-optimization-browser-smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
