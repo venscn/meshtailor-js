@@ -22,6 +22,10 @@ try {
   const factors=boosted.packingReport.areaBoosts;assert.equal(factors.length,1);assert.equal(factors[0].factor,2);checks++;
   const b=uv.auditIslandAreas(mesh,boosted.packed);const d=b.islands.map(x=>x.areaUV/x.area3D);assert.ok(Math.abs(d[0]/d[1]-2)<1e-8);checks++;
  }
+ const plateau=raw.map(c=>({...c,area3D:[1,100,2][c.id]}));
+ for(const packing of ['maxrects','shelf']){const result=uv.packAtlas(plateau,{packing,tinyIslandAreaFraction:.02,maxTinyAreaBoost:4});assert.deepEqual(result.packingReport.placementOrder,[1,2,0]);checks++;}
+ assert.throws(()=>uv.packAtlas(raw,{normalizationReferenceArea:Infinity}),/reference/);checks++;
+ assert.throws(()=>uv.packAtlas([{...raw[0],area3D:Infinity}]),/zero-area/);checks++;
  assert.deepEqual({mesh,packed},source);checks++;
  for(const opts of [{maxTinyAreaBoost:Infinity},{maxTinyAreaBoost:5},{tinyIslandAreaFraction:-1},{packingOrder:'banana'}]){assert.throws(()=>uv.packAtlas(raw,opts),/allocation/);checks++;}
  console.log(`${checks} area allocation checks passed: original small island >900x share; normalized density ratio 1; large-first placement; <=2x area boost; no mutation.`);

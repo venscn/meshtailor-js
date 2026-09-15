@@ -6,19 +6,19 @@ export type PackingMethod = 'auto'|'maxrects'|'shelf';
 export interface PackOptions { neighborHints?:{a:number;b:number;weight:number}[]; normalizationReferenceArea?:number; packingOrder?:'area'|'legacy'; tinyIslandAreaFraction?:number; maxTinyAreaBoost?:number; /** Internal common texel density for multiple pages. */ fixedScale?:number; padding:number; rotate:boolean; rotationSteps:number; packing?:PackingMethod }
 export interface AtlasPacking {packed:PackedChart[]; occupancy:number; boxOccupancy:number; scale:number; padding:number; packingMethod:'maxrects'|'shelf'; packingReport?:{order:'area'|'legacy';placementOrder:number[];searchAttempts:number;failedFits:number;areaBoosts:{id:number;factor:number}[]}}
 interface Rect {x:number;y:number;w:number;h:number}
-interface OrientedChart {id:number;coords:Map<number,[Vec2,Vec2,Vec2]>;w:number;h:number;area:number}
+interface OrientedChart {id:number;coords:Map<number,[Vec2,Vec2,Vec2]>;w:number;h:number;area:number;surfaceArea:number}
 interface Placement extends Rect { id:number;rotated:boolean }
 function bounds(points:Vec2[]){let x=Infinity,y=Infinity,X=-Infinity,Y=-Infinity;for(const p of points){x=Math.min(x,p[0]);y=Math.min(y,p[1]);X=Math.max(X,p[0]);Y=Math.max(Y,p[1]);}return{x,y,w:X-x,h:Y-y};}
 /** Area normalization gives all islands the SAME mean texel density. Never scale U/V independently. */
 function orient(chart:RawChart,steps:number,boost=1):OrientedChart{
   const values=[...chart.faceUVs.values()],points=values.flat();let area=0;
   for(const [a,b,c]of values)area+=Math.abs((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]))*.5;
-  if(!(area>0&&chart.area3D>0))throw new Error('Cannot pack zero-area chart.');
+  if(!(area>0&&chart.area3D>0&&Number.isFinite(area)&&Number.isFinite(chart.area3D)))throw new Error('Cannot pack zero-area chart.');
   const density=Math.sqrt(chart.area3D*boost/area);let best={angle:0,box:bounds(points),score:Infinity};
   for(let i=0;i<steps;i++){const angle=i/steps*Math.PI/2,c=Math.cos(angle),s=Math.sin(angle),box=bounds(points.map(([x,y])=>[x*c-y*s,x*s+y*c]));if(box.w*box.h<best.score)best={angle,box,score:box.w*box.h};}
   const c=Math.cos(best.angle),s=Math.sin(best.angle),coords=new Map<number,[Vec2,Vec2,Vec2]>();
   for(const [fi,uv]of chart.faceUVs)coords.set(fi,uv.map(([x,y])=>[(x*c-y*s-best.box.x)*density,(x*s+y*c-best.box.y)*density] as Vec2) as [Vec2,Vec2,Vec2]);
-  return{id:chart.id,coords,w:best.box.w*density,h:best.box.h*density,area:chart.area3D*boost};
+  return{id:chart.id,coords,w:best.box.w*density,h:best.box.h*density,area:chart.area3D*boost,surfaceArea:chart.area3D};
 }
 function indexHints(hints:NonNullable<PackOptions['neighborHints']>){
   const result=new Map<number,{id:number;weight:number}[]>();
@@ -32,7 +32,7 @@ const contains=(a:Rect,b:Rect)=>b.x>=a.x-1e-12&&b.y>=a.y-1e-12&&b.x+b.w<=a.x+a.w
  * cannot nest concave polygons; it is a heuristic, NOT an optimal atlas solver. */
 function attempt(charts:OrientedChart[],scale:number,pad:number,rotate:boolean,sort:number,work?:UVWork,areaFirst=false,hints:NonNullable<PackOptions['neighborHints']>=[]):Placement[]|null{
   const placementIndex=new Map<number,Placement>(),nearby=indexHints(hints);
-  const ordered=[...charts].sort((a,b)=>areaFirst?(b.area-a.area||b.w*b.h-a.w*a.h||a.id-b.id):sort===0?Math.max(b.w,b.h)-Math.max(a.w,a.h)||b.area-a.area:b.w*b.h-a.w*a.h||b.area-a.area);
+  const ordered=[...charts].sort((a,b)=>areaFirst?(b.surfaceArea-a.surfaceArea||b.area-a.area||b.w*b.h-a.w*a.h||a.id-b.id):sort===0?Math.max(b.w,b.h)-Math.max(a.w,a.h)||b.area-a.area:b.w*b.h-a.w*a.h||b.area-a.area);
   let free:Rect[]=[{x:0,y:0,w:1,h:1}];const placements:Placement[]=[];
   for(const ch of ordered){work?.check();let best:Placement|null=null,bestShort=Infinity,bestLong=Infinity;
     for(const rect of free)for(const r of rotate?[false,true]:[false]){
@@ -62,8 +62,8 @@ function shelfAttempt(charts:OrientedChart[],scale:number,pad:number,rotate:bool
   const placementIndex=new Map<number,Placement>(),nearby=indexHints(hints);
   const ordered=charts.map(ch=>{
     const rotated=rotate&&ch.h>ch.w;
-    return {id:ch.id,area:ch.area,w:(rotated?ch.h:ch.w)*scale+2*pad,h:(rotated?ch.w:ch.h)*scale+2*pad,rotated};
-  }).sort((a,b)=>areaFirst?(b.area-a.area||b.w*b.h-a.w*a.h||a.id-b.id):sort===0?b.h-a.h||b.w-a.w:b.w*b.h-a.w*a.h||b.h-a.h);
+    return {id:ch.id,area:ch.area,surfaceArea:ch.surfaceArea,w:(rotated?ch.h:ch.w)*scale+2*pad,h:(rotated?ch.w:ch.h)*scale+2*pad,rotated};
+  }).sort((a,b)=>areaFirst?(b.surfaceArea-a.surfaceArea||b.area-a.area||b.w*b.h-a.w*a.h||a.id-b.id):sort===0?b.h-a.h||b.w-a.w:b.w*b.h-a.w*a.h||b.h-a.h);
   const shelves:{y:number;h:number;x:number}[]=[],placements:Placement[]=[];let top=0;
   for(const ch of ordered){work?.check();
     let best=-1,w=ch.w,h=ch.h,r=ch.rotated,waste=Infinity;
@@ -88,6 +88,7 @@ export function packAtlas(charts:RawChart[],options:Partial<PackOptions>={},work
   const opts={padding:.003,rotate:true,rotationSteps:12,packing:'auto' as PackingMethod,packingOrder:'area' as const,tinyIslandAreaFraction:0,maxTinyAreaBoost:1,...options};
   if(!['area','legacy'].includes(opts.packingOrder)||!Number.isFinite(opts.tinyIslandAreaFraction)||opts.tinyIslandAreaFraction<0||opts.tinyIslandAreaFraction>.1||!Number.isFinite(opts.maxTinyAreaBoost)||opts.maxTinyAreaBoost<1||opts.maxTinyAreaBoost>4)throw new Error('Invalid area allocation settings. Tiny AREA boost must be 1..4.');
   if(!charts.length)throw new Error('Cannot pack empty atlas.');
+  if(opts.normalizationReferenceArea!==undefined&&!(Number.isFinite(opts.normalizationReferenceArea)&&opts.normalizationReferenceArea>0))throw new Error('Invalid reference surface area.');
   if(!Number.isFinite(opts.padding)||opts.padding<0||opts.padding>=.1||!Number.isInteger(opts.rotationSteps)||opts.rotationSteps<1||opts.rotationSteps>90)throw new Error('Invalid atlas packing options.');
   if(!['auto','maxrects','shelf'].includes(opts.packing))throw new Error('Invalid atlas packing method.');
   if(new Set(charts.map(c=>c.id)).size!==charts.length)throw new Error('Duplicate atlas chart IDs.');
