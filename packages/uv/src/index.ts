@@ -26,3 +26,4 @@ export * from './chart-merge.js';
 export * from './atlas-pages.js';
 export * from './postprocess.js';
 export * from './area-audit.js';
+export * from './spatial-neighbors.js';

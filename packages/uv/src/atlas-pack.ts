@@ -3,7 +3,7 @@ import type { Vec2 } from '@meshtailor/mesh-core';
 import type { PackedChart } from './preview.js';
 export interface RawChart {id:number; faceUVs:Map<number,[Vec2,Vec2,Vec2]>; area3D:number}
 export type PackingMethod = 'auto'|'maxrects'|'shelf';
-export interface PackOptions { packingOrder?:'area'|'legacy'; tinyIslandAreaFraction?:number; maxTinyAreaBoost?:number; /** Internal common texel density for multiple pages. */ fixedScale?:number; padding:number; rotate:boolean; rotationSteps:number; packing?:PackingMethod }
+export interface PackOptions { neighborHints?:{a:number;b:number;weight:number}[]; normalizationReferenceArea?:number; packingOrder?:'area'|'legacy'; tinyIslandAreaFraction?:number; maxTinyAreaBoost?:number; /** Internal common texel density for multiple pages. */ fixedScale?:number; padding:number; rotate:boolean; rotationSteps:number; packing?:PackingMethod }
 export interface AtlasPacking {packed:PackedChart[]; occupancy:number; boxOccupancy:number; scale:number; padding:number; packingMethod:'maxrects'|'shelf'; packingReport?:{order:'area'|'legacy';placementOrder:number[];searchAttempts:number;failedFits:number;areaBoosts:{id:number;factor:number}[]}}
 interface Rect {x:number;y:number;w:number;h:number}
 interface OrientedChart {id:number;coords:Map<number,[Vec2,Vec2,Vec2]>;w:number;h:number;area:number}
@@ -20,17 +20,20 @@ function orient(chart:RawChart,steps:number,boost=1):OrientedChart{
   for(const [fi,uv]of chart.faceUVs)coords.set(fi,uv.map(([x,y])=>[(x*c-y*s-best.box.x)*density,(x*s+y*c-best.box.y)*density] as Vec2) as [Vec2,Vec2,Vec2]);
   return{id:chart.id,coords,w:best.box.w*density,h:best.box.h*density,area:chart.area3D*boost};
 }
+function neighborCost(id:number,x:number,y:number,w:number,h:number,placed:Placement[],hints:NonNullable<PackOptions['neighborHints']>):number{
+  let total=0,weight=0;for(const link of hints){const other=link.a===id?link.b:link.b===id?link.a:undefined;if(other===undefined)continue;const p=placed.find(v=>v.id===other);if(!p)continue;total+=link.weight*Math.hypot(x+w/2-p.x-p.w/2,y+h/2-p.y-p.h/2);weight+=link.weight;}return weight?total/weight:0;
+}
 const contains=(a:Rect,b:Rect)=>b.x>=a.x-1e-12&&b.y>=a.y-1e-12&&b.x+b.w<=a.x+a.w+1e-12&&b.y+b.h<=a.y+a.h+1e-12;
 /** Independent MaxRects best-short-side-fit implementation. Bounding rectangles
  * cannot nest concave polygons; it is a heuristic, NOT an optimal atlas solver. */
-function attempt(charts:OrientedChart[],scale:number,pad:number,rotate:boolean,sort:number,work?:UVWork,areaFirst=false):Placement[]|null{
+function attempt(charts:OrientedChart[],scale:number,pad:number,rotate:boolean,sort:number,work?:UVWork,areaFirst=false,hints:NonNullable<PackOptions['neighborHints']>=[]):Placement[]|null{
   const ordered=[...charts].sort((a,b)=>areaFirst?(b.area-a.area||b.w*b.h-a.w*a.h||a.id-b.id):sort===0?Math.max(b.w,b.h)-Math.max(a.w,a.h)||b.area-a.area:b.w*b.h-a.w*a.h||b.area-a.area);
   let free:Rect[]=[{x:0,y:0,w:1,h:1}];const placements:Placement[]=[];
   for(const ch of ordered){work?.check();let best:Placement|null=null,bestShort=Infinity,bestLong=Infinity;
     for(const rect of free)for(const r of rotate?[false,true]:[false]){
       const w=(r?ch.h:ch.w)*scale+2*pad,h=(r?ch.w:ch.h)*scale+2*pad;
       if(w>rect.w+1e-12||h>rect.h+1e-12)continue;
-      const short=Math.min(rect.w-w,rect.h-h),long=Math.max(rect.w-w,rect.h-h);
+      const short=Math.min(rect.w-w,rect.h-h)+.08*neighborCost(ch.id,rect.x,rect.y,w,h,placements,hints),long=Math.max(rect.w-w,rect.h-h);
       if(short<bestShort-1e-12||Math.abs(short-bestShort)<1e-12&&long<bestLong){best={id:ch.id,x:rect.x,y:rect.y,w,h,rotated:r};bestShort=short;bestLong=long;}
     }
     if(!best)return null;placements.push(best);const used=best,next:Rect[]=[];
@@ -50,7 +53,7 @@ function attempt(charts:OrientedChart[],scale:number,pad:number,rotate:boolean,s
  * The same pre-oriented shapes, common texel density, gutter and uniform scale
  * are retained. This heuristic may leave more space than polygon nesting.
  */
-function shelfAttempt(charts:OrientedChart[],scale:number,pad:number,rotate:boolean,sort:number,work?:UVWork,areaFirst=false):Placement[]|null{
+function shelfAttempt(charts:OrientedChart[],scale:number,pad:number,rotate:boolean,sort:number,work?:UVWork,areaFirst=false,hints:NonNullable<PackOptions['neighborHints']>=[]):Placement[]|null{
   const ordered=charts.map(ch=>{
     const rotated=rotate&&ch.h>ch.w;
     return {id:ch.id,area:ch.area,w:(rotated?ch.h:ch.w)*scale+2*pad,h:(rotated?ch.w:ch.h)*scale+2*pad,rotated};
@@ -63,7 +66,7 @@ function shelfAttempt(charts:OrientedChart[],scale:number,pad:number,rotate:bool
       for(let turn=0;turn<(rotate?2:1);turn++){
         const cw=turn?ch.h:ch.w,cheight=turn?ch.w:ch.h;
         if(cheight>row.h+1e-12||row.x+cw>1+1e-12)continue;
-        const score=(row.h-cheight)*cw+(1-row.x-cw)*1e-6;
+        const score=(row.h-cheight)*cw+(1-row.x-cw)*1e-6+.02*neighborCost(ch.id,row.x,row.y,cw,cheight,placements,hints);
         if(score<waste){waste=score;best=i;w=cw;h=cheight;r=turn?!ch.rotated:ch.rotated;}
       }
     }
@@ -87,10 +90,10 @@ export function packAtlas(charts:RawChart[],options:Partial<PackOptions>={},work
   if(opts.packing==='maxrects'&&charts.length>1024)throw new Error('MaxRects is limited to 1024 islands. Choose auto/shelf for large atlases.');
   const packingMethod=opts.packing==='auto'?(charts.length>256?'shelf':'maxrects'):opts.packing;
   const place=packingMethod==='shelf'?shelfAttempt:attempt;
-  const totalArea=charts.reduce((sum,c)=>sum+c.area3D,0),boosts=charts.map(c=>({id:c.id,factor:Math.max(1,Math.min(opts.maxTinyAreaBoost,totalArea*opts.tinyIslandAreaFraction/c.area3D))}));
+  const totalArea=charts.reduce((sum,c)=>sum+c.area3D,0),boosts=charts.map(c=>({id:c.id,factor:Math.max(1,Math.min(opts.maxTinyAreaBoost,(opts.normalizationReferenceArea??totalArea)*opts.tinyIslandAreaFraction/c.area3D))}));
   const raw=charts.map((c,i)=>{uvProgress(work,{stage:'orient',detail:'按表面积统一纹素密度与旋转方向',current:i+1,total:charts.length,unit:'岛'});return orient(c,opts.rotate?opts.rotationSteps:1,boosts[i]!.factor);});
   let best:Placement[]|null=null,bestScale=0,searchAttempts=0,failedFits=0;
-  const run=(scale:number,sort:number)=>{searchAttempts++;const p=place(raw,scale,opts.padding,opts.rotate,sort,work,opts.packingOrder==='area');if(!p)failedFits++;return p;};
+  const run=(scale:number,sort:number)=>{searchAttempts++;const p=place(raw,scale,opts.padding,opts.rotate,sort,work,opts.packingOrder==='area',opts.neighborHints??[]);if(!p)failedFits++;return p;};
   if(opts.fixedScale!==undefined){
     if(!(opts.fixedScale>0&&Number.isFinite(opts.fixedScale)))throw new Error('Invalid fixed atlas scale.');
     for(let sort=0;sort<2&&!best;sort++){best=run(opts.fixedScale,sort);if(best)bestScale=opts.fixedScale;}

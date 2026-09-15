@@ -14,7 +14,7 @@ export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
 }
-export interface UnwrapResult extends AtlasPacking { pageReport?:PageReport; merge?:MergeReport; fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
+export interface UnwrapResult extends AtlasPacking { spatialReport?:import('./spatial-neighbors.js').SpatialReport; pageReport?:PageReport; merge?:MergeReport; fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
 export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
 export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,chartPolicy:'large',stretchAreaPercentile:.99,maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
 export function recommendUnwrap(mesh:MeshData,goal:ChartGoal='large'):{options:UnwrapOptions;analysis:MeshAnalysis;regions:RegionOptions;reasons:string[]}{

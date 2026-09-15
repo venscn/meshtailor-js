@@ -1,11 +1,12 @@
+import {buildSpatialNeighbors,type SpatialOptions,type SpatialReport} from './spatial-neighbors.js';
 import type {MeshData} from '@meshtailor/mesh-core';
 import {packAtlas,type RawChart,type AtlasPacking,type PackOptions} from './atlas-pack.js';
 import {buildChartGraph,chartAffinity} from './chart-adjacency.js';
 import {uvProgress,type UVWork} from './work.js';
-export interface PageOptions {atlasPageMode?:'single'|'adjacency'|'components';atlasPageCount?:number}
+export interface PageOptions extends SpatialOptions {atlasPageMode?:'single'|'adjacency'|'components'|'spatial';atlasPageCount?:number}
 export interface AtlasPage {id:number;charts:number[];faces:number;sourceMaterials:string[];occupancy:number;boxOccupancy:number;scale:number}
-export interface PageReport {mode:'single'|'adjacency'|'components';requested:number;actual:number;geometryComponents:number|null;retainedSharedBoundaryRatio:number;pages:AtlasPage[]}
-export interface PagedAtlas extends AtlasPacking {pageReport?:PageReport}
+export interface PageReport {mode:'single'|'adjacency'|'components'|'spatial';requested:number;actual:number;geometryComponents:number|null;retainedSharedBoundaryRatio:number;pages:AtlasPage[]}
+export interface PagedAtlas extends AtlasPacking {pageReport?:PageReport;spatialReport?:SpatialReport}
 /** New-atlas page grouping: a maximum-affinity spanning forest. Strong shared
  * geometric boundaries stay on the same page preferentially. No UV proximity,
  * source-material enumeration, or welding is used to infer connectivity.
@@ -13,17 +14,19 @@ export interface PagedAtlas extends AtlasPacking {pageReport?:PageReport}
  * the caller explicitly selects single-page packing. */
 export function packConnectedAtlas(mesh:MeshData,raw:RawChart[],opts:Partial<PackOptions>&PageOptions={},work?:UVWork):PagedAtlas {
   const mode=opts.atlasPageMode??'single',requested=opts.atlasPageCount??2;
-  if(!['single','adjacency','components'].includes(mode)||!Number.isInteger(requested)||requested<1||requested>64)throw new Error('Atlas pages: choose single/adjacency/components and a page target of 1..64.');
+  if(!['single','adjacency','components','spatial'].includes(mode)||!Number.isInteger(requested)||requested<1||requested>64)throw new Error('Atlas pages: choose single/adjacency/components and a page target of 1..64.');
+  const spatialReport=buildSpatialNeighbors(mesh,raw,opts,work);
+  opts={...opts,normalizationReferenceArea:raw.reduce((sum,c)=>sum+c.area3D,0),neighborHints:opts.spatialNeighbors===false?[]:spatialReport.links.map(l=>({a:l.a,b:l.b,weight:l.score}))};
   if(mode==='single'){
     const p=packAtlas(raw,opts,work);
     // A NEW single atlas also needs a new export domain. Retaining old material
     // domains would make Extract split a cross-material stitched island again.
-    return {...p,packed:p.packed.map(c=>({...c,atlasPage:0,uvSpace:'atlas-page-1',uvSpaceName:'UV 页 1',displayOffset:[0,0] as [number,number]})),pageReport:{mode,requested:1,actual:1,geometryComponents:null,retainedSharedBoundaryRatio:1,pages:[{id:0,charts:raw.map(c=>c.id),faces:raw.reduce((s,c)=>s+c.faceUVs.size,0),sourceMaterials:[...new Set(raw.flatMap(c=>[...c.faceUVs.keys()].map(fi=>mesh.faces[fi]!.uvSpace??'default')))],occupancy:p.occupancy,boxOccupancy:p.boxOccupancy,scale:p.scale}]}};
+    return {...p,spatialReport,packed:p.packed.map(c=>({...c,atlasPage:0,uvSpace:'atlas-page-1',uvSpaceName:'UV 页 1',displayOffset:[0,0] as [number,number]})),pageReport:{mode,requested:1,actual:1,geometryComponents:null,retainedSharedBoundaryRatio:1,pages:[{id:0,charts:raw.map(c=>c.id),faces:raw.reduce((s,c)=>s+c.faceUVs.size,0),sourceMaterials:[...new Set(raw.flatMap(c=>[...c.faceUVs.keys()].map(fi=>mesh.faces[fi]!.uvSpace??'default')))],occupancy:p.occupancy,boxOccupancy:p.boxOccupancy,scale:p.scale}]}};
   }
   const graph=buildChartGraph(mesh,raw.map(c=>({id:c.id,faces:[...c.faceUVs.keys()]})),undefined,work),parent=new Map(raw.map(c=>[c.id,c.id]));
   const root=(i:number):number=>{let r=i;while(parent.get(r)!==r)r=parent.get(r)!;while(parent.get(i)!==i){const n=parent.get(i)!;parent.set(i,r);i=n;}return r;};
   let remaining=raw.length;
-  const links=[...graph.links].sort((a,b)=>chartAffinity(b,graph.boundaries)-chartAffinity(a,graph.boundaries)||b.length-a.length||a.a-b.a||a.b-b.b);
+  const links=mode==='spatial'?[...spatialReport.links].sort((a,b)=>b.score-a.score||a.a-b.a||a.b-b.b):[...graph.links].sort((a,b)=>chartAffinity(b,graph.boundaries)-chartAffinity(a,graph.boundaries)||b.length-a.length||a.a-b.a||a.b-b.b);
   // Compute the actual connected lower bound independently of requested page count.
   for(const l of links){const a=root(l.a),b=root(l.b);if(a!==b){parent.set(b,a);remaining--;}}
   const components=remaining;for(const c of raw)parent.set(c.id,c.id);remaining=raw.length;
@@ -41,5 +44,5 @@ export function packConnectedAtlas(mesh:MeshData,raw:RawChart[],opts:Partial<Pac
   const packed=equal.flatMap((p,i)=>p.packed.map(c=>({...c,atlasPage:i,uvSpace:`atlas-page-${i+1}`,uvSpaceName:`UV 页 ${i+1}`,displayOffset:[(i%cols)*1.15,Math.floor(i/cols)*1.15] as [number,number]})));
   let shared=0,retained=0;for(const l of graph.links){shared+=l.length;if(root(l.a)===root(l.b))retained+=l.length;}
   const pages=equal.map((p,i)=>({id:i,charts:ordered[i]!.map(c=>c.id),faces:ordered[i]!.reduce((s,c)=>s+c.faceUVs.size,0),sourceMaterials:[...new Set(ordered[i]!.flatMap(c=>[...c.faceUVs.keys()].map(fi=>mesh.faces[fi]!.uvSpace??'default')))],occupancy:p.occupancy,boxOccupancy:p.boxOccupancy,scale:p.scale}));
-  return {packed,occupancy:equal.reduce((s,p)=>s+p.occupancy,0)/equal.length,boxOccupancy:equal.reduce((s,p)=>s+p.boxOccupancy,0)/equal.length,scale:commonScale,padding:equal[0]!.padding,packingMethod:equal.some(p=>p.packingMethod==='shelf')?'shelf':'maxrects',pageReport:{mode,requested,actual:pages.length,geometryComponents:components,retainedSharedBoundaryRatio:shared?retained/shared:1,pages}};
+  return {packed,spatialReport,packingReport:{order:opts.packingOrder??'area',placementOrder:equal.flatMap(p=>p.packingReport?.placementOrder??[]),searchAttempts:equal.reduce((n,p)=>n+(p.packingReport?.searchAttempts??0),0),failedFits:equal.reduce((n,p)=>n+(p.packingReport?.failedFits??0),0),areaBoosts:equal.flatMap(p=>p.packingReport?.areaBoosts??[])},occupancy:equal.reduce((s,p)=>s+p.occupancy,0)/equal.length,boxOccupancy:equal.reduce((s,p)=>s+p.boxOccupancy,0)/equal.length,scale:commonScale,padding:equal[0]!.padding,packingMethod:equal.some(p=>p.packingMethod==='shelf')?'shelf':'maxrects',pageReport:{mode,requested,actual:pages.length,geometryComponents:components,retainedSharedBoundaryRatio:shared?retained/shared:1,pages}};
 }
