@@ -30,6 +30,11 @@ try{
  let stopped=0;assert.throws(()=>uv.mergeAdjacentCharts(mesh,raw,seams,uv.DEFAULT_UNWRAP,[],{check(){if(++stopped>4)throw new uv.UVWorkStopped('cancel');},report(){}}),/cancel/);checks++;
  const material=structuredClone(mesh);material.faces.slice(2).forEach(f=>f.uvSpace='metal');
  const m=uv.mergeAdjacentCharts(material,raw,seams,{...uv.DEFAULT_UNWRAP,mergeOptions:{respectMaterials:true}});assert.equal(m.raw.length,2);checks++;
+ const cross=uv.postprocessUV(material,packed,seams,'stitch');
+ assert.equal(cross.packed.length,1);const exported=core.parseOBJ(core.meshToOBJ(uv.meshWithPreviewUV(material,cross.packed))),ss=await c.load('packages/chaining-seams/src/index.js');
+ assert.equal(uv.buildCharts(exported,ss.extractSeamEdgesFromUV(exported)).length,1,'new atlas must not resplit along old material domains');checks++;
+ assert.deepEqual(cross.pageReport.pages[0].sourceMaterials,['cloth','metal']);checks++;
+ const noChange=structuredClone(packed);noChange.forEach(p=>p.atlasPage=0);const ident=uv.meshWithPreviewUV(mesh,noChange);assert.ok(ident.faces.every(f=>f.uvSpace==='atlas-page-1'));checks++;
  const generated=uv.unwrapMesh(mesh,seams,{...uv.DEFAULT_UNWRAP,postMerge:true});assert.equal(generated.packed.length,1);assert.equal(generated.merge.before,6);checks++;
  const cone=core.makeComplexExample('gear','low'),run=uv.unwrapMesh(cone,new Set(),{...uv.DEFAULT_UNWRAP,initialSegmentation:'connected',postMerge:true});
  assert.equal(run.packed.reduce((s,c)=>s+c.faceUVs.size,0),cone.faces.length);for(const p of run.packed)assert.ok(uv.checkUVTriangles([...p.faceUVs.values()]).valid);checks++;

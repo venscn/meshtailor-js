@@ -219,7 +219,7 @@ export function meshWithPreviewUV(mesh: MeshData, packed: PackedChart[]): MeshDa
   if (all.size !== mesh.faces.length) throw new Error('Incomplete atlas.');
   const atlasPages=new Map<number,number>();for(const chart of packed)if(chart.atlasPage!==undefined)for(const fi of chart.faceUVs.keys())atlasPages.set(fi,chart.atlasPage);
   const identities=new Map<string,number>();
-  const original=mesh.faces.every((f,i)=>f.uvs?.every((p,k)=>p?.every((v,a)=>v===all.get(i)![k]![a])));
+  const original=!packed.some(c=>c.atlasPage!==undefined)&&mesh.faces.every((f,i)=>f.uvs?.every((p,k)=>p?.every((v,a)=>v===all.get(i)![k]![a])));
   return { ...mesh, faces: mesh.faces.map((f, i) => {
     const values = all.get(i)!;
     if (values.some(p => p.length !== 2 || !p.every(Number.isFinite))) throw new Error('Invalid UVs for export.');

@@ -55,6 +55,7 @@ function splitDisks(local:CutMesh,maxFaces:number,limitNormals:boolean,work?:UVW
 }
 export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Partial<UnwrapOptions>={},work?:UVWork):UnwrapResult{
   const opts={...(options.chartPolicy==='legacy'?LEGACY_UNWRAP:recommendUnwrap(input,options.chartPolicy??'large').options),...options};
+  if(opts.initialSegmentation!==undefined&&!['regions','connected'].includes(opts.initialSegmentation)||opts.postMerge!==undefined&&typeof opts.postMerge!=='boolean')throw new Error('Invalid pre/post segmentation settings.');
   if(!Number.isFinite(opts.stretchAreaPercentile??1)||(opts.stretchAreaPercentile??1)<.9||(opts.stretchAreaPercentile??1)>1)throw new Error('Stretch area percentile must be 0.9..1.');
   if(!['large','balanced','legacy'].includes(opts.chartPolicy??''))throw new Error('Invalid chart policy.');
   if(!['auto','lscm','tutte'].includes(opts.method)||typeof opts.autoCut!=='boolean'||typeof opts.rotate!=='boolean'||!Number.isFinite(opts.padding)||opts.padding<0||opts.padding>=.1||!Number.isInteger(opts.rotationSteps)||opts.rotationSteps<1||opts.rotationSteps>90)throw new Error('Invalid UV solver or packing settings.');
@@ -125,7 +126,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     if(direction(f)===direction(g))effective.add(key);
   }
   const addedSeams=[...effective].filter(e=>!seams.has(e));
-  if(addedSeams.length)warnings.push(`自动新增 ${addedSeams.length} 条 UV 裁切边（原接缝保留），用于拓扑修复、控制求解规模或避免无效 UV。新增边已用于动画、2D 与导出。`);
+  if(addedSeams.length)warnings.push(`自动新增 ${addedSeams.length} 条 UV 裁切边（未启用后处理时保留原接缝；后处理移除量另列），用于拓扑修复、控制求解规模或避免无效 UV。新增边已用于动画、2D 与导出。`);
   const fallbacks=diagnostics.filter(d=>d.method==='tutte').length;if(fallbacks)warnings.push(`${fallbacks} 个岛使用凸边界 Tutte；优先有效映射，可能有较大拉伸。`);
   fragmentation.outputCharts=raw.length;fragmentation.tinyCharts=raw.filter(c=>c.faceUVs.size<16).length;
   warnings.push(`碎片诊断：输入 ${fragmentation.inputComponents} 个几何连通分量 → ${fragmentation.initialCharts} 个初始区域 → ${raw.length} 个最终岛（${fragmentation.tinyCharts} 个小于16面）。补切原因：${JSON.stringify(fragmentation.reasons)}。详细事件可导出诊断。`);

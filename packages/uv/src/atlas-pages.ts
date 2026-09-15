@@ -4,7 +4,7 @@ import {buildChartGraph,chartAffinity} from './chart-adjacency.js';
 import {uvProgress,type UVWork} from './work.js';
 export interface PageOptions {atlasPageMode?:'single'|'adjacency'|'components';atlasPageCount?:number}
 export interface AtlasPage {id:number;charts:number[];faces:number;sourceMaterials:string[];occupancy:number;boxOccupancy:number;scale:number}
-export interface PageReport {mode:'single'|'adjacency'|'components';requested:number;actual:number;geometryComponents:number;retainedSharedBoundaryRatio:number;pages:AtlasPage[]}
+export interface PageReport {mode:'single'|'adjacency'|'components';requested:number;actual:number;geometryComponents:number|null;retainedSharedBoundaryRatio:number;pages:AtlasPage[]}
 export interface PagedAtlas extends AtlasPacking {pageReport?:PageReport}
 /** New-atlas page grouping: a maximum-affinity spanning forest. Strong shared
  * geometric boundaries stay on the same page preferentially. No UV proximity,
@@ -14,7 +14,12 @@ export interface PagedAtlas extends AtlasPacking {pageReport?:PageReport}
 export function packConnectedAtlas(mesh:MeshData,raw:RawChart[],opts:Partial<PackOptions>&PageOptions={},work?:UVWork):PagedAtlas {
   const mode=opts.atlasPageMode??'single',requested=opts.atlasPageCount??2;
   if(!['single','adjacency','components'].includes(mode)||!Number.isInteger(requested)||requested<1||requested>64)throw new Error('Atlas pages: choose single/adjacency/components and a page target of 1..64.');
-  if(mode==='single')return packAtlas(raw,opts,work);
+  if(mode==='single'){
+    const p=packAtlas(raw,opts,work);
+    // A NEW single atlas also needs a new export domain. Retaining old material
+    // domains would make Extract split a cross-material stitched island again.
+    return {...p,packed:p.packed.map(c=>({...c,atlasPage:0,uvSpace:'atlas-page-1',uvSpaceName:'UV 页 1',displayOffset:[0,0] as [number,number]})),pageReport:{mode,requested:1,actual:1,geometryComponents:null,retainedSharedBoundaryRatio:1,pages:[{id:0,charts:raw.map(c=>c.id),faces:raw.reduce((s,c)=>s+c.faceUVs.size,0),sourceMaterials:[...new Set(raw.flatMap(c=>[...c.faceUVs.keys()].map(fi=>mesh.faces[fi]!.uvSpace??'default')))],occupancy:p.occupancy,boxOccupancy:p.boxOccupancy,scale:p.scale}]}};
+  }
   const graph=buildChartGraph(mesh,raw.map(c=>({id:c.id,faces:[...c.faceUVs.keys()]})),undefined,work),parent=new Map(raw.map(c=>[c.id,c.id]));
   const root=(i:number):number=>{let r=i;while(parent.get(r)!==r)r=parent.get(r)!;while(parent.get(i)!==i){const n=parent.get(i)!;parent.set(i,r);i=n;}return r;};
   let remaining=raw.length;
