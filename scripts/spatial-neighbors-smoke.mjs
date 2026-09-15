@@ -14,6 +14,7 @@ try{
  assert.equal(uv.buildSpatialNeighbors(mesh,raw,{neighborDistanceRatio:.00001}).links.length,0);checks++;
  const a=uv.packConnectedAtlas(mesh,raw,{atlasPageMode:'spatial',atlasPageCount:1,neighborDistanceRatio:.003});
  assert.equal(a.pageReport.actual,2);assert.equal(a.packed.length,3);checks++;
+ assert.equal(a.pageReport.geometryComponents,3);assert.equal(a.pageReport.associationComponents,2);checks++;
  assert.equal(a.packed[0].atlasPage,a.packed[1].atlasPage);assert.notEqual(a.packed[0].atlasPage,a.packed[2].atlasPage);checks++;
  assert.equal(uv.mergeAdjacentCharts(mesh,raw,new Set(),uv.DEFAULT_UNWRAP).raw.length,3,'spatial association must not invent a weld');checks++;
  for(const page of a.pageReport.pages){const triangles=a.packed.filter(c=>page.charts.includes(c.id)).flatMap(c=>[...c.faceUVs.values()]);assert.ok(uv.checkUVTriangles(triangles).valid);checks++;}

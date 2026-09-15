@@ -14,7 +14,7 @@ const asset=arg('--asset')??'flight-helmet';
 if(!['flight-helmet','corset'].includes(asset))throw new Error('--asset must be flight-helmet or corset.');
 const file=resolve(arg('--file')??`apps/studio/public/assets/remote/${asset}-domains-v2.glb`);
 const only=arg('--target');if(only&&!['generated','source'].includes(only))throw new Error('--target must be generated or source.');
-const pipeline=arg('--pipeline')??'baseline';if(!['baseline','connected','stitch','repack'].includes(pipeline))throw new Error('--pipeline must be baseline, connected, stitch or repack.');
+const pipeline=arg('--pipeline')??'baseline';if(!['baseline','connected','stitch','repack','source-atlas'].includes(pipeline))throw new Error('--pipeline must be baseline, connected, stitch, repack or source-atlas.');
 const seconds=Number(arg('--budget-seconds')??120);if(!(seconds>=1&&seconds<=900))throw new Error('--budget-seconds must be 1..900.');
 // Three's fetch progress events are a browser API missing from Node, not a loader substitute.
 if(typeof globalThis.ProgressEvent==='undefined')Object.defineProperty(globalThis,'ProgressEvent',{value:class extends Event{lengthComputable=false;loaded=0;total=0;constructor(type:string,init:ProgressEventInit={}){super(type);Object.assign(this,init);}}});
@@ -24,7 +24,7 @@ const c=await compileCore();
 const report:{pipeline:string;asset:string;sha256:string;faces:number;vertices:number;importReport:unknown;results:unknown[]}={pipeline,asset:file,sha256:createHash('sha256').update(bytes).digest('hex'),faces:mesh.faces.length,vertices:mesh.positions.length,importReport,results:[]};
 try{
  let seed:UVSnapshot|undefined;
- const targets:UVTarget[]=pipeline==='stitch'||pipeline==='repack'?['source',pipeline]:(only?[only as UVTarget]:['generated','source']);
+ const targets:UVTarget[]=pipeline==='stitch'||pipeline==='repack'||pipeline==='source-atlas'?['source',pipeline]:(only?[only as UVTarget]:['generated','source']);
  for(const target of targets){
    if((target==='stitch'||target==='repack')&&!seed){report.results.push({target,ok:false,error:'Source stage failed; no replacement seed was invented.'});process.exitCode=1;continue;}
    const events:unknown[]=[],url=pathToFileURL(join(c.output,'apps/studio/src/workers/uv.worker.js')).href;
@@ -41,7 +41,7 @@ try{
    if(!result.ok){report.results.push({target,...result,progress:events});process.exitCode=1;continue;}
    const s=result.snapshot;if(target==='source')seed=s;const covered=new Set<number>();for(const chart of s.packed)for(const fi of chart.faceUVs.keys()){if(covered.has(fi))throw new Error('Duplicate source face in atlas');covered.add(fi);}
    if(covered.size!==mesh.faces.length||s.geometry.target.length!==mesh.faces.length*9||!s.geometry.target.every(Number.isFinite))throw new Error('Invalid or incomplete correspondence.');
-   report.results.push({target,ok:true,islands:s.packed.length,timing:s.timing,metrics:s.metrics,fragmentation:s.fragmentation,sourceAudit:s.sourceAudit,merge:s.merge,pageReport:s.pageReport,uvSpaces:s.geometry.atlas.spaces,warnings:s.warnings,progressMessages:events.length});
+   report.results.push({target,ok:true,islands:s.packed.length,timing:s.timing,metrics:s.metrics,fragmentation:s.fragmentation,sourceAudit:s.sourceAudit,sourceAreaAudit:s.sourceAreaAudit,areaAudit:s.areaAudit,spatialReport:s.spatialReport,packingReport:s.packingReport,merge:s.merge,pageReport:s.pageReport,uvSpaces:s.geometry.atlas.spaces,warnings:s.warnings,progressMessages:events.length});
  }
  console.log(JSON.stringify(report,null,2));const destination=arg('--report');if(destination)await writeFile(destination,JSON.stringify(report,null,2)+'\n');
 }finally{await c.cleanup();}
