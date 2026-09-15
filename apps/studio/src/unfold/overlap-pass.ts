@@ -40,11 +40,15 @@ uniform bool projected;
 out vec4 result;
 ${PACK}
 void main(){
+  // Evaluate derivatives before any per-pixel rejection: derivatives inside
+  // non-uniform branches/discard paths are not portable across GPU drivers.
+  vec3 tangentNormal=cross(dFdx(world),dFdy(world));
+  float normalLength=length(tangentNormal);
   ivec2 pixel=ivec2(gl_FragCoord.xy);
   vec4 stored=texelFetch(nearestNormal,pixel,0);
   if(stored.a<.5||decode24(texelFetch(nearestID,pixel,0).rgb)!=islandID)discard;
   if(!projected){
-    vec3 n=cross(dFdx(world),dFdy(world));float len=length(n);if(len<1e-20)discard;n/=len;
+    if(normalLength<1e-20)discard;vec3 n=tangentNormal/normalLength;
     vec3 n0=normalize(stored.rgb*2.0-1.0);
     // A 2-degree normal gate rejects crossing faces even where their depths coincide.
     if(abs(dot(n,n0))<0.999390827)discard;
