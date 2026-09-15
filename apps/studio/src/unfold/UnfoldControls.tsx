@@ -9,7 +9,7 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
   const pages=Math.max(1,Math.ceil(islands.length/40)),current=Math.min(page,pages-1),visible=islands.slice(current*40,current*40+40);
   return <section className="unfold-controls">
     <h3>展开与检查</h3>
-    <label>UV 目标<select aria-label="UV target" value={target} onChange={e=>onTarget(e.target.value as UVTarget)}><option value="generated">重新展开与排布</option><option value="source">保留原始 UV</option></select></label>
+    <label>UV 目标<select aria-label="UV target" value={target} onChange={e=>onTarget(e.target.value as UVTarget)}><option value="generated">重新展开与排布</option><option value="source">保留原始 UV</option>{(target==='stitch'||target==='repack')&&<option value={target}>{target==='stitch'?'当前邻岛缝合结果':'当前重排结果'}</option>}</select></label>
     <label>播放范围<select aria-label="Unfold scope" value={p.scope} onChange={e=>p.changeScope(e.target.value as UnfoldScope)}><option value="all">全部 UV 岛</option><option value="single">单个 UV 岛</option><option value="selected">多选 UV 岛</option></select></label>
     <details open className="island-selector">
       <summary>UV 岛 <span className="count">{p.active.length} / {p.all.length}</span></summary>

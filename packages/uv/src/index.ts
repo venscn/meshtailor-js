@@ -24,3 +24,4 @@ export * from './chart-adjacency.js';
 export * from './source-audit.js';
 export * from './chart-merge.js';
 export * from './atlas-pages.js';
+export * from './postprocess.js';

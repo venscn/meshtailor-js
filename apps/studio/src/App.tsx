@@ -11,7 +11,7 @@ import { UVCanvas } from './UVCanvas';
 import { importMeshFiles, type SceneImportOptions } from './importers';
 import type { SeamJob, SeamResult } from './workers/seam.worker';
 import { prepareViewportMesh } from './viewport-math';
-import { meshWithPreviewUV, recommendUnwrap, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
+import { meshWithPreviewUV, recommendUnwrap, DEFAULT_UNWRAP, type UnwrapOptions, type PackedChart } from '@meshtailor/uv';
 import { makeUnfoldDemo, makeHingeDemo } from './unfold/demo';
 import { useUVSnapshot } from './unfold/useUVSnapshot';
 import { useUnfoldPlayer } from './unfold/useUnfoldPlayer';
@@ -55,10 +55,11 @@ export default function App(){
   // Unfolding always freezes the COMPLETE seam set. Traversal progress must not repack its target mid-animation.
   const snapshotTarget = uvTarget;
   const snapshotEdges = previewEdges(snapshotTarget,seamEdges,activeEdges,viewMode==='traversal'&&liveUV);
+  const [uvSeed,setUVSeed]=useState<PackedChart[]|undefined>();
   const [uvConfig,setUVConfig]=useState<UnwrapOptions>(()=>recommendUnwrap(mesh).options);
-  const uvState = useUVSnapshot(mesh,snapshotEdges,snapshotTarget,uvConfig);
+  const uvState = useUVSnapshot(mesh,snapshotEdges,snapshotTarget,uvConfig,uvSeed);
   const snapshot = uvState.snapshot;
-  const displaySeams=useMemo(()=>new Set(snapshotTarget==='source'?(snapshot?.seams??[]):[...activeEdges,...(snapshot?.addedSeams??[])]),[activeEdges,snapshot,snapshotTarget]);
+  const displaySeams=useMemo(()=>new Set((snapshotTarget!=='generated'||!!snapshot?.merge)?(snapshot?.seams??[]):[...activeEdges,...(snapshot?.addedSeams??[])]),[activeEdges,snapshot,snapshotTarget]);
   const player = useUnfoldPlayer(snapshot);
   const chartCount = snapshot?.packed.length??null;
   const uvStatus=uvState.loading?describeUVProgress(uvState.progress,uvState.elapsedMs):uvState.error;
@@ -79,7 +80,7 @@ export default function App(){
   const begin=(message:string)=>{cancel();setLoadError(null);setBusy(message);return operation.current;};
   const replaceMesh=(m:MeshData,report:MeshImportReport|null=null)=>{
     prepareViewportMesh(m); // Reject malformed input before React/topology/Three see it.
-    setMesh(m);setImportReport(report);setUVConfig(recommendUnwrap(m).options);setUVTarget('generated');setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
+    setUVSeed(undefined);setMesh(m);setImportReport(report);setUVConfig(recommendUnwrap(m).options);setUVTarget('generated');setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
   };
   const loadUnfoldDemo=()=>{cancel();setLoadError(null);try{const demo=makeUnfoldDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setUVTarget('generated');setViewMode('unfold');setToolTab('animation');setNotice('六岛立方体：拖动 0–100% 进度，观察同色编号的面片移入对应 UV 岛。');}catch(error){setLoadError(String(error));}};
   const loadHingeDemo=()=>{cancel();setLoadError(null);try{const demo=makeHingeDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice('三块折角带：点“分块陈列”，再缓慢拖动 28–70%，看各铰链真实转动。');}catch(error){setLoadError(String(error));}};
@@ -123,7 +124,7 @@ export default function App(){
         const result=event.data;if(!result.ok){setLoadError(result.error);return;}
         try{
           const edges=new Set(result.edges),fs=buildGenerationFrames(mesh,result.chains);
-          setUVTarget(seamTarget(kind));
+          setUVSeed(undefined);setUVTarget(seamTarget(kind));
           if(kind.startsWith('auto-')&&result.parameters)setUVConfig({...result.parameters,timeBudgetMs:uvConfig.timeBudgetMs,padding:uvConfig.padding});
           setSeamEdges(edges);setChains(result.chains);setFrames(fs);setShowAllSeams(false);setStep(fs.length?0:-1);setPlaying(false);
           setNotice(kind==='uv-seams'?`已读取原始 UV 接缝：${edges.size} 条边。显示和动画直接使用原 UV，不重新分割。`:`输入 ${result.analysis?.components??'?'} 个独立连通部件（不跨部件焊接）；${result.regionCount??'传统'} 个候选分区，合并 ${result.mergedCount??0} 个小区域；${edges.size} 条接缝。最终岛数由 UV 有效性检查决定。`);
@@ -134,6 +135,17 @@ export default function App(){
       worker.onerror=event=>{worker.terminate();if(id===operation.current){setBusy(null);setLoadError('Seam worker failed: '+event.message);}};
       worker.postMessage({kind,mesh,options:{strategy:uvConfig.chartPolicy==='legacy'?'legacy':'adaptive',goal:uvConfig.chartPolicy==='balanced'?'balanced':'large',regionOptions:{...uvConfig.regionOptions,maxChartFaces:uvConfig.maxChartFaces},curvatureQuantile:curvature,structuralRings:rings,maxEdges}} satisfies SeamJob);
     }catch(error){setBusy(null);setLoadError(String(error));}
+  };
+  const processUV=(operation:'connected'|'stitch'|'repack',config:UnwrapOptions)=>{
+    if(operation!=='connected'&&!snapshot)return;
+    cancel();setLoadError(null);setViewMode('unfold');setShowAllSeams(true);setPlaying(false);
+    if(operation==='connected'){
+      setUVSeed(undefined);setUVConfig({...config,initialSegmentation:'connected',postMerge:true});setSeamEdges(new Set());setChains([]);setFrames([]);setStep(-1);setUVTarget('generated');
+      setNotice('前处理：从连通块开始，仅在必要时补切，再执行验证式邻岛缝合。原 UV 保留在模型中；新 UV 需要重烘焙。');
+    }else{
+      setUVSeed(snapshot!.packed);setSeamEdges(new Set(snapshot!.seams));setUVConfig({...config});setUVTarget(operation);
+      setNotice(operation==='stitch'?'后处理：基于当前岛和共享接缝尝试缝合，不重新运行 baseline。':'只重排当前岛；不改变岛数，不把同页摆放冒充缝合。');
+    }
   };
   const seek=(next:number)=>{setPlaying(false);setStep(Math.max(0,Math.min(frames.length-1,next)));};
   const togglePlayback=()=>{if(!frames.length)return;if(!playing&&step>=frames.length-1)setStep(0);setPlaying(!playing);};
@@ -181,9 +193,9 @@ export default function App(){
           <label>Structural cross-sections <b>{rings}</b><input type="range" min="0" max="5" step="1" value={rings} onChange={e=>setRings(+e.target.value)}/></label>
           <label>Baseline edge budget <input aria-label="Edge budget" type="number" min="50" max="20000" step="50" value={maxEdges} onChange={e=>{const n=Math.floor(+e.target.value);if(n>=50&&n<=20000)setMaxEdges(n);}}/></label><small>仅限制传统 baseline；自动大块模式不截断区域边界，不抽稀网格。</small></details>
         </section>
-            <UVSolverControls value={uvConfig} onChange={setUVConfig} snapshot={snapshot} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
+            <UVSolverControls value={uvConfig} onChange={setUVConfig} snapshot={snapshot} onProcess={processUV} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
             <UVJobStatus state={uvState} hasSource={hasSourceUV} onUseSource={()=>{setUVTarget('source');setViewMode('unfold');if(snapshotTarget==='source')uvState.retry();}}/>
-            <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.7',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,fragmentation:snapshot?.fragmentation,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
+            <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.7',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,fragmentation:snapshot?.fragmentation,sourceAudit:snapshot?.sourceAudit,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
           </div>
           <div id="tools-animation" role="tabpanel" aria-labelledby="tool-animation" hidden={toolTab!=='animation'}>
             <UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={setUVTarget} onExport={exportTargetUV} onDemo={loadUnfoldDemo} onHingeDemo={loadHingeDemo}/>

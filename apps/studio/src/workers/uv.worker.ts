@@ -1,10 +1,10 @@
 import type { MeshData } from '@meshtailor/mesh-core';
 import { extractSeamEdgesFromUV } from '@meshtailor/chaining-seams';
-import { buildCharts, buildUnfoldGeometry, unwrapMesh, sourceUVPreview, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
-export type UVTarget = 'generated' | 'source';
+import { auditSourceUV, postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildCharts, buildUnfoldGeometry, unwrapMesh, sourceUVPreview, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
+export type UVTarget = 'generated' | 'source' | 'stitch' | 'repack';
 export interface UVSnapshot {
   packed:PackedChart[]; geometry:UnfoldGeometry; seams:string[]; target:UVTarget; warnings:string[];
-  fragmentation?:FragmentationReport;
+  fragmentation?:FragmentationReport; sourceAudit?:SourceUVAudit; merge?:MergeReport; pageReport?:PageReport; removedSeams?:string[];
   addedSeams?:string[]; diagnostics?:ChartDiagnostic[];
   metrics?:{occupancy:number;boxOccupancy:number;padding:number;validated:boolean;elapsedMs:number;packingMethod?:string};
   timing?:{elapsedMs:number;stages:Record<string,number>};
@@ -12,15 +12,15 @@ export interface UVSnapshot {
 export type UVResult = {ok:true;snapshot:UVSnapshot}|{ok:false;error:string;code?:'timeout'|'invalid'};
 export type UVJobProgress = UVProgress & {elapsedMs:number};
 export type UVMessage = UVResult | {type:'progress';progress:UVJobProgress};
-export interface UVJob {mesh:MeshData;edges:string[];target:UVTarget;config?:Partial<UnwrapOptions>}
+export interface UVJob {seedCharts?:PackedChart[];mesh:MeshData;edges:string[];target:UVTarget;config?:Partial<UnwrapOptions>}
 export const DEFAULT_UV_BUDGET_MS=120_000;
 self.onmessage=(event:MessageEvent<UVJob>)=>{
   const start=performance.now();let last:UVJobProgress|undefined;
   try{
-    const {mesh,edges,target,config}=event.data;
+    const {mesh,edges,target,config,seedCharts}=event.data;
     const budget=config?.timeBudgetMs??DEFAULT_UV_BUDGET_MS;
     if(!Number.isFinite(budget)||budget<1||budget>900_000)throw new Error('UV time budget must be between 1 and 900000 milliseconds.');
-    if(target!=='generated'&&target!=='source')throw new Error('Unknown UV target.');
+    if(!['generated','source','stitch','repack'].includes(target))throw new Error('Unknown UV target.');
     let sentAt=-Infinity,stageAt=start,stage='validate';const stages:Record<string,number>={};
     const work:UVWork={
       check(){if(performance.now()-start>budget)throw new UVWorkStopped(`UV 计算达到 ${(budget/1000).toFixed(1)} 秒预算。最后阶段：${last?.detail??'初始化'}。原网格未修改，可调整预算后重试或使用网格原始 UV。`);},
@@ -38,11 +38,17 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     if(target==='source'){
       work.report({stage:'charts',detail:'提取原始 UV 岛（不重新参数化或排布）'});
       const packed=sourceUVPreview(mesh,buildCharts(mesh,seams),config?.sourceUVLayout??'materials');
+      const sourceAudit=auditSourceUV(packed,work);
       work.check();work.report({stage:'correspondence',detail:'原始 UV 已读取，建立动画对应',facesDone:mesh.faces.length,facesTotal:mesh.faces.length,islandsDone:packed.length});
-      snapshot={packed,geometry:buildUnfoldGeometry(mesh,packed,seams,work),seams:[...seams],target,warnings:[config?.sourceUVLayout==='overlay'?'诊断叠加视图：所有材质共用画框，跨材质重叠不等于原 UV 错误。':'原 UV 按材质分框显示；展示偏移不会写入导出，每框仍是各自的原始坐标。', '同一材质内的原始重叠、镜像复用或退化仍原样保留。分框不是修复或统一重排；重新展开需要重新烘焙贴图。']};
+      snapshot={packed,sourceAudit,geometry:buildUnfoldGeometry(mesh,packed,seams,work),seams:[...seams],target,warnings:[config?.sourceUVLayout==='overlay'?'诊断叠加视图：所有材质共用画框，跨材质重叠不等于原 UV 错误。':'原 UV 按材质分框显示；展示偏移不会写入导出，每框仍是各自的原始坐标。', '同一材质内的原始重叠、镜像复用或退化仍原样保留。分框不是修复或统一重排；重新展开需要重新烘焙贴图。']};
+      if(sourceAudit.hasOverlaps||sourceAudit.hasDegenerate)snapshot.warnings.unshift('原始 UV 实测检查：'+sourceAudit.domains.filter(d=>d.overlapPairs||d.degenerate).map(d=>`${d.name}：${d.overlapCountCapped?'至少 ':''}${d.overlapPairs} 对正面积重叠、${d.degenerate} 个退化面（${d.islands} 个真实岛）`).join('；')+'。少量可见轮廓不代表岛数减少；复用/堆叠是否有意需结合原贴图判断。');
+    }else if(target==='stitch'||target==='repack'){
+      if(!seedCharts?.length)throw new Error('后处理需要当前已完成的 UV 快照。先生成或提取 UV，再执行邻岛缝合/只重排。');
+      const result=postprocessUV(mesh,seedCharts,seams,target,config,work);seams=new Set(result.seams);
+      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,merge:result.merge,pageReport:result.pageReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
     }else{
       const result=unwrapMesh(mesh,seams,config,work);seams=new Set(result.seams);
-      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,fragmentation:result.fragmentation,addedSeams:result.addedSeams,diagnostics:result.diagnostics,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
+      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,fragmentation:result.fragmentation,merge:result.merge,pageReport:result.pageReport,removedSeams:result.merge?.removedSeams,addedSeams:result.addedSeams,diagnostics:result.diagnostics,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
     }
     const rig=snapshot.geometry.hinge;
     if(rig?.islands.some(i=>i.targetOrientation<0))snapshot.warnings.push('镜像 UV 岛保持原坐标；动画在刚性转向阶段对齐其正反面，避免最后形变阶段翻面。');
