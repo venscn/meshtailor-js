@@ -69,12 +69,13 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <label>目标页数（软目标）<input id="atlas-page-count" type="number" min="1" max="64" value="2"></label>
 <label>初始分割<select id="initial-segmentation"><option value="regions">法线区域（原策略）</option><option value="connected">几何连通块优先</option></select></label>
 <label>生成后自动缝合<input id="post-merge" type="checkbox"></label>
-<label>缝合尝试预算<input id="merge-attempts" type="number" min="0" max="2000" value="128"></label>
+<label>缝合尝试预算<input id="merge-attempts" type="number" min="0" max="2000" placeholder="自动 128–512"></label>
 <label>目标岛数<input id="merge-target" type="number" min="1" value="1"></label>
 <label>后处理保留材质边界<input id="merge-materials" type="checkbox"></label>
 <small id="audit-summary" role="status"></small><small id="post-summary" role="status"></small>
 </details>
 <details open><summary>面积与空间邻居</summary>
+<label>局部修复无效原 UV<input id="source-repair" type="checkbox" checked></label><small>只重做含内部重叠/混合翻面/退化的原岛；其余形状保留，原输入不变。</small><p id="repair-summary" role="status"></p>
 <label>整理时尝试缝合<input id="source-merge" type="checkbox" checked></label>
 <label>放置顺序<select id="packing-order"><option value="area">3D 面积由大到小</option><option value="legacy">旧长边 / 包围盒策略</option></select></label>
 <label>小岛目标面积占比 %<input id="tiny-fraction" type="number" min="0" max="10" step=".01" value="0"></label>
