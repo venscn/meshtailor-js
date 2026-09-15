@@ -1,0 +1,43 @@
+PASS DPR 1: GPU shaders and framebuffer complete; one face is one layer
+PASS DPR 1: shared triangle edge is not double counted
+PASS DPR 1: identical same-island triangles give two layers across the full footprint
+PASS DPR 1: partial overlap marks only intersection, not entire faces
+PASS DPR 1: three identical faces give three layers and visible magenta hatch
+PASS DPR 1: opposite winding still reveals two layers
+PASS DPR 1: different islands at same coordinates are not reported as intra-island overlap
+PASS DPR 1: ordinary front/back occlusion is excluded by near-plane mode
+PASS DPR 1: projected mode deliberately includes occlusion and says so
+PASS DPR 1: crossing nonparallel faces are not flagged as coplanar
+PASS DPR 1: near-coincident faces inside the configured tolerance are counted
+PASS DPR 1: parallel faces outside the tolerance are not counted
+PASS DPR 1: oblique manual camera preserves near-plane classification
+PASS DPR 1: turning diagnostics off releases targets and preserves all source/target positions and camera
+PASS DPR 1: re-enable recreates the buffers, without moving or repacking anything
+PASS DPR 1: solid unselected foreground occludes diagnostics; hidden foreground does not
+PASS DPR 1: pose updates use current positions, no stale overlap from previous frame
+PASS DPR 1: framebuffer and depth state restored after diagnostic composition
+PASS DPR 1: diagnostic allocation/render failure never disables the mesh viewport
+PASS DPR 1: off and on explicitly retries diagnostic failure
+PASS DPR 1: no uncaught errors or silently failed diagnostics
+PASS DPR 2: GPU shaders and framebuffer complete; one face is one layer
+PASS DPR 2: shared triangle edge is not double counted
+PASS DPR 2: identical same-island triangles give two layers across the full footprint
+PASS DPR 2: partial overlap marks only intersection, not entire faces
+PASS DPR 2: three identical faces give three layers and visible magenta hatch
+PASS DPR 2: opposite winding still reveals two layers
+PASS DPR 2: different islands at same coordinates are not reported as intra-island overlap
+PASS DPR 2: ordinary front/back occlusion is excluded by near-plane mode
+PASS DPR 2: projected mode deliberately includes occlusion and says so
+PASS DPR 2: crossing nonparallel faces are not flagged as coplanar
+PASS DPR 2: near-coincident faces inside the configured tolerance are counted
+PASS DPR 2: parallel faces outside the tolerance are not counted
+PASS DPR 2: oblique manual camera preserves near-plane classification
+PASS DPR 2: turning diagnostics off releases targets and preserves all source/target positions and camera
+PASS DPR 2: re-enable recreates the buffers, without moving or repacking anything
+PASS DPR 2: solid unselected foreground occludes diagnostics; hidden foreground does not
+PASS DPR 2: pose updates use current positions, no stale overlap from previous frame
+PASS DPR 2: framebuffer and depth state restored after diagnostic composition
+PASS DPR 2: diagnostic allocation/render failure never disables the mesh viewport
+PASS DPR 2: off and on explicitly retries diagnostic failure
+PASS DPR 2: no uncaught errors or silently failed diagnostics
+PASS 42 cases

@@ -1,0 +1,18 @@
+PASS new controls default to near-coplanar without pausing the player
+PASS real Worker builds one saddle UV island with valid final diamond
+PASS original noncoplanar saddle is not falsely marked
+PASS production hinge flatten creates a visible same-island 2-layer region
+PASS diagnostic toggles leave current pose, camera, snapshot and selection alone
+PASS tone, opacity and tolerance controls do not rebuild UV or timeline
+PASS two-stage inspection and repeat click still cancel only triangle
+PASS UV endpoint has no intra-island overlap and matches all target coordinates
+PASS reverse scrubbing restores overlap without stale UV-endpoint mask
+PASS controls during actual playback keep advancing the same queue
+PASS manual camera gesture stays independent of diagnostic redraw
+PASS high-DPI resize obeys buffer caps and the shared canvas remains stable
+PASS actual context loss/restoration rebuilds diagnostic resources and keeps camera
+PASS source mesh and endpoint buffer remain byte-identical after all diagnostics
+PASS zero-selection and re-selection do not retain overlap ink
+PASS legend never captures pointers or changes island selection
+PASS no unhandled errors
+PASS 17 cases

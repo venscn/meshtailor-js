@@ -1,0 +1,12 @@
+PASS near-coplanar is default; not indiscriminate X-ray counting
+PASS off is preserved
+PASS invalid mode and NaN values fall back
+PASS tolerance and alpha are bounded
+PASS face tones can be disabled without switching detection
+PASS texture allocation is capped across extreme viewports
+PASS small views remain full resolution
+PASS device maximum texture size is obeyed
+PASS source scale uses longest side not island count or hinge spread
+PASS empty geometry scale stays finite
+PASS linear depth precision floor is explicit
+PASS legend never calls projected occlusion a collision

@@ -1,0 +1,187 @@
+{
+  "timeUTC": "2026-09-15T05:57:16.774928+00:00",
+  "tests": [
+    {
+      "name": "overlap-policy",
+      "command": [
+        "node",
+        "scripts/overlap-policy-smoke.mjs",
+        "--report",
+        "validation/v0.4.9/overlap-policy.json"
+      ],
+      "exitCode": 0,
+      "seconds": 1.631
+    },
+    {
+      "name": "overlap-gpu",
+      "command": [
+        "node",
+        "scripts/overlap-browser-smoke.mjs",
+        "--report",
+        "validation/v0.4.9/overlap-gpu.json"
+      ],
+      "exitCode": 0,
+      "seconds": 13.954
+    },
+    {
+      "name": "overlap-workbench",
+      "command": [
+        "node",
+        "scripts/overlap-lab-browser-smoke.mjs",
+        "--report",
+        "validation/v0.4.9/overlap-workbench.json"
+      ],
+      "exitCode": 0,
+      "seconds": 5.535
+    },
+    {
+      "name": "selection-browser",
+      "command": [
+        "node",
+        "scripts/selection-browser-smoke.mjs",
+        "--report",
+        "validation/v0.4.9/selection-browser.json"
+      ],
+      "exitCode": 0,
+      "seconds": 9.471
+    },
+    {
+      "name": "camera-browser",
+      "command": [
+        "node",
+        "scripts/camera-browser-smoke.mjs",
+        "--report",
+        "validation/v0.4.9/camera-browser.json"
+      ],
+      "exitCode": 0,
+      "seconds": 40.745
+    },
+    {
+      "name": "relay-browser",
+      "command": [
+        "node",
+        "scripts/relay-browser-smoke.mjs",
+        "--report",
+        "validation/v0.4.9/relay-browser.json"
+      ],
+      "exitCode": 0,
+      "seconds": 20.571
+    },
+    {
+      "name": "motion-browser",
+      "command": [
+        "node",
+        "scripts/motion-browser-smoke.mjs",
+        "--report",
+        "validation/v0.4.9/motion-browser.json"
+      ],
+      "exitCode": 0,
+      "seconds": 18.081
+    },
+    {
+      "name": "unfold-browser",
+      "command": [
+        "node",
+        "scripts/unfold-browser-smoke.mjs",
+        "--skip-browser-worker",
+        "--report",
+        "validation/v0.4.9/unfold-browser.json"
+      ],
+      "exitCode": 0,
+      "seconds": 17.551
+    },
+    {
+      "name": "core",
+      "command": [
+        "node",
+        "scripts/core-smoke.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 2.74
+    },
+    {
+      "name": "hinge",
+      "command": [
+        "node",
+        "scripts/hinge-smoke.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 1.67
+    },
+    {
+      "name": "selection",
+      "command": [
+        "node",
+        "scripts/selection-smoke.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 1.65
+    },
+    {
+      "name": "chart-merge",
+      "command": [
+        "node",
+        "scripts/chart-merge-smoke.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 1.926
+    },
+    {
+      "name": "atlas-pages",
+      "command": [
+        "node",
+        "scripts/atlas-pages-smoke.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 1.596
+    },
+    {
+      "name": "uv-worker",
+      "command": [
+        "node",
+        "scripts/uv-worker-smoke.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 2.832
+    },
+    {
+      "name": "layout",
+      "command": [
+        "node",
+        "scripts/layout-smoke.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 7.495
+    },
+    {
+      "name": "git-tools",
+      "command": [
+        "node",
+        "--test",
+        "scripts/tests/git-history-check.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 2.677
+    },
+    {
+      "name": "full-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 127,
+      "seconds": 0.204
+    },
+    {
+      "name": "full-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exitCode": 2,
+      "seconds": 0.746
+    }
+  ]
+}

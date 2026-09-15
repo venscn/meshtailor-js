@@ -1,48 +1,53 @@
-# Validation — v0.4.8
+# Validation — v0.4.9
 
-日期：2026-09-15。v0.4.7完整记录保存在 `VALIDATION-0.4.7.md`。本轮确实改变UV流水线，新增原UV跨岛重叠审计、连通优先入口、快照后处理/重排、经验证的邻岛缝合和连接感知新页分配。不是只改描述或展示。
+日期：2026-09-15。历史 v0.4.8 验证保存在 `VALIDATION-0.4.8.md`。本版修改生产WebGL显示、重叠设置与教学示例，不改UV/铰链几何算法。
 
-## 实际执行
+## 实际执行结果
 
-| 执行范围 | 结果 | 证据 |
-|---|---|---|
-| 25个核心/Worker套件 | 全部退出0 | `core-results.json` 及同名日志 |
-| chart-merge | 21项通过 | 真实邻接、保护边、预算、材质保护、事务失败、内折叠拒绝、回读、Low齿轮 |
-| atlas-pages | 14项通过 | 几何分组对照错列材质、软目标、单页/多页有效性、共同密度/留白、导出页和3D端点 |
-| optimization-quality | 4组网格通过 | `quality.json`，同代码保留原路径与连接优先/缝合的对照，不是4个真实资产 |
-| optimization-browser | 16项通过 | `browser-optimization.json`：真实Worker + WebGL + 离线UI，不是React |
-| selection-browser | 39项通过，退出0 | `browser-selection.json`：2D/3D输入、两级选择、取消、DPR与响应布局 |
-| camera-browser | 39项断言及报告完成 | `browser-camera.json`；所在组合命令在报告后清理阶段触及120秒外层预算，未收到该子命令最终退出码；不把清理超时隐瞒为完整进程退出0 |
-| Git工具 | 22项通过，退出0 | `git-tools.log` |
-| 5个修改的TSX/TS入口 | 语法转译成功 | `syntax.json`，不是依赖感知类型检查，不是React执行 |
+所有证据路径相对于 `validation/v0.4.9/`。日志只移除末尾多余空行以通过Git空白检查，命令输出内容不改写。仅本表列出的本轮执行可称为本轮通过，不沿用旧包数字充数。
 
-新增21/14项已包含在25个套件内，不能重复相加作总数。25个套件的首批外层组合命令达到160秒预算后，余下10个单独续跑完成，结果在同一JSON中汇总；不是把超时算成测试通过。每个列出的套件都实际得到退出0。
+| 套件 | 结果 | 证据 |
+|---|---:|---|
+| 重叠策略 | 12项，退出0 | `overlap-policy.json` |
+| 生产重叠GPU通道 | 42项，退出0 | `overlap-gpu.json`，DPR1/2、真实着色器/计数像素 |
+| 实际马鞍铰链与新控件 | 17项，退出0 | `overlap-workbench.json`，生产classic UV Worker与生产renderer |
+| 两级选择浏览器 | 39项，退出0 | `selection-browser.json` |
+| 自由相机浏览器 | 39项，退出0 | `camera-browser.json` |
+| 接力浏览器 | 28项，退出0 | `relay-browser.json` |
+| 静止跳过浏览器 | 28项，退出0 | `motion-browser.json` |
+| 通用原生WebGL | 24项通过，2项跳过，退出0 | `unfold-browser.json`，显式 `--skip-browser-worker` |
+| 核心 | 21项，退出0 | `core.log` |
+| 铰链 | 17项，退出0 | `hinge.log` |
+| 纯选择策略 | 20项，退出0 | `selection.log` |
+| 邻岛缝合 | 21项，退出0 | `chart-merge.log` |
+| 连接分页与导出 | 14项，退出0 | `atlas-pages.log` |
+| Node生产UV Worker | 4项，退出0 | `uv-worker.log` |
+| 真实布局 | 13项，退出0 | `layout.log` |
+| Git工具单元测试 | 22项，退出0 | `git-tools.log` |
+| 严格核心TS类型检查 | 退出0 | `strict-core-typecheck.log`（无输出） |
+| 3个修改TSX入口 | 0语法错误 | `tsx-syntax.json`，不是全量类型检查 |
+| 独立离线页面构建 | 退出0 | `lab-build.log` |
 
-浏览器是Linux Chromium + ANGLE/SwiftShader软件WebGL，不是用户设备的原生GPU。截图 `images/optimization-0.4.8.png` 是两片明确标记的合成测试面板，而非飞行头盔/服装人台。对应端点用真实渲染数据验证，不用截图相似代替数值断言。
+原生通用WebGL的2个module Worker检查因opaque-origin测试宿主被显式跳过，不计为通过。新的工作台套件在HTTP宿主运行真正的classic UV Worker并通过，并不替代Vite module Worker。测试全程是Linux Chromium + ANGLE/SwiftShader软件WebGL，不是硬件GPU实机认证。
 
-## 对照测量
+首批组合执行曾受工具单次时间上限影响；之后将每个套件作为独立进程运行并记录退出码，表中均有实际成功结果。`summary.json` 记录命令、耗时和退出状态；着色器导数求值被移至拒绝分支前之后，重叠GPU42项与工作台17项再次退出0并覆盖对应最终报告。截图按0.4.9标签重新生成。重复执行不重复相加计数。
 
-| Low网格 | 面数 | 原分割路径 | 新路径 | 合并前→后 | 新路径毫秒 | 新有效UV占用率 |
-|---|---:|---:|---:|---:|---:|---:|
-| 齿轮 | 1536 | 4 | 2 | 3→2 | 227 | 40.7% |
-| 程序服装 | 3072 | 10 | 1 | 1→1 | 203 | 33.5% |
-| 三叶结 | 2304 | 7 | 2 | 12→2 | 946 | 18.5% |
-| 多部件机械件 | 5632 | 31 | 8 | 45→8 | 2535 | 55.9% |
+## 针对用户问题的证据
 
-时间为本机单次同步UV计算，不是浏览器下载、导入、动画准备全流程，也不是性能保证。原机械件计算约233毫秒，所以合并明显增加开销。所有面保留，全部生成三角面和跨岛排布有效性经过检查，源mesh/UV不变，新atlas导出回读保持岛数。内置程序服装不是Corset。真实模型可能触及128次合并尝试、单岛面数或总时间预算。
+原生GPU套件验证了完全叠合2层、部分叠合、3层、反绕序、共享边不误报、不同岛不混计、普通前后遮挡在默认模式中排除且在明确的视线模式中计入、法向非平行拒绝、容差内外、相机转动、FBO状态恢复、禁用与显式错误重试。不是只检查着色器字符串存在。
 
-浏览器的合成例：源12岛、30对正面积重叠；只重排仍12岛，缝合接受10次得到2岛/2页；再次Extract恢复原来的12岛与30对重叠。当前快照被故意提供非法页数或内部折叠时会显式失败，旧完成结果保持，可重试；没有将折叠源UV静默视为有效。
+马鞍是4个相连三角形/1个UV岛，使用真实铰链树：铰链末段出现橙纹，最终有效菱形UV无重叠提示。测试验证源与目标端点、动画播放不被设置打断、相机和面选择不变。真实WebGL上下文丢失/恢复后验证重叠资源、几何和相机；离线宿主恢复后错误横幅的清理沿用测试宿主处理，不将该项扩写成完整Studio恢复UI已认证。
 
-## 构建与未认证范围
+截图 `docs/images/overlap-0.4.9.png` 为本版真实离线工作台：条纹只在重叠三角区域，右侧显示无重叠菱形UV。没有生成式设计图，没有拿合成例冒充头盔/服装人台。
 
-`npm install` 在25秒外层预算退出124，依赖未安装成功；日志为空不能自行编造npm错误信息。另行网络检查曾见DNS失败，但不是将此写成这次空日志中的内容。`npm run build` 实际退出127，`vite: not found`；`npm run typecheck` 退出2，缺少node类型定义。命令状态和输出均保留。没有把语法转译当成完整类型检查。
+## 构建、依赖和未验证边界
 
-完整React/Vite主Studio、React hook和module Worker联调、真实FBX/glTF导入、本轮macOS/Windows/Safari实机测试未认证。新增入口确实在主UI代码中接好，但通过的是生产核心与离线工作台，不替代React集成验证。
+`npm run build` 实际退出127，`vite: not found`，日志 `full-build.log`；`npm run typecheck` 实际退出2，缺少node类型定义，日志 `full-typecheck.log`。另行 `curl -I --max-time 6 https://registry.npmjs.org/react` 返回6，无法解析域名，日志 `registry-check.log`；不能把这一curl错误说成npm安装日志。
 
-真实Corset/FlightHelmet几何二进制仍未成功获取。扩展的 `test:sample-asset --pipeline baseline|connected|stitch|repack` 已写入工程并通过语法转译，但没有在真实资产上执行；不得宣称这两个模型已减少到表中岛数。
+本轮未再次成功安装依赖，未通过完整React/Vite构建、React主页面端到端、FBX/glTF导入或module Worker联调。主Studio和离线页均接入同一生产渲染与选择模块，但两者不是同一个UI运行时。严格核心TS不包含React TSX依赖检查，语法转译也不证明React hooks或props全量正确。
 
-新增浏览器测试开发时，曾在选中单岛后拿其已改变预览范围的整帧数据与“全岛完成”比较，断言不成立；修正为先独立检查完整端点，再验证先岛后面的选择行为。没有为此改变动画算法。相机进程批次清理超时的边界如上记录。
+没有测试真实Corset/FlightHelmet的二进制，亦未测试macOS/Windows/Safari/硬件GPU或真实显存耗尽。新通道是可见表层附近的近共面采样诊断，不是精确/全局几何交叠审计；非平行自交、深处和亚像素重叠可能不显示。
 
-## 交付检验
+## 最终交付
 
-内部记录对应提交前实测。发布采用现有历史的干净提交HEAD和新附注tag；最终ZIP解压、旧tag、逐文件一致性、bundle独立恢复及关键复跑单独写入外部交付验证文件，避免在尚未打包时预先宣称已验证最终ZIP。
+内部记录对应打包前实际测试。发布使用干净提交HEAD、新附注tag v0.4.9、保留旧tag；最终ZIP解压、跟踪文件一致性、Git发布检查与bundle独立恢复，以及从解压包重跑关键测试，单独记录在外部交付验证文件。不在尚未打包前预先写“最终ZIP已通过”。

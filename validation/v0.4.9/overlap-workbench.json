@@ -1,0 +1,122 @@
+{
+  "suite": "Actual saddle hinge + controls + production UV Worker and renderer",
+  "host": "Offline workbench, not React Studio",
+  "cases": [
+    {
+      "name": "new controls default to near-coplanar without pausing the player",
+      "passed": true
+    },
+    {
+      "name": "real Worker builds one saddle UV island with valid final diamond",
+      "passed": true,
+      "details": {
+        "name": "Saddle hinge overlap · 马鞍铰链重叠示例",
+        "faces": 4,
+        "islands": 1,
+        "valid": true,
+        "hinges": 4
+      }
+    },
+    {
+      "name": "original noncoplanar saddle is not falsely marked",
+      "passed": true,
+      "details": {
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 860,
+        "height": 589,
+        "error": 0
+      }
+    },
+    {
+      "name": "production hinge flatten creates a visible same-island 2-layer region",
+      "passed": true,
+      "details": {
+        "two": 38661,
+        "three": 0,
+        "max": 2,
+        "width": 860,
+        "height": 589,
+        "error": 0
+      }
+    },
+    {
+      "name": "diagnostic toggles leave current pose, camera, snapshot and selection alone",
+      "passed": true
+    },
+    {
+      "name": "tone, opacity and tolerance controls do not rebuild UV or timeline",
+      "passed": true
+    },
+    {
+      "name": "two-stage inspection and repeat click still cancel only triangle",
+      "passed": true
+    },
+    {
+      "name": "UV endpoint has no intra-island overlap and matches all target coordinates",
+      "passed": true,
+      "details": {
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 860,
+        "height": 589,
+        "error": 0
+      }
+    },
+    {
+      "name": "reverse scrubbing restores overlap without stale UV-endpoint mask",
+      "passed": true
+    },
+    {
+      "name": "controls during actual playback keep advancing the same queue",
+      "passed": true
+    },
+    {
+      "name": "manual camera gesture stays independent of diagnostic redraw",
+      "passed": true
+    },
+    {
+      "name": "high-DPI resize obeys buffer caps and the shared canvas remains stable",
+      "passed": true,
+      "details": {
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1656,
+        "height": 1265,
+        "error": 0
+      }
+    },
+    {
+      "name": "actual context loss/restoration rebuilds diagnostic resources and keeps camera",
+      "passed": true,
+      "details": {
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 860,
+        "height": 589,
+        "error": 0
+      }
+    },
+    {
+      "name": "source mesh and endpoint buffer remain byte-identical after all diagnostics",
+      "passed": true
+    },
+    {
+      "name": "zero-selection and re-selection do not retain overlap ink",
+      "passed": true
+    },
+    {
+      "name": "legend never captures pointers or changes island selection",
+      "passed": true
+    },
+    {
+      "name": "no unhandled errors",
+      "passed": true
+    }
+  ],
+  "passed": 17
+}
