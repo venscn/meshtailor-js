@@ -1,0 +1,25 @@
+{
+  "method": "Independent GEOS/Shapely STRtree polygon intersection on exported OBJ vt/f, not application UV checker",
+  "shapelyVersion": "2.1.2",
+  "absoluteUVAreaTolerance": 1e-14,
+  "assets": {
+    "Corset": {
+      "exportSHA256": "f853908a5905eae7784c77b6624257cda0071a377868a9a290281dfb55b247ff",
+      "triangles": 18324,
+      "intersectingCandidatePairsIncludingSharedEdges": 95760,
+      "positiveAreaOverlapPairsAboveTolerance": 0,
+      "maxIntersectionArea": 0.0,
+      "overlapExamples": [],
+      "seconds": 0.8
+    },
+    "FlightHelmet": {
+      "exportSHA256": "c5093cc9bafee0668732ae5ec874dc7f60dc8b828547a5ff9ec8aca0569ba7c9",
+      "triangles": 94722,
+      "intersectingCandidatePairsIncludingSharedEdges": 534284,
+      "positiveAreaOverlapPairsAboveTolerance": 0,
+      "maxIntersectionArea": 0.0,
+      "overlapExamples": [],
+      "seconds": 4.105
+    }
+  }
+}

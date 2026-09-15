@@ -1,0 +1,122 @@
+[
+  {
+    "suite": "core",
+    "exitCode": 0,
+    "seconds": 5.217
+  },
+  {
+    "suite": "complex",
+    "exitCode": 0,
+    "seconds": 6.215
+  },
+  {
+    "suite": "source-repair",
+    "exitCode": 0,
+    "seconds": 3.503
+  },
+  {
+    "suite": "chart-join",
+    "exitCode": 0,
+    "seconds": 3.264
+  },
+  {
+    "suite": "rigid-uv-join",
+    "exitCode": 0,
+    "seconds": 3.161
+  },
+  {
+    "suite": "chart-merge",
+    "exitCode": 0,
+    "seconds": 3.462
+  },
+  {
+    "suite": "source-atlas",
+    "exitCode": 0,
+    "seconds": 2.853
+  },
+  {
+    "suite": "area-allocation",
+    "exitCode": 0,
+    "seconds": 2.429
+  },
+  {
+    "suite": "spatial-neighbors",
+    "exitCode": 0,
+    "seconds": 2.588
+  },
+  {
+    "suite": "atlas-pages",
+    "exitCode": 0,
+    "seconds": 2.374
+  },
+  {
+    "suite": "unwrap-guards",
+    "exitCode": 0,
+    "seconds": 3.282
+  },
+  {
+    "suite": "parameterization",
+    "exitCode": 0,
+    "seconds": 2.43
+  },
+  {
+    "suite": "hinge",
+    "exitCode": 0,
+    "seconds": 2.256
+  },
+  {
+    "suite": "unfold",
+    "exitCode": 0,
+    "seconds": 2.998
+  },
+  {
+    "suite": "motion-geometry",
+    "exitCode": 0,
+    "seconds": 2.51
+  },
+  {
+    "suite": "motion-timing",
+    "exitCode": 0,
+    "seconds": 2.567
+  },
+  {
+    "suite": "schedule",
+    "exitCode": 0,
+    "seconds": 2.382
+  },
+  {
+    "suite": "camera-policy",
+    "exitCode": 0,
+    "seconds": 2.203
+  },
+  {
+    "suite": "selection",
+    "exitCode": 0,
+    "seconds": 2.36
+  },
+  {
+    "suite": "overlap-policy",
+    "exitCode": 0,
+    "seconds": 2.254
+  },
+  {
+    "suite": "optimization-quality",
+    "exitCode": 0,
+    "seconds": 13.479
+  },
+  {
+    "suite": "material-domain",
+    "exitCode": 0,
+    "seconds": 2.207
+  },
+  {
+    "suite": "boundary-stitch",
+    "exitCode": 0,
+    "seconds": 2.386
+  },
+  {
+    "suite": "source-layout",
+    "exitCode": 0,
+    "seconds": 2.034
+  }
+]

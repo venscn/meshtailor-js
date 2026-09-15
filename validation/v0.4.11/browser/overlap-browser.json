@@ -1,0 +1,840 @@
+{
+  "suite": "Production overlap GPU / exact pixel-layer counts",
+  "host": "Native renderer test host, not React Studio",
+  "softwareWebGL": true,
+  "cases": [
+    {
+      "name": "DPR 1: GPU shaders and framebuffer complete; one face is one layer",
+      "passed": true,
+      "details": {
+        "one": 197012,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: shared triangle edge is not double counted",
+      "passed": true,
+      "details": {
+        "one": 355216,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: identical same-island triangles give two layers across the full footprint",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 197012,
+        "three": 0,
+        "max": 2,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: partial overlap marks only intersection, not entire faces",
+      "passed": true,
+      "details": {
+        "one": 186858,
+        "two": 66225,
+        "three": 0,
+        "max": 2,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: three identical faces give three layers and visible magenta hatch",
+      "passed": true,
+      "details": {
+        "r": {
+          "one": 0,
+          "two": 0,
+          "three": 197012,
+          "max": 3,
+          "width": 1060,
+          "height": 680,
+          "error": 0,
+          "state": {
+            "mode": "coplanar",
+            "error": null,
+            "size": {
+              "width": 1060,
+              "height": 680
+            }
+          }
+        },
+        "color": {
+          "amber": 0,
+          "pink": 118770,
+          "error": 0
+        }
+      }
+    },
+    {
+      "name": "DPR 1: opposite winding still reveals two layers",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 197012,
+        "three": 0,
+        "max": 2,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: different islands at same coordinates are not reported as intra-island overlap",
+      "passed": true,
+      "details": {
+        "one": 197012,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: ordinary front/back occlusion is excluded by near-plane mode",
+      "passed": true,
+      "details": {
+        "one": 197012,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: projected mode deliberately includes occlusion and says so",
+      "passed": true,
+      "details": {
+        "one": 48002,
+        "two": 149010,
+        "three": 0,
+        "max": 2,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "projected",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: crossing nonparallel faces are not flagged as coplanar",
+      "passed": true,
+      "details": {
+        "one": 160078,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: near-coincident faces inside the configured tolerance are counted",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 197012,
+        "three": 0,
+        "max": 2,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: parallel faces outside the tolerance are not counted",
+      "passed": true,
+      "details": {
+        "one": 197012,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: oblique manual camera preserves near-plane classification",
+      "passed": true,
+      "details": {
+        "one": 53849,
+        "two": 96810,
+        "three": 0,
+        "max": 2,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: turning diagnostics off releases targets and preserves all source/target positions and camera",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 0,
+        "three": 0,
+        "max": 0,
+        "width": 0,
+        "height": 0,
+        "error": 0,
+        "state": {
+          "mode": "off",
+          "error": null,
+          "size": {
+            "width": 0,
+            "height": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: re-enable recreates the buffers, without moving or repacking anything",
+      "passed": true,
+      "details": {
+        "one": 53849,
+        "two": 96810,
+        "three": 0,
+        "max": 2,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: solid unselected foreground occludes diagnostics; hidden foreground does not",
+      "passed": true,
+      "details": {
+        "solid": {
+          "one": 0,
+          "two": 0,
+          "three": 0,
+          "max": 0,
+          "width": 1060,
+          "height": 680,
+          "error": 0,
+          "state": {
+            "mode": "coplanar",
+            "error": null,
+            "size": {
+              "width": 1060,
+              "height": 680
+            }
+          }
+        },
+        "hidden": {
+          "one": 0,
+          "two": 170446,
+          "three": 0,
+          "max": 2,
+          "width": 1060,
+          "height": 680,
+          "error": 0,
+          "state": {
+            "mode": "coplanar",
+            "error": null,
+            "size": {
+              "width": 1060,
+              "height": 680
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: pose updates use current positions, no stale overlap from previous frame",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 197012,
+        "three": 0,
+        "max": 2,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: framebuffer and depth state restored after diagnostic composition",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: diagnostic allocation/render failure never disables the mesh viewport",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: off and on explicitly retries diagnostic failure",
+      "passed": true,
+      "details": {
+        "one": 73687,
+        "two": 105921,
+        "three": 43121,
+        "max": 3,
+        "width": 1060,
+        "height": 680,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1060,
+            "height": 680
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 1: no uncaught errors or silently failed diagnostics",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: GPU shaders and framebuffer complete; one face is one layer",
+      "passed": true,
+      "details": {
+        "one": 572330,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: shared triangle edge is not double counted",
+      "passed": true,
+      "details": {
+        "one": 1031240,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: identical same-island triangles give two layers across the full footprint",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 572330,
+        "three": 0,
+        "max": 2,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: partial overlap marks only intersection, not entire faces",
+      "passed": true,
+      "details": {
+        "one": 542617,
+        "two": 193034,
+        "three": 0,
+        "max": 2,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: three identical faces give three layers and visible magenta hatch",
+      "passed": true,
+      "details": {
+        "r": {
+          "one": 0,
+          "two": 0,
+          "three": 572330,
+          "max": 3,
+          "width": 1808,
+          "height": 1159,
+          "error": 0,
+          "state": {
+            "mode": "coplanar",
+            "error": null,
+            "size": {
+              "width": 1808,
+              "height": 1159
+            }
+          }
+        },
+        "color": {
+          "amber": 0,
+          "pink": 519835,
+          "error": 0
+        }
+      }
+    },
+    {
+      "name": "DPR 2: opposite winding still reveals two layers",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 572330,
+        "three": 0,
+        "max": 2,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: different islands at same coordinates are not reported as intra-island overlap",
+      "passed": true,
+      "details": {
+        "one": 572330,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: ordinary front/back occlusion is excluded by near-plane mode",
+      "passed": true,
+      "details": {
+        "one": 572330,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: projected mode deliberately includes occlusion and says so",
+      "passed": true,
+      "details": {
+        "one": 139112,
+        "two": 433218,
+        "three": 0,
+        "max": 2,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "projected",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: crossing nonparallel faces are not flagged as coplanar",
+      "passed": true,
+      "details": {
+        "one": 465413,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: near-coincident faces inside the configured tolerance are counted",
+      "passed": true,
+      "details": {
+        "one": 56,
+        "two": 572274,
+        "three": 0,
+        "max": 2,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: parallel faces outside the tolerance are not counted",
+      "passed": true,
+      "details": {
+        "one": 572330,
+        "two": 0,
+        "three": 0,
+        "max": 1,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: oblique manual camera preserves near-plane classification",
+      "passed": true,
+      "details": {
+        "one": 156549,
+        "two": 281471,
+        "three": 0,
+        "max": 2,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: turning diagnostics off releases targets and preserves all source/target positions and camera",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 0,
+        "three": 0,
+        "max": 0,
+        "width": 0,
+        "height": 0,
+        "error": 0,
+        "state": {
+          "mode": "off",
+          "error": null,
+          "size": {
+            "width": 0,
+            "height": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: re-enable recreates the buffers, without moving or repacking anything",
+      "passed": true,
+      "details": {
+        "one": 156549,
+        "two": 281471,
+        "three": 0,
+        "max": 2,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: solid unselected foreground occludes diagnostics; hidden foreground does not",
+      "passed": true,
+      "details": {
+        "solid": {
+          "one": 0,
+          "two": 0,
+          "three": 0,
+          "max": 0,
+          "width": 1808,
+          "height": 1159,
+          "error": 0,
+          "state": {
+            "mode": "coplanar",
+            "error": null,
+            "size": {
+              "width": 1808,
+              "height": 1159
+            }
+          }
+        },
+        "hidden": {
+          "one": 0,
+          "two": 494784,
+          "three": 0,
+          "max": 2,
+          "width": 1808,
+          "height": 1159,
+          "error": 0,
+          "state": {
+            "mode": "coplanar",
+            "error": null,
+            "size": {
+              "width": 1808,
+              "height": 1159
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: pose updates use current positions, no stale overlap from previous frame",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 572330,
+        "three": 0,
+        "max": 2,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: framebuffer and depth state restored after diagnostic composition",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: diagnostic allocation/render failure never disables the mesh viewport",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: off and on explicitly retries diagnostic failure",
+      "passed": true,
+      "details": {
+        "one": 0,
+        "two": 572330,
+        "three": 0,
+        "max": 2,
+        "width": 1808,
+        "height": 1159,
+        "error": 0,
+        "state": {
+          "mode": "coplanar",
+          "error": null,
+          "size": {
+            "width": 1808,
+            "height": 1159
+          }
+        }
+      }
+    },
+    {
+      "name": "DPR 2: no uncaught errors or silently failed diagnostics",
+      "passed": true
+    }
+  ],
+  "passed": 42
+}

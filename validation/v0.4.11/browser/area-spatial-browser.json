@@ -1,0 +1,115 @@
+{
+  "suite": "Actual offline workbench: source organization, area ratios, spatial association and export",
+  "cases": [
+    {
+      "name": "New default Extract explicitly creates an organized atlas",
+      "passed": true
+    },
+    {
+      "name": "Raw inspect still restores all original islands and their overlap",
+      "passed": true
+    },
+    {
+      "name": "Build deliberately distorted source-area fixture (not Corset)",
+      "passed": true
+    },
+    {
+      "name": "Normalize while keeping disconnected pieces separate",
+      "passed": true
+    },
+    {
+      "name": "No overlap after real browser Worker packing",
+      "passed": true
+    },
+    {
+      "name": "Placement order is physical surface area descending and scale search is observable",
+      "passed": true,
+      "details": {
+        "order": "area",
+        "placementOrder": [
+          0,
+          1,
+          2
+        ],
+        "searchAttempts": 56,
+        "failedFits": 30,
+        "areaBoosts": []
+      }
+    },
+    {
+      "name": "Disconnected nearby surfaces receive spatial links without invented shared edges",
+      "passed": true,
+      "details": {
+        "groups": [
+          [
+            0,
+            1,
+            2
+          ]
+        ],
+        "links": [
+          {
+            "a": 1,
+            "b": 2,
+            "kind": "spatial",
+            "stitchable": false,
+            "distance": 0.0024937655860349794,
+            "support": 8,
+            "score": 0.49236284289276616
+          },
+          {
+            "a": 0,
+            "b": 2,
+            "kind": "spatial",
+            "stitchable": false,
+            "distance": 0.004987531172069848,
+            "support": 7,
+            "score": 0.38704021197007427
+          },
+          {
+            "a": 0,
+            "b": 1,
+            "kind": "spatial",
+            "stitchable": false,
+            "distance": 0.0024937655860348684,
+            "support": 4,
+            "score": 0.3282418952618462
+          }
+        ]
+      }
+    },
+    {
+      "name": "Island-first inspector shows current surface/UV allocation and neighbors",
+      "passed": true
+    },
+    {
+      "name": "Inspecting triangles still toggles without re-packing",
+      "passed": true
+    },
+    {
+      "name": "OBJ export and re-import keep the same new UV coordinates",
+      "passed": true
+    },
+    {
+      "name": "UV final animation endpoint uses exactly the same atlas",
+      "passed": true
+    },
+    {
+      "name": "Explicit tiny-detail area boost is capped at 2x",
+      "passed": true
+    },
+    {
+      "name": "Turning association off does not silently weld or merge anything",
+      "passed": true
+    },
+    {
+      "name": "Original source remains byte-for-byte identical in memory",
+      "passed": true
+    },
+    {
+      "name": "No unhandled browser exceptions and no horizontal layout overflow",
+      "passed": true
+    }
+  ],
+  "passed": 15
+}

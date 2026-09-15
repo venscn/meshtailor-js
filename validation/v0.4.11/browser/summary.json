@@ -1,0 +1,37 @@
+[
+  {
+    "suite": "camera-browser",
+    "exitCode": 0,
+    "seconds": 48.004
+  },
+  {
+    "suite": "relay-browser",
+    "exitCode": 0,
+    "seconds": 23.021
+  },
+  {
+    "suite": "motion-browser",
+    "exitCode": 0,
+    "seconds": 20.185
+  },
+  {
+    "suite": "selection-browser",
+    "exitCode": 0,
+    "seconds": 10.293
+  },
+  {
+    "suite": "overlap-browser",
+    "exitCode": 0,
+    "seconds": 13.16
+  },
+  {
+    "suite": "uv-optimization-browser",
+    "exitCode": 0,
+    "seconds": 4.488
+  },
+  {
+    "suite": "area-spatial-browser",
+    "exitCode": 0,
+    "seconds": 4.34
+  }
+]

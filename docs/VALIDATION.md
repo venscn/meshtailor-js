@@ -1,57 +1,72 @@
-# Validation — v0.4.10
+# Validation — v0.4.11
 
-日期：2026-09-15。旧记录完整保存在 `VALIDATION-0.4.9.md`。下表只列本轮实际执行，不用旧数字代替新回归。
+日期：2026-09-15。历史 v0.4.10 验证保存在 `VALIDATION-0.4.10.md`。本文件只报告本轮实际执行；源码构建、真实模型算法、离线浏览器、完整 Studio 分开。
 
-## 已执行的本轮回归
+## 输入身份
 
-证据路径相对于根目录 `validation/v0.4.10/`。
+唯一使用 `meshtailor-test-models(1).zip`（2,763,968字节，SHA256 `284decae81fda986f3c291bf4bebee473221b4eabe7078c65ed44adaf9ffb563`）。旧无 `(1)` 包不读取，不回退，不参与任何本轮统计。正确四文件现随包置于 `examples/verified-models/`，逐字节哈希门槛见专项脚本。
 
-| 套件 | 结果 | 证据 |
+## 真实模型与整张 atlas
+
+证据：`validation/v0.4.11/after-Corset-source-atlas.json`、`after-FlightHelmet-source-atlas.json`，对照旧 HEAD 的 `before-*.json`。
+
+| 项目 | Corset | FlightHelmet |
+|---|---:|---:|
+| 三角形（全部保留） | 18,324 | 94,722 |
+| 生产装配后连通块 | 75 | 85 |
+| 源 UV 岛 / 当前新 UV 岛 | 98 / **79** | 237 / **130** |
+| 修复的原 UV 岛 | #72、#73 | #6、#12 |
+| 接受共享边缝合 | 19 | 107 |
+| 新图最大平均密度比误差 | <1e-12 | <1e-12 |
+| 全图翻面 / 退化 / 正面积交叠 | **0 / 0 / 0** | **0 / 0 / 0** |
+| 导出OBJ重读岛数 | 79 | 130 |
+| 本次 Node Worker 记录的完整耗时 | 2.43秒 | 23.00秒 |
+
+这些耗时是本制作环境的单次记录，测试时存在其他并发工作，不是独占机器基准或用户机器性能保证。此前同代码执行的头盔Worker也曾约18.9秒。报告包含真实阶段耗时、面积、关联图、全部缝合事件、失败原因、输入未修改断言及导出检验；岛数不使用空间组数替代。
+
+### 独立导出几何检查
+
+除应用自己的 `checkUVTriangles`，还对**导出的OBJ**做了一次独立 GEOS/Shapely 2.1.2 的 STRtree + 三角形多边形求交检查。不是调用本工程UV检查器，也不是从截图猜测。
+
+Corset检查95,760对接触候选，头盔检查534,284对候选（含正常共享边）；两者交集最大面积均为0，超过 `1e-14 UV²` 容差的正面积重叠对均为0。检查报告绑定对应OBJ的SHA256，见 `independent-geometry-check.json`。此为制作环境的独立QA，不是JS工程的运行依赖；通用应用和自带回归不要求Python/Shapely。
+
+## 回归套件
+
+| 套件 | 本轮结果 | 证据 |
 |---|---:|---|
-| 面积审计、真实大岛优先、受限小岛增益 | 22项通过 | `area-allocation-smoke.log` |
-| 真实邻接与空间关联分离、分页与取消 | 17项通过 | `spatial-neighbors-smoke.log` |
-| 生产source-atlas Worker（非模拟算法） | 13项通过 | `source-atlas-smoke.log` |
-| 新入口/面积/邻居/导出真实浏览器 | 15项通过 | `area-spatial-browser.json` |
-| 旧前后处理工作流浏览器 | 16项通过 | `optimization-browser.json` |
-| 自由相机浏览器 | 39项通过 | `camera-browser.json` |
-| 逐岛接力浏览器 | 28项通过 | `relay-browser.json` |
-| 静止跳过浏览器 | 28项通过 | `motion-browser.json` |
-| 两级选择浏览器 | 39项通过 | `selection-browser.json` |
-| 重叠真实WebGL像素通道 | 42项通过 | `overlap-browser.json` |
-| 连接分页与导出 | 14项通过 | `atlas-pages-smoke.log` |
-| 邻岛缝合 | 21项通过 | `chart-merge-smoke.log` |
-| 核心 | 21项通过 | `core-smoke.log` |
-| 复杂网格 | 退出0，范围见原始报告 | `complex-smoke.log` |
-| 铰链 | 17项通过 | `hinge-smoke.log` |
-| 朝向 | 18项通过 | `orientation-smoke.log` |
-| 纯选择策略 | 20项通过 | `selection-smoke.log` |
-| Node生产UV Worker | 4项通过 | `uv-worker-smoke.log` |
-| 2000岛装箱 | 5项通过 | `packing-large.json` |
-| Git工具单元测试 | 22项通过 | `git-tools.log` |
-| 严格核心TS类型检查 | 退出0 | `strict-core-typecheck.log` |
-| 修改的5个TSX文件 | 0语法错误，不是完整类型检查 | `tsx-syntax.json` |
-| 独立实验页构建 | 退出0 | `lab-build.log` |
+| 核心 / 参数化 / 展开 / 保护 / 面积 / 邻居等24个脚本 | **24套退出0** | `core/summary.json`、各日志 |
+| 新局部修复 | 12项通过 | `core/source-repair.log` |
+| 新保留必要开缝连接 | 9项通过 | `core/chart-join.log` |
+| 新保留UV形状缝合 | 10项通过 | `core/rigid-uv-join.log` |
+| 两个正确真实模型的浏览器流程 | **18项通过** | `corrected-models-browser.json` |
+| 自由相机浏览器 | 39项通过 | `browser/camera-browser.json` |
+| 逐岛接力浏览器 | 28项通过 | `browser/relay-browser.json` |
+| 静止跳过浏览器 | 28项通过 | `browser/motion-browser.json` |
+| 两级选择浏览器 | 39项通过 | `browser/selection-browser.json` |
+| 叠层WebGL像素回归 | 42项通过 | `browser/overlap-browser.json` |
+| 前处理/后处理工作流浏览器 | 16项通过 | `browser/uv-optimization-browser.json` |
+| 面积/邻居/导出工作流浏览器 | 15项通过 | `browser/area-spatial-browser.json` |
 
-浏览器为Linux Chromium + ANGLE/SwiftShader软件WebGL；新工作台测试实际执行生产classic UV Worker和生产几何/渲染/导出模块。它们不是主Studio React/Vite端到端认证。浏览器回归需要较长时间，第一轮工具时间上限曾打断组合任务/相机任务；后续独立执行完整通过。重复执行不相加计数。`browser-results.json` 记录后续五套命令的真实退出码和耗时。日志只修剪行尾空白以便Git检查，结果文本不改写。
+新算法三个小套件已包含在上述24套内，不重复相加冒充更多独立测试。24套还覆盖了旧的21核心、33展开、17铰链等断言；精确计数按原始报告，不用“退出0”自动扩写为若干未执行断言。
 
-## 对用户问题的具体证据
+## 浏览器范围及性能警告
 
-1. **不再把异常源比例当成已归一结果。** 合成三角片的最小源3D面积占比约0.0999%，却拥有超过900倍于平均的原UV密度。新atlas得到每岛密度比1；原输入不变。可选2倍增益实测为面积2倍，不是边长2倍。
-2. **真实减少与仅分组分开。** 生产Worker中12个重叠源岛来自两个真实连通面板；整理+验证缝合得到2岛，纯重排仍12岛。3个真正断开的近邻面板保持3岛，只成为2个关联组/空间页。没有靠改计数或重叠显示冒充合并。
-3. **操作与坐标一致。** 新主按钮生成source-atlas，原样按钮恢复原12岛与重叠；逐三角形检查新atlas无交叠，动画最终顶点和新UV精确一致，OBJ导出回读保持相同坐标。岛/三角形选择不触发重排。
-4. **大岛优先和共同缩放。** MaxRects和Shelf均检查实际放置顺序，包含小岛提升导致目标面积相同时仍按3D面积排序的情况。诊断记录多次试装和失败轮，不只写一个固定成功标记。
-5. **性能边界。** 2000个合成矩形岛使用生产Shelf，测得装箱约276.5ms、占用约42.67%；这是单独装箱阶段、无真实模型求解，不是Corset或FlightHelmet性能结论。全部2000岛检查非叠放、留白、比例与确定性。新邻居索引避免每个候选位置扫描所有已放岛，但邻近搜索仍有明确比较上限。
+实际运行 Chromium + SwiftShader（无硬件GPU）的**离线工作台与生产Worker/WebGL**。真实模型测试从哈希锁定的静态glTF/bin经生产网格装配送入浏览器，检查实际Worker岛数、局部修复、全图有效性、OBJ重读、动画终点、先岛后面/二次取消、恢复原UV、控制台与布局。截图是这两份真实输入的运行画面，版本标记0.4.11，不是设计稿或替代网格。
 
-截图 `docs/images/area-spatial-0.4.10.png` 来自实际离线页面，标题明确为“面积比例与空间邻居 · 合成测试片”，不是服装人台或头盔；没有使用生成式设计图替代运行截图。
+**大模型专项为避免软件叠层通道的额外开销，关闭了实时重叠着色；全图重叠由独立数值检查完成。** 叠层着色本身另有42项实际WebGL像素测试，但不能把它算成默认设置下94,722面头盔的流畅认证。
 
-## 未通过/未完成的范围
+初次大模型调试触发15秒CDP超时；测试工具后来允许显式90秒单次命令预算（小套件默认仍15秒），不改变应用Worker120秒任务预算，也不修改算法断言。真实头盔的整组选择操作在软件渲染测试中累计约45.6秒；截图也明显慢。因此**只证明功能结果，不声称大模型交互流畅、实时帧率达标或已完成硬件GPU性能认证**。这些耗时记录在案例的 `milliseconds` 字段。
 
-本轮实际执行 `npm install --ignore-scripts --no-audit --no-fund`，12秒上限终止，未获得可用依赖；`npm run build` 退出127（vite: not found），全量 `npm run typecheck` 退出2（缺少node类型定义）。另行registry访问退出6（DNS无法解析）。命令、退出码和耗时记录在 `build-attempts.json`，各自原始输出见同名log。不能把独立curl结果伪称为npm安装输出。
+制作环境禁止通过浏览器导航到localhost（ERR_BLOCKED_BY_ADMINISTRATOR）；专项用CDP载入离线HTML并注入正确模型数据，实际Worker仍在浏览器内创建。没有称其为网络部署/HTTP完整导航联调。
 
-真实Corset/FlightHelmet的几何二进制未取得；公开glTF元数据不能证明具体UV面积、岛数或重叠原因。**没有测量用户的98岛，也没有确认#1/#75为何叠放，不能声称它们已变成某个岛数。** 新GLB诊断脚本路径已接入source-atlas和相应报告，但依赖/资产缺失时不计通过。未执行macOS、Windows、Safari、硬件GPU实机认证。
+## 未通过或未覆盖
 
-空间邻居是有限采样近似，不是精确最近面/语义部件识别；新atlas依旧矩形装箱而非凹多边形嵌套。平均岛密度归一不能修复岛内部局部形变或原始自折叠。未连接的岛不会仅因接近被焊接；小岛/关联组数减少不冒充真实岛数减少。全部面有效性检查继续执行，错误/超时不发布伪成功半成品。
+本轮 `npm run build` 实际退出127（`vite: not found`）；`npm run typecheck` 实际退出2（缺少Node类型依赖）。日志在 `environment/`。不把核心严格TS编译或TSX语法检查冒充完整UI类型检查。
 
-## 发布验证另行记录
+未成功安装React/Three/Vite依赖，因此没有完成真实 `GLTFLoader` / FBXLoader 导入、完整React页面E2E、贴图加载或生产Vite包认证。专用fixture解码器仅支持这四个固定文件，并且拒绝其他glTF格式，不替换应用加载器。
 
-本轮在现有Git历史上小步提交，版本0.4.10使用独立附注tag，所有旧tag保留。本内部文档是打包前记录；最终ZIP跟踪文件一致性、干净工作区、Git发布检查、bundle恢复，以及解压包关键回归，放入外部交付验证文件。没有在打包前预填“最终ZIP已通过”。
+未做macOS/Windows/Safari或硬件GPU实机认证。未保证人类语义版型、全局最少岛、全局最优凹多边形装箱、全部动画姿态无自交。原始UV可能有意镜像/复用；新atlas通常需要重烘焙贴图。
+
+## Git / 最终交付
+
+基于原 `v0.4.10` 连续小步提交，不移动旧tag。独立附注tag为 `v0.4.11`。发布后重新解压检查、跟踪文件逐字节核对、旧tag身份、bundle独立恢复和真实模型再次运行记录写入ZIP旁的交付验证报告；不由本源码测试清单代替。

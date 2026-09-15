@@ -1,0 +1,16 @@
+PASS New default Extract explicitly creates an organized atlas
+PASS Raw inspect still restores all original islands and their overlap
+PASS Build deliberately distorted source-area fixture (not Corset)
+PASS Normalize while keeping disconnected pieces separate
+PASS No overlap after real browser Worker packing
+PASS Placement order is physical surface area descending and scale search is observable
+PASS Disconnected nearby surfaces receive spatial links without invented shared edges
+PASS Island-first inspector shows current surface/UV allocation and neighbors
+PASS Inspecting triangles still toggles without re-packing
+PASS OBJ export and re-import keep the same new UV coordinates
+PASS UV final animation endpoint uses exactly the same atlas
+PASS Explicit tiny-detail area boost is capped at 2x
+PASS Turning association off does not silently weld or merge anything
+PASS Original source remains byte-for-byte identical in memory
+PASS No unhandled browser exceptions and no horizontal layout overflow
+{"passed":15}

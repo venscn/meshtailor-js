@@ -1,0 +1,64 @@
+{
+  id: 'gear',
+  faces: 1536,
+  oldIslands: 4,
+  newIslands: 2,
+  initialRegions: 1,
+  beforeMerge: 3,
+  merges: 1,
+  attempts: 3,
+  budgetExhausted: false,
+  rejectionReasons: { distortion: 2 },
+  occupancy: 0.4074530380432437,
+  oldMs: 316.1950119999997,
+  currentMs: 612.0156569999999,
+  allFacesAndValidUV: true
+}
+{
+  id: 'garment',
+  faces: 3072,
+  oldIslands: 10,
+  newIslands: 1,
+  initialRegions: 1,
+  beforeMerge: 1,
+  merges: 0,
+  attempts: 0,
+  budgetExhausted: false,
+  rejectionReasons: {},
+  occupancy: 0.3346916124878896,
+  oldMs: 292.9373310000001,
+  currentMs: 244.0298990000001,
+  allFacesAndValidUV: true
+}
+{
+  id: 'knot',
+  faces: 2304,
+  oldIslands: 7,
+  newIslands: 1,
+  initialRegions: 1,
+  beforeMerge: 12,
+  merges: 11,
+  attempts: 14,
+  budgetExhausted: false,
+  rejectionReasons: { distortion: 3 },
+  occupancy: 0.12377306159825412,
+  oldMs: 376.60408000000007,
+  currentMs: 4374.885579000001,
+  allFacesAndValidUV: true
+}
+{
+  id: 'assembly',
+  faces: 5632,
+  oldIslands: 31,
+  newIslands: 8,
+  initialRegions: 4,
+  beforeMerge: 45,
+  merges: 37,
+  attempts: 71,
+  budgetExhausted: false,
+  rejectionReasons: { distortion: 34 },
+  occupancy: 0.4970248643069746,
+  oldMs: 363.65069700000095,
+  currentMs: 3696.3397800000002,
+  allFacesAndValidUV: true
+}
