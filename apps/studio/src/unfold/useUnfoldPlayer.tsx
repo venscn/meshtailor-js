@@ -19,7 +19,12 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   // Synchronous ref also handles consecutive pointer events before React paints.
   // Playback's `active` list is not an implicit inspection selection.
   const inspection=useRef<InspectionSelection>(EMPTY_INSPECTION);
-  const applyInspection=(next:InspectionSelection)=>{inspection.current=next;setSelection([...next.islands]);setFocusFace(next.face);};
+  const applyInspection=(next:InspectionSelection)=>{
+    inspection.current=next;
+    // Face-only inspection must keep the same island array / memoized timeline.
+    setSelection(previous=>previous.length===next.islands.length&&previous.every((id,i)=>id===next.islands[i])?previous:[...next.islands]);
+    setFocusFace(next.face);
+  };
   const clearFace=()=>applyInspection({...inspection.current,face:null});
   const [cameraCommand,setCameraCommand]=useState({kind:'orbit' as 'orbit'|'uv'|'current',key:0});
   const ref=useRef(0);ref.current=progress;
