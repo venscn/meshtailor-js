@@ -55,14 +55,28 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">M</span>MeshTailor <span class="version">0.4.7</span></div><div class="document-name">离线展开实验页</div><div class="header-actions"><button id="header-import">导入 OBJ</button><button id="header-export">导出 OBJ + UV</button></div></header>
 <main class="layout"><aside><nav class="tool-tabs" role="tablist" aria-label="工具分类"><button role="tab" data-tool="mesh" aria-controls="lab-tools-mesh" aria-selected="false">模型</button><button role="tab" data-tool="uv" aria-controls="lab-tools-uv" aria-selected="false">UV</button><button role="tab" data-tool="animation" aria-controls="lab-tools-animation" aria-selected="true">动画</button></nav><div class="lab-tool-content">
 <div id="lab-tools-mesh" role="tabpanel" hidden><h3>本地与内置模型</h3><div class="row"><button id="ribbon" class="primary">三块折角带</button><button id="cube">六岛立方体</button></div>
+<button id="fragment-demo">重叠碎岛测试片（2 个连通片）</button>
 <label>复杂样例<select id="example"><option value="garment">褶皱服装 · Low</option><option value="knot">三叶结 · Low</option><option value="gear">齿轮 · Low</option><option value="assembly">机械件 · Low</option></select></label><button id="complex">载入复杂样例</button>
 <label>本地 OBJ<input id="file" type="file" accept=".obj" style="max-width:170px"></label><small>此离线页支持 OBJ；FBX / GLB 等仍在主 Studio 导入。内置样例均不需要联网。</small>
 </div>
 <div id="lab-tools-uv" role="tabpanel" hidden><h3>裁切与展开</h3><div class="row"><button id="auto-large" class="primary">自动参数 · 大块重分割</button><button id="auto-balanced">自动 · 均衡</button><button id="extract-uv">Extract existing UV seams</button></div>
 <small>自动重分割替换当前裁切，原始 UV 仍保留。Extract 只读取原布局，不重切。</small><small id="auto-config" role="status"></small>
+<details open><summary>前处理 / 后处理</summary>
+<button id="pre-connected" class="primary">前处理：连通优先重分割 + 自动缝合</button>
+<div class="row"><button id="post-stitch">后处理：缝合当前邻岛</button><button id="post-repack">只重排当前岛</button></div>
+<small>缝合会移除接缝并重新求解；重排不减少岛数。新 UV 需要重烘焙；Extract 不改原 UV。</small>
+<label>新 UV 页分配<select id="atlas-page-mode"><option value="single">单页</option><option value="adjacency">连接紧密的岛优先同页</option><option value="components">每个几何连通组一页</option></select></label>
+<label>目标页数（软目标）<input id="atlas-page-count" type="number" min="1" max="64" value="2"></label>
+<label>初始分割<select id="initial-segmentation"><option value="regions">法线区域（原策略）</option><option value="connected">几何连通块优先</option></select></label>
+<label>生成后自动缝合<input id="post-merge" type="checkbox"></label>
+<label>缝合尝试预算<input id="merge-attempts" type="number" min="0" max="2000" value="128"></label>
+<label>目标岛数<input id="merge-target" type="number" min="1" value="1"></label>
+<label>后处理保留材质边界<input id="merge-materials" type="checkbox"></label>
+<small id="audit-summary" role="status"></small><small id="post-summary" role="status"></small>
+</details>
 <label>单岛面数预算<input id="chart-faces" type="number" min="8" max="20000" step="128" value="8192"></label>
 <label>区域法线锥角<input id="chart-cone" type="number" min="1" max="178" value="80"></label>
-<label>最大角形变比<input id="chart-stretch" type="number" min="1" max="1000" value="30"></label><label>UV 来源<select id="target"><option value="generated">重新展开 + 面积感知排布</option><option value="source">保留原始 UV（不修复 / 不重排）</option></select></label>
+<label>最大角形变比<input id="chart-stretch" type="number" min="1" max="1000" value="30"></label><label>UV 来源<select id="target"><option value="generated">重新展开 + 面积感知排布</option><option value="source">保留原始 UV（不修复 / 不重排）</option><option value="stitch" disabled>当前邻岛缝合结果</option><option value="repack" disabled>当前重排结果</option></select></label>
 <label>原 UV 显示<select id="source-layout"><option value="materials">材质分框（不改原坐标）</option><option value="overlay">原位叠加（诊断）</option></select></label><label>求解方式<select id="solver"><option value="auto">LSCM → 检查 → Tutte 回退</option><option value="lscm">仅 LSCM</option><option value="tutte">凸边界 Tutte</option></select></label>
 <label>排布策略<select id="packing"><option value="auto">自动 MaxRects / Shelf</option><option value="maxrects">MaxRects（≤1024 岛）</option><option value="shelf">Shelf 大岛数快速排布</option></select></label>
 <label>UV 任务预算（秒）<input id="budget" type="number" min="5" max="900" step="5" value="120"></label>

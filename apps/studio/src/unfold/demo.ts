@@ -29,3 +29,16 @@ export function makeHingeDemo(): ReturnType<typeof makeUnfoldDemo> {
   const mesh:MeshData={name:'Hinge ribbons · 折角铰链示例',positions,faces};
   return {mesh,edges:new Set(),chains:[],frames:[]};
 }
+
+/** Deliberately fragmented/overlapped source UVs, NOT Corset or FlightHelmet.
+ * The underlying sheets are connected; UV identities split every triangle. */
+export function makeFragmentationDemo(parts=1):ReturnType<typeof makeUnfoldDemo> {
+  const positions:MeshData['positions']=[],faces:MeshData['faces']=[];
+  for(let part=0;part<parts;part++){
+    const base=positions.length;for(let y=0;y<=1;y++)for(let x=0;x<=3;x++)positions.push([x,part*2+y,Math.sin(x*.5)*.3]);
+    for(let x=0;x<3;x++)for(const [indices,uvs]of [ [[x,x+1,x+5],[[0,0],[1,0],[1,1]]], [[x,x+5,x+4],[[0,0],[1,1],[0,1]]] ] as const){
+      const fi=faces.length;faces.push({vertices:indices.map(v=>v+base) as [number,number,number],uvs:uvs.map(v=>[...v]) as [[number,number],[number,number],[number,number]],uvIndices:[fi*3,fi*3+1,fi*3+2],uvSpace:'intentional-stack',uvSpaceName:'故意重叠的测试 UV',sourcePart:`sheet-${part}`});
+    }
+  }
+  return {mesh:{name:'Overlapped fragmented sheets · 合成测试片',positions,faces},edges:new Set(),chains:[],frames:[]};
+}

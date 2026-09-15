@@ -1,6 +1,6 @@
 import * as core from '/packages/mesh-core/src/index.js';
 import * as uv from '/packages/uv/src/index.js';
-import { makeHingeDemo, makeUnfoldDemo } from '/apps/studio/src/unfold/demo.js';
+import { makeHingeDemo, makeUnfoldDemo, makeFragmentationDemo } from '/apps/studio/src/unfold/demo.js';
 import { UnfoldWebGLView } from '/apps/studio/src/unfold/webgl-view.js';
 import { DEFAULT_AUTO_FRAME } from '/apps/studio/src/unfold/camera-policy.js';
 import { drawUVSnapshot, pickUVFace } from '/apps/studio/src/unfold/uv-drawing.js';
@@ -10,6 +10,7 @@ let inspection=EMPTY_INSPECTION;
 const $=id=>document.getElementById(id);
 let inspectionIndex=null, timelineGeometry=null, timelineKey='';
 let chartConfig={...uv.DEFAULT_UNWRAP};
+let postSeed;
 let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,sequence=0;
 const options={skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
@@ -90,11 +91,12 @@ function cancel(){sequence++;jobHandle?.cancel();jobHandle=null;$('cancel').disa
 async function solve(){
   cancel();pause();window.lab.ready=false;window.lab.progressEvents=[];
   const token=sequence,start=performance.now();let lastProgress=null,clock;
+  const backup=['stitch','repack'].includes($('target').value)?snapshot:null;
   $('error').hidden=true;snapshot=null;inspection=EMPTY_INSPECTION;options.focusFace=null;selectionStatus();view.setGeometry(null);$('islands').replaceChildren();
   const c=$('uv'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
   $('status').textContent='启动 UV Worker…';$('solve').disabled=true;$('cancel').disabled=false;
   try{
-    jobHandle=startUVJob({mesh,edges:[...seams],target:$('target').value,config:{...chartConfig,maxChartFaces:Number($('chart-faces').value),maxStretch:Number($('chart-stretch').value),regionOptions:{...chartConfig.regionOptions,normalConeDegrees:Number($('chart-cone').value)},method:$('solver').value,padding:Number($('padding').value),autoCut:$('autocut').checked,rotate:$('rotate').checked,packing:$('packing')?.value??'auto',timeBudgetMs:Number($('budget')?.value??120)*1000}},{
+    jobHandle=startUVJob({mesh,edges:[...seams],target:$('target').value,seedCharts:postSeed,config:{...chartConfig,initialSegmentation:$('initial-segmentation').value,postMerge:$('post-merge').checked,mergeOptions:{maxAttempts:Number($('merge-attempts').value),targetCharts:Number($('merge-target').value),respectMaterials:$('merge-materials').checked},atlasPageMode:$('atlas-page-mode').value,atlasPageCount:Number($('atlas-page-count').value),maxChartFaces:Number($('chart-faces').value),maxStretch:Number($('chart-stretch').value),regionOptions:{...chartConfig.regionOptions,normalConeDegrees:Number($('chart-cone').value)},method:$('solver').value,padding:Number($('padding').value),autoCut:$('autocut').checked,rotate:$('rotate').checked,packing:$('packing')?.value??'auto',timeBudgetMs:Number($('budget')?.value??120)*1000}},{
       createWorker:()=>{const url=window.labWorkerURL();try{return new Worker(url);}finally{URL.revokeObjectURL(url);}},
       onProgress:p=>{if(token!==sequence)return;lastProgress=p;window.lab.progressEvents.push(p);$('status').textContent=describeUVProgress(p,performance.now()-start);}
     });
@@ -104,16 +106,24 @@ async function solve(){
     rebuildTimeline();view.setOptions(options);view.setGeometry(snapshot.geometry,{resetCamera:framedMesh!==mesh});framedMesh=mesh;list();update();const m=snapshot.metrics;
     $('title').textContent=`${mesh.name} · ${mesh.faces.length.toLocaleString()} 三角面 · ${snapshot.packed.length} 岛`;
     $('status').textContent=(m?`生成 UV：翻面 / 退化 / 正面积重叠检查通过\n有效面积占用 ${(m.occupancy*100).toFixed(1)}% · 包围盒 ${(m.boxOccupancy*100).toFixed(1)}%\n${m.packingMethod} 排布 · 新增 ${snapshot.addedSeams.length} 条 UV 补切\n`:'原始 UV：未修复、未重新排布\n')+`Worker 完成 · ${(snapshot.timing.elapsedMs/1000).toFixed(2)} 秒\n`+snapshot.warnings.join('\n')+(snapshot.fragmentation?`\n分割诊断：${snapshot.fragmentation.inputComponents} 个源分量 → ${snapshot.fragmentation.initialCharts} 个初始区域 → ${snapshot.fragmentation.outputCharts} 岛；小于16面的岛 ${snapshot.fragmentation.tinyCharts}\n补切原因：${JSON.stringify(snapshot.fragmentation.reasons)}`:'');
-    window.lab.ready=true;
-  }catch(e){if(token===sequence){fail(e.message);$('status').textContent='未生成结果，原网格未修改。';}}
+    reportUV();window.lab.ready=true;
+  }catch(e){if(token===sequence){fail(e.message);$('status').textContent='未生成新结果，原网格未修改。';if(backup){snapshot=backup;view.setGeometry(snapshot.geometry,{resetCamera:false});rebuildTimeline();view.setOptions(options);list();update();reportUV();window.lab.ready=true;$('status').textContent+='已恢复上一份 UV 快照。';}}}
   finally{clearInterval(clock);if(token===sequence){jobHandle=null;$('solve').disabled=false;$('cancel').disabled=true;}}
 }
 function tune(goal='large'){
  const r=uv.recommendUnwrap(mesh,goal);chartConfig=r.options;$('chart-faces').value=chartConfig.maxChartFaces;$('chart-cone').value=chartConfig.regionOptions.normalConeDegrees;$('chart-stretch').value=chartConfig.maxStretch;$('source-layout').value=chartConfig.sourceUVLayout??'materials';
  $('auto-config').textContent=`自动填写：${goal==='large'?'大块优先':'均衡'} · ${r.analysis.components} 个连通分量 · 小区域面积比 ${chartConfig.regionOptions.minRegionAreaRatio} · 不为填充率补切`;
 }
-function load(demo){mesh=demo.mesh;seams=demo.edges;tune();$('extract-uv').disabled=!mesh.faces.every(f=>f.uvs?.every(p=>p?.length===2));window.lab.ready=false;return solve();}
+function load(demo){postSeed=undefined;if(['stitch','repack'].includes($('target').value))$('target').value='generated';mesh=demo.mesh;seams=demo.edges;tune();$('post-merge').checked=false;$('initial-segmentation').value='regions';$('extract-uv').disabled=!mesh.faces.every(f=>f.uvs?.every(p=>p?.length===2));window.lab.ready=false;return solve();}
 function autoCharts(goal){tune(goal);seams=new Set();$('target').value='generated';return solve();}
+function reportUV(){
+  $('audit-summary').textContent=snapshot?.sourceAudit?`真实岛数 ${snapshot.packed.length}；`+snapshot.sourceAudit.domains.map(d=>`${d.name}：${d.islands} 岛，${d.overlapCountCapped?'至少 ':''}${d.overlapPairs} 对重叠、${d.degenerate} 个退化面`).join('；'):'';
+  $('post-summary').textContent=(snapshot?.merge?`缝合：${snapshot.merge.before} → ${snapshot.merge.after} 岛；接受 ${snapshot.merge.accepted} 次，移除 ${snapshot.merge.removedSeams.length} 条边。${snapshot.merge.budgetExhausted?'达到尝试预算。':''}`:'')+(snapshot?.pageReport?` 按连接关系分配 ${snapshot.pageReport.actual} 页，同页共享边界 ${(snapshot.pageReport.retainedSharedBoundaryRatio*100).toFixed(1)}%。`:'');
+}
+function postprocess(operation){if(!snapshot)return;postSeed=snapshot.packed;seams=new Set(snapshot.seams);$('target').value=operation;return solve();}
+$('post-stitch').onclick=()=>postprocess('stitch');$('post-repack').onclick=()=>postprocess('repack');
+$('pre-connected').onclick=()=>{postSeed=undefined;seams=new Set();$('target').value='generated';$('post-merge').checked=true;$('initial-segmentation').value='connected';return solve();};
+$('fragment-demo').onclick=()=>{$('target').value='source';return load(makeFragmentationDemo(2));};
 $('auto-large').onclick=()=>autoCharts('large');$('auto-balanced').onclick=()=>autoCharts('balanced');
 $('extract-uv').onclick=()=>{$('target').value='source';return solve();};
 for(const stage of uv.HINGE_STAGES){const b=document.createElement('button');b.textContent=stage.label;b.dataset.stage=stage.t;b.onclick=()=>{pause();const schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,$('reverse').checked,options.timeline),index=inspectionIndex??schedule.focusIndex;update({progress:uv.islandTimelineProgress((options.timeline?.entries[index]?uv.motionLocal(options.timeline.entries[index].profile,stage.t):uv.hingePlaybackProgress(stage.t,options.holdNet)),index,options.selected.length,options.order,options.handoff,options.timeline)},index);};$('stages').append(b);}
@@ -142,10 +152,10 @@ function tick(now){
 }requestAnimationFrame(tick);
 $('uv').onclick=e=>{if(!snapshot)return;const r=$('uv').getBoundingClientRect(),hit=pickUVFace(snapshot,r.width,r.height,e.clientX-r.left,e.clientY-r.top,options.selected);if(hit)pick(hit.id,hit.face,e.shiftKey||e.ctrlKey||e.metaKey);};
 $('export').onclick=()=>{if(!snapshot)return;const text=core.meshToOBJ(uv.meshWithPreviewUV(mesh,snapshot.packed)),url=URL.createObjectURL(new Blob([text],{type:'text/plain'})),a=document.createElement('a');a.href=url;a.download='meshtailor-target-uv.obj';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-$('diagnostic').onclick=()=>{if(!snapshot)return;const report={version:'0.4.7',asset:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},config:chartConfig,fragmentation:snapshot.fragmentation,uvSpaces:snapshot.geometry.atlas.spaces,metrics:snapshot.metrics,warnings:snapshot.warnings,timing:snapshot.timing};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='meshtailor-diagnostic.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+$('diagnostic').onclick=()=>{if(!snapshot)return;const report={version:'0.4.7',asset:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},config:chartConfig,fragmentation:snapshot.fragmentation,sourceAudit:snapshot.sourceAudit,merge:snapshot.merge,pageReport:snapshot.pageReport,uvSpaces:snapshot.geometry.atlas.spaces,metrics:snapshot.metrics,warnings:snapshot.warnings,timing:snapshot.timing};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='meshtailor-diagnostic.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 new ResizeObserver(drawUV).observe($('uvhost'));
 if($('clear-face'))$('clear-face').onclick=clearFace;
-window.lab={ready:false,view,options,errors,update,select,pick,clearFace,get inspection(){return inspection;},load,solve,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
+window.lab={ready:false,view,options,errors,update,select,pick,clearFace,get inspection(){return inspection;},load,solve,postprocess,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
 for(const button of document.querySelectorAll('[data-tool]'))button.onclick=()=>{
   for(const tab of document.querySelectorAll('[data-tool]')){
     const selected=tab===button;tab.setAttribute('aria-selected',String(selected));

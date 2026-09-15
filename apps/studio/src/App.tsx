@@ -12,7 +12,7 @@ import { importMeshFiles, type SceneImportOptions } from './importers';
 import type { SeamJob, SeamResult } from './workers/seam.worker';
 import { prepareViewportMesh } from './viewport-math';
 import { meshWithPreviewUV, recommendUnwrap, DEFAULT_UNWRAP, type UnwrapOptions, type PackedChart } from '@meshtailor/uv';
-import { makeUnfoldDemo, makeHingeDemo } from './unfold/demo';
+import { makeUnfoldDemo, makeHingeDemo, makeFragmentationDemo } from './unfold/demo';
 import { useUVSnapshot } from './unfold/useUVSnapshot';
 import { useUnfoldPlayer } from './unfold/useUnfoldPlayer';
 import { UVSolverControls } from './unfold/UVSolverControls';
@@ -178,6 +178,7 @@ export default function App(){
           <small>{COMPLEX_EXAMPLES.find(m=>m.id===exampleId)?.description}</small>
           <button onClick={()=>resetForMesh(makeComplexExample(exampleId,detail))}>载入样例</button>
           <div className="button-grid two"><button disabled={!!busy} onClick={()=>void loadFBXExample('ascii')}>FBX ASCII</button><button disabled={!!busy} onClick={()=>void loadFBXExample('binary')}>FBX Binary</button></div>
+          <button onClick={()=>{resetForMesh(makeFragmentationDemo(2).mesh);setUVTarget('source');setViewMode('unfold');setToolTab('uv');}}>重叠碎岛测试片（非真实资产）</button>
           <button onClick={()=>saveFile('meshtailor-mesh.obj',meshToOBJ(mesh),'text/plain')}>导出当前网格</button>
         </section>
         <section><h3>在线模型</h3><small>CC0；优先使用已下载的本地副本，否则从原站获取几何和 UV，不下载贴图。</small>
