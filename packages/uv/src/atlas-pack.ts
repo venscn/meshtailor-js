@@ -20,23 +20,28 @@ function orient(chart:RawChart,steps:number,boost=1):OrientedChart{
   for(const [fi,uv]of chart.faceUVs)coords.set(fi,uv.map(([x,y])=>[(x*c-y*s-best.box.x)*density,(x*s+y*c-best.box.y)*density] as Vec2) as [Vec2,Vec2,Vec2]);
   return{id:chart.id,coords,w:best.box.w*density,h:best.box.h*density,area:chart.area3D*boost};
 }
-function neighborCost(id:number,x:number,y:number,w:number,h:number,placed:Placement[],hints:NonNullable<PackOptions['neighborHints']>):number{
-  let total=0,weight=0;for(const link of hints){const other=link.a===id?link.b:link.b===id?link.a:undefined;if(other===undefined)continue;const p=placed.find(v=>v.id===other);if(!p)continue;total+=link.weight*Math.hypot(x+w/2-p.x-p.w/2,y+h/2-p.y-p.h/2);weight+=link.weight;}return weight?total/weight:0;
+function indexHints(hints:NonNullable<PackOptions['neighborHints']>){
+  const result=new Map<number,{id:number;weight:number}[]>();
+  for(const h of hints){if(!Number.isFinite(h.weight)||h.weight<0)throw new Error('Invalid neighbor weight.');for(const [a,b]of [[h.a,h.b],[h.b,h.a]]){const list=result.get(a!)??[];list.push({id:b!,weight:h.weight});result.set(a!,list);}}return result;
+}
+function neighborCost(id:number,x:number,y:number,w:number,h:number,placed:ReadonlyMap<number,Placement>,hints:ReturnType<typeof indexHints>):number{
+  let total=0,weight=0;for(const link of hints.get(id)??[]){const p=placed.get(link.id);if(!p)continue;total+=link.weight*Math.hypot(x+w/2-p.x-p.w/2,y+h/2-p.y-p.h/2);weight+=link.weight;}return weight?total/weight:0;
 }
 const contains=(a:Rect,b:Rect)=>b.x>=a.x-1e-12&&b.y>=a.y-1e-12&&b.x+b.w<=a.x+a.w+1e-12&&b.y+b.h<=a.y+a.h+1e-12;
 /** Independent MaxRects best-short-side-fit implementation. Bounding rectangles
  * cannot nest concave polygons; it is a heuristic, NOT an optimal atlas solver. */
 function attempt(charts:OrientedChart[],scale:number,pad:number,rotate:boolean,sort:number,work?:UVWork,areaFirst=false,hints:NonNullable<PackOptions['neighborHints']>=[]):Placement[]|null{
+  const placementIndex=new Map<number,Placement>(),nearby=indexHints(hints);
   const ordered=[...charts].sort((a,b)=>areaFirst?(b.area-a.area||b.w*b.h-a.w*a.h||a.id-b.id):sort===0?Math.max(b.w,b.h)-Math.max(a.w,a.h)||b.area-a.area:b.w*b.h-a.w*a.h||b.area-a.area);
   let free:Rect[]=[{x:0,y:0,w:1,h:1}];const placements:Placement[]=[];
   for(const ch of ordered){work?.check();let best:Placement|null=null,bestShort=Infinity,bestLong=Infinity;
     for(const rect of free)for(const r of rotate?[false,true]:[false]){
       const w=(r?ch.h:ch.w)*scale+2*pad,h=(r?ch.w:ch.h)*scale+2*pad;
       if(w>rect.w+1e-12||h>rect.h+1e-12)continue;
-      const short=Math.min(rect.w-w,rect.h-h)+.08*neighborCost(ch.id,rect.x,rect.y,w,h,placements,hints),long=Math.max(rect.w-w,rect.h-h);
+      const short=Math.min(rect.w-w,rect.h-h)+.08*neighborCost(ch.id,rect.x,rect.y,w,h,placementIndex,nearby),long=Math.max(rect.w-w,rect.h-h);
       if(short<bestShort-1e-12||Math.abs(short-bestShort)<1e-12&&long<bestLong){best={id:ch.id,x:rect.x,y:rect.y,w,h,rotated:r};bestShort=short;bestLong=long;}
     }
-    if(!best)return null;placements.push(best);const used=best,next:Rect[]=[];
+    if(!best)return null;placements.push(best);placementIndex.set(best.id,best);const used=best,next:Rect[]=[];
     for(const f of free){
       if(used.x>=f.x+f.w-1e-12||used.x+used.w<=f.x+1e-12||used.y>=f.y+f.h-1e-12||used.y+used.h<=f.y+1e-12){next.push(f);continue;}
       if(used.x>f.x+1e-12)next.push({x:f.x,y:f.y,w:used.x-f.x,h:f.h});
@@ -54,6 +59,7 @@ function attempt(charts:OrientedChart[],scale:number,pad:number,rotate:boolean,s
  * are retained. This heuristic may leave more space than polygon nesting.
  */
 function shelfAttempt(charts:OrientedChart[],scale:number,pad:number,rotate:boolean,sort:number,work?:UVWork,areaFirst=false,hints:NonNullable<PackOptions['neighborHints']>=[]):Placement[]|null{
+  const placementIndex=new Map<number,Placement>(),nearby=indexHints(hints);
   const ordered=charts.map(ch=>{
     const rotated=rotate&&ch.h>ch.w;
     return {id:ch.id,area:ch.area,w:(rotated?ch.h:ch.w)*scale+2*pad,h:(rotated?ch.w:ch.h)*scale+2*pad,rotated};
@@ -66,7 +72,7 @@ function shelfAttempt(charts:OrientedChart[],scale:number,pad:number,rotate:bool
       for(let turn=0;turn<(rotate?2:1);turn++){
         const cw=turn?ch.h:ch.w,cheight=turn?ch.w:ch.h;
         if(cheight>row.h+1e-12||row.x+cw>1+1e-12)continue;
-        const score=(row.h-cheight)*cw+(1-row.x-cw)*1e-6+.02*neighborCost(ch.id,row.x,row.y,cw,cheight,placements,hints);
+        const score=(row.h-cheight)*cw+(1-row.x-cw)*1e-6+.02*neighborCost(ch.id,row.x,row.y,cw,cheight,placementIndex,nearby);
         if(score<waste){waste=score;best=i;w=cw;h=cheight;r=turn?!ch.rotated:ch.rotated;}
       }
     }
@@ -74,7 +80,7 @@ function shelfAttempt(charts:OrientedChart[],scale:number,pad:number,rotate:bool
       if(ch.w>1+1e-12||top+ch.h>1+1e-12)return null;
       best=shelves.length;shelves.push({y:top,h:ch.h,x:0});top+=ch.h;
     }
-    const row=shelves[best]!;placements.push({id:ch.id,x:row.x,y:row.y,w,h,rotated:r});row.x+=w;
+    const row=shelves[best]!;const p={id:ch.id,x:row.x,y:row.y,w,h,rotated:r};placements.push(p);placementIndex.set(p.id,p);row.x+=w;
   }
   return placements;
 }
