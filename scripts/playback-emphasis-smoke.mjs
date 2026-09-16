@@ -7,7 +7,7 @@ try {const f=await c.load('apps/studio/src/unfold/focus-policy.js');const o={pro
  check('Programmatic seek alone does not create session',()=>assert.equal(f.playbackEmphasis({...o,interactionActive:undefined}),null));
  check('Handoff protects both islands',()=>assert.deepEqual(f.playbackEmphasis({...o,progress:.9/2.7}),[10,4]));
  check('An almost-complete island is still opaque',()=>assert.deepEqual(f.playbackEmphasis({...o,progress:.99999/2.7}),[10,4]));
- check('Completed island in UV is ghosted only after full completion',()=>assert.deepEqual(f.playbackEmphasis({...o,progress:1.0001/2.7}),[4]));
+ check('Completed island leaves motion set; arrival presentation is a separate layer',()=>assert.deepEqual(f.playbackEmphasis({...o,progress:1.0001/2.7}),[4]));
  check('Reverse at same pose protects same two actual moving islands',()=>assert.deepEqual(f.playbackEmphasis({...o,progress:1.8/2.7}),[4,8]));
  for(const progress of [0,1])check('Endpoint '+progress+' restores regardless of stale interaction flag',()=>assert.equal(f.playbackEmphasis({...o,progress}),null));
  check('Off overrides session',()=>assert.equal(f.playbackEmphasis({...o,focusMode:'off'}),null));
