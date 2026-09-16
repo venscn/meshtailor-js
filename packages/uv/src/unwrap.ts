@@ -1,3 +1,4 @@
+import {planarShapeCandidate} from './free-boundary.js';
 import { packConnectedAtlas, type PageOptions, type PageReport } from './atlas-pages.js';
 import { mergeAdjacentCharts, type MergeOptions, type MergeReport } from './chart-merge.js';
 import { normalizedMesh, shapeQuality } from './chart-quality.js';
@@ -15,8 +16,8 @@ export interface FragmentationReport {
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
 }
 export interface UnwrapResult extends AtlasPacking { spatialReport?:import('./spatial-neighbors.js').SpatialReport; pageReport?:PageReport; merge?:MergeReport; fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
-export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
-export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,chartPolicy:'large',stretchAreaPercentile:.99,maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
+export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',uvObjective:'compact',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
+export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,uvObjective:'paint',chartPolicy:'large',stretchAreaPercentile:.99,maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
 export function recommendUnwrap(mesh:MeshData,goal:ChartGoal='large'):{options:UnwrapOptions;analysis:MeshAnalysis;regions:RegionOptions;reasons:string[]}{
   const r=recommendRegions(mesh,goal),large=goal==='large';
   return{options:{...DEFAULT_UNWRAP,chartPolicy:goal,stretchAreaPercentile:large?.99:1,regionOptions:{...r.options},maxChartFaces:r.options.maxChartFaces,maxAspect:large?24:10,minFill:0,maxStretch:large?30:16},analysis:r.analysis,regions:r.options,reasons:[
@@ -81,7 +82,8 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   const solve=(faces:number[],sourceChart:number,depth=0)=>{
     uvProgress(work,{stage:'topology',detail:`检查源岛 ${sourceChart+1} 的 ${faces.length} 个面（补切层 ${depth}）`,facesDone,facesTotal:mesh.faces.length,islandsDone:raw.length});
     let local=cutLocalMesh(mesh,faces,effective);
-    if(opts.autoCut&&opts.chartPolicy!=='legacy'&&!local.disk&&faces.length<=opts.maxChartFaces){
+    const planar=opts.uvObjective==='paint'&&opts.method==='auto'&&planarShapeCandidate(local)!==null;
+    if(!planar&&opts.autoCut&&opts.chartPolicy!=='legacy'&&!local.disk&&faces.length<=opts.maxChartFaces){
       const opened=openChartWithSlits(mesh,faces,effective,local,work);
       if(opened){local=opened.local;for(const key of opened.added)effective.add(key);}
     }
@@ -92,7 +94,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       // final exported cuts are computed from actual solved chart membership.
       return r.regions.length>1?r.regions:splitDisks(local,maxFaces,normalLimit,work);
     };
-    if(!local.disk||faces.length>opts.maxChartFaces){
+    if(!local.disk&&!planar||faces.length>opts.maxChartFaces){
       if(!opts.autoCut)throw new Error(`Chart ${sourceChart+1}: requires additional cuts (Euler ${local.euler}, ${local.boundaryLoops} boundaries, ${faces.length} faces). Enable automatic cuts or edit seams.`);
       record(!local.disk?'topology':'face-budget',faces.length,sourceChart,depth,`Euler ${local.euler}; boundaries ${local.boundaryLoops}`);
       const pieces=partition(Math.min(opts.maxChartFaces,Math.max(1,faces.length-1)),!local.disk);partitions++;

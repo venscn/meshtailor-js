@@ -1,9 +1,10 @@
+import {planarShapeCandidate,freeBoundaryARAP} from './free-boundary.js';
 import { uvProgress, rethrowUVStop, type UVWork } from './work.js';
 import type { Vec2,Vec3 } from '@meshtailor/mesh-core';
 import type { CutMesh } from './cut-topology.js';
 import { checkUVTriangles, type UVQuality, signedArea2 } from './uv-quality.js';
-export interface SolverOptions { iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte' }
-export interface Parameterization { uv:Vec2[]; method:'lscm'|'tutte'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
+export interface SolverOptions { iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte'; uvObjective?:'paint'|'compact'; paintIterations?:number }
+export interface Parameterization { uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
 export function triangleArea(a:Vec3,b:Vec3,c:Vec3):number{const u=b.map((x,i)=>x-a[i]!),v=c.map((x,i)=>x-a[i]!);return Math.hypot(u[1]!*v[2]!-u[2]!*v[1]!,u[2]!*v[0]!-u[0]!*v[2]!,u[0]!*v[1]!-u[1]!*v[0]!)*.5;}
 type Row={ids:number[];values:number[]};
 /** Matrix-free, diagonally preconditioned conjugate gradients on A^T A.
@@ -82,20 +83,37 @@ function tutte(mesh:CutMesh,opts:SolverOptions,work?:UVWork){
   return{uv,iterations,residual};
 }
 export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={},work?:UVWork):Parameterization{
-  if(!mesh.disk)throw new Error(`UV chart is not a disk: Euler=${mesh.euler}, boundaries=${mesh.boundaryLoops}`);
-  const opts:SolverOptions={iterations:2000,tolerance:1e-9,method:'auto',...options};let reason='';
-  const finish=(r:ReturnType<typeof lscm>,method:'lscm'|'tutte'):Parameterization=>{
+  const opts:SolverOptions={iterations:2000,tolerance:1e-9,method:'auto',uvObjective:'paint',paintIterations:24,...options};let reason='';
+  const finish=(r:ReturnType<typeof lscm>,method:Parameterization['method']):Parameterization=>{
     const signs=mesh.triangles.reduce((s,t)=>s+signedArea2(r.uv[t[0]]!,r.uv[t[1]]!,r.uv[t[2]]!),0);
     if(signs<0)r.uv.forEach(p=>p[1]*=-1);
     uvProgress(work,{stage:'quality',detail:'检查翻面、退化与正面积重叠'});
     const quality=checkUVTriangles(mesh.triangles.map(t=>t.map(v=>r.uv[v]!) as [Vec2,Vec2,Vec2]),100,work);
     return {...r,method,quality,...(reason?{fallbackReason:reason}:{})};
   };
+  if(!['paint','compact'].includes(opts.uvObjective!))throw Error('Invalid UV objective.');
+  if(!Number.isInteger(opts.paintIterations)||opts.paintIterations!<1||opts.paintIterations!>100)throw Error('Paint iterations must be 1..100.');
+  if(opts.uvObjective==='paint'&&opts.method==='auto'){
+    const uv=planarShapeCandidate(mesh);
+    if(uv){const result=finish({uv,iterations:0,residual:0},'planar-shape');if(result.quality.valid)return result;}
+  }
+  if(!mesh.disk)throw new Error(`UV chart is not a disk: Euler=${mesh.euler}, boundaries=${mesh.boundaryLoops}`);
   if(opts.method!=='tutte'){
     try{const r=finish(lscm(mesh,opts,work),'lscm');if(r.quality.valid&&r.residual<1e-6)return r;reason=`LSCM rejected: residual=${r.residual.toExponential(2)}, flips=${r.quality.flipped}, degenerates=${r.quality.degenerate}, overlaps>=${r.quality.overlaps}`;}
     catch(e){rethrowUVStop(e);reason=String(e);}
     if(opts.method==='lscm')throw new Error(reason);
   }
-  const r=finish(tutte(mesh,opts,work),'tutte');if(!r.quality.valid||r.residual>1e-6)throw new Error(`Tutte validation failed; ${reason}; residual=${r.residual}, degenerates=${r.quality.degenerate}, overlaps=${r.quality.overlaps}`);
-  return r;
+  const seed=finish(tutte(mesh,opts,work),'tutte');
+  if(!seed.quality.valid||seed.residual>1e-6)throw new Error(`Tutte seed invalid; ${reason}; residual=${seed.residual}`);
+  // Circular embedding is only a numerical initialization in paint mode.
+  // The final boundary is unconstrained and must independently pass global checks.
+  if(opts.uvObjective==='paint'&&opts.method!=='tutte'){
+    const free=freeBoundaryARAP(mesh,seed.uv,opts.paintIterations!,Math.min(opts.iterations,600),work);
+    const r=finish(free,'arap-free');
+    if(!r.quality.valid||!free.accepted||free.maxAnisotropy>100||free.energy>free.initialEnergy+1e-8)
+      throw Error('Hand-paint shape solve rejected; circular fallback is disabled. Keep the existing separate charts or add a deliberate seam. '+reason);
+    r.fallbackReason=(reason?reason+'; ':'')+`Free boundary ARAP energy ${free.initialEnergy.toPrecision(4)} -> ${free.energy.toPrecision(4)} (${free.accepted} accepted steps); no circle boundary is retained.`;
+    return r;
+  }
+  return seed;
 }

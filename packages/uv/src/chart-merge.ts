@@ -1,3 +1,4 @@
+import {uvShapeChange} from './shape-preservation.js';
 import {tryRigidUVJoin} from './rigid-uv-join.js';
 import {joinAlongBoundaryChain} from './chart-join.js';
 import { buildTopology, type MeshData, type Vec2 } from '@meshtailor/mesh-core';
@@ -12,7 +13,7 @@ import type { RawChart } from './atlas-pack.js';
 import type { PackedChart } from './preview.js';
 import type { UnwrapOptions, ChartDiagnostic } from './unwrap.js';
 export interface MergeOptions {
-  reuseValidUV?:boolean;maxJoinAreaRatio?:number;maxAttempts:number; targetCharts:number; respectMaterials:boolean; protectedSeams:string[];
+  maxShapeChange?:number; reuseValidUV?:boolean;maxJoinAreaRatio?:number;maxAttempts:number; targetCharts:number; respectMaterials:boolean; protectedSeams:string[];
 }
 export const DEFAULT_MERGE:MergeOptions={maxAttempts:128,targetCharts:1,respectMaterials:false,protectedSeams:[]};
 export interface MergeReport {
@@ -42,6 +43,8 @@ export function mergeAdjacentCharts(mesh:MeshData,input:RawChart[],inputSeams:Re
   const settings={...DEFAULT_MERGE,...opts.mergeOptions,maxAttempts:opts.mergeOptions?.maxAttempts??Math.min(512,Math.max(128,input.length*3))};
   if(settings.reuseValidUV!==undefined&&typeof settings.reuseValidUV!=='boolean'||!Number.isFinite(settings.maxJoinAreaRatio??1.25)||(settings.maxJoinAreaRatio??1.25)<1||(settings.maxJoinAreaRatio??1.25)>2)throw new Error('Invalid rigid UV join settings.');
   if(!Number.isInteger(settings.maxAttempts)||settings.maxAttempts<0||settings.maxAttempts>2000||!Number.isInteger(settings.targetCharts)||settings.targetCharts<1||typeof settings.respectMaterials!=='boolean'||!Array.isArray(settings.protectedSeams))throw new Error('Invalid chart merge options.');
+  const paint=opts.uvObjective==='paint',shapeLimit=settings.maxShapeChange??1.5;
+  if(!Number.isFinite(shapeLimit)||shapeLimit<1||shapeLimit>4)throw Error('Invalid UV shape change limit.');
   const topology=buildTopology(mesh),graph=buildChartGraph(mesh,input.map(c=>({id:c.id,faces:[...c.faceUVs.keys()]})),topology,work);
   const locked=new Set(settings.protectedSeams);for(const key of locked){const e=topology.edges.get(key);if(!e)throw new Error('Protected seam is not a mesh edge: '+key);if(e.faces.length===2&&graph.faceChart[e.faces[0]!]===graph.faceChart[e.faces[1]!]&&!inputSeams.has(key))throw new Error('Protected seam must already be a UV cut: '+key);}
   let effective=new Set(inputSeams);for(const key of locked)effective.add(key);
@@ -79,10 +82,13 @@ export function mergeAdjacentCharts(mesh:MeshData,input:RawChart[],inputSeams:Re
         if(!local.disk&&opts.autoCut){const opened=openChartWithSlits(mesh,faces,trial,local,work);if(opened){local=opened.local;for(const e of opened.added)trial.add(e);}}
         if(!local.disk){const partial=joinAlongBoundaryChain(mesh,faces,effective,link.edges,work);if(partial){local=partial.local;trial=partial.seams;joinMode='open-chain';}}
         let p:{uv:Vec2[];method:string;iterations:number;residual:number;fallbackReason?:string}|undefined,shape:ReturnType<typeof shapeQuality>|undefined,reason='topology';
-        if(local.disk)try{const solved=parameterizeChart(local,opts,work),q=shapeQuality(local,solved.uv,opts.stretchAreaPercentile??1,opts.maxStretch);if(solved.quality.valid&&q.areaStretch<=opts.maxStretch&&q.aspect<=opts.maxAspect&&q.fill>=opts.minFill){p=solved;shape=q;}else reason='distortion';}catch(error){rethrowUVStop(error);reason='solver-invalid';}
+        // Hand-paint goal first tries to keep both existing silhouettes exactly.
+        if(paint&&settings.reuseValidUV!==false){const fit=tryRigidUVJoin(mesh,A,B,effective,link.edges,opts,work,topology);if(fit){local=fit.local;trial=fit.seams;p=fit;shape=fit.shape;joinMode='uv-similarity';}}
+        if(!p&&local.disk)try{const solved=parameterizeChart(local,opts,work),q=shapeQuality(local,solved.uv,opts.stretchAreaPercentile??1,opts.maxStretch);if(solved.quality.valid&&q.areaStretch<=opts.maxStretch&&q.aspect<=opts.maxAspect&&q.fill>=opts.minFill){p=solved;shape=q;}else reason='distortion';}catch(error){rethrowUVStop(error);reason='solver-invalid';}
         if(!p&&settings.reuseValidUV!==false){const fit=tryRigidUVJoin(mesh,A,B,effective,link.edges,opts,work,topology);if(fit){local=fit.local;trial=fit.seams;p=fit;shape=fit.shape;joinMode='uv-similarity';}}
         if(!p||!shape){reject(reason);continue;}
         const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...p.uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
+        if(paint&&Math.max(uvShapeChange(mesh,A,faceUVs),uvShapeChange(mesh,B,faceUVs))>shapeLimit){reject('paint-shape-change');continue;}
         // No mutation until the complete trial has passed all numerical/UV checks.
         work?.check();parent.set(b,a);versions.set(a,versions.get(a)!+1);raw.delete(b);raw.set(a,{id:a,faceUVs,area3D:A.area3D+B.area3D});
         diag.delete(b);diag.set(a,{id:a,sourceChart:diag.get(a)?.sourceChart??a,faces:faces.length,method:p.method,iterations:p.iterations,residual:p.residual,...shape,...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});effective=trial;

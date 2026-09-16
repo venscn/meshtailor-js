@@ -11,7 +11,7 @@ import {shapeQuality} from './chart-quality.js';
 import {uvProgress,type UVWork} from './work.js';
 export interface SourceRepairReport {
   inspected:number; repaired:number; preserved:number; addedSeams:string[];
-  islands:{id:number;faces:number;before:UVQuality;method:string;iterations:number;maxStretch:number}[];
+  islands:{id:number;faces:number;before:UVQuality;method:string;iterations:number;residual?:number;fallbackReason?:string;maxStretch:number}[];
 }
 /** Repair ONLY invalid source islands, using their original 3D face sets. This
  * is an explicit new-atlas operation, never an edit to source coordinates.
@@ -33,7 +33,7 @@ export function repairSourceCharts(mesh:MeshData,seed:readonly PackedChart[],inp
       const result=parameterizeChart(local,opts,work),shape=shapeQuality(local,result.uv,opts.stretchAreaPercentile??1,opts.maxStretch);
       if(!result.quality.valid||shape.areaStretch>opts.maxStretch||shape.aspect>opts.maxAspect||shape.fill<opts.minFill)throw new Error(`原 UV 岛 #${c.id+1} 局部修复未通过 UV/形变检查；请运行前处理。没有放宽检查或删除面。`);
       faceUVs=new Map();local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...result.uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
-      report.repaired++;report.islands.push({id:c.id,faces:faces.length,before,method:result.method,iterations:result.iterations,maxStretch:shape.maxStretch});
+      report.repaired++;report.islands.push({id:c.id,faces:faces.length,before,method:result.method,iterations:result.iterations,residual:result.residual,fallbackReason:result.fallbackReason,maxStretch:shape.maxStretch});
     }else{
       report.preserved++;
       // A uniform mirror is not invalid. Normalize orientation only for new atlas.
