@@ -4,7 +4,12 @@ export interface UVProgress {
   stage:UVStage; detail:string; current?:number; total?:number; unit?:string;
   facesDone?:number; facesTotal?:number; islandsDone?:number;
 }
-export interface UVWork { check():void; report(progress:UVProgress):void }
+export type UVOperationStep='input'|'extract'|'parameterize'|'repair'|'merge'|'pack'|'fill'|'correspondence'|'audit';
+export interface UVWork {
+  check():void; report(progress:UVProgress):void;
+  /** Coarse operation boundaries, separate from nested numerical progress. */
+  step?:(id:UVOperationStep)=>void;
+}
 /** Must propagate through numerical fallbacks rather than start more retries. */
 export class UVWorkStopped extends Error {
   constructor(message:string){super(message);this.name='UVWorkStopped';}

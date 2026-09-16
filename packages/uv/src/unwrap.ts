@@ -60,6 +60,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   if(!['large','balanced','legacy'].includes(opts.chartPolicy??''))throw new Error('Invalid chart policy.');
   if(!['auto','lscm','tutte'].includes(opts.method)||typeof opts.autoCut!=='boolean'||typeof opts.rotate!=='boolean'||!Number.isFinite(opts.padding)||opts.padding<0||opts.padding>=.1||!Number.isInteger(opts.rotationSteps)||opts.rotationSteps<1||opts.rotationSteps>90)throw new Error('Invalid UV solver or packing settings.');
   if(!(opts.maxAspect>=1&&Number.isFinite(opts.maxAspect))||!(opts.minFill>=0&&opts.minFill<=1)||!(opts.maxStretch>=1&&Number.isFinite(opts.maxStretch))||!Number.isInteger(opts.maxChartFaces)||opts.maxChartFaces<8||opts.maxChartFaces>20000||!Number.isInteger(opts.iterations)||opts.iterations<1||opts.iterations>20000||!(opts.tolerance>0&&opts.tolerance<1))throw new Error('Invalid UV solver settings.');
+  work?.step?.('parameterize');
   uvProgress(work,{stage:'validate',detail:'检查输入几何',facesDone:0,facesTotal:input.faces.length,islandsDone:0});
   const mesh=normalizedMesh(input),topology=buildTopology(mesh),effective=new Set(seams),warnings:string[]=[];
   for(const [key,e]of topology.edges)if(e.faces.length>2){if(!opts.autoCut)throw new Error('Non-manifold edges require cuts or mesh repair.');effective.add(key);}
@@ -116,7 +117,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   };
   charts.forEach(chart=>solve(chart.faces,chart.id));
   let merge:MergeReport|undefined;
-  if(opts.postMerge){const m=mergeAdjacentCharts(mesh,raw,effective,opts,diagnostics,work);raw.splice(0,raw.length,...m.raw);diagnostics.splice(0,diagnostics.length,...m.diagnostics);effective.clear();for(const key of m.seams)effective.add(key);merge=m.report;warnings.push(`后处理邻岛缝合：${merge.before} → ${merge.after} 岛；接受 ${merge.accepted} 次，尝试 ${merge.attempts} 次；${merge.budgetExhausted?'达到预算，不代表全局最少岛':'保留未通过拓扑/形变检查的边界'}。`);}
+  if(opts.postMerge){work?.step?.('merge');const m=mergeAdjacentCharts(mesh,raw,effective,opts,diagnostics,work);raw.splice(0,raw.length,...m.raw);diagnostics.splice(0,diagnostics.length,...m.diagnostics);effective.clear();for(const key of m.seams)effective.add(key);merge=m.report;warnings.push(`后处理邻岛缝合：${merge.before} → ${merge.after} 岛；接受 ${merge.accepted} 次，尝试 ${merge.attempts} 次；${merge.budgetExhausted?'达到预算，不代表全局最少岛':'保留未通过拓扑/形变检查的边界'}。`);}
   const faceChart=new Int32Array(mesh.faces.length);raw.forEach(r=>{for(const fi of r.faceUVs.keys())faceChart[fi]=r.id;});
   for(const [key,e]of topology.edges){
     if(e.faces.length!==2){if(e.faces.length>1)effective.add(key);continue;}
@@ -132,6 +133,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   warnings.push(`碎片诊断：输入 ${fragmentation.inputComponents} 个几何连通分量 → ${fragmentation.initialCharts} 个初始区域 → ${raw.length} 个最终岛（${fragmentation.tinyCharts} 个小于16面）。补切原因：${JSON.stringify(fragmentation.reasons)}。详细事件可导出诊断。`);
   const tolerated=diagnostics.filter(d=>d.maxStretch>opts.maxStretch&&d.areaStretch!<=opts.maxStretch);
   if(tolerated.length)warnings.push(`${tolerated.length} 个岛含超过软形变阈值的微小细节；采用 ${((opts.stretchAreaPercentile??1)*100).toFixed(1)}% 源表面积分位数避免整块反复切碎。最坏值仍报告；不豁免翻面、退化或交叠。`);
+  work?.step?.('pack');
   const atlas=packConnectedAtlas(mesh,raw,opts,work);
   warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
   return{...atlas,merge,fragmentation,seams:[...effective],addedSeams,diagnostics,warnings};

@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {writeFile} from 'node:fs/promises';
+import {compileCore} from './lib/compiled-core.mjs';
+const c=await compileCore(),cases=[];
+const check=(name,fn)=>{fn();cases.push({name,passed:true});console.log('PASS',name)};
+try{
+ const p=await c.load('apps/studio/src/unfold/load-pipeline.js');
+ const core=await c.load('packages/mesh-core/src/index.js');
+ const demo=await c.load('apps/studio/src/unfold/demo.js'); const mesh=core.makeCube();mesh.faces=mesh.faces.map(f=>({...f,uvs:[[0,0],[1,0],[0,1]]}));const without={...mesh,faces:mesh.faces.map(f=>({vertices:f.vertices}))};
+ const defaults=p.DEFAULT_LOAD_PIPELINE;
+ check('Default model-load flow explicitly disables fill',()=>assert.equal(defaults.fill,false));
+ check('Complete UV chooses source-atlas',()=>assert.equal(p.resolveLoadPipeline(mesh,defaults).target,'source-atlas'));
+ check('Missing UV chooses generated',()=>assert.equal(p.resolveLoadPipeline(without,defaults).target,'generated'));
+ check('Generated explicit override',()=>assert.equal(p.resolveLoadPipeline(mesh,{...defaults,source:'generated'}).target,'generated'));
+ check('Inspection never hides generated fallback',()=>assert.throws(()=>p.resolveLoadPipeline(without,{...defaults,source:'inspect'})));
+ check('Inspection rejects mutating fill',()=>assert.throws(()=>p.resolveLoadPipeline(mesh,{...defaults,source:'inspect',fill:true})));
+ check('Multi-page rejects automatic fill before solve',()=>assert.throws(()=>p.resolveLoadPipeline(mesh,{...defaults,fill:true},{atlasPageMode:'components'})));
+ check('Disable merge hits both source and generated config',()=>{const c=p.resolveLoadPipeline(mesh,{...defaults,mergeAdjacent:false}).config;assert.equal(c.sourceAtlasMerge,false);assert.equal(c.postMerge,false)});
+ check('Disable repair is strict rejection, not hidden repair',()=>assert.equal(p.resolveLoadPipeline(mesh,{...defaults,repairInvalid:false}).config.sourceRepairPolicy,'reject'));
+ check('Automatic fill never invokes nested packing fill or recut',()=>{const c=p.resolveLoadPipeline(mesh,{...defaults,fill:true},{fillMode:'area-priority',fillRecutLarge:true}).config;assert.equal(c.fillMode,'off');assert.equal(c.fillRecutLarge,false)});
+ check('Budget and rounds are actual serialized options',()=>{const c=p.resolveLoadPipeline(mesh,{...defaults,fill:true,fillBudgetSeconds:23,fillRounds:6}).config;assert.equal(c.fillTimeBudgetMs,23000);assert.equal(c.fillRounds,6)});
+ check('Corrupt storage recovers versioned defaults',()=>assert.deepEqual(p.readLoadPipeline({getItem:()=>'{'}),defaults));
+ check('Denied storage recovers defaults',()=>assert.deepEqual(p.readLoadPipeline({getItem:()=>{throw Error()}}),defaults));
+ check('Invalid version rejected',()=>assert.throws(()=>p.validateLoadPipeline({...defaults,version:2})));
+ check('Invalid boolean rejected',()=>assert.throws(()=>p.validateLoadPipeline({...defaults,fill:'false'})));
+ check('NaN budgets rejected',()=>assert.throws(()=>p.validateLoadPipeline({...defaults,fillBudgetSeconds:NaN})));
+ check('Configuration serialized without arbitrary injected fields',()=>assert.equal('foo' in p.validateLoadPipeline({...defaults,foo:'x'}),false));
+ check('No numerical progress guesses completed steps',()=>{let t=0;const rec=new p.PipelineRecorder('source-atlas',{},defaults,()=>t);rec.enter('input');t=10;rec.detail('Checking');assert.equal(rec.trace.steps.find(s=>s.id==='repair').state,'pending');rec.enter('extract');assert.equal(rec.trace.steps[0].elapsedMs,10);t=20;const x=rec.finish('error','bad asset');assert.equal(x.steps.find(s=>s.id==='extract').state,'error');assert.equal(x.steps.find(s=>s.id==='repair').state,'skipped')});
+ check('Hard-cancel trace marks pending as not executed',()=>{const rec=new p.PipelineRecorder('generated',{},defaults,()=>12);rec.enter('parameterize');const x=p.terminalPipeline(rec.snapshot(),'cancelled',32);assert.equal(x.steps.find(s=>s.id==='parameterize').state,'cancelled');assert.equal(x.steps.find(s=>s.id==='pack').reason,'前序未完成，未执行')});
+ check('Completed snapshot immutable from recorder changes',()=>{let t=0;const rec=new p.PipelineRecorder('source',{},undefined,()=>t);rec.enter('input');const a=rec.snapshot();t=2;rec.enter('extract');assert.equal(a.steps[0].state,'running')});
+ const i=process.argv.indexOf('--report');if(i>=0)await writeFile(process.argv[i+1],JSON.stringify({passed:cases.length,cases},null,2));
+}finally{await c.cleanup()}
