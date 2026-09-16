@@ -1,3 +1,5 @@
+import {PipelinePanel} from '/apps/studio/src/unfold/pipeline-panel.js';
+import {readLoadPipeline,PIPELINE_STORAGE_KEY,resolveLoadPipeline,terminalPipeline} from '/apps/studio/src/unfold/load-pipeline.js';
 import * as core from '/packages/mesh-core/src/index.js';
 import * as uv from '/packages/uv/src/index.js';
 import { makeHingeDemo, makeUnfoldDemo, makeFragmentationDemo, makeOverlapDemo } from '/apps/studio/src/unfold/demo.js';
@@ -12,6 +14,12 @@ const $=id=>document.getElementById(id);
 let inspectionIndex=null, timelineGeometry=null, timelineKey='';
 let chartConfig={...uv.DEFAULT_UNWRAP};
 let postSeed;
+let loadPlan;try{loadPlan=readLoadPipeline(window.localStorage);}catch{loadPlan=readLoadPipeline();}
+let pipelineTrace=null,pipelineRunning=false,pipelineStarted=0;
+const pipelinePanel=new PipelinePanel(plan=>{loadPlan=plan;try{localStorage.setItem(PIPELINE_STORAGE_KEY,JSON.stringify(plan));}catch{}renderPipeline();},()=>solve(loadPlan),()=>{cancel();pause();});
+$('pipeline-host').append(pipelinePanel.element);
+function renderPipeline(){if(mesh)pipelinePanel.update({config:loadPlan,mesh,options:chartConfig,trace:pipelineTrace,loading:pipelineRunning,inputStatus:`已读取 ${mesh.name} · ${mesh.faces.length.toLocaleString()} 面 · 离线 OBJ / 内置样例入口`});}
+
 let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,sequence=0;
 const options={focusMode:'dither',focusRadius:1.2,focusRetained:.12,overlapMode:'auto',overlapTolerance:.0001,overlapOpacity:.72,faceTones:true,skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
@@ -94,35 +102,39 @@ function update(patch={},focus=null){
   $('queue-prev').disabled=focusIndex<=0;$('queue-next').disabled=focusIndex<0||focusIndex>=options.selected.length-1;
 }
 function seekQueue(direction){pause();const schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,$('reverse').checked,options.timeline),index=Math.max(0,Math.min(options.selected.length-1,(inspectionIndex??schedule.focusIndex)+direction));update({progress:uv.islandTimelineProgress($('reverse').checked?1:0,index,options.selected.length,options.order,options.handoff,options.timeline)},index);}
-function cancel(){sequence++;jobHandle?.cancel();jobHandle=null;$('cancel').disabled=true;$('solve').disabled=false;}
-async function solve(){
-  cancel();pause();window.lab.ready=false;window.lab.progressEvents=[];
+function cancel(){sequence++;jobHandle?.cancel();jobHandle=null;$('cancel').disabled=true;$('solve').disabled=false;if(pipelineRunning){pipelineTrace=terminalPipeline(pipelineTrace,'cancelled',performance.now()-pipelineStarted,'用户取消；保留上一份完整结果');pipelineRunning=false;renderPipeline();}}
+async function solve(plan){
+  // Browser click events are not serialized configuration objects.
+  if(plan?.version!==1)plan=undefined;
+  cancel();pause();
+  if(plan){try{const resolved=resolveLoadPipeline(mesh,plan,{...chartConfig,atlasPageMode:$('atlas-page-mode').value});$('target').value=resolved.target;}catch(e){fail(e.message);return;}}
+  pipelineTrace=null;pipelineRunning=true;pipelineStarted=performance.now();renderPipeline();window.lab.ready=false;window.lab.progressEvents=[];
   const token=sequence,start=performance.now();let lastProgress=null,clock;
   const backup=['stitch','repack','source-atlas','fill'].includes($('target').value)?snapshot:null;
   $('error').hidden=true;snapshot=null;inspection=EMPTY_INSPECTION;options.focusFace=null;selectionStatus();view.setGeometry(null);$('islands').replaceChildren();
   const c=$('uv'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
   $('status').textContent='启动 UV Worker…';$('solve').disabled=true;$('cancel').disabled=false;
   try{
-    jobHandle=startUVJob({mesh,edges:[...seams],target:$('target').value,seedCharts:postSeed,config:{...chartConfig,fillMode:$('target').value==='fill'?$('fill-mode').value:'off',fillStep:Number($('fill-step').value)/100,fillMaxAreaGain:Number($('fill-cap').value),fillRecutLarge:$('fill-recut').checked,fillMinStep:Number($('fill-min-step').value)/100,fillRounds:Number($('fill-rounds').value),fillResolution:Number($('fill-resolution').value),fillTimeBudgetMs:Number($('fill-budget').value)*1000,sourceRepairPolicy:$('source-repair').checked?'repair':'reject',sourceAtlasMerge:$('source-merge').checked,packingOrder:$('packing-order').value,tinyIslandAreaFraction:Number($('tiny-fraction').value)/100,maxTinyAreaBoost:Number($('tiny-cap').value),spatialNeighbors:$('spatial-neighbors').checked,neighborDistanceRatio:Number($('neighbor-distance').value)/100,initialSegmentation:$('initial-segmentation').value,postMerge:$('post-merge').checked,mergeOptions:{reuseValidUV:$('reuse-uv-shape').checked,maxAttempts:$('merge-attempts').value===''?undefined:Number($('merge-attempts').value),targetCharts:Number($('merge-target').value),respectMaterials:$('merge-materials').checked},atlasPageMode:$('atlas-page-mode').value,atlasPageCount:Number($('atlas-page-count').value),maxChartFaces:Number($('chart-faces').value),maxStretch:Number($('chart-stretch').value),regionOptions:{...chartConfig.regionOptions,normalConeDegrees:Number($('chart-cone').value)},method:$('solver').value,padding:Number($('padding').value),autoCut:$('autocut').checked,rotate:$('rotate').checked,packing:$('packing')?.value??'auto',timeBudgetMs:Number($('budget')?.value??120)*1000}},{
+    jobHandle=startUVJob({pipeline:plan,mesh,edges:[...seams],target:$('target').value,seedCharts:postSeed,config:{...chartConfig,fillMode:$('target').value==='fill'?$('fill-mode').value:'off',fillStep:Number($('fill-step').value)/100,fillMaxAreaGain:Number($('fill-cap').value),fillRecutLarge:$('fill-recut').checked,fillMinStep:Number($('fill-min-step').value)/100,fillRounds:Number($('fill-rounds').value),fillResolution:Number($('fill-resolution').value),fillTimeBudgetMs:Number($('fill-budget').value)*1000,sourceRepairPolicy:$('source-repair').checked?'repair':'reject',sourceAtlasMerge:$('source-merge').checked,packingOrder:$('packing-order').value,tinyIslandAreaFraction:Number($('tiny-fraction').value)/100,maxTinyAreaBoost:Number($('tiny-cap').value),spatialNeighbors:$('spatial-neighbors').checked,neighborDistanceRatio:Number($('neighbor-distance').value)/100,initialSegmentation:$('initial-segmentation').value,postMerge:$('post-merge').checked,mergeOptions:{reuseValidUV:$('reuse-uv-shape').checked,maxAttempts:$('merge-attempts').value===''?undefined:Number($('merge-attempts').value),targetCharts:Number($('merge-target').value),respectMaterials:$('merge-materials').checked},atlasPageMode:$('atlas-page-mode').value,atlasPageCount:Number($('atlas-page-count').value),maxChartFaces:Number($('chart-faces').value),maxStretch:Number($('chart-stretch').value),regionOptions:{...chartConfig.regionOptions,normalConeDegrees:Number($('chart-cone').value)},method:$('solver').value,padding:Number($('padding').value),autoCut:$('autocut').checked,rotate:$('rotate').checked,packing:$('packing')?.value??'auto',timeBudgetMs:Number($('budget')?.value??120)*1000}},{
       createWorker:()=>{const url=window.labWorkerURL();try{return new Worker(url);}finally{URL.revokeObjectURL(url);}},
-      onProgress:p=>{if(token!==sequence)return;lastProgress=p;window.lab.progressEvents.push(p);$('status').textContent=describeUVProgress(p,performance.now()-start);}
+      onProgress:p=>{if(token!==sequence)return;lastProgress=p;pipelineTrace=p.pipeline??pipelineTrace;renderPipeline();window.lab.progressEvents.push(p);$('status').textContent=describeUVProgress(p,performance.now()-start);}
     });
     clock=setInterval(()=>{if(token===sequence)$('status').textContent=describeUVProgress(lastProgress,performance.now()-start);},500);
     const result=await jobHandle.result;if(token!==sequence)return;
-    snapshot=result;inspection=EMPTY_INSPECTION;jobHandle=null;options.selected=snapshot.geometry.islands.map(i=>i.id);options.progress=0;options.focusFace=null;
+    snapshot=result;pipelineTrace=snapshot.pipeline??pipelineTrace;inspection=EMPTY_INSPECTION;jobHandle=null;options.selected=snapshot.geometry.islands.map(i=>i.id);options.progress=0;options.focusFace=null;
     rebuildTimeline();view.setOptions(options);view.setGeometry(snapshot.geometry,{resetCamera:framedMesh!==mesh});framedMesh=mesh;list();update();const m=snapshot.metrics;
     $('title').textContent=`${mesh.name} · ${mesh.faces.length.toLocaleString()} 三角面 · ${snapshot.packed.length} 岛`;
     $('status').textContent=(m?`生成 UV：翻面 / 退化 / 正面积重叠检查通过\n有效面积占用 ${(m.occupancy*100).toFixed(1)}% · 包围盒面积总和（可覆盖） ${(m.boxOccupancy*100).toFixed(1)}%\n${m.packingMethod} 排布 · 新增 ${snapshot.addedSeams.length} 条 UV 补切\n`:'原始 UV：未修复、未重新排布\n')+`Worker 完成 · ${(snapshot.timing.elapsedMs/1000).toFixed(2)} 秒\n`+snapshot.warnings.join('\n')+(snapshot.fragmentation?`\n分割诊断：${snapshot.fragmentation.inputComponents} 个源分量 → ${snapshot.fragmentation.initialCharts} 个初始区域 → ${snapshot.fragmentation.outputCharts} 岛；小于16面的岛 ${snapshot.fragmentation.tinyCharts}\n补切原因：${JSON.stringify(snapshot.fragmentation.reasons)}`:'');
     const fr=snapshot.packingReport?.refinement;$('fill-summary').textContent=fr?uv.describeFill(fr)+(fr.recut?` 大岛旧切缝试验：${fr.recut.trials} 个候选，${fr.recut.accepted?'接受一次':'未接受，原岛保留'}。`:''):'';$('fill-shapes').textContent=fr?'建议检查轮廓/切缝（不是自动补切）：'+fr.shapeWaste.slice(0,5).map(c=>`#${c.id+1} 轮廓/框 ${(c.shapeFill*100).toFixed(0)}%`).join('、'):'';
     reportUV();window.lab.ready=true;
-  }catch(e){if(token===sequence){fail(e.message);$('status').textContent='未生成新结果，原网格未修改。';if(backup){snapshot=backup;view.setGeometry(snapshot.geometry,{resetCamera:false});rebuildTimeline();view.setOptions(options);list();update();reportUV();window.lab.ready=true;$('status').textContent+='已恢复上一份 UV 快照。';}}}
-  finally{clearInterval(clock);if(token===sequence){jobHandle=null;$('solve').disabled=false;$('cancel').disabled=true;}}
+  }catch(e){if(token===sequence){pipelineTrace=terminalPipeline(pipelineTrace,e.code==='cancelled'?'cancelled':e.code==='timeout'?'timeout':'error',performance.now()-pipelineStarted,e.message);fail(e.message);$('status').textContent='未生成新结果，原网格未修改。';if(backup){snapshot=backup;view.setGeometry(snapshot.geometry,{resetCamera:false});rebuildTimeline();view.setOptions(options);list();update();reportUV();window.lab.ready=true;$('status').textContent+='已恢复上一份 UV 快照。';}}}
+  finally{clearInterval(clock);if(token===sequence){pipelineRunning=false;renderPipeline();jobHandle=null;$('solve').disabled=false;$('cancel').disabled=true;}}
 }
 function tune(goal='large'){
  const r=uv.recommendUnwrap(mesh,goal);chartConfig=r.options;$('chart-faces').value=chartConfig.maxChartFaces;$('chart-cone').value=chartConfig.regionOptions.normalConeDegrees;$('chart-stretch').value=chartConfig.maxStretch;$('source-layout').value=chartConfig.sourceUVLayout??'materials';
  $('auto-config').textContent=`自动填写：${goal==='large'?'大块优先':'均衡'} · ${r.analysis.components} 个连通分量 · 小区域面积比 ${chartConfig.regionOptions.minRegionAreaRatio} · 不为填充率补切`;
 }
-function load(demo){postSeed=undefined;if(['stitch','repack','fill'].includes($('target').value))$('target').value='generated';mesh=demo.mesh;seams=demo.edges;tune();$('post-merge').checked=false;$('initial-segmentation').value='regions';$('extract-uv').disabled=!mesh.faces.every(f=>f.uvs?.every(p=>p?.length===2));window.lab.ready=false;return solve();}
+function load(demo,automatic=false){postSeed=undefined;if(['stitch','repack','fill'].includes($('target').value))$('target').value='generated';mesh=demo.mesh;seams=demo.edges;tune();$('post-merge').checked=false;$('initial-segmentation').value='regions';$('extract-uv').disabled=!mesh.faces.every(f=>f.uvs?.every(p=>p?.length===2));window.lab.ready=false;return solve(automatic?loadPlan:undefined);}
 function autoCharts(goal){tune(goal);seams=new Set();$('target').value='generated';return solve();}
 function reportUV(){
   const repair=snapshot?.repair;$('repair-summary').textContent=repair?`原 UV 局部修复 ${repair.repaired}/${repair.inspected} 岛：${repair.islands.map(i=>'#'+(i.id+1)+' '+i.method).join('、')||'无需修复'}；其余 ${repair.preserved} 岛未重新参数化。`:'';
@@ -141,8 +153,8 @@ $('auto-large').onclick=()=>autoCharts('large');$('auto-balanced').onclick=()=>a
 $('extract-uv').onclick=()=>{$('target').value='source-atlas';return solve();};
 $('inspect-source').onclick=()=>{$('target').value='source';return solve();};
 for(const stage of uv.HINGE_STAGES){const b=document.createElement('button');b.textContent=stage.label;b.dataset.stage=stage.t;b.onclick=()=>{pause();const schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,$('reverse').checked,options.timeline),index=inspectionIndex??schedule.focusIndex;update({progress:uv.islandTimelineProgress((options.timeline?.entries[index]?uv.motionLocal(options.timeline.entries[index].profile,stage.t):uv.hingePlaybackProgress(stage.t,options.holdNet)),index,options.selected.length,options.order,options.handoff,options.timeline)},index);};$('stages').append(b);}
-$('ribbon').onclick=()=>load(makeHingeDemo());$('cube').onclick=()=>load(makeUnfoldDemo());$('complex').onclick=()=>{const m=core.makeComplexExample($('example').value,'low');load({mesh:m,edges:new Set()});};
-$('file').onchange=async e=>{try{const f=e.target.files?.[0];if(f){const m=core.parseOBJ(await f.text(),f.name);await load({mesh:m,edges:new Set()});}}catch(e){fail(e.message);}};
+$('ribbon').onclick=()=>load(makeHingeDemo());$('cube').onclick=()=>load(makeUnfoldDemo());$('complex').onclick=()=>{const m=core.makeComplexExample($('example').value,'low');load({mesh:m,edges:new Set()},true);};
+$('file').onchange=async e=>{try{const f=e.target.files?.[0];if(f){const m=core.parseOBJ(await f.text(),f.name);await load({mesh:m,edges:new Set()},true);}}catch(e){fail(e.message);}};
 $('source-layout').onchange=()=>{chartConfig.sourceUVLayout=$('source-layout').value;if($('target').value==='source')solve();};
 $('solve').onclick=solve;$('cancel').onclick=()=>{cancel();$('status').textContent='已取消本次求解。';};$('target').onchange=solve;
 $('all').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update({progress:0});};$('none').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=[];list();update({progress:0});};
@@ -175,7 +187,7 @@ $('export').onclick=()=>{if(!snapshot)return;const text=core.meshToOBJ(uv.meshWi
 $('diagnostic').onclick=()=>{if(!snapshot)return;const report={version:'0.4.13',asset:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},config:chartConfig,fragmentation:snapshot.fragmentation,repair:snapshot.repair,sourceAudit:snapshot.sourceAudit,areaAudit:snapshot.areaAudit,sourceAreaAudit:snapshot.sourceAreaAudit,spatialReport:snapshot.spatialReport,packingReport:snapshot.packingReport,merge:snapshot.merge,pageReport:snapshot.pageReport,uvSpaces:snapshot.geometry.atlas.spaces,metrics:snapshot.metrics,warnings:snapshot.warnings,timing:snapshot.timing};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='meshtailor-diagnostic.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 new ResizeObserver(drawUV).observe($('uvhost'));
 if($('clear-face'))$('clear-face').onclick=clearFace;
-window.lab={ready:false,view,options,errors,update,select,pick,boxSelect,clearFace,get inspection(){return inspection;},load,solve,postprocess,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
+window.lab={ready:false,view,options,errors,update,select,pick,boxSelect,clearFace,get inspection(){return inspection;},load,solve,postprocess,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;},get loadPlan(){return loadPlan;},get pipelineTrace(){return pipelineTrace;}};
 for(const button of document.querySelectorAll('[data-tool]'))button.onclick=()=>{
   for(const tab of document.querySelectorAll('[data-tool]')){
     const selected=tab===button;tab.setAttribute('aria-selected',String(selected));
