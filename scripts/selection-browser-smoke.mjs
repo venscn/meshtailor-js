@@ -39,7 +39,7 @@ try{for(const dpr of [1,2]){
   await clickPoint(r);assert.equal((await state()).face,r.fi);await clickUV(r.fi);assert.equal((await state()).face,null);assert.equal((await state()).progress,1);return r;
  });
  await check(prefix+'face toggles during playback keep the clock and queue running',async()=>{
-  await page.evaluate('lab.update({progress:.3});document.querySelector("#play").click()');await clickUV(f0);assert.equal((await state()).playing,true);assert.equal((await state()).face,f0);const before=(await state()).progress;await delay(120);assert.ok((await state()).progress>before);await clickUV(f0);assert.equal((await state()).face,null);assert.equal((await state()).playing,true);await page.evaluate('lab.pause()');
+  await page.evaluate('lab.update({progress:.3});document.querySelector("#play").click()');await clickUV(f0);assert.equal((await state()).playing,true);assert.equal((await state()).face,f0);const before=(await state()).progress;await page.waitFor(`lab.playing && lab.options.progress>${before}`,3000);assert.ok((await state()).progress>before);await clickUV(f0);assert.equal((await state()).face,null);assert.equal((await state()).playing,true);await page.evaluate('lab.pause()');
  });
  await check(prefix+'dragging camera never selects a triangle',async()=>{
   const r=await page.evaluate('(()=>{const r=lab.view.canvas.getBoundingClientRect();return {x:r.x+r.width*.5,y:r.y+r.height*.4};})()');const camera=await page.evaluate('JSON.stringify(lab.view.camera)');
