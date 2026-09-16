@@ -111,7 +111,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <h3 class="section-divider">播放与显示</h3><label>播放方式<select id="order"><option value="relay">逐岛尾段接力（最多相邻两岛）</option><option value="sequential">严格逐岛（完成后启动下一个）</option></select></label>
 <label><span id="handoff-label">前岛完成 85% 时接力</span><input id="handoff" aria-label="Island handoff" type="range" min=".75" max="1" step=".01" value=".85" style="max-width:110px"></label>
 <small>未启动的岛保持原位，已完成的岛留在 UV。没有全体同时启动模式。</small>
-<label>每岛基准时长（跳过前）<input id="seconds" type="number" min=".5" step=".5" max="60" value="12"></label>
+<small>队列按原始 3D 表面积降序，点击顺序不影响播放。</small><label>播放倍速<select id="rate" aria-label="Playback speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option><option value="8">8×</option><option value="16">16×</option><option value="32">32×</option><option value="64">64×</option></select></label><label>每岛基准时长（跳过前）<input id="seconds" type="number" min=".5" step=".5" max="60" value="12"></label>
 <label>自动跳过无变化区间<input id="skip-static" type="checkbox" checked></label><small id="motion-status" role="status"></small><details><summary>运动判定容差</summary><label>相对岛尺寸<input id="motion-tolerance" type="number" value="0.000001" min="0" max=".001" step=".000001"></label><small>按顶点及铰链变换判断；与相机、遮挡无关。绝对容差 1e-8 个归一化单位。</small></details>
 <details open class="overlap-controls" data-testid="overlap-controls"><summary>重叠与面片识别</summary>
 <label>重叠提示<select id="overlap-mode" aria-label="Overlap visualization"><option value="coplanar">同岛近共面重叠 · 默认</option><option value="projected">视线叠层 · 含前后遮挡</option><option value="off">关闭</option></select></label>

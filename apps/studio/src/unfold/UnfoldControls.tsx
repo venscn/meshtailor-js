@@ -34,9 +34,10 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
     <h3 className="section-divider">播放</h3>
     <label>方式<select aria-label="Unfold order" value={p.order} onChange={e=>p.changeOrder(e.target.value as UnfoldOrder)}><option value="relay">逐岛接力</option><option value="sequential">严格逐岛</option></select></label>
     {p.order!=='sequential'&&<label>接力点 <b>{Math.round(p.handoff*100)}%</b><input aria-label="Island handoff" type="range" min=".75" max="1" step=".01" value={p.handoff} onChange={e=>p.changeHandoff(+e.target.value)}/></label>}
+    <small>队列按原始 3D 表面积从大到小；多选顺序不影响播放。</small>
     <label>每岛基准时长 / 秒<input aria-label="Unfold duration" type="number" min=".5" max="60" step=".5" value={p.seconds} onChange={e=>{const v=+e.target.value;if(v>=.5&&v<=60)p.setSeconds(v);}}/></label>
     <label className="check"><input aria-label="Skip unchanged animation spans" type="checkbox" checked={p.skipStatic} onChange={e=>p.changeSkipStatic(e.target.checked)}/>跳过无变化区间</label>
-    <small data-testid="motion-time-savings">{p.duration.toFixed(1)} 秒 · 比固定阶段缩短 {Math.max(0,p.nominalDuration-p.duration).toFixed(1)} 秒</small>
+    <small data-testid="motion-time-savings">基准 {p.duration.toFixed(1)} 秒 / 当前倍速 {p.wallDuration.toFixed(1)} 秒 · 静止跳过缩短 {Math.max(0,p.nominalDuration-p.duration).toFixed(1)} 秒</small>
     <label>向外分离 <b>{Math.round(p.separation*100)}%</b><input aria-label="Unfold separation" type="range" min="0" max=".5" step=".01" value={p.separation} onChange={e=>p.setSeparation(+e.target.value)}/></label>
     <button onClick={()=>p.setSeparation(0)}>原位展开</button>
     <small>相对模型最长边；0 表示不向外移动。</small>
@@ -82,6 +83,7 @@ export function UnfoldTransport({player:p,disabled}:{player:UnfoldPlayer;disable
       <button className="primary" onClick={p.toggle} disabled={blocked}>{p.playing?'暂停展开':'播放展开'}</button>
       <label><input type="checkbox" checked={p.reverse} onChange={e=>p.setReverse(e.target.checked)}/>反向</label>
       <label><input type="checkbox" checked={p.loop} onChange={e=>p.setLoop(e.target.checked)}/>循环</label>
+      <label>倍速<select aria-label="Playback speed" value={p.rate} onChange={e=>p.setRate(+e.target.value)}>{[.25,.5,1,2,4,8,16,32,64].map(n=><option key={n} value={n}>{n}×</option>)}</select></label>
       <span className="queue-summary">{p.schedule.completed} / {p.active.length} 岛 · 剩余 {p.remaining.toFixed(1)} s</span>
       <b className="play-percent">{(p.progress*100).toFixed(1)}%</b>
     </div>

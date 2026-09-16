@@ -1,3 +1,4 @@
+import { validPlaybackRate } from './playback-policy.js';
 import { motionProgress, motionSeek, sampleMotionTimeline, type MotionTimeline } from './motion-timing.js';
 /** Shared, seekable island timeline. Durations are in PER-ISLAND units, not
  * whole-mesh units. Geometry, labels and both players must use this mapping. */
@@ -68,11 +69,12 @@ export function sampleUnfoldSchedule(progress: number, count: number, order: Unf
 }
 /** No frame-delta cap: low frame rate must not secretly lengthen playback.
  * Hidden-tab time is excluded by the caller resetting its RAF timestamp. */
-export function advanceUnfoldPlayback(progress: number, elapsedMs: number, durationSeconds: number, reverse = false, loop = false): { progress: number; finished: boolean } {
+export function advanceUnfoldPlayback(progress: number, elapsedMs: number, durationSeconds: number, reverse = false, loop = false, rate = 1): { progress: number; finished: boolean } {
+  validPlaybackRate(rate);
   finite(progress, 'Progress'); finite(elapsedMs, 'Elapsed time'); finite(durationSeconds, 'Duration');
   if (elapsedMs < 0) throw new Error('Elapsed time must be nonnegative.');
   if (durationSeconds <= 0) return { progress: reverse ? 0 : 1, finished: true };
-  const next = clamp(progress) + (reverse ? -1 : 1) * elapsedMs / (durationSeconds * 1000);
+  const next = clamp(progress) + (reverse ? -1 : 1) * elapsedMs * rate / (durationSeconds * 1000);
   if (loop && (next > 1 || next < 0)) return { progress: ((next % 1) + 1) % 1, finished: false };
   return { progress: clamp(next), finished: !loop && (reverse ? next <= 0 : next >= 1) };
 }

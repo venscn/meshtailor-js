@@ -33,3 +33,5 @@ export * from './chart-join.js';
 export * from './rigid-uv-join.js';
 
 export * from './fill-refinement.js';
+
+export * from './playback-policy.js';

@@ -62,6 +62,7 @@ window.addEventListener('keydown',e=>{
 });
 function rebuildTimeline(){
   if(!snapshot){options.timeline=undefined;timelineGeometry=null;return;}
+  options.selected=uv.areaOrderedIslands(snapshot.geometry,options.selected);
   const key=JSON.stringify([options.selected,options.order,options.handoff,options.holdNet,options.path,options.separation,options.hingeWave,options.skipStatic,options.motionTolerance]);
   if(timelineGeometry!==snapshot.geometry||timelineKey!==key){
     options.timeline=uv.buildMotionTimeline(snapshot.geometry,options,{skipStatic:options.skipStatic,relativeEpsilon:options.motionTolerance});
@@ -82,7 +83,7 @@ function update(patch={},focus=null){
   $('phase').textContent=(focusIndex<0?'没有选择岛':`#${options.selected[focusIndex]+1} · `)+(pose<.18?'分离面片':pose<.28?'转向观察':pose<.70?'沿边铰链旋转':pose<.80?'刚性平面网':pose<.92?'UV 参数化形变':pose<1?'面积感知排布':'目标 UV');
   const seconds=Math.max(.5,Math.min(60,Number($('seconds').value)||12));
   const duration=uv.unfoldDuration(seconds,options.selected.length,options.order,options.handoff,options.timeline);
-  $('queue-status').textContent=`${reverse?'已折回':'已完成'} ${reverse?schedule.waiting:schedule.completed} / ${options.selected.length} · ${reverse?'待折回':'等待'} ${reverse?schedule.completed:schedule.waiting} · ${schedule.active.length?'播放中 '+schedule.active.map(a=>`#${options.selected[a.index]+1} (${(a.progress*100).toFixed(1)}%)`).join(' → '):'无活动岛'}\n总时长 ${duration.toFixed(1)} 秒 · 剩余 ${(duration*(reverse?options.progress:1-options.progress)).toFixed(1)} 秒`;
+  $('queue-status').textContent=`${reverse?'已折回':'已完成'} ${reverse?schedule.waiting:schedule.completed} / ${options.selected.length} · ${reverse?'待折回':'等待'} ${reverse?schedule.completed:schedule.waiting} · ${schedule.active.length?'播放中 '+schedule.active.map(a=>`#${options.selected[a.index]+1} (${(a.progress*100).toFixed(1)}%)`).join(' → '):'无活动岛'}\n总时长 ${duration.toFixed(1)} 秒 · 剩余 ${(duration/Number($('rate').value)*(reverse?options.progress:1-options.progress)).toFixed(1)} 秒`;
   const nominal=uv.unfoldDuration(seconds,options.selected.length,options.order,options.handoff);
   const profile=options.timeline?.entries[focusIndex]?.profile;
   $('skip-static').checked=options.skipStatic;
@@ -151,7 +152,7 @@ $('overlap-tolerance').onchange=()=>{const n=Number($('overlap-tolerance').value
 $('overlap-demo').onclick=()=>{$('target').value='source';return load(makeOverlapDemo());};
 $('wave').onchange=()=>{pause();update({hingeWave:$('wave').checked,progress:0});};
 for(const [id,key]of [['face-tones','faceTones'],['frame','autoFrame'],['hinges','showHinges'],['temporary','showTemporaryCuts'],['checker','checker']])$(id).onchange=()=>update({[key]:$(id).checked});
-$('handoff').oninput=()=>{pause();update({handoff:Number($('handoff').value),progress:0});};$('skip-static').onchange=()=>{pause();update({skipStatic:$('skip-static').checked,progress:0});};$('motion-tolerance').onchange=()=>{const v=Number($('motion-tolerance').value);if(Number.isFinite(v)&&v>=0&&v<=.001){pause();update({motionTolerance:v,progress:0});}};$('hold-net').onchange=()=>{pause();update({holdNet:$('hold-net').checked,progress:0});};$('queue-prev').onclick=()=>seekQueue(-1);$('queue-next').onclick=()=>seekQueue(1);$('seconds').onchange=()=>update();$('reverse').onchange=()=>update();
+$('handoff').oninput=()=>{pause();update({handoff:Number($('handoff').value),progress:0});};$('skip-static').onchange=()=>{pause();update({skipStatic:$('skip-static').checked,progress:0});};$('motion-tolerance').onchange=()=>{const v=Number($('motion-tolerance').value);if(Number.isFinite(v)&&v>=0&&v<=.001){pause();update({motionTolerance:v,progress:0});}};$('hold-net').onchange=()=>{pause();update({holdNet:$('hold-net').checked,progress:0});};$('queue-prev').onclick=()=>seekQueue(-1);$('queue-next').onclick=()=>seekQueue(1);$('seconds').onchange=()=>update();$('rate').onchange=()=>update();$('reverse').onchange=()=>update();
 $('order').onchange=()=>{pause();update({order:$('order').value,progress:0});};$('context').onchange=()=>update({context:$('context').value});$('fit-current').onclick=()=>view.fitCurrent();$('orbit').onclick=()=>view.fit('orbit');$('front').onclick=()=>view.fit('uv');
 $('progress').oninput=()=>{pause();update({progress:Number($('progress').value)});};$('play').onclick=()=>{if(playing){pause();return;}if(!snapshot||!options.selected.length)return;playing=true;inspectionIndex=null;clockLast=null;const reverse=$('reverse').checked;if((!reverse&&options.progress===1)||(reverse&&options.progress===0))update({progress:reverse?1:0});$('play').textContent='暂停';};
 // Visibility resets the timestamp so time spent in a hidden tab is not replayed.
@@ -161,7 +162,7 @@ function tick(now){
     const elapsed=clockLast===null?0:Math.max(0,now-clockLast);
     const seconds=Math.max(.5,Math.min(60,Number($('seconds').value)||12));
     const duration=uv.unfoldDuration(seconds,options.selected.length,options.order,options.handoff,options.timeline);
-    const next=uv.advanceUnfoldPlayback(options.progress,elapsed,duration,$('reverse').checked,$('loop').checked);
+    const next=uv.advanceUnfoldPlayback(options.progress,elapsed,duration,$('reverse').checked,$('loop').checked,Number($('rate').value));
     if(next.finished)pause();update({progress:next.progress});
   }
   clockLast=playing&&!document.hidden?now:null;requestAnimationFrame(tick);
