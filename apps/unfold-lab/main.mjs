@@ -87,6 +87,7 @@ function update(patch={},focus=null){
   options.interactionActive=playing||scrubbing;
   options.playbackReverse=playing&&$('reverse').checked;
   rebuildTimeline();
+  options.animationDurationSeconds=uv.unfoldDuration(Math.max(.5,Math.min(60,Number($('seconds').value)||12)),options.selected.length,options.order,options.handoff,options.timeline);
   $('overlap-mode').value=options.overlapMode;$('overlap-opacity').value=options.overlapOpacity;$('face-tones').checked=options.faceTones;$('overlap-tolerance').value=options.overlapTolerance*100;
   view.setOptions(options);cameraStatus();drawUV();selectionStatus();
   $('progress').value=options.progress;$('percent').textContent=(options.progress*100).toFixed(1)+'%';

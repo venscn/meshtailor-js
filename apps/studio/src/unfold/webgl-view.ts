@@ -97,16 +97,6 @@ export class UnfoldWebGLView {
   private arrivalBuffer!: WebGLBuffer;
   private arrivalEdgeBuffer!: WebGLBuffer;
   private arrivalRanges: {id:number; offset:number; count:number; edgeOffset:number; edgeCount:number}[] = [];
-  private presentationTime=0;
-  private presentationLast=performance.now();
-  /** Visible seconds, unrelated to playback rate. Hidden tabs do not consume the hold. */
-  private presentationNow(){
-    const now=performance.now();
-    if(!document.hidden)this.presentationTime+=Math.max(0,now-this.presentationLast);
-    this.presentationLast=now;
-    return this.presentationTime;
-  }
-  private readonly presentationVisibility=()=>{this.presentationLast=performance.now();if(!document.hidden)this.invalidate();};
   private activeCount=0; private contextCount=0; private seamCount=0;
   private camera: OrbitCamera = {yaw:.65,pitch:.35,distance:8,target:[0,0,0]};
   private readonly cameraFollow = new CameraFollowPolicy();
@@ -133,7 +123,7 @@ export class UnfoldWebGLView {
     this.canvas.addEventListener('webglcontextlost',this.contextLost);this.canvas.addEventListener('webglcontextrestored',this.contextRestored);
     this.observer=new ResizeObserver(this.invalidate);this.observer.observe(host);
     window.addEventListener('resize',this.invalidate);
-    document.addEventListener('visibilitychange',this.presentationVisibility);
+    
     this.onError(null);this.invalidate();
   }
   private initialize(){
@@ -230,7 +220,7 @@ export class UnfoldWebGLView {
   private syncPresentation(){
     if(!this.data)return;
     const o=this.options,data=this.data,gl=this.gl;
-    this.arrivalStates=this.arrival.update(o,this.presentationNow());
+    this.arrivalStates=this.arrival.update(o);
     this.emphasis=playbackEmphasis(o);
     // A strict sequential handoff can have no active island at the exact boundary.
     // Keep the session alive there instead of briefly restoring every island.
@@ -430,7 +420,7 @@ export class UnfoldWebGLView {
     const error=gl.getError();if(error!==gl.NO_ERROR)this.onError(`Unfold WebGL error 0x${error.toString(16)}. Retry the preview.`);
     this.canvas.dataset.draws=String(Number(this.canvas.dataset.draws??0)+1);this.canvas.dataset.glError=String(error);this.canvas.dataset.camera=JSON.stringify(this.camera);
     // Held scrub gestures may produce no input events; the fade still renders.
-    if(this.arrivalStates.length&&!document.hidden)this.invalidate();
+    // Arrival colour is evaluated on animation progress; stationary scrubs need no RAF loop.
   };
   private readonly pointerDown=(e:PointerEvent)=>{if(this.pointer||(e.button!==0&&e.button!==2))return;this.pointer={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,button:e.button,dragged:false};this.canvas.setPointerCapture(e.pointerId);};
   private readonly pointerMove=(e:PointerEvent)=>{
@@ -460,7 +450,7 @@ export class UnfoldWebGLView {
   private readonly contextLost=(e:Event)=>{e.preventDefault();this.lost=true;this.overlapPass=null;this.overlapFailure=null;this.onError('Unfold WebGL context lost. Wait for browser recovery or use Retry.');};
   private readonly contextRestored=()=>{try{this.initialize();this.lost=false;this.setGeometry(this.data,{resetCamera:false});this.onError(null);}catch(error){this.onError(String(error));}};
   dispose(){
-    if(this.disposed)return;this.disposed=true;this.arrival.reset();document.removeEventListener('visibilitychange',this.presentationVisibility);cancelAnimationFrame(this.raf);this.observer.disconnect();window.removeEventListener('resize',this.invalidate);
+    if(this.disposed)return;this.disposed=true;this.arrival.reset();cancelAnimationFrame(this.raf);this.observer.disconnect();window.removeEventListener('resize',this.invalidate);
     this.canvas.removeEventListener('pointerdown',this.pointerDown);this.canvas.removeEventListener('pointermove',this.pointerMove);this.canvas.removeEventListener('pointerup',this.pointerUp);this.canvas.removeEventListener('pointercancel',this.pointerCancel);
     this.canvas.removeEventListener('lostpointercapture',this.pointerCancel);
     this.canvas.removeEventListener('wheel',this.wheel);this.canvas.removeEventListener('contextmenu',this.contextMenu);this.canvas.removeEventListener('webglcontextlost',this.contextLost);this.canvas.removeEventListener('webglcontextrestored',this.contextRestored);

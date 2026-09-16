@@ -53,9 +53,9 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
       <label>突出方式<select aria-label="Playback emphasis mode" value={p.focusMode} onChange={e=>p.setFocusMode(e.target.value as 'off'|'ghost'|'dither')}><option value="ghost">其他岛整体半透明（默认）</option><option value="dither">局部球形散点（旧方式）</option><option value="off">关闭</option></select></label>
       <label>其他岛不透明度<input aria-label="Playback ghost opacity" type="range" min=".03" max=".65" step=".01" value={p.focusOpacity} onChange={e=>p.setFocusOpacity(+e.target.value)}/><small>{Math.round(p.focusOpacity*100)}% · 暂停 / 松手后恢复原显示</small></label>
       <div data-testid="arrival-controls">
-        <label>到达 UV 后亮显（秒）<input aria-label="UV arrival hold seconds" type="number" min="0" max="5" step=".1" value={p.arrivalHoldSeconds} onChange={e=>{const n=e.target.valueAsNumber;if(Number.isFinite(n))p.setArrivalHoldSeconds(Math.max(0,Math.min(5,n)));}}/></label>
-        <label>随后渐隐（秒）<input aria-label="UV arrival fade seconds" type="number" min="0" max="5" step=".1" value={p.arrivalFadeSeconds} onChange={e=>{const n=e.target.valueAsNumber;if(Number.isFinite(n))p.setArrivalFadeSeconds(Math.max(0,Math.min(5,n)));}}/></label>
-        <small>实际显示秒数，不随倍速压缩；只在整体半透明模式生效。落位后先保持岛色，再平滑变到背景透明度，不阻塞下一岛。暂停 / 松手 / 播放结束仍立即恢复原显示。</small>
+        <label>到达 UV 后亮显（1× 动画秒）<input aria-label="UV arrival hold seconds" type="number" min="0" max="5" step=".1" value={p.arrivalHoldSeconds} onChange={e=>{const n=e.target.valueAsNumber;if(Number.isFinite(n))p.setArrivalHoldSeconds(Math.max(0,Math.min(5,n)));}}/></label>
+        <label>随后渐隐（1× 动画秒）<input aria-label="UV arrival fade seconds" type="number" min="0" max="5" step=".1" value={p.arrivalFadeSeconds} onChange={e=>{const n=e.target.valueAsNumber;if(Number.isFinite(n))p.setArrivalFadeSeconds(Math.max(0,Math.min(5,n)));}}/></label>
+        <small>随动画进度和倍速计算；回拖/倒放可复现，停住进度即停止渐隐；只在整体半透明模式生效。落位后先保持岛色，再平滑变到背景透明度，不阻塞下一岛。暂停 / 松手 / 播放结束仍立即恢复原显示。</small>
       </div>
       <small>等待岛淡化；运动岛始终实体，完全到达目标 UV 后才进入亮显和渐隐。不改变选择、UV 或相机。</small>
       <details><summary>旧球形散点选项（仅旧方式有效）</summary><label>球形范围<input aria-label="Focus sphere radius" type="range" min="1" max="3" step=".1" value={p.focusRadius} onChange={e=>p.setFocusRadius(+e.target.value)}/><small>{p.focusRadius.toFixed(1)} × 当前岛半径</small></label>
