@@ -4,18 +4,20 @@ import type {Vec2} from '@meshtailor/mesh-core';
  * is reserved; a square dilation reserves the requested per-side UV gutter.
  * Masks are only a search accelerator, never the reported geometric area. */
 export interface ShapeMask {width:number;height:number;stride:number;words:Uint32Array;occupied:{row:number;word:number;bits:number}[];pad:number;runs:{row:number;lo:number;hi:number}[];dilated?:Map<number,{row:number;word:number;bits:number}[]>}
-export interface RasterPlacement {mask:ShapeMask;x:number;y:number;turn:boolean;gain:number}
+export interface RasterPlacement {mask:ShapeMask;x:number;y:number;turn:boolean;gain:number;rotation?:number}
 export class RasterBudget extends Error {constructor(){super('Refinement search budget reached');this.name='RasterBudget';}}
 export interface RasterWork {tick():void}
 const rangeBits=(lo:number,hi:number)=>((0xffffffff<<lo)&(0xffffffff>>>(31-hi)))>>>0;
-export function rasterShape(triangles:readonly (readonly Vec2[])[],width:number,height:number,gain:number,turn:boolean,resolution:number,padding:number,work?:RasterWork):ShapeMask|null {
-  const scale=Math.sqrt(gain)*resolution,pad=0,w=Math.floor((turn?height:width)*scale)+1,h=Math.floor((turn?width:height)*scale)+1;
+export function rasterShape(triangles:readonly (readonly Vec2[])[],width:number,height:number,gain:number,turn:boolean|number,resolution:number,padding:number,work?:RasterWork):ShapeMask|null {
+  const rotation=typeof turn==='boolean'?(turn?1:0):turn;
+  const odd=rotation%2!==0;
+  const scale=Math.sqrt(gain)*resolution,pad=0,w=Math.floor((odd?height:width)*scale)+1,h=Math.floor((odd?width:height)*scale)+1;
   if(w>resolution||h>resolution)return null;
   const stride=Math.ceil(w/32),words=new Uint32Array(stride*h);
   function paint(row:number,a:number,b:number){const first=a>>>5,last=b>>>5,base=row*stride;if(first===last){words[base+first]!|=rangeBits(a&31,b&31);return;}words[base+first]!|=0xffffffff<<(a&31);for(let j=first+1;j<last;j++)words[base+j]=0xffffffff;words[base+last]!|=0xffffffff>>>(31-(b&31));}
   for(let t=0;t<triangles.length;t++){
     if(t%128===0)work?.tick();
-    const ps=triangles[t]!.map(([x,y])=>turn?[(height-y)*scale+pad,x*scale+pad]:[x*scale+pad,y*scale+pad]);
+    const ps=triangles[t]!.map(p=>{const [x,y]=quarterTurnPoint(p,width,height,rotation);return[x*scale+pad,y*scale+pad];});
     const low=Math.max(pad,Math.floor(Math.min(...ps.map(p=>p[1]!)))),high=Math.min(h-pad-1,Math.floor(Math.max(...ps.map(p=>p[1]!))));
     for(let y=low;y<=high;y++){
       let min=Infinity,max=-Infinity;
@@ -68,4 +70,9 @@ export class RasterBoard {
     if(X<0||Y<0)return null;
     for(let y=0;y<=Y;y++){work?.tick();for(let x=0;x<=X;x++)if(this.fits(mask,x,y))return{x,y};}return null;
   }
+}
+
+/** Proper rotations only: no reflection or separate U/V scaling. */
+export function quarterTurnPoint([x,y]:readonly number[],width:number,height:number,turn:number):Vec2 {
+ switch(turn){case 0:return[x!,y!];case 1:return[height-y!,x!];case 2:return[width-x!,height-y!];case 3:return[y!,width-x!];default:throw Error('Quarter turn must be 0..3.');}
 }

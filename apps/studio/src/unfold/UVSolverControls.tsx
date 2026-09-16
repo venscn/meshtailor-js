@@ -29,7 +29,9 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onP
       <label>精排模式<select aria-label="Fill mode" value={draft.fillMode==='uniform'?'uniform':'area-priority'} onChange={e=>patch({fillMode:e.target.value as UnwrapOptions['fillMode']})}><option value="area-priority">从大到小逐岛扩张</option><option value="uniform">全岛共同放大（保持密度比例）</option></select></label>
       <label>每步面积增量 %<input aria-label="Fill step" type="number" min=".5" max="25" step=".5" value={(draft.fillStep??.08)*100} onChange={e=>patch({fillStep:+e.target.value/100})}/></label>
       <label>面积增益 / 密度差上限<input aria-label="Fill area cap" type="number" min="1" max="3" step=".1" value={draft.fillMaxAreaGain??1.6} onChange={e=>patch({fillMaxAreaGain:+e.target.value})}/></label>
-      <label>最大轮数<input aria-label="Fill rounds" type="number" min="1" max="24" value={draft.fillRounds??4} onChange={e=>patch({fillRounds:+e.target.value})}/></label>
+      <small>每轮按面积降序；大岛失败继续小岛。逐岛缩小尝试步长，先原位扩张，再移动 / 重排后续岛。支持 0/90/180/270°。</small>
+      <label>最小面积步长 %<input aria-label="Fill minimum step" type="number" min=".1" max="5" step=".1" value={(draft.fillMinStep??.005)*100} onChange={e=>patch({fillMinStep:+e.target.value/100})}/></label>
+      <label>最大轮数<input aria-label="Fill rounds" type="number" min="1" max="24" value={draft.fillRounds??8} onChange={e=>patch({fillRounds:+e.target.value})}/></label>
       <label>轮廓搜索网格<select aria-label="Fill resolution" value={draft.fillResolution??512} onChange={e=>patch({fillResolution:+e.target.value})}><option value="256">256（快速 / 保守）</option><option value="512">512（默认）</option><option value="1024">1024（更细 / 更慢）</option></select></label>
       <label>精排搜索预算（秒）<input aria-label="Fill budget" type="number" min="1" max="120" value={(draft.fillTimeBudgetMs??15000)/1000} onChange={e=>patch({fillTimeBudgetMs:+e.target.value*1000})}/></label>
       <small>不缩小其他岛腾空间，不拉伸宽高。8% 面积增量约为 3.9% 边长；默认最多 1.6 倍面积。轮廓栅格可利用凹口，但不保证最优。仅支持有效单页，原样重叠 UV 须先整理。可在预算停止后继续精排，不会无界累积大岛密度。</small>

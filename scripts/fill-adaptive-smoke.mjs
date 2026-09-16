@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';import {writeFile} from 'node:fs/promises';import {compileCore} from './lib/compiled-core.mjs';
+const c=await compileCore(),cases=[];const check=(name,fn)=>{fn();cases.push({name,passed:true});console.log('PASS',name)};
+try{const u=await c.load('packages/uv/src/index.js'),r=await c.load('packages/uv/src/shape-raster.js');
+const chart=(id,x,y,w,h)=>({id,bounds:[x,y,x+w,y+h],polygon:[],faceUVs:new Map([[id*2,[[x,y],[x+w,y],[x+w,y+h]]],[id*2+1,[[x,y],[x+w,y+h],[x,y+h]]]])});
+const packed=[chart(9,.003,.003,.994,.65),chart(1,.003,.7,.12,.12)],raw=packed.map((c,i)=>({...c,area3D:i?1:100}));
+const base={packed,occupancy:.994*.65+.12*.12,boxOccupancy:.994*.65+.12*.12,scale:1,padding:.003,packingMethod:'existing',packingReport:{order:'area',placementOrder:[9,1],searchAttempts:0,failedFits:0,areaBoosts:[]}};
+const before=JSON.stringify([...packed[0].faceUVs]);const result=u.refineAtlas(base,raw,{fillMode:'area-priority',fillRounds:10,fillTimeBudgetMs:30000,fillWarmupPasses:0,fillMaxAreaGain:2,fillResolution:256});const f=result.packingReport.refinement;
+check('Largest remains first, not small-first disguised optimization',()=>assert.deepEqual(f.order,[9,1]));
+check('Largest does not fit but smaller is still attempted and grown',()=>{assert.ok(f.adaptive.attempts[0].failed>0);assert.ok(f.adaptive.attempts[1].accepted>0);assert.ok(f.adaptive.smallerAfterFailure>0);});
+check('Largest never shrinks to purchase room',()=>assert.equal(f.gains[0].areaFactor,1));
+check('Multiple fair descending sweeps really occur',()=>assert.ok(f.rounds>2));
+check('Failed big island step decreases independently',()=>assert.ok(f.adaptive.attempts[0].nextStep<f.adaptive.attempts[1].nextStep));
+check('Min step is tested, not falsely converged before use',()=>assert.ok(f.adaptive.attempts[0].minStepFailed));
+check('Local vacancy growth is actually used',()=>assert.ok(f.adaptive.localAccepted>0));
+check('All faces and original snapshot retained',()=>{assert.equal(result.packed.flatMap(c=>[...c.faceUVs]).length,4);assert.equal(JSON.stringify([...packed[0].faceUVs]),before);});
+check('Final global triangles are valid',()=>assert.ok(u.checkUVTriangles(result.packed.flatMap(c=>[...c.faceUVs.values()])).valid));
+check('Actual density cap / no shrink',()=>{assert.ok(f.densitySpreadAfter<=Math.max(f.densitySpreadBefore,2)+1e-10);assert.ok(f.gains.every(g=>g.areaFactor>=1&&g.areaFactor<=2+1e-10));});
+check('Common mode still shares identical gains',()=>{const a=u.refineAtlas(base,raw,{fillMode:'uniform',fillRounds:2,fillTimeBudgetMs:30000});assert.equal(new Set(a.packingReport.refinement.gains.map(g=>g.areaFactor)).size,1);});
+for(let turn=0;turn<4;turn++)check(`Quarter rotation ${turn} preserves triangle signed area`,()=>{const a=[[0,0],[.7,0],[.2,.3]],b=a.map(p=>r.quarterTurnPoint(p,1,.6,turn));const area=t=>(t[1][0]-t[0][0])*(t[2][1]-t[0][1])-(t[2][0]-t[0][0])*(t[1][1]-t[0][1]);assert.ok(Math.abs(area(a)-area(b))<1e-12);assert.ok(r.rasterShape([a],1,.6,.5,turn,128,0));});
+check('Invalid controls rejected',()=>{for(const o of [{fillMinStep:0},{fillQuarterTurns:3},{fillStrategy:'anything'}])assert.throws(()=>u.validateFillOptions(o));});
+check('Trial budget is not called convergence',()=>{const a=u.refineAtlas(base,raw,{fillMode:'area-priority',fillMaxTrials:1,fillWarmupPasses:0});assert.equal(a.packingReport.refinement.stop,'trial-budget');});
+const i=process.argv.indexOf('--report');if(i>=0)await writeFile(process.argv[i+1],JSON.stringify({passed:cases.length,cases,example:f},null,2));
+}finally{await c.cleanup();}
