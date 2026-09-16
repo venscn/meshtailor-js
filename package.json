@@ -79,7 +79,10 @@
     "test:chart-join": "node scripts/chart-join-smoke.mjs",
     "test:rigid-uv-join": "node scripts/rigid-uv-join-smoke.mjs",
     "test:verified-models": "node scripts/verified-models-smoke.mjs",
-    "test:verified-models:browser": "node scripts/verified-models-browser-smoke.mjs"
+    "test:verified-models:browser": "node scripts/verified-models-browser-smoke.mjs",
+    "test:fill": "node scripts/fill-refinement-smoke.mjs",
+    "test:fill:browser": "node scripts/fill-browser-smoke.mjs",
+    "test:fill:real": "node scripts/fill-verified-models.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
