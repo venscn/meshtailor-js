@@ -4,10 +4,11 @@ import { cameraBasis, cameraMatrix, pickFace, projectPoint, type OrbitCamera } f
 import type { Vec3 } from '@meshtailor/mesh-core';
 import { CameraFollowPolicy, DEFAULT_AUTO_FRAME } from './camera-policy.js';
 import {FOCUS_GLSL,playbackEmphasis,focusSettings,playbackFocusSpheres,uploadFocusUniforms,type FocusSettings,type FocusSphere} from './focus-policy.js';
+import { ArrivalPresentation, type ArrivalSettings, type ArrivalState } from './arrival-presentation.js';
 import { OverlapPass } from './overlap-pass.js';
 import { overlapSettings, overlapLegend, sourceModelScale, type OverlapSettings } from './overlap-policy.js';
 
-export interface UnfoldDisplay extends UnfoldOptions, OverlapSettings, FocusSettings {
+export interface UnfoldDisplay extends UnfoldOptions, OverlapSettings, FocusSettings, ArrivalSettings {
   showHinges?:boolean; showTemporaryCuts?:boolean;
   /** Opt-in only. A camera gesture disables following until explicitly re-enabled. */
   autoFrame?:boolean;
@@ -38,7 +39,7 @@ const FRAGMENT=`#version 300 es
 precision highp float;
 precision highp int;
 in vec3 vColor; in vec3 vWorld; in vec2 vUV; in vec3 bary; flat in int face;
-uniform float opacity; uniform bool wire; uniform bool checker; uniform bool lineMode;
+uniform float opacity; uniform float desaturate; uniform bool wire; uniform bool checker; uniform bool lineMode;
 uniform vec3 lineColor; uniform int focus; uniform bool dashed; uniform bool faceTones; uniform bool edgeOnly;
 flat in float vChart;
 ${FOCUS_GLSL}
@@ -52,7 +53,7 @@ void main(){
   if(checker){float check=mod(floor(vUV.x*16.0)+floor(vUV.y*16.0),2.0);c*=mix(.7,1.0,check);}
   vec3 n=surfaceNormal;float len=length(n);
   c*=len>1e-10?.78+.22*abs(n.z/len):1.0;
-  if(opacity<.99)c=mix(c,vec3(.34,.39,.48),.7);
+  c=mix(c,vec3(.34,.39,.48),desaturate);
   if(face==focus)c=mix(c,vec3(1.0),.4);
   if(wire||face==focus||edgeOnly){vec3 e=smoothstep(vec3(0.0),baryWidth*1.1,bary);float edge=1.0-min(min(e.x,e.y),e.z);if(edgeOnly){if(edge<.05)discard;result=vec4(1,1,1,edge);return;}c=mix(c,face==focus?vec3(1.0):c*.42,edge*.82);}
   result=vec4(c,opacity);
@@ -91,6 +92,21 @@ export class UnfoldWebGLView {
   private options: UnfoldDisplay = {progress:0,selected:[],order:DEFAULT_UNFOLD_ORDER,path:'staged',separation:DEFAULT_SEPARATION,context:'dim',wireframe:false,checker:false,labels:true,xray:false,focusFace:null,autoFrame:DEFAULT_AUTO_FRAME};
   private active = new Set<number>();
   private emphasis:number[]|null=null;
+  private readonly arrival = new ArrivalPresentation();
+  private arrivalStates: ArrivalState[] = [];
+  private arrivalBuffer!: WebGLBuffer;
+  private arrivalEdgeBuffer!: WebGLBuffer;
+  private arrivalRanges: {id:number; offset:number; count:number; edgeOffset:number; edgeCount:number}[] = [];
+  private presentationTime=0;
+  private presentationLast=performance.now();
+  /** Visible seconds, unrelated to playback rate. Hidden tabs do not consume the hold. */
+  private presentationNow(){
+    const now=performance.now();
+    if(!document.hidden)this.presentationTime+=Math.max(0,now-this.presentationLast);
+    this.presentationLast=now;
+    return this.presentationTime;
+  }
+  private readonly presentationVisibility=()=>{this.presentationLast=performance.now();if(!document.hidden)this.invalidate();};
   private activeCount=0; private contextCount=0; private seamCount=0;
   private camera: OrbitCamera = {yaw:.65,pitch:.35,distance:8,target:[0,0,0]};
   private readonly cameraFollow = new CameraFollowPolicy();
@@ -117,6 +133,7 @@ export class UnfoldWebGLView {
     this.canvas.addEventListener('webglcontextlost',this.contextLost);this.canvas.addEventListener('webglcontextrestored',this.contextRestored);
     this.observer=new ResizeObserver(this.invalidate);this.observer.observe(host);
     window.addEventListener('resize',this.invalidate);
+    document.addEventListener('visibilitychange',this.presentationVisibility);
     this.onError(null);this.invalidate();
   }
   private initialize(){
@@ -126,10 +143,10 @@ export class UnfoldWebGLView {
     gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);
     if(!gl.getProgramParameter(program,gl.LINK_STATUS)){const error=gl.getProgramInfoLog(program);gl.deleteProgram(program);throw new Error('Unfold program: '+error);}
     this.program=program;this.uniforms.clear();
-    for(const name of ['mvp','opacity','wire','checker','lineMode','lineColor','focus','dashed','faceTones','edgeOnly'])this.uniforms.set(name,gl.getUniformLocation(program,name)!);
+    for(const name of ['mvp','opacity','desaturate','wire','checker','lineMode','lineColor','focus','dashed','faceTones','edgeOnly'])this.uniforms.set(name,gl.getUniformLocation(program,name)!);
     this.vao=gl.createVertexArray()!;this.atlasVAO=gl.createVertexArray()!;
     this.buffers=[];
-    this.positionBuffer=this.buffer();this.activeBuffer=this.buffer();this.contextBuffer=this.buffer();this.seamBuffer=this.buffer();this.hingeBuffer=this.buffer();this.temporaryBuffer=this.buffer();this.motionBuffer=this.buffer();
+    this.positionBuffer=this.buffer();this.activeBuffer=this.buffer();this.contextBuffer=this.buffer();this.seamBuffer=this.buffer();this.hingeBuffer=this.buffer();this.temporaryBuffer=this.buffer();this.motionBuffer=this.buffer();this.arrivalBuffer=this.buffer();this.arrivalEdgeBuffer=this.buffer();
   }
   private buffer(){const b=this.gl.createBuffer()!;this.buffers.push(b);return b;}
   private uniform(name:string){return this.uniforms.get(name)!;}
@@ -138,11 +155,12 @@ export class UnfoldWebGLView {
     gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,0,0);
   }
   setGeometry(data:UnfoldGeometry|null,{resetCamera=true}:{resetCamera?:boolean}={}){
+    this.arrival.reset();this.arrivalStates=[];this.arrivalRanges=[];this.canvas.dataset.arrivalPresentation='[]';
     this.data=data;this.positions=data?data.source.slice():new Float32Array(0);this.modelScale=data?sourceModelScale(data.source):1;this.lastSelection='';this.lastPose='';this.motionKey='';
     if(!data){this.emphasis=null;this.focusSpheres=[];this.canvas.dataset.playbackFocus='restored';this.canvas.dataset.opaqueIslands='[]';this.canvas.dataset.interactionActive='false';this.overlapPass?.releaseTargets();this.diagnosticNotice.hidden=true;this.activeCount=this.contextCount=this.seamCount=0;this.labelHost.replaceChildren();this.labels=[];this.hingeLabels=[];this.invalidate();return;}
     // Reuse the fixed position/index buffers; replace only the two immutable attributes.
     const gl=this.gl;
-    for(const b of this.buffers.splice(7))gl.deleteBuffer(b);
+    for(const b of this.buffers.splice(9))gl.deleteBuffer(b);
     gl.bindVertexArray(this.vao);
     this.attribute(0,3,this.positions,true,this.positionBuffer);
     const colors=new Float32Array(data.source.length);
@@ -174,22 +192,7 @@ export class UnfoldWebGLView {
     const data=this.data,gl=this.gl,ids=selectedIslands(data,options.selected);
     this.options={...options,selected:ids};
     this.active=new Set(ids);
-    this.emphasis=playbackEmphasis(this.options);
-    const solid=this.emphasis?new Set(this.emphasis):this.active;
-    this.canvas.dataset.playbackFocus=this.emphasis?'active':'restored';
-    this.canvas.dataset.opaqueIslands=JSON.stringify([...solid]);
-    this.canvas.dataset.interactionActive=String(options.interactionActive===true);
-    const key=JSON.stringify([ids,options.context,options.showHinges,this.emphasis]);
-    if(key!==this.lastSelection){
-      this.lastSelection=key;
-      const active:number[]=[],context:number[]=[],lines:number[]=[];
-      for(let fi=0;fi<data.faceChart.length;fi++)(solid.has(data.faceChart[fi]!)?active:context).push(fi*3,fi*3+1,fi*3+2);
-      for(let i=0;i<data.boundaries.length;i+=2)if(solid.has(data.faceChart[Math.floor(data.boundaries[i]!/3)]!))lines.push(data.boundaries[i]!,data.boundaries[i+1]!);
-      gl.bindVertexArray(this.vao);
-      for(const [buffer,indices]of [[this.activeBuffer,active],[this.contextBuffer,context],[this.seamBuffer,lines]] as const){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,buffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(indices),gl.STATIC_DRAW);}
-      this.activeCount=active.length;this.contextCount=context.length;this.seamCount=lines.length;
-      this.makeLabels();
-    }
+    this.syncPresentation();
     writeUnfoldPositions(data,options,this.positions);
     this.focusSpheres=playbackFocusSpheres(data,this.positions,this.options,this.modelScale);
     this.canvas.dataset.focusSpheres=JSON.stringify(this.focusSpheres);
@@ -221,6 +224,49 @@ export class UnfoldWebGLView {
     const labelKey=schedule.active.map(a=>ids[a.index]).join(',');
     if(labelKey!==this.lastAnimationLabels){this.lastAnimationLabels=labelKey;this.makeLabels(schedule.active.map(a=>ids[a.index]!));}
     this.invalidate();
+  }
+  /** Updates display-only buffers only when group membership changes. A fade
+   * frame never writes positions, advances progress or calls camera fitting. */
+  private syncPresentation(){
+    if(!this.data)return;
+    const o=this.options,data=this.data,gl=this.gl;
+    this.arrivalStates=this.arrival.update(o,this.presentationNow());
+    this.emphasis=playbackEmphasis(o);
+    // A strict sequential handoff can have no active island at the exact boundary.
+    // Keep the session alive there instead of briefly restoring every island.
+    if(!this.emphasis&&o.interactionActive&&focusSettings(o).mode==='ghost'&&o.progress>0&&o.progress<1&&o.selected.length)this.emphasis=[];
+    const solid=this.emphasis?new Set(this.emphasis):this.active;
+    const tails=new Set(this.arrivalStates.map(a=>a.id));
+    const opaque=[...solid,...this.arrivalStates.filter(a=>a.weight>=1).map(a=>a.id)];
+    this.canvas.dataset.playbackFocus=this.emphasis?'active':'restored';
+    this.canvas.dataset.opaqueIslands=JSON.stringify(opaque);
+    this.canvas.dataset.interactionActive=String(o.interactionActive===true);
+    this.canvas.dataset.arrivalPresentation=JSON.stringify(this.arrivalStates);
+    const key=JSON.stringify([o.selected,o.context,o.showHinges,this.emphasis,[...tails]]);
+    if(key===this.lastSelection)return;
+    this.lastSelection=key;
+    const active:number[]=[],context:number[]=[],lines:number[]=[];
+    const groups=new Map([...tails].map(id=>[id,{faces:[] as number[],edges:[] as number[]}]));
+    for(let fi=0;fi<data.faceChart.length;fi++){
+      const id=data.faceChart[fi]!,group=groups.get(id);
+      (solid.has(id)?active:group?group.faces:context).push(fi*3,fi*3+1,fi*3+2);
+    }
+    for(let i=0;i<data.boundaries.length;i+=2){
+      const id=data.faceChart[Math.floor(data.boundaries[i]!/3)]!,group=groups.get(id);
+      if(solid.has(id))lines.push(data.boundaries[i]!,data.boundaries[i+1]!);
+      else if(group)group.edges.push(data.boundaries[i]!,data.boundaries[i+1]!);
+    }
+    const arrivals:number[]=[],edges:number[]=[];this.arrivalRanges=[];
+    for(const [id,group] of groups){
+      this.arrivalRanges.push({id,offset:arrivals.length*4,count:group.faces.length,edgeOffset:edges.length*4,edgeCount:group.edges.length});
+      // Avoid spread's argument limit for a very large island.
+      for(const index of group.faces)arrivals.push(index);
+      for(const index of group.edges)edges.push(index);
+    }
+    gl.bindVertexArray(this.vao);
+    for(const [buffer,indices]of [[this.activeBuffer,active],[this.contextBuffer,context],[this.seamBuffer,lines],[this.arrivalBuffer,arrivals],[this.arrivalEdgeBuffer,edges]] as const){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,buffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(indices),gl.STATIC_DRAW);}
+    this.activeCount=active.length;this.contextCount=context.length;this.seamCount=lines.length;
+    this.makeLabels([...solid,...tails]);
   }
   private lastAnimationLabels="";
   private makeLabels(priority:readonly number[]=[]){
@@ -275,7 +321,7 @@ export class UnfoldWebGLView {
   }
   /** Public snapshot for regression diagnostics, not a second animation implementation. */
   getPositions(){return this.positions.slice();}
-  getFocusState(){return {settings:focusSettings(this.options),spheres:this.focusSpheres,emphasis:this.emphasis,interactionActive:this.options.interactionActive===true};}
+  getFocusState(){return {arrivals:this.arrivalStates,settings:focusSettings(this.options),spheres:this.focusSpheres,emphasis:this.emphasis,interactionActive:this.options.interactionActive===true};}
   getCamera(){return {...this.camera,target:[...this.camera.target]};}
   /** Opt-in debug readback, never invoked by ordinary playback. */
   getOverlapCounts(){return this.overlapPass?.readCounts()??{width:0,height:0,counts:new Uint8Array()};}
@@ -317,8 +363,9 @@ export class UnfoldWebGLView {
     if(size.width!==this.size.width||size.height!==this.size.height||size.dpr!==this.size.dpr){this.canvas.width=Math.max(1,Math.round(size.width*size.dpr));this.canvas.height=Math.max(1,Math.round(size.height*size.dpr));this.size=size;}
     gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.clearColor(.106,.114,.122,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     if(!this.data)return;
+    this.syncPresentation();
     const mvp=cameraMatrix(this.camera,size.width/size.height);
-    gl.useProgram(this.program);gl.uniform1i(this.uniform('edgeOnly'),0);gl.uniform1i(this.uniform('faceTones'),Number(overlapSettings(this.options).faceTones));gl.uniform1i(this.uniform('dashed'),0);gl.uniformMatrix4fv(this.uniform('mvp'),false,mvp);
+    gl.useProgram(this.program);gl.uniform1f(this.uniform('desaturate'),0);gl.uniform1i(this.uniform('edgeOnly'),0);gl.uniform1i(this.uniform('faceTones'),Number(overlapSettings(this.options).faceTones));gl.uniform1i(this.uniform('dashed'),0);gl.uniformMatrix4fv(this.uniform('mvp'),false,mvp);
     gl.uniform1i(this.uniform('checker'),Number(this.options.checker));gl.uniform1i(this.uniform('wire'),Number(this.options.wireframe));gl.uniform1i(this.uniform('focus'),this.options.focusFace??-1);
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.disable(gl.CULL_FACE);
     gl.uniform1i(this.uniform('lineMode'),1);gl.uniform3f(this.uniform('lineColor'),.23,.31,.39);gl.uniform1f(this.uniform('opacity'),.8);
@@ -330,8 +377,16 @@ export class UnfoldWebGLView {
     gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1,1);
     if((this.emphasis||this.options.context!=='hidden')&&this.contextCount){
       const dim=!!this.emphasis||this.options.context==='dim';gl.depthMask(!dim);gl.uniform1f(this.uniform('opacity'),this.emphasis?focusSettings(this.options).opacity:dim?.20:1);
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.contextBuffer);gl.drawElements(gl.TRIANGLES,this.contextCount,gl.UNSIGNED_INT,0);
+      gl.uniform1f(this.uniform('desaturate'),dim?.7:0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.contextBuffer);gl.drawElements(gl.TRIANGLES,this.contextCount,gl.UNSIGNED_INT,0);
     }
+    // Draw arriving islands behind still-moving islands. Their outline, original
+    // colour and alpha share one easing curve; the hold is not a white flash.
+    for(const range of this.arrivalRanges){
+      const state=this.arrivalStates.find(a=>a.id===range.id)!;
+      gl.depthMask(false);gl.uniform1f(this.uniform('opacity'),state.opacity);gl.uniform1f(this.uniform('desaturate'),.7*(1-state.weight));
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.arrivalBuffer);gl.drawElements(gl.TRIANGLES,range.count,gl.UNSIGNED_INT,range.offset);
+    }
+    gl.uniform1f(this.uniform('desaturate'),0);
     gl.depthMask(true);gl.uniform1f(this.uniform('opacity'),1);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.activeBuffer);gl.drawElements(gl.TRIANGLES,this.activeCount,gl.UNSIGNED_INT,0);
     gl.disable(gl.POLYGON_OFFSET_FILL);
     this.drawOverlap(mvp);
@@ -344,6 +399,12 @@ export class UnfoldWebGLView {
     gl.uniform1i(this.uniform('lineMode'),1);gl.uniform3f(this.uniform('lineColor'),1,.79,.44);
     if(this.options.xray)gl.disable(gl.DEPTH_TEST);gl.depthMask(false);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.seamBuffer);gl.drawElements(gl.LINES,this.seamCount,gl.UNSIGNED_INT,0);
+    for(const range of this.arrivalRanges){
+      const state=this.arrivalStates.find(a=>a.id===range.id)!;
+      gl.uniform1f(this.uniform('opacity'),state.weight);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.arrivalEdgeBuffer);gl.drawElements(gl.LINES,range.edgeCount,gl.UNSIGNED_INT,range.edgeOffset);
+    }
+    gl.uniform1f(this.uniform('opacity'),1);
     if(this.hingeCount){gl.uniform3f(this.uniform('lineColor'),.2,.9,1);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.hingeBuffer);gl.drawElements(gl.LINES,this.hingeCount,gl.UNSIGNED_INT,0);}
     if(this.temporaryCount){gl.uniform1i(this.uniform('dashed'),1);gl.uniform3f(this.uniform('lineColor'),.92,.45,1);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.temporaryBuffer);gl.drawElements(gl.LINES,this.temporaryCount,gl.UNSIGNED_INT,0);gl.uniform1i(this.uniform('dashed'),0);}
     gl.depthMask(true);gl.bindVertexArray(null);
@@ -353,7 +414,9 @@ export class UnfoldWebGLView {
       const center:Vec3=[0,0,0];for(const fi of label.faces)for(let k=0;k<9;k++)center[k%3]+=this.positions[fi*9+k]!;
       for(let a=0;a<3;a++)center[a]/=label.faces.length*3;
       const p=projectPoint(center,mvp,size.width,size.height),visible=!!p&&p[2]>=-1&&p[2]<=1&&p[0]>=0&&p[0]<=size.width&&p[1]>=0&&p[1]<=size.height;
-      label.el.style.opacity=this.emphasis&&!this.emphasis.includes(label.id)?'.22':'1';
+      const arrival=this.arrivalStates.find(a=>a.id===label.id);
+      label.el.style.opacity=arrival?String(.22+.78*arrival.weight):this.emphasis&&!this.emphasis.includes(label.id)?'.22':'1';
+      label.el.dataset.arrival=arrival?.phase??'';
       label.el.hidden=!visible;if(p&&visible)label.el.style.transform=`translate(${p[0]}px,${p[1]}px) translate(-50%,-50%)`;
     }
     for(const label of this.hingeLabels){
@@ -366,6 +429,8 @@ export class UnfoldWebGLView {
     }
     const error=gl.getError();if(error!==gl.NO_ERROR)this.onError(`Unfold WebGL error 0x${error.toString(16)}. Retry the preview.`);
     this.canvas.dataset.draws=String(Number(this.canvas.dataset.draws??0)+1);this.canvas.dataset.glError=String(error);this.canvas.dataset.camera=JSON.stringify(this.camera);
+    // Held scrub gestures may produce no input events; the fade still renders.
+    if(this.arrivalStates.length&&!document.hidden)this.invalidate();
   };
   private readonly pointerDown=(e:PointerEvent)=>{if(this.pointer||(e.button!==0&&e.button!==2))return;this.pointer={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,button:e.button,dragged:false};this.canvas.setPointerCapture(e.pointerId);};
   private readonly pointerMove=(e:PointerEvent)=>{
@@ -395,7 +460,7 @@ export class UnfoldWebGLView {
   private readonly contextLost=(e:Event)=>{e.preventDefault();this.lost=true;this.overlapPass=null;this.overlapFailure=null;this.onError('Unfold WebGL context lost. Wait for browser recovery or use Retry.');};
   private readonly contextRestored=()=>{try{this.initialize();this.lost=false;this.setGeometry(this.data,{resetCamera:false});this.onError(null);}catch(error){this.onError(String(error));}};
   dispose(){
-    if(this.disposed)return;this.disposed=true;cancelAnimationFrame(this.raf);this.observer.disconnect();window.removeEventListener('resize',this.invalidate);
+    if(this.disposed)return;this.disposed=true;this.arrival.reset();document.removeEventListener('visibilitychange',this.presentationVisibility);cancelAnimationFrame(this.raf);this.observer.disconnect();window.removeEventListener('resize',this.invalidate);
     this.canvas.removeEventListener('pointerdown',this.pointerDown);this.canvas.removeEventListener('pointermove',this.pointerMove);this.canvas.removeEventListener('pointerup',this.pointerUp);this.canvas.removeEventListener('pointercancel',this.pointerCancel);
     this.canvas.removeEventListener('lostpointercapture',this.pointerCancel);
     this.canvas.removeEventListener('wheel',this.wheel);this.canvas.removeEventListener('contextmenu',this.contextMenu);this.canvas.removeEventListener('webglcontextlost',this.contextLost);this.canvas.removeEventListener('webglcontextrestored',this.contextRestored);
