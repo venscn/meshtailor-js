@@ -6,6 +6,13 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onP
   const [draft,setDraft]=useState(value),patch=(v:Partial<UnwrapOptions>)=>setDraft(d=>({...d,...v}));
   useEffect(()=>setDraft(value),[value]);
   return <details className="uv-solver-controls" open><summary>UV 求解与排布</summary>
+    <section className="paint-shape-controls">
+      <label>UV 目标<select aria-label="UV objective" value={draft.uvObjective??'paint'} onChange={e=>patch({uvObjective:e.target.value as UnwrapOptions['uvObjective']})}><option value="paint">手绘轮廓优先（默认）</option><option value="compact">少岛稳健 · 旧圆边界回退</option></select></label>
+      <small>手绘模式保留主要平面凹口、齿形和孔洞；曲面使用自由边界。缝合优先保留原岛轮廓，宁可留下合理的分片，不把有效形状强制挤成圆。不会自动识别衣片名称。</small>
+      <label>保形迭代预算<input aria-label="Paint iterations" type="number" min="1" max="100" value={draft.paintIterations??24} onChange={e=>patch({paintIterations:+e.target.value})}/></label>
+      <label>缝合时原形比例变化上限<input aria-label="Merge shape limit" type="number" min="1" max="4" step=".05" value={draft.mergeOptions?.maxShapeChange??1.5} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,maxShapeChange:+e.target.value}})}/></label>
+      <small>去除整体旋转/缩放后，按99%源表面积检查边长比例变化；1表示保留比例。仅控制新缝合，不会把原样检查的源UV偷偷重绘。</small>
+    </section>
     <div className="button-grid two"><button className="primary" aria-label="Auto large charts" onClick={()=>onAuto('large')}>自动参数 · 大块重分割</button><button aria-label="Auto balanced charts" onClick={()=>onAuto('balanced')}>自动参数 · 均衡</button></div>
     <small>分析当前几何并填写参数，替换当前裁切方案、重新生成 UV；原始 UV 仍保留，可通过“原样检查”对比。不是在保持贴图布局的前提下合并。</small>
     <details open><summary>减少碎岛 · 前处理 / 后处理</summary>
@@ -20,7 +27,7 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onP
       <label className="check"><input aria-label="Post merge generated charts" type="checkbox" checked={draft.postMerge??false} onChange={e=>patch({postMerge:e.target.checked})}/>生成后自动尝试邻岛缝合</label>
       <label>缝合尝试预算<input aria-label="Merge attempts" type="number" min="0" max="2000" placeholder="自动：128–512" value={draft.mergeOptions?.maxAttempts??''} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,maxAttempts:e.target.value===''?undefined:+e.target.value}})}/></label>
       <small>尝试预算留空：按初始岛数 × 3 自动设置，范围 128–512；手动输入优先。闭环接口优先保留必要开缝，不强制删除整圈。</small>
-      <label className="check"><input aria-label="Reuse valid UV shapes" type="checkbox" checked={draft.mergeOptions?.reuseValidUV!==false} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,reuseValidUV:e.target.checked}})}/>重解失败时尝试保留形状缝合</label><small>沿真实共享边对齐现有 UV；保留必要开缝，限制两岛平均密度差不超过 25%，仍检查重叠与形变。不因空间靠近而焊接。</small>
+      <label className="check"><input aria-label="Reuse valid UV shapes" type="checkbox" checked={draft.mergeOptions?.reuseValidUV!==false} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,reuseValidUV:e.target.checked}})}/>允许保留形状缝合（手绘模式优先）</label><small>沿真实共享边对齐现有 UV；保留必要开缝，限制两岛平均密度差不超过 25%，仍检查重叠与形变。不因空间靠近而焊接。</small>
       <label>目标岛数（不牺牲有效性）<input aria-label="Merge target" type="number" min="1" value={draft.mergeOptions?.targetCharts??1} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,targetCharts:+e.target.value}})}/></label>
       <label className="check"><input aria-label="Preserve material boundaries" type="checkbox" checked={draft.mergeOptions?.respectMaterials??false} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,respectMaterials:e.target.checked}})}/>后处理不跨源材质边界缝合</label>
     </details>
@@ -58,7 +65,7 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onP
     <label>原始 UV 展示<select aria-label="Source UV layout" value={draft.sourceUVLayout??'materials'} onChange={e=>{const v={...draft,sourceUVLayout:e.target.value as 'materials'|'overlay'};setDraft(v);onChange(v);}}><option value="materials">按材质分框（默认，不改原 UV）</option><option value="overlay">所有材质叠加（仅诊断）</option></select></label>
     <small>分框偏移只用于对应动画与显示；不是把多张材质贴图合成一张。导出保留原坐标及材质分组。</small>
     <label>分区策略<select aria-label="Chart policy" value={draft.chartPolicy??'large'} onChange={e=>patch({chartPolicy:e.target.value as UnwrapOptions['chartPolicy']})}><option value="large">大块优先 · 连通分区 + 短路径开缝</option><option value="balanced">均衡 · 更严格的形变限制</option><option value="legacy">传统碎片化参数（回归对比）</option></select></label>
-    <label>参数化<select aria-label="UV solver" value={draft.method} onChange={e=>patch({method:e.target.value as UnwrapOptions['method']})}><option value="auto">LSCM + 有效性检查 + Tutte 回退</option><option value="lscm">仅 LSCM（无效时补切或报错）</option><option value="tutte">凸边界 Tutte（稳健，拉伸较大）</option></select></label>
+    <label>参数化<select aria-label="UV solver" value={draft.method} onChange={e=>patch({method:e.target.value as UnwrapOptions['method']})}><option value="auto">自动（按当前 UV 目标）</option><option value="lscm">仅 LSCM（无效时补切或报错）</option><option value="tutte">强制圆边界 Tutte（诊断用）</option></select></label>
     <label className="check"><input type="checkbox" checked={draft.autoCut} onChange={e=>patch({autoCut:e.target.checked})}/> 允许必要的拓扑 / 形变补切</label>
     <small>关闭后严格保留输入接缝；无法有效求解时明确报错。所有补切都会在 3D / UV 中显示。</small>
     <label>UV 留白（每侧）<input type="number" min="0" max=".05" step=".001" value={draft.padding} onChange={e=>patch({padding:+e.target.value})}/></label>
@@ -82,6 +89,7 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onP
       <label>岛 / 包围盒最小面积比<input type="number" min="0" max="1" step=".05" value={draft.minFill} onChange={e=>patch({minFill:+e.target.value})}/></label>
     </details>
     <div className="button-grid two"><button className="primary" onClick={()=>onChange({...draft})}>应用并重新展开</button><button onClick={()=>{setDraft({...DEFAULT_UNWRAP});onChange({...DEFAULT_UNWRAP});}}>恢复默认（固定参数）</button></div>
+    {snapshot?.diagnostics&&<p data-testid="shape-methods">实际方法：{Object.entries(snapshot.diagnostics.reduce((a,d)=>(a[d.method]=(a[d.method]??0)+1,a),{} as Record<string,number>)).map(([k,n])=>`${k}: ${n}`).join(' · ')}。source-shape 为保留原形，planar-shape 为平面轮廓，arap-free 为自由边界。</p>}
     {snapshot?.fragmentation&&<p>分裂来源：{snapshot.fragmentation.inputComponents} 个原几何连通分量 → {snapshot.fragmentation.initialCharts} 个初始区域 → {snapshot.fragmentation.outputCharts} 个最终岛；小于16面：{snapshot.fragmentation.tinyCharts}。<br/>补切原因：{Object.entries(snapshot.fragmentation.reasons).map(([k,v])=>`${k}: ${v}`).join(' · ')||'无'}。</p>}
     {snapshot?.metrics&&<div className="uv-quality-stats"><b>有效 UV 占用 {(snapshot.metrics.occupancy*100).toFixed(1)}%</b><span>包围盒面积总和 {(snapshot.metrics.boxOccupancy*100).toFixed(1)}%（可互相覆盖）</span><span>{snapshot.addedSeams?.length??0} 条补切 · {snapshot.diagnostics?.filter(d=>d.method==='tutte').length??0} 个 Tutte 岛</span><span>实际排布：{snapshot.metrics.packingMethod??'MaxRects'}</span><span>生成 UV 已检查翻面、退化和正面积重叠</span></div>}
   </details>;

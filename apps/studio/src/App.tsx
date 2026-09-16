@@ -134,7 +134,7 @@ export default function App(){
         try{
           const edges=new Set(result.edges),fs=buildGenerationFrames(mesh,result.chains);
           setUVSeed(undefined);setUVTarget(kind==='uv-seams'&&organizeSource?'source-atlas':seamTarget(kind));
-          if(kind.startsWith('auto-')&&result.parameters)setUVConfig({...result.parameters,timeBudgetMs:uvConfig.timeBudgetMs,padding:uvConfig.padding});
+          if(kind.startsWith('auto-')&&result.parameters)setUVConfig({...result.parameters,uvObjective:uvConfig.uvObjective,paintIterations:uvConfig.paintIterations,timeBudgetMs:uvConfig.timeBudgetMs,padding:uvConfig.padding});
           setSeamEdges(edges);setChains(result.chains);setFrames(fs);setShowAllSeams(false);setStep(fs.length?0:-1);setPlaying(false);
           setNotice(kind==='uv-seams'?`已读取原始 UV 接缝：${edges.size} 条边。${organizeSource?'将继续面积校正、验证缝合和去叠放；生成新 atlas。':'原样检查，不修正面积或叠放。'}`:`输入 ${result.analysis?.components??'?'} 个独立连通部件（不跨部件焊接）；${result.regionCount??'传统'} 个候选分区，合并 ${result.mergedCount??0} 个小区域；${edges.size} 条接缝。最终岛数由 UV 有效性检查决定。`);
           if(kind.startsWith('auto-'))setShowAllSeams(true);
