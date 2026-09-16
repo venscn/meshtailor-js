@@ -14,3 +14,5 @@ export * from './asset-download.js';
 export * from './chart-regions.js';
 
 export * from './boundary-stitch.js';
+
+export * from './paint-panels.js';

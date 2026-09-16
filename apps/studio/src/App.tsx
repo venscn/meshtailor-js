@@ -142,7 +142,7 @@ export default function App(){
         }catch(error){setLoadError(String(error));}
       };
       worker.onerror=event=>{worker.terminate();if(id===operation.current){setBusy(null);setLoadError('Seam worker failed: '+event.message);}};
-      worker.postMessage({kind,mesh,options:{strategy:uvConfig.chartPolicy==='legacy'?'legacy':'adaptive',goal:uvConfig.chartPolicy==='balanced'?'balanced':'large',regionOptions:{...uvConfig.regionOptions,maxChartFaces:uvConfig.maxChartFaces},curvatureQuantile:curvature,structuralRings:rings,maxEdges}} satisfies SeamJob);
+      worker.postMessage({kind,mesh,options:{uvObjective:uvConfig.uvObjective,strategy:uvConfig.chartPolicy==='legacy'?'legacy':'adaptive',goal:uvConfig.chartPolicy==='balanced'?'balanced':'large',regionOptions:{...uvConfig.regionOptions,maxChartFaces:uvConfig.maxChartFaces},curvatureQuantile:curvature,structuralRings:rings,maxEdges}} satisfies SeamJob);
     }catch(error){setBusy(null);setLoadError(String(error));}
   };
   const processUV=(operation:'connected'|'stitch'|'repack'|'fill',config:UnwrapOptions)=>{

@@ -3,7 +3,7 @@ import { packConnectedAtlas, type PageOptions, type PageReport } from './atlas-p
 import { mergeAdjacentCharts, type MergeOptions, type MergeReport } from './chart-merge.js';
 import { normalizedMesh, shapeQuality } from './chart-quality.js';
 import { uvProgress, rethrowUVStop, type UVWork } from './work.js';
-import { buildTopology, edgeKey, recommendRegions, segmentMeshRegions, type ChartGoal, type MeshAnalysis, type RegionOptions, type MeshData, type Vec3, type Vec2 } from '@meshtailor/mesh-core';
+import { paintPanelSeams,buildTopology, edgeKey, recommendRegions, segmentMeshRegions, type ChartGoal, type MeshAnalysis, type RegionOptions, type MeshData, type Vec3, type Vec2 } from '@meshtailor/mesh-core';
 import { buildCharts } from './charts.js';
 import { openChartWithSlits } from './topology-slits.js';
 import { cutLocalMesh, type CutMesh } from './cut-topology.js';
@@ -66,7 +66,11 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   const mesh=normalizedMesh(input),topology=buildTopology(mesh),effective=new Set(seams),warnings:string[]=[];
   for(const [key,e]of topology.edges)if(e.faces.length>2){if(!opts.autoCut)throw new Error('Non-manifold edges require cuts or mesh repair.');effective.add(key);}
   for(let fi=0;fi<mesh.faces.length;fi++){if(fi%256===0)work?.check();const t=mesh.faces[fi]!.vertices;if(new Set(t).size!==3||t.some(v=>!mesh.positions[v])||triangleArea(mesh.positions[t[0]]!,mesh.positions[t[1]]!,mesh.positions[t[2]]!)<1e-15)throw new Error(`Face ${fi} is degenerate in 3D. Repair/remove it before unwrapping; no faces were silently dropped.`);}
-  if(opts.autoCut&&opts.chartPolicy!=='legacy'&&seams.size===0&&opts.initialSegmentation!=='connected'){
+  if(opts.autoCut&&opts.uvObjective==='paint'&&seams.size===0){
+    const panels=paintPanelSeams(mesh,effective);
+    if(panels.panels.length){for(const key of panels.seams)effective.add(key);warnings.push(`保留 ${panels.panels.length} 个主要平面特征面板，优先保持凹口、齿形与孔洞；没有按小平面切碎。`);}
+  }
+  if(opts.autoCut&&opts.chartPolicy!=='legacy'&&effective.size===0&&opts.initialSegmentation!=='connected'){
     uvProgress(work,{stage:'charts',detail:'自动大块分区：合并相邻小区域'});
     const regionOpts={...recommendRegions(mesh,opts.chartPolicy).options,...opts.regionOptions,maxChartFaces:opts.maxChartFaces};
     const regions=segmentMeshRegions(mesh,regionOpts,effective,undefined,()=>work?.check(),topology);

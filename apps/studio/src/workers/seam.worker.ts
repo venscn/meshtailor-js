@@ -11,7 +11,7 @@ self.onmessage=(event:MessageEvent<SeamJob>)=>{
     if(kind!=='uv-seams'){
       const goal=kind==='auto-balanced'?'balanced':kind==='auto-large'?'large':options?.goal??'large';
       const recommendation=recommendUnwrap(mesh,goal),parameters=recommendation.options;
-      const result=generateGeometricSeams(mesh,kind.startsWith('auto-')?{strategy:'adaptive',goal}:options);
+      const result=generateGeometricSeams(mesh,kind.startsWith('auto-')?{strategy:'adaptive',goal,uvObjective:options?.uvObjective}:options);
       self.postMessage({ok:true,edges:[...result.seamEdges],chains:result.chains,parameters,analysis:recommendation.analysis,regionCount:result.regions,mergedCount:result.mergedRegions,elapsedMs:performance.now()-start} satisfies SeamResult);
     }else{
       const edges=extractSeamEdgesFromUV(mesh),chains=canonicalOrder(mesh,traceSeamChains(mesh,edges));

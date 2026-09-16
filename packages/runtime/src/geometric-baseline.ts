@@ -1,8 +1,9 @@
-import { recommendRegions, segmentMeshRegions, type ChartGoal, type RegionOptions, buildTopology, dot3, edgeKey, normalize3, sub3, triangleNormal, type MeshData, type Vec3 } from '@meshtailor/mesh-core';
+import { paintPanelSeams,recommendRegions, segmentMeshRegions, type ChartGoal, type RegionOptions, buildTopology, dot3, edgeKey, normalize3, sub3, triangleNormal, type MeshData, type Vec3 } from '@meshtailor/mesh-core';
 import { canonicalOrder, traceSeamChains, type SeamChain } from '@meshtailor/chaining-seams';
 
 export interface GeometricBaselineOptions {
   strategy?:'adaptive'|'legacy';
+  uvObjective?:'paint'|'compact';
   goal?:ChartGoal;
   regionOptions?:Partial<RegionOptions>;
   curvatureQuantile?: number;
@@ -24,6 +25,10 @@ function faceNormals(mesh:MeshData):Vec3[]{return mesh.faces.map((f)=>triangleNo
 export function generateGeometricSeams(mesh:MeshData,opts:GeometricBaselineOptions={}):GeometricBaselineResult{
   if(opts.strategy!=='legacy'){
     const recommended=recommendRegions(mesh,opts.goal??'large'),options={...recommended.options,...opts.regionOptions};
+    if(opts.uvObjective!=='compact'){
+      const panels=paintPanelSeams(mesh);
+      if(panels.panels.length&&panels.seams.size)return{seamEdges:panels.seams,chains:canonicalOrder(mesh,traceSeamChains(mesh,panels.seams)),scores:new Map(),regions:panels.panels.length,mergedRegions:0,regionOptions:options};
+    }
     const result=segmentMeshRegions(mesh,options);
     // Never truncate a connected region boundary to satisfy an edge budget.
     // curvatureQuantile/structuralRings/maxEdges are legacy-only diagnostics.
