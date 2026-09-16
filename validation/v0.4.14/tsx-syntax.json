@@ -1,0 +1,54 @@
+{
+  "scope": "Syntax transpilation only, NOT full typecheck or React E2E",
+  "cases": [
+    {
+      "file": "apps/studio/src/App.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/MeshViewport.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/UVCanvas.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/main.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/CorrespondenceInspector.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/LoadPipelinePanel.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UVJobStatus.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UVSolverControls.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UnfoldControls.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UnfoldViewport.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/useUVSnapshot.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/useUnfoldPlayer.tsx",
+      "errors": []
+    }
+  ],
+  "passed": 12
+}

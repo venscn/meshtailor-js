@@ -1,0 +1,265 @@
+PASS Default is smooth full-context ghost, not a local dither bubble
+PASS First unfinished island stays opaque; waiting others ghost
+PASS Paused mid-motion restores previous display
+PASS Programmatic seek alone does not create session
+PASS Handoff protects both islands
+PASS An almost-complete island is still opaque
+PASS Completed island in UV is ghosted only after full completion
+PASS Reverse at same pose protects same two actual moving islands
+PASS Endpoint 0 restores regardless of stale interaction flag
+PASS Endpoint 1 restores regardless of stale interaction flag
+PASS Off overrides session
+PASS Legacy bubble requires explicit alternative
+PASS No active islands restores
+PASS Opacity finite and bounded
+PASS Default model-load flow explicitly disables fill
+PASS Complete UV chooses source-atlas
+PASS Missing UV chooses generated
+PASS Generated explicit override
+PASS Inspection never hides generated fallback
+PASS Inspection rejects mutating fill
+PASS Multi-page rejects automatic fill before solve
+PASS Disable merge hits both source and generated config
+PASS Disable repair is strict rejection, not hidden repair
+PASS Automatic fill never invokes nested packing fill or recut
+PASS Budget and rounds are actual serialized options
+PASS Corrupt storage recovers versioned defaults
+PASS Denied storage recovers defaults
+PASS Invalid version rejected
+PASS Invalid boolean rejected
+PASS NaN budgets rejected
+PASS Configuration serialized without arbitrary injected fields
+PASS No numerical progress guesses completed steps
+PASS Hard-cancel trace marks pending as not executed
+PASS Completed snapshot immutable from recorder changes
+{
+  "suite": "Strict core/view math compilation and executable regression",
+  "compiler": "5.8.3",
+  "node": "v22.16.0",
+  "cases": [
+    {
+      "name": "Cube: valid real-edge traversal, final seams and UV coverage",
+      "passed": true
+    },
+    {
+      "name": "Cube: normalized display preserves input and triangles",
+      "passed": true
+    },
+    {
+      "name": "Cylinder: valid real-edge traversal, final seams and UV coverage",
+      "passed": true
+    },
+    {
+      "name": "Cylinder: normalized display preserves input and triangles",
+      "passed": true
+    },
+    {
+      "name": "Torso-like tube: valid real-edge traversal, final seams and UV coverage",
+      "passed": true
+    },
+    {
+      "name": "Torso-like tube: normalized display preserves input and triangles",
+      "passed": true
+    },
+    {
+      "name": "OBJ per-corner UV extraction still finds the 12 cube seams",
+      "passed": true
+    },
+    {
+      "name": "training samples keep xyz+normal, sampled point count and EOS",
+      "passed": true
+    },
+    {
+      "name": "off-origin mesh is normalized before float32 conversion",
+      "passed": true
+    },
+    {
+      "name": "very small meshes do not collapse into fixed near-plane limits",
+      "passed": true
+    },
+    {
+      "name": "empty mesh has a clear validation failure",
+      "passed": true
+    },
+    {
+      "name": "NaN coordinates are rejected",
+      "passed": true
+    },
+    {
+      "name": "infinite coordinates are rejected",
+      "passed": true
+    },
+    {
+      "name": "out-of-range face index is rejected",
+      "passed": true
+    },
+    {
+      "name": "zero-extent mesh is rejected",
+      "passed": true
+    },
+    {
+      "name": "portrait camera fit uses horizontal FOV",
+      "passed": true
+    },
+    {
+      "name": "wide camera fit does not crop the vertical axis",
+      "passed": true
+    },
+    {
+      "name": "camera fit contains the entire bounding sphere",
+      "passed": true
+    },
+    {
+      "name": "invalid camera input is rejected",
+      "passed": true
+    },
+    {
+      "name": "DPR is clamped independently of CSS viewport size",
+      "passed": true
+    },
+    {
+      "name": "hidden or invalid viewport sizes are skipped",
+      "passed": true
+    }
+  ],
+  "strictCompile": "pass",
+  "syntaxOnly": {
+    "sourceFiles": 109,
+    "result": "pass",
+    "fullUITypecheck": "not performed by this script"
+  },
+  "passed": 21
+}
+{
+  "suite": "Production UV job handler in Node worker_threads (not browser Worker loading)",
+  "cases": [
+    {
+      "name": "Generated UV worker transfers exact shared geometry, typed arrays and Maps",
+      "passed": true
+    },
+    {
+      "name": "Original-UV worker ignores unrelated baseline edges and preserves face UVs",
+      "passed": true
+    },
+    {
+      "name": "Missing source UV returns explicit error instead of a fallback or stale atlas",
+      "passed": true
+    },
+    {
+      "name": "Complex original-UV job transfers all per-corner correspondences",
+      "passed": true
+    }
+  ],
+  "passed": 4
+}
+{
+  "suite": "UV worker client lifecycle (fake transports)",
+  "cases": [
+    {
+      "name": "Progress does not settle the job; snapshot terminates once",
+      "passed": true
+    },
+    {
+      "name": "Silent Worker startup expires",
+      "passed": true
+    },
+    {
+      "name": "Progress heartbeat cannot keep a runaway job alive forever",
+      "passed": true
+    },
+    {
+      "name": "Cancel rejects promise, terminates Worker, ignores late snapshot",
+      "passed": true
+    },
+    {
+      "name": "onerror is terminal and releases transport",
+      "passed": true
+    },
+    {
+      "name": "onmessageerror is terminal and releases transport",
+      "passed": true
+    },
+    {
+      "name": "Construction error becomes a rejected job",
+      "passed": true
+    },
+    {
+      "name": "Structured-clone/postMessage error terminates the Worker",
+      "passed": true
+    },
+    {
+      "name": "Protocol error fails instead of leaving a spinner",
+      "passed": true
+    },
+    {
+      "name": "Worker deadline error retains its timeout classification",
+      "passed": true
+    },
+    {
+      "name": "New independent job completes after the previous one was cancelled",
+      "passed": true
+    }
+  ],
+  "passed": 11
+}
+PASS Default is 85% relay, never a whole-mesh simultaneous start
+PASS A legacy together value migrates to relay, not synchronous playback
+PASS Per-island time determines real span (3 x 12s relay = 32.4s)
+PASS Strict serial starts only after the preceding complete island
+PASS Zero and one selection have no synthetic queue or empty tail
+PASS First island only at initial interior time
+PASS Second starts at predecessor 85%, with exact predecessor endpoint preserved
+PASS Handoff is bounded to 75–100%, never arbitrary many concurrent islands
+PASS No gaps, premature starts, early last completion, or >2 active islands (1)
+PASS No gaps, premature starts, early last completion, or >2 active islands (3)
+PASS No gaps, premature starts, early last completion, or >2 active islands (97)
+PASS No gaps, premature starts, early last completion, or >2 active islands (2000)
+PASS Local/global stage seeking round-trips through the same timeline
+PASS Reverse playback is the exact forward timeline read backwards
+PASS Stage focus stays on oldest unfinished island in overlap; reverse chooses newest
+PASS Last island runs to exactly 100% without trailing empty slots
+PASS No fixed hold by default; explicit hold preserves old geometric stage timing
+PASS Finite frame elapsed time is never capped to 100ms
+PASS Slow and fast frames integrate the same active elapsed time
+PASS Non-looping endpoint stops immediately with no 650ms artificial wait
+PASS Forward and reverse loops wrap with elapsed remainder
+PASS Malformed timeline input fails explicitly, rather than NaN poses
+PASS Three bent islands retained; no automatic triangle-per-island proxy
+PASS Visible interior hinges actually exist
+PASS relay exact 3D endpoint
+PASS relay exact exported UV endpoint
+PASS sequential exact 3D endpoint
+PASS sequential exact exported UV endpoint
+PASS Every face edge length preserved throughout rigid phases (wave=false)
+PASS Parent-child hinge endpoints remain welded at every pose (wave=false)
+PASS Every face edge length preserved throughout rigid phases (wave=true)
+PASS Parent-child hinge endpoints remain welded at every pose (wave=true)
+PASS Rigid net is actually planar, not projection of folded vertices
+PASS Developable ribbons need NO temporary curvature cuts
+PASS All seven stage joins continuous
+PASS Backward scrub has no accumulated transform drift
+PASS Unselected islands do not move
+PASS Workbench translation is bounded by half the model extent, not island radii
+PASS Island workbench does not jump when selection membership changes
+17 hinge regressions passed.
+cube per-island seconds at base 12: [
+  4.800000000000001,
+  4.800000000000001,
+  4.800000000000001,
+  4.800000000000001,
+  4.800000000000001,
+  4.800000000000001
+]
+PASS Cube flat islands skip hinge stage without losing target UV
+PASS Developable bent ribbons keep actual hinge motion and skip redundant UV deformation
+PASS cube: every dropped span is unchanged throughout, not just at endpoints
+PASS ribbon: every dropped span is unchanged throughout, not just at endpoints
+PASS Stage-boundary scrub is continuous across removed time
+PASS Explicit user hold is retained despite automatic skip
+PASS Diagnostic skip-off retains the fixed-time schedule
+PASS Analysis and rendering never mutate source, target, UV or hinge geometry
+PASS Equal overall endpoints do not remove real intermediate separation
+PASS Entirely motionless direct path has zero duration and no phantom wait
+PASS Relative tolerance still detects small but real islands
+PASS Changing selection and separation rebuilds the actual workbench motion
+PASS Invalid tolerance fails explicitly

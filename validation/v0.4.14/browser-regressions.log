@@ -1,0 +1,137 @@
+PASS DPR 1: hinge path defaults to manual mode in UI and renderer
+PASS DPR 1: actual play advances geometry while preserving the whole camera
+PASS DPR 1: orbit drag during play changes yaw/pitch and survives later frames
+PASS DPR 1: right-button pan during play changes target without snap-back
+PASS DPR 1: wheel zoom during play remains exactly where the user leaves it
+PASS DPR 1: pause/resume and reverse playback never reset the manual camera
+PASS DPR 1: forward and reverse loop boundaries keep the camera
+PASS DPR 1: scrubbing all stages and switching scope/path never performs an implicit fit
+PASS DPR 1: opt-in follow starts immediately when paused, not only at next frame
+PASS DPR 1: manual orbit interrupts opt-in follow, updates checkbox and keeps playback running
+PASS DPR 1: manual pan interrupts opt-in follow, updates checkbox and keeps playback running
+PASS DPR 1: manual zoom interrupts opt-in follow, updates checkbox and keeps playback running
+PASS DPR 1: late enabled UI props cannot re-enable follow after a gesture
+PASS DPR 1: fit current selection is one-shot, keeps orbit orientation and does not pause play
+PASS DPR 1: 3D/UV view buttons fit once and hand control straight back to the user
+PASS DPR 1: held pointer suspends follow and cancellation never re-enables it
+PASS DPR 1: viewport resizing changes projection size, not camera pose
+PASS DPR 1: re-solving UV for the same source mesh retains the manual camera
+PASS WebGL context recovery reuploads buffers without resetting the manual camera
+PASS DPR 1: source/UV endpoints and real WebGL drawing are unchanged
+PASS DPR 2: hinge path defaults to manual mode in UI and renderer
+PASS DPR 2: actual play advances geometry while preserving the whole camera
+PASS DPR 2: orbit drag during play changes yaw/pitch and survives later frames
+PASS DPR 2: right-button pan during play changes target without snap-back
+PASS DPR 2: wheel zoom during play remains exactly where the user leaves it
+PASS DPR 2: pause/resume and reverse playback never reset the manual camera
+PASS DPR 2: forward and reverse loop boundaries keep the camera
+PASS DPR 2: scrubbing all stages and switching scope/path never performs an implicit fit
+PASS DPR 2: opt-in follow starts immediately when paused, not only at next frame
+PASS DPR 2: manual orbit interrupts opt-in follow, updates checkbox and keeps playback running
+PASS DPR 2: manual pan interrupts opt-in follow, updates checkbox and keeps playback running
+PASS DPR 2: manual zoom interrupts opt-in follow, updates checkbox and keeps playback running
+PASS DPR 2: late enabled UI props cannot re-enable follow after a gesture
+PASS DPR 2: fit current selection is one-shot, keeps orbit orientation and does not pause play
+PASS DPR 2: 3D/UV view buttons fit once and hand control straight back to the user
+PASS DPR 2: held pointer suspends follow and cancellation never re-enables it
+PASS DPR 2: viewport resizing changes projection size, not camera pose
+PASS DPR 2: re-solving UV for the same source mesh retains the manual camera
+PASS DPR 2: source/UV endpoints and real WebGL drawing are unchanged
+PASS 39 camera browser cases
+PASS DPR 1: relay defaults in UI and runtime; net hold and camera follow are off
+PASS DPR 1: first island deforms while every queued island remains EXACTLY at 3D
+PASS DPR 1: overlap contains only predecessor at 90% and successor at 5%
+PASS DPR 1: completed island remains EXACTLY at UV while the next plays
+PASS DPR 1: geometry, progress counters and late-start invariant agree across a full scrub
+PASS DPR 1: handoff slider controls the actual start threshold
+PASS DPR 1: strict serial has no overlap and duration is per island
+PASS DPR 1: multi-selection sorts by area without phantom duration slots
+PASS DPR 1: queue navigation and stage buttons stay on the inspected island during overlap
+PASS DPR 1: static rigid-net hold is opt-in and default playback passes through it
+PASS DPR 1: actual forward RAF playback visits all three islands with no idle tail
+PASS DPR 1: actual reverse RAF playback visits all three islands with no idle tail
+PASS DPR 1: real camera drag survives subsequent relay frames
+PASS DPR 1: empty queue cannot play, and endpoints remain available without runtime errors
+PASS DPR 2: relay defaults in UI and runtime; net hold and camera follow are off
+PASS DPR 2: first island deforms while every queued island remains EXACTLY at 3D
+PASS DPR 2: overlap contains only predecessor at 90% and successor at 5%
+PASS DPR 2: completed island remains EXACTLY at UV while the next plays
+PASS DPR 2: geometry, progress counters and late-start invariant agree across a full scrub
+PASS DPR 2: handoff slider controls the actual start threshold
+PASS DPR 2: strict serial has no overlap and duration is per island
+PASS DPR 2: multi-selection sorts by area without phantom duration slots
+PASS DPR 2: queue navigation and stage buttons stay on the inspected island during overlap
+PASS DPR 2: static rigid-net hold is opt-in and default playback passes through it
+PASS DPR 2: actual forward RAF playback visits all three islands with no idle tail
+PASS DPR 2: actual reverse RAF playback visits all three islands with no idle tail
+PASS DPR 2: real camera drag survives subsequent relay frames
+PASS DPR 2: empty queue cannot play, and endpoints remain available without runtime errors
+PASS 28 relay browser cases
+PASS DPR 1: default automatically skips unchanged spans with camera independent
+PASS DPR 1: geometry profiling is cached, not rerun on every frame
+PASS DPR 1: flat cube skips hinge and UV fit, reducing 12s base to 4.8s per island
+PASS DPR 1: skipped stage buttons collapse to one displayed pose
+PASS DPR 1: scrub uses identical compact clocks for poses, state and phase labels
+PASS DPR 1: no long motionless interior intervals across dense whole-queue sampling
+PASS DPR 1: skip switch restores fixed 12s stages for comparison, then re-enables compaction
+PASS DPR 1: manual teaching hold remains opt-in even with automatic pruning enabled
+PASS DPR 1: variable duration settings invalidate cached profile once
+PASS DPR 1: area-ordered selection and strict mode use actual selected durations
+PASS DPR 1: actual forward RAF playback finishes on shortened clock with no tail
+PASS DPR 1: actual reverse RAF playback finishes on shortened clock with no tail
+PASS DPR 1: endpoints exactly match source and exported target positions
+PASS DPR 1: no runtime errors or WebGL errors
+PASS DPR 2: default automatically skips unchanged spans with camera independent
+PASS DPR 2: geometry profiling is cached, not rerun on every frame
+PASS DPR 2: flat cube skips hinge and UV fit, reducing 12s base to 4.8s per island
+PASS DPR 2: skipped stage buttons collapse to one displayed pose
+PASS DPR 2: scrub uses identical compact clocks for poses, state and phase labels
+PASS DPR 2: no long motionless interior intervals across dense whole-queue sampling
+PASS DPR 2: skip switch restores fixed 12s stages for comparison, then re-enables compaction
+PASS DPR 2: manual teaching hold remains opt-in even with automatic pruning enabled
+PASS DPR 2: variable duration settings invalidate cached profile once
+PASS DPR 2: area-ordered selection and strict mode use actual selected durations
+PASS DPR 2: actual forward RAF playback finishes on shortened clock with no tail
+PASS DPR 2: actual reverse RAF playback finishes on shortened clock with no tail
+PASS DPR 2: endpoints exactly match source and exported target positions
+PASS DPR 2: no runtime errors or WebGL errors
+PASS DPR 1: default playback-all is not an explicit inspection selection
+PASS DPR 1: first real UV click selects island only
+PASS DPR 1: second click selects triangle without changing geometry camera or progress
+PASS DPR 1: repeated click cancels triangle and preserves island
+PASS DPR 1: another triangle replaces the selected face
+PASS DPR 1: first click on another island clears face and never auto-selects a new one
+PASS DPR 1: island-list click and number label never choose a triangle
+PASS DPR 1: modifier selection adds an island without selecting face
+PASS DPR 1: picking a triangle in a multiselection does not collapse its queue
+PASS DPR 1: modifier deselects island and removes stale triangle focus
+PASS DPR 1: Escape first removes triangle then islands
+PASS DPR 1: real 3D ray pick selects triangle only after explicit island selection; UV click cancels it
+PASS DPR 1: face toggles during playback keep the clock and queue running
+PASS DPR 1: dragging camera never selects a triangle
+PASS DPR 1: switching tool tabs keeps the mesh UV and camera
+PASS DPR 1: new UV snapshot clears all face and island inspection
+PASS DPR 1: bounded canvas drawing buffers and independent scroll panels
+PASS responsive 1117px: no horizontal overflow and visible canvas
+PASS responsive 900px: no horizontal overflow and visible canvas
+PASS responsive 600px: no horizontal overflow and visible canvas
+PASS DPR 1: no uncaught browser errors and successful GPU draw
+PASS DPR 2: default playback-all is not an explicit inspection selection
+PASS DPR 2: first real UV click selects island only
+PASS DPR 2: second click selects triangle without changing geometry camera or progress
+PASS DPR 2: repeated click cancels triangle and preserves island
+PASS DPR 2: another triangle replaces the selected face
+PASS DPR 2: first click on another island clears face and never auto-selects a new one
+PASS DPR 2: island-list click and number label never choose a triangle
+PASS DPR 2: modifier selection adds an island without selecting face
+PASS DPR 2: picking a triangle in a multiselection does not collapse its queue
+PASS DPR 2: modifier deselects island and removes stale triangle focus
+PASS DPR 2: Escape first removes triangle then islands
+PASS DPR 2: real 3D ray pick selects triangle only after explicit island selection; UV click cancels it
+PASS DPR 2: face toggles during playback keep the clock and queue running
+PASS DPR 2: dragging camera never selects a triangle
+PASS DPR 2: switching tool tabs keeps the mesh UV and camera
+PASS DPR 2: new UV snapshot clears all face and island inspection
+PASS DPR 2: bounded canvas drawing buffers and independent scroll panels
+PASS DPR 2: no uncaught browser errors and successful GPU draw
+PASS 39 cases

@@ -1,0 +1,171 @@
+{
+  "identity": {
+    "archiveSHA256": "284decae81fda986f3c291bf4bebee473221b4eabe7078c65ed44adaf9ffb563",
+    "jsonSHA256": "1aaa7fa54731ca833c3a0f919ba82c1af2a69cc7f8de36ba76bfb5038de8bd38",
+    "binarySHA256": "de7730fb4201466603410dc1a7128bc1339e945a945dbb852f6dc39f3c53ec22",
+    "binaryBytes": 662184,
+    "decoder": "exact static fixture decoder + production assembleMeshParts; not GLTFLoader E2E"
+  },
+  "mesh": "Corset",
+  "faces": 18324,
+  "islands": 79,
+  "flow": {
+    "version": 1,
+    "target": "source-atlas",
+    "origin": "model-load",
+    "status": "completed",
+    "settings": {
+      "chartPolicy": "large",
+      "method": "auto",
+      "iterations": 2000,
+      "tolerance": 1e-9,
+      "padding": 0.003,
+      "rotate": true,
+      "rotationSteps": 12,
+      "autoCut": true,
+      "maxChartFaces": 13056,
+      "maxAspect": 24,
+      "minFill": 0,
+      "maxStretch": 30,
+      "stretchAreaPercentile": 0.99,
+      "regionOptions": {
+        "normalConeDegrees": 86.6328985177959,
+        "maxChartFaces": 13056,
+        "minRegionFaces": 68,
+        "minRegionAreaRatio": 0.01
+      },
+      "fillMode": "off",
+      "fillStep": 0.08,
+      "fillMaxAreaGain": 1.6,
+      "fillRecutLarge": false,
+      "fillMinStep": 0.005,
+      "fillRounds": 8,
+      "fillResolution": 512,
+      "fillTimeBudgetMs": 3000,
+      "sourceRepairPolicy": "repair",
+      "sourceAtlasMerge": true,
+      "packingOrder": "area",
+      "tinyIslandAreaFraction": 0,
+      "maxTinyAreaBoost": 1,
+      "spatialNeighbors": true,
+      "neighborDistanceRatio": 0.02,
+      "initialSegmentation": "regions",
+      "postMerge": true,
+      "mergeOptions": {
+        "reuseValidUV": true,
+        "targetCharts": 1,
+        "respectMaterials": false
+      },
+      "atlasPageMode": "single",
+      "atlasPageCount": 2,
+      "packing": "auto",
+      "timeBudgetMs": 120000
+    },
+    "steps": [
+      {
+        "id": "input",
+        "label": "检查几何与任务配置",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 46.9000000001397,
+        "detail": "Worker 已启动，检查输入",
+        "elapsedMs": 125.19999999995343
+      },
+      {
+        "id": "extract",
+        "label": "提取原 UV 岛 · 审计原坐标",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 172.10000000009313,
+        "detail": "整理原 UV：验证当前岛、面积归一、邻岛缝合与大岛优先排布",
+        "elapsedMs": 375.60000000009313
+      },
+      {
+        "id": "parameterize",
+        "label": "连通分区 · 参数化与必要补切",
+        "enabled": false,
+        "state": "skipped",
+        "reason": "沿用现有 UV 岛"
+      },
+      {
+        "id": "repair",
+        "label": "验证现有岛 · 局部修复无效 UV",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 547.7000000001863,
+        "detail": "检查翻面、退化与正面积重叠",
+        "elapsedMs": 410.79999999981374
+      },
+      {
+        "id": "merge",
+        "label": "尝试共享边缝合",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 958.5,
+        "detail": "检查翻面、退化与正面积重叠",
+        "elapsedMs": 414.20000000018626
+      },
+      {
+        "id": "pack",
+        "label": "按 3D 面积归一 · 大岛优先排布",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 1372.7000000001863,
+        "detail": "MaxRects 排布 · 79 个岛",
+        "elapsedMs": 546.7999999998137
+      },
+      {
+        "id": "fill",
+        "label": "填补空白 · 轮廓精排",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 1919.5,
+        "detail": "精排后检查全部 UV 三角形：翻面、退化、交叠及边距",
+        "elapsedMs": 3976.2000000001863
+      },
+      {
+        "id": "correspondence",
+        "label": "建立 3D / UV 对应 · 铰链准备",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 5895.700000000186,
+        "detail": "构建刚性平面网和临时断边",
+        "elapsedMs": 247.89999999990687
+      },
+      {
+        "id": "audit",
+        "label": "面积统计 · 空间邻居 · 返回结果",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 6143.600000000093,
+        "detail": "传回同一份 3D / UV 与铰链数据",
+        "elapsedMs": 16.300000000046566
+      }
+    ],
+    "elapsedMs": 6159.90000000014,
+    "config": {
+      "version": 1,
+      "source": "auto",
+      "repairInvalid": true,
+      "mergeAdjacent": true,
+      "fill": true,
+      "fillBudgetSeconds": 3,
+      "fillRounds": 8
+    }
+  },
+  "focus": {
+    "settings": {
+      "mode": "ghost",
+      "opacity": 0.18,
+      "radius": 1.2,
+      "retained": 0.12
+    },
+    "spheres": [],
+    "emphasis": [
+      13
+    ],
+    "interactionActive": true
+  },
+  "playing": true,
+  "errors": []
+}

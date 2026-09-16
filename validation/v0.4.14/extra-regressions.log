@@ -1,0 +1,160 @@
+PASS Current island pixel color remains unchanged by focus toggle
+PASS Occluding other island is dissolved using real per-fragment discard
+PASS Focus rendering leaves geometry UV selection and camera intact
+PASS Remote occluder outside sphere stays fully unchanged
+PASS Both active relay islands are protected
+PASS Projected overlap visible on nonparallel triangles mid-animation
+PASS Auto at endpoint returns to near-coplanar without claiming collision
+PASS Waiting island layers are not painted as moving-island diagnosis
+PASS No browser/WebGL errors
+PASS Current island pixel color remains unchanged by focus toggle
+PASS Occluding other island is dissolved using real per-fragment discard
+PASS Focus rendering leaves geometry UV selection and camera intact
+PASS Remote occluder outside sphere stays fully unchanged
+PASS Both active relay islands are protected
+PASS Projected overlap visible on nonparallel triangles mid-animation
+PASS Auto at endpoint returns to near-coplanar without claiming collision
+PASS Waiting island layers are not painted as moving-island diagnosis
+PASS No browser/WebGL errors
+TAP version 13
+# Subtest: accepts complete clean history with three distinct original tags
+ok 1 - accepts complete clean history with three distinct original tags
+  ---
+  duration_ms: 145.664716
+  type: 'test'
+  ...
+# Subtest: accepts annotated release matching HEAD and package version
+ok 2 - accepts annotated release matching HEAD and package version
+  ---
+  duration_ms: 138.952183
+  type: 'test'
+  ...
+# Subtest: rejects a missing historical tag
+ok 3 - rejects a missing historical tag
+  ---
+  duration_ms: 118.988567
+  type: 'test'
+  ...
+# Subtest: rejects moving an old tag
+ok 4 - rejects moving an old tag
+  ---
+  duration_ms: 164.443965
+  type: 'test'
+  ...
+# Subtest: rejects rewriting annotation even if the tagged commit is unchanged
+ok 5 - rejects rewriting annotation even if the tagged commit is unchanged
+  ---
+  duration_ms: 167.701491
+  type: 'test'
+  ...
+# Subtest: rejects an untracked source file
+ok 6 - rejects an untracked source file
+  ---
+  duration_ms: 149.102245
+  type: 'test'
+  ...
+# Subtest: rejects unstaged changes
+ok 7 - rejects unstaged changes
+  ---
+  duration_ms: 137.859548
+  type: 'test'
+  ...
+# Subtest: rejects staged changes
+ok 8 - rejects staged changes
+  ---
+  duration_ms: 179.006
+  type: 'test'
+  ...
+# Subtest: allows ignored bundle artifacts without tracking recursive history
+ok 9 - allows ignored bundle artifacts without tracking recursive history
+  ---
+  duration_ms: 110.007144
+  type: 'test'
+  ...
+# Subtest: rejects two release versions on one commit
+ok 10 - rejects two release versions on one commit
+  ---
+  duration_ms: 134.278697
+  type: 'test'
+  ...
+# Subtest: allows a new annotated release after an independent release commit
+ok 11 - allows a new annotated release after an independent release commit
+  ---
+  duration_ms: 140.602003
+  type: 'test'
+  ...
+# Subtest: rejects a lightweight tag for a new release
+ok 12 - rejects a lightweight tag for a new release
+  ---
+  duration_ms: 138.505033
+  type: 'test'
+  ...
+# Subtest: rejects a release/package version mismatch
+ok 13 - rejects a release/package version mismatch
+  ---
+  duration_ms: 149.054618
+  type: 'test'
+  ...
+# Subtest: rejects a workspace version mismatch
+ok 14 - rejects a workspace version mismatch
+  ---
+  duration_ms: 157.497002
+  type: 'test'
+  ...
+# Subtest: accepts a correctly versioned multi-workspace release
+ok 15 - accepts a correctly versioned multi-workspace release
+  ---
+  duration_ms: 196.882318
+  type: 'test'
+  ...
+# Subtest: rejects release mode when HEAD is ahead of the requested tag
+ok 16 - rejects release mode when HEAD is ahead of the requested tag
+  ---
+  duration_ms: 245.174658
+  type: 'test'
+  ...
+# Subtest: accepts a clean detached release checkout
+ok 17 - accepts a clean detached release checkout
+  ---
+  duration_ms: 163.81561
+  type: 'test'
+  ...
+# Subtest: rejects a replacement root unrelated to historical commits
+ok 18 - rejects a replacement root unrelated to historical commits
+  ---
+  duration_ms: 140.908595
+  type: 'test'
+  ...
+# Subtest: rejects shallow clones
+ok 19 - rejects shallow clones
+  ---
+  duration_ms: 197.706031
+  type: 'test'
+  ...
+# Subtest: rejects directories without a working Git repository
+ok 20 - rejects directories without a working Git repository
+  ---
+  duration_ms: 97.413678
+  type: 'test'
+  ...
+# Subtest: audit is read-only for index, refs and status
+ok 21 - audit is read-only for index, refs and status
+  ---
+  duration_ms: 138.955644
+  type: 'test'
+  ...
+# Subtest: CLI rejects invalid arguments without claiming a passed check
+ok 22 - CLI rejects invalid arguments without claiming a passed check
+  ---
+  duration_ms: 179.010808
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3492.79543

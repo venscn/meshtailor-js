@@ -1,0 +1,159 @@
+{
+  "asset": "FlightHelmet",
+  "fill": false,
+  "passed": true,
+  "identity": {
+    "archiveSHA256": "284decae81fda986f3c291bf4bebee473221b4eabe7078c65ed44adaf9ffb563",
+    "jsonSHA256": "c94a08a28305fb49a612cf273330a04e3dfc084306257d52dc00b4447eeb1091",
+    "binarySHA256": "9e623a27f837e1cc995d1380da5fd3becf4d29586fefba882fc0ba76b49f94bf",
+    "binaryBytes": 3227148,
+    "decoder": "exact static fixture decoder + production assembleMeshParts; not GLTFLoader E2E"
+  },
+  "faces": 94722,
+  "islands": 130,
+  "occupancy": 0.6248665114528978,
+  "quality": {
+    "triangles": 94722,
+    "flipped": 0,
+    "degenerate": 0,
+    "overlaps": 0,
+    "area": 0.6248665114528928,
+    "valid": true
+  },
+  "pipeline": {
+    "version": 1,
+    "target": "source-atlas",
+    "origin": "model-load",
+    "status": "completed",
+    "settings": {
+      "chartPolicy": "large",
+      "method": "auto",
+      "iterations": 2000,
+      "tolerance": 1e-9,
+      "padding": 0.003,
+      "rotate": true,
+      "rotationSteps": 12,
+      "autoCut": true,
+      "maxChartFaces": 20000,
+      "maxAspect": 24,
+      "minFill": 0,
+      "maxStretch": 30,
+      "stretchAreaPercentile": 0.99,
+      "regionOptions": {
+        "normalConeDegrees": 84.1705013489881,
+        "maxChartFaces": 20000,
+        "minRegionFaces": 96,
+        "minRegionAreaRatio": 0.01
+      },
+      "atlasPageMode": "single",
+      "timeBudgetMs": 210000,
+      "sourceRepairPolicy": "repair",
+      "sourceAtlasMerge": true,
+      "postMerge": true,
+      "fillMode": "off",
+      "fillRecutLarge": false,
+      "fillTimeBudgetMs": 3000,
+      "fillRounds": 3
+    },
+    "steps": [
+      {
+        "id": "input",
+        "label": "检查几何与任务配置",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 8.17573799999991,
+        "detail": "Worker 已启动，检查输入",
+        "elapsedMs": 255.46625799999856
+      },
+      {
+        "id": "extract",
+        "label": "提取原 UV 岛 · 审计原坐标",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 263.64199599999847,
+        "detail": "整理原 UV：验证当前岛、面积归一、邻岛缝合与大岛优先排布",
+        "elapsedMs": 2008.1484820000023
+      },
+      {
+        "id": "parameterize",
+        "label": "连通分区 · 参数化与必要补切",
+        "enabled": false,
+        "state": "skipped",
+        "reason": "沿用现有 UV 岛"
+      },
+      {
+        "id": "repair",
+        "label": "验证现有岛 · 局部修复无效 UV",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 2271.790478000001,
+        "detail": "检查翻面、退化与正面积重叠",
+        "elapsedMs": 1877.5673319999987
+      },
+      {
+        "id": "merge",
+        "label": "尝试共享边缝合",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 4149.3578099999995,
+        "detail": "检查翻面、退化与正面积重叠",
+        "elapsedMs": 10069.585866999998
+      },
+      {
+        "id": "pack",
+        "label": "按 3D 面积归一 · 大岛优先排布",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 14218.943676999997,
+        "detail": "MaxRects 排布 · 130 个岛",
+        "elapsedMs": 2152.77232
+      },
+      {
+        "id": "fill",
+        "label": "填补空白 · 轮廓精排",
+        "enabled": false,
+        "state": "skipped",
+        "reason": "未启用：不会自动填补空白"
+      },
+      {
+        "id": "correspondence",
+        "label": "建立 3D / UV 对应 · 铰链准备",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 16371.715996999998,
+        "detail": "构建刚性平面网和临时断边",
+        "elapsedMs": 1721.0546110000014
+      },
+      {
+        "id": "audit",
+        "label": "面积统计 · 空间邻居 · 返回结果",
+        "enabled": true,
+        "state": "completed",
+        "startedMs": 18092.770608,
+        "detail": "传回同一份 3D / UV 与铰链数据",
+        "elapsedMs": 161.399682999996
+      }
+    ],
+    "elapsedMs": 18254.170290999995,
+    "config": {
+      "version": 1,
+      "source": "auto",
+      "repairInvalid": true,
+      "mergeAdjacent": true,
+      "fill": false,
+      "fillBudgetSeconds": 3,
+      "fillRounds": 3
+    }
+  },
+  "stages": [
+    "input",
+    "extract",
+    "repair",
+    "merge",
+    "pack",
+    "correspondence",
+    "audit"
+  ],
+  "exportSHA256": "c5093cc9bafee0668732ae5ec874dc7f60dc8b828547a5ff9ec8aca0569ba7c9",
+  "sourceUnchanged": true
+}

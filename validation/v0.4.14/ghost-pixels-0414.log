@@ -1,0 +1,24 @@
+PASS Paused selected queue stays solid
+PASS During playback whole waiting islands dim even far outside old sphere
+PASS Both relay islands remain opaque including tail
+PASS Fully completed UV island ghosts only after completion
+PASS Pause restores exact prior pixels without resetting pose/camera/selection
+PASS Restore original hidden context exactly
+PASS Restore original dim context exactly
+PASS Restore original solid context exactly
+PASS Endpoints restore even if caller flag is still true
+PASS Off overrides ghost without touching geometry
+PASS Geometry disposal restores diagnostic session state
+PASS No JS or WebGL errors
+PASS Paused selected queue stays solid
+PASS During playback whole waiting islands dim even far outside old sphere
+PASS Both relay islands remain opaque including tail
+PASS Fully completed UV island ghosts only after completion
+PASS Pause restores exact prior pixels without resetting pose/camera/selection
+PASS Restore original hidden context exactly
+PASS Restore original dim context exactly
+PASS Restore original solid context exactly
+PASS Endpoints restore even if caller flag is still true
+PASS Off overrides ghost without touching geometry
+PASS Geometry disposal restores diagnostic session state
+PASS No JS or WebGL errors

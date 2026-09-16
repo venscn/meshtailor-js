@@ -1,0 +1,115 @@
+{
+  "suite": "Configurable load pipeline, real browser Worker and shared panel",
+  "cases": [
+    {
+      "name": "Pipeline panel discoverable from header",
+      "passed": true
+    },
+    {
+      "name": "Default explicitly shows disabled automatic fill",
+      "passed": true
+    },
+    {
+      "name": "Changing plan is not automatic recomputation",
+      "passed": true
+    },
+    {
+      "name": "Disable merge is a real plan switch",
+      "passed": true
+    },
+    {
+      "name": "Explicit run executes source-atlas then exactly one fill",
+      "passed": true,
+      "details": [
+        {
+          "id": "input",
+          "state": "completed",
+          "elapsedMs": 1
+        },
+        {
+          "id": "extract",
+          "state": "completed",
+          "elapsedMs": 4.199999999953434
+        },
+        {
+          "id": "parameterize",
+          "state": "skipped"
+        },
+        {
+          "id": "repair",
+          "state": "completed",
+          "elapsedMs": 1.6999999999534339
+        },
+        {
+          "id": "merge",
+          "state": "skipped"
+        },
+        {
+          "id": "pack",
+          "state": "completed",
+          "elapsedMs": 29.100000000093132
+        },
+        {
+          "id": "fill",
+          "state": "completed",
+          "elapsedMs": 1003.1000000000931
+        },
+        {
+          "id": "correspondence",
+          "state": "completed",
+          "elapsedMs": 3.2999999998137355
+        },
+        {
+          "id": "audit",
+          "state": "completed",
+          "elapsedMs": 0.4000000001396984
+        }
+      ]
+    },
+    {
+      "name": "UI trace exposes actual completion and durations",
+      "passed": true
+    },
+    {
+      "name": "Worker receives configured budget and rounds",
+      "passed": true
+    },
+    {
+      "name": "Turning off fill preserves last output until rerun",
+      "passed": true
+    },
+    {
+      "name": "Rerun with fill off really skips it",
+      "passed": true
+    },
+    {
+      "name": "Config editing during running job cannot rewrite active plan",
+      "passed": true
+    },
+    {
+      "name": "Cancel immediately preserves last complete atlas",
+      "passed": true
+    },
+    {
+      "name": "Cancelled job cannot overwrite a newer inspection run",
+      "passed": true
+    },
+    {
+      "name": "Raw inspection keeps original islands rather than reporting a hidden merge",
+      "passed": true
+    },
+    {
+      "name": "New imported model uses chosen auto plan, not previous manual target",
+      "passed": true
+    },
+    {
+      "name": "Main policy rejects inspect on missing UV without silent fallback",
+      "passed": true
+    },
+    {
+      "name": "No browser JS or WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 16
+}

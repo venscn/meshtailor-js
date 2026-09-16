@@ -1,0 +1,147 @@
+{
+  "suite": "Fixed-time late relay diagnostics (automatic pruning disabled explicitly)",
+  "host": "Offline lab / production WebGL renderer / classic UV worker",
+  "cases": [
+    {
+      "name": "DPR 1: relay defaults in UI and runtime; net hold and camera follow are off",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: first island deforms while every queued island remains EXACTLY at 3D",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: overlap contains only predecessor at 90% and successor at 5%",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: completed island remains EXACTLY at UV while the next plays",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: geometry, progress counters and late-start invariant agree across a full scrub",
+      "passed": true,
+      "details": {
+        "samples": 81,
+        "maximum": 2
+      }
+    },
+    {
+      "name": "DPR 1: handoff slider controls the actual start threshold",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: strict serial has no overlap and duration is per island",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: multi-selection sorts by area without phantom duration slots",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: queue navigation and stage buttons stay on the inspected island during overlap",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: static rigid-net hold is opt-in and default playback passes through it",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: actual forward RAF playback visits all three islands with no idle tail",
+      "passed": true,
+      "details": {
+        "elapsedMs": 2759,
+        "frames": 65,
+        "overlapFrames": 6
+      }
+    },
+    {
+      "name": "DPR 1: actual reverse RAF playback visits all three islands with no idle tail",
+      "passed": true,
+      "details": {
+        "elapsedMs": 2789,
+        "frames": 65,
+        "overlapFrames": 6
+      }
+    },
+    {
+      "name": "DPR 1: real camera drag survives subsequent relay frames",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: empty queue cannot play, and endpoints remain available without runtime errors",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: relay defaults in UI and runtime; net hold and camera follow are off",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: first island deforms while every queued island remains EXACTLY at 3D",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: overlap contains only predecessor at 90% and successor at 5%",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: completed island remains EXACTLY at UV while the next plays",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: geometry, progress counters and late-start invariant agree across a full scrub",
+      "passed": true,
+      "details": {
+        "samples": 81,
+        "maximum": 2
+      }
+    },
+    {
+      "name": "DPR 2: handoff slider controls the actual start threshold",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: strict serial has no overlap and duration is per island",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: multi-selection sorts by area without phantom duration slots",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: queue navigation and stage buttons stay on the inspected island during overlap",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: static rigid-net hold is opt-in and default playback passes through it",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: actual forward RAF playback visits all three islands with no idle tail",
+      "passed": true,
+      "details": {
+        "elapsedMs": 2821,
+        "frames": 32,
+        "overlapFrames": 3
+      }
+    },
+    {
+      "name": "DPR 2: actual reverse RAF playback visits all three islands with no idle tail",
+      "passed": true,
+      "details": {
+        "elapsedMs": 2914,
+        "frames": 32,
+        "overlapFrames": 4
+      }
+    },
+    {
+      "name": "DPR 2: real camera drag survives subsequent relay frames",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: empty queue cannot play, and endpoints remain available without runtime errors",
+      "passed": true
+    }
+  ],
+  "passed": 28
+}

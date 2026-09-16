@@ -1,3 +1,56 @@
+# v0.4.14 实际验证
+
+本版记录在 `validation/v0.4.14/`。在原v0.4.13基础上修改自动执行编排、可视化配置与播放/拖动期间的全局上下文半透明，没有重写UV优化算法。具体操作见 [RELEASE-0.4.14.md](RELEASE-0.4.14.md)。
+
+## 流程与显示测试
+
+| 测试 | 本轮结果 | 证据 |
+|---|---|---|
+| 流程配置、条件分支、实际事件、取消 | 20项通过 | `pipeline-policy.json` |
+| 播放突出策略、接力末段、端点/暂停 | 14项通过 | `emphasis-policy.json` |
+| 真实浏览器配置面板和UV Worker | 16项通过 | `pipeline-browser.json` |
+| 真正WebGL像素、全局透明、原状态恢复 | 24项通过，DPR1/2 | `ghost-pixels.json` |
+| 真正播放与鼠标/键盘进度条生命周期 | 17项通过 | `session-browser.json` |
+| 原框选/面积排序/倍速 | 32项通过 | `workflow-0414.json` |
+| 自由相机 | 39项通过 | `camera-browser.json` |
+| 逐岛接力 | 28项通过 | `relay-browser.json` |
+| 静止区间跳过 | 28项通过 | `motion-browser.json` |
+| 两级选择与工作台布局 | 39项通过 | `selection-browser.json` |
+| 旧局部散点（显式备选）与早期叠层 | 18项通过 | `legacy-bubble-browser.json` |
+| 核心21、原UV Worker4、客户端11、调度22、铰链17、运动13 | 全部通过 | `core-regressions.log` |
+| Git工具自身 | 22项通过 | `extra-regressions.log` |
+
+浏览器为Chromium软件WebGL，加载完整离线工作台与生产算法/Worker/拾取/渲染模块。鼠标按下/拖动/释放和键盘导航使用CDP实际输入；罕见pointercancel/lostcapture/blur分支注入对应DOM事件。像素测试读取真实RGBA并验证恢复后一致，不只是检查界面标签。
+
+流程浏览器测试覆盖：修改草稿不运行、填空关闭真实跳过、开启后只执行一次、实际配置回传、运行中修改草稿不改变当前计划、取消保留旧结果、旧线程不覆盖新任务、缺UV的自动生成分支、原样检查缺UV显式拒绝。初始化前取消也保留一份未执行的步骤计划并标取消，不伪造已开始的步骤。
+
+## 正确人台/头盔四条生产流程
+
+唯一输入为仓库内的正确哈希夹具，不下载替代物、不读取早期错误ZIP。每次核对四文件哈希；身份、阶段事件、实际参数、导出SHA256在 `real/`。
+
+| 资产 | 三角面 | 标准整理UV岛 | 自动填空UV岛 | 源网格不变 / 全图UV有效 / OBJ岛数重读 |
+|---|---:|---:|---:|---|
+| Corset | 18,324 | 79 | 79 | 均通过 |
+| FlightHelmet | 94,722 | 130 | 130 | 均通过 |
+
+配置是3秒搜索、最多3轮、210秒总任务预算。用于证明“实际执行了配置的步骤且不破坏结果”，不是求最佳占用率的基准；软件环境的时间预算会影响接受搜索的次数。标准流程的填空步骤标跳过，无精排报告；填空流程恰好进入一次fill、恰好一次correspondence，最终面积不低于本次标准结果。验证了全部面覆盖、三角UV有效、有限动画目标、原数据不变、导出重读后79/130岛。
+
+本轮没有将Python/Shapely独立求交当作新执行过的测试；全图检查使用生产UV检查器。先前独立几何测试记录仍在历史目录。固定静态glTF解码器只接受这两个哈希夹具，后续是生产装配/拓扑/UV；不是通用Three.GLTFLoader导入入口认证。
+
+## 截图与未验证边界
+
+`previews/pipeline.png`、`previews/playback.png` 来自真实人台，离线生产Worker自动整理＋3秒填空后截图；浏览器界面显示的是79岛，不用合成网格冒充。第二张在实际播放，其他岛半透明；截图脚本显式点击一次等价的“适配当前面片”取景，不代表相机自动跟随。`previews/capture.json` 记录实际状态。
+
+截图脚本首次因CDP两段顶层`const e`重名失败；已将评估片段限制在IIFE作用域，重新生成成功。应用不受此测试脚本绑定问题影响，原错误记录保留在`initial/preview-eval-binding.log`。
+
+**完整React/Vite主入口构建未通过。** 本次再次执行npm build退出127（`vite: not found`），全量类型检查退出2（缺少Node类型）。npm安装未取得可用依赖，独立registry请求明确退出6（DNS无法解析）。12个TSX语法转译无错误不等于全量类型检查；纯TypeScript生产模块严格编译已通过。见`full-build.log`、`full-types.log`、`registry-check.log`、`tsx-syntax.json`。
+
+没有认证macOS/Windows/Safari实机、硬件GPU帧率、FBX/通用GLTF完整入口。半透明是检查示意，不是物理透明排序；生成新UV仍需贴图烘焙。
+
+最终ZIP干净HEAD、tag、文件逐字节与重新解压测试另见外部交付验证报告；不把工作目录测试冒充最终ZIP复跑。
+
+---
+
 # v0.4.13 实际验证
 
 当前报告：`../validation/v0.4.13/`；新行为和预算见 [RELEASE-0.4.13.md](RELEASE-0.4.13.md)。

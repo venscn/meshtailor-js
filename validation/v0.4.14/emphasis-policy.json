@@ -1,0 +1,61 @@
+{
+  "passed": 14,
+  "cases": [
+    {
+      "name": "Default is smooth full-context ghost, not a local dither bubble",
+      "passed": true
+    },
+    {
+      "name": "First unfinished island stays opaque; waiting others ghost",
+      "passed": true
+    },
+    {
+      "name": "Paused mid-motion restores previous display",
+      "passed": true
+    },
+    {
+      "name": "Programmatic seek alone does not create session",
+      "passed": true
+    },
+    {
+      "name": "Handoff protects both islands",
+      "passed": true
+    },
+    {
+      "name": "An almost-complete island is still opaque",
+      "passed": true
+    },
+    {
+      "name": "Completed island in UV is ghosted only after full completion",
+      "passed": true
+    },
+    {
+      "name": "Reverse at same pose protects same two actual moving islands",
+      "passed": true
+    },
+    {
+      "name": "Endpoint 0 restores regardless of stale interaction flag",
+      "passed": true
+    },
+    {
+      "name": "Endpoint 1 restores regardless of stale interaction flag",
+      "passed": true
+    },
+    {
+      "name": "Off overrides session",
+      "passed": true
+    },
+    {
+      "name": "Legacy bubble requires explicit alternative",
+      "passed": true
+    },
+    {
+      "name": "No active islands restores",
+      "passed": true
+    },
+    {
+      "name": "Opacity finite and bounded",
+      "passed": true
+    }
+  ]
+}

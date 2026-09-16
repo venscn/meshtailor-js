@@ -1,0 +1,179 @@
+{
+  "suite": "Local playback cutaway + early projected overlap",
+  "host": "Production WebGL2, synthetic geometry, not full React",
+  "cases": [
+    {
+      "name": "DPR1: Current island pixel color remains unchanged by focus toggle",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Occluding other island is dissolved using real per-fragment discard",
+      "passed": true,
+      "details": {
+        "changed": 205396,
+        "s": {
+          "settings": {
+            "mode": "dither",
+            "opacity": 0.18,
+            "radius": 1.2,
+            "retained": 0.12
+          },
+          "spheres": [
+            {
+              "id": 0,
+              "center": [
+                0,
+                0.09999999403953552,
+                0
+              ],
+              "radius": 1.6144348904336538,
+              "strength": 1
+            }
+          ],
+          "emphasis": null,
+          "interactionActive": true
+        },
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR1: Focus rendering leaves geometry UV selection and camera intact",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Remote occluder outside sphere stays fully unchanged",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Both active relay islands are protected",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Projected overlap visible on nonparallel triangles mid-animation",
+      "passed": true,
+      "details": {
+        "before": {
+          "two": 0,
+          "max": 1,
+          "effective": "coplanar"
+        },
+        "after": {
+          "two": 149807,
+          "max": 2,
+          "effective": "projected"
+        }
+      }
+    },
+    {
+      "name": "DPR1: Auto at endpoint returns to near-coplanar without claiming collision",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Waiting island layers are not painted as moving-island diagnosis",
+      "passed": true,
+      "details": {
+        "a": {
+          "two": 0,
+          "max": 1,
+          "effective": "projected"
+        },
+        "b": {
+          "two": 53462,
+          "max": 2,
+          "effective": "projected"
+        }
+      }
+    },
+    {
+      "name": "DPR1: No browser/WebGL errors",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Current island pixel color remains unchanged by focus toggle",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Occluding other island is dissolved using real per-fragment discard",
+      "passed": true,
+      "details": {
+        "changed": 819273,
+        "s": {
+          "settings": {
+            "mode": "dither",
+            "opacity": 0.18,
+            "radius": 1.2,
+            "retained": 0.12
+          },
+          "spheres": [
+            {
+              "id": 0,
+              "center": [
+                0,
+                0.09999999403953552,
+                0
+              ],
+              "radius": 1.6144348904336538,
+              "strength": 1
+            }
+          ],
+          "emphasis": null,
+          "interactionActive": true
+        },
+        "error": 0
+      }
+    },
+    {
+      "name": "DPR2: Focus rendering leaves geometry UV selection and camera intact",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Remote occluder outside sphere stays fully unchanged",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Both active relay islands are protected",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Projected overlap visible on nonparallel triangles mid-animation",
+      "passed": true,
+      "details": {
+        "before": {
+          "two": 0,
+          "max": 1,
+          "effective": "coplanar"
+        },
+        "after": {
+          "two": 456958,
+          "max": 2,
+          "effective": "projected"
+        }
+      }
+    },
+    {
+      "name": "DPR2: Auto at endpoint returns to near-coplanar without claiming collision",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Waiting island layers are not painted as moving-island diagnosis",
+      "passed": true,
+      "details": {
+        "a": {
+          "two": 0,
+          "max": 1,
+          "effective": "projected"
+        },
+        "b": {
+          "two": 163698,
+          "max": 2,
+          "effective": "projected"
+        }
+      }
+    },
+    {
+      "name": "DPR2: No browser/WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 18
+}

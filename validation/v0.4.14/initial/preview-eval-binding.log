@@ -1,0 +1,9 @@
+file:///mnt/data/dev-0414/meshtailor-js/scripts/chrome-cdp.mjs:50
+    if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text);
+                                       ^
+
+Error: SyntaxError: Identifier 'e' has already been declared
+    at Connection.evaluate (file:///mnt/data/dev-0414/meshtailor-js/scripts/chrome-cdp.mjs:50:40)
+    at async file:///mnt/data/dev-0414/meshtailor-js/scripts/load-workflow-preview.mjs:9:1
+
+Node.js v22.16.0

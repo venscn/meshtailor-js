@@ -1,0 +1,85 @@
+{
+  "passed": 20,
+  "cases": [
+    {
+      "name": "Default model-load flow explicitly disables fill",
+      "passed": true
+    },
+    {
+      "name": "Complete UV chooses source-atlas",
+      "passed": true
+    },
+    {
+      "name": "Missing UV chooses generated",
+      "passed": true
+    },
+    {
+      "name": "Generated explicit override",
+      "passed": true
+    },
+    {
+      "name": "Inspection never hides generated fallback",
+      "passed": true
+    },
+    {
+      "name": "Inspection rejects mutating fill",
+      "passed": true
+    },
+    {
+      "name": "Multi-page rejects automatic fill before solve",
+      "passed": true
+    },
+    {
+      "name": "Disable merge hits both source and generated config",
+      "passed": true
+    },
+    {
+      "name": "Disable repair is strict rejection, not hidden repair",
+      "passed": true
+    },
+    {
+      "name": "Automatic fill never invokes nested packing fill or recut",
+      "passed": true
+    },
+    {
+      "name": "Budget and rounds are actual serialized options",
+      "passed": true
+    },
+    {
+      "name": "Corrupt storage recovers versioned defaults",
+      "passed": true
+    },
+    {
+      "name": "Denied storage recovers defaults",
+      "passed": true
+    },
+    {
+      "name": "Invalid version rejected",
+      "passed": true
+    },
+    {
+      "name": "Invalid boolean rejected",
+      "passed": true
+    },
+    {
+      "name": "NaN budgets rejected",
+      "passed": true
+    },
+    {
+      "name": "Configuration serialized without arbitrary injected fields",
+      "passed": true
+    },
+    {
+      "name": "No numerical progress guesses completed steps",
+      "passed": true
+    },
+    {
+      "name": "Hard-cancel trace marks pending as not executed",
+      "passed": true
+    },
+    {
+      "name": "Completed snapshot immutable from recorder changes",
+      "passed": true
+    }
+  ]
+}
