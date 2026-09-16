@@ -52,6 +52,9 @@ export function mergeAdjacentCharts(mesh:MeshData,input:RawChart[],inputSeams:Re
   for(const link of graph.links)for(const key of link.edges)effective.add(key);
   const beforeSeams=new Set(effective),parent=new Map(input.map(c=>[c.id,c.id])),raw=new Map(input.map(c=>[c.id,c]));
   const versions=new Map(input.map(c=>[c.id,0])),diag=new Map(diagnostics.map(d=>[d.id,d]));
+  // Fixed references prevent acceptable per-merge changes from accumulating
+  // into an unrecognizable outline across a long greedy merge sequence.
+  const referenceParts=new Map(input.map(c=>[c.id,[c]]));
   const root=(id:number):number=>{let r=id;while(parent.get(r)!==r)r=parent.get(r)!;while(parent.get(id)!==id){const next=parent.get(id)!;parent.set(id,r);id=next;}return r;};
   const failed=new Set<string>(),report:MergeReport={before:input.length,after:input.length,attempts:0,accepted:0,attemptBudget:settings.maxAttempts,partialJoins:0,rigidJoins:0,removedSeams:[],reasons:{},budgetExhausted:false,events:[]};
   while(raw.size>settings.targetCharts){work?.check();
@@ -88,9 +91,9 @@ export function mergeAdjacentCharts(mesh:MeshData,input:RawChart[],inputSeams:Re
         if(!p&&settings.reuseValidUV!==false){const fit=tryRigidUVJoin(mesh,A,B,effective,link.edges,opts,work,topology);if(fit){local=fit.local;trial=fit.seams;p=fit;shape=fit.shape;joinMode='uv-similarity';}}
         if(!p||!shape){reject(reason);continue;}
         const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...p.uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
-        if(paint&&Math.max(uvShapeChange(mesh,A,faceUVs),uvShapeChange(mesh,B,faceUVs))>shapeLimit){reject('paint-shape-change');continue;}
+        if(paint&&[...referenceParts.get(a)!,...referenceParts.get(b)!].some(reference=>uvShapeChange(mesh,reference,faceUVs)>shapeLimit)){reject('paint-shape-change');continue;}
         // No mutation until the complete trial has passed all numerical/UV checks.
-        work?.check();parent.set(b,a);versions.set(a,versions.get(a)!+1);raw.delete(b);raw.set(a,{id:a,faceUVs,area3D:A.area3D+B.area3D});
+        work?.check();referenceParts.set(a,[...referenceParts.get(a)!,...referenceParts.get(b)!]);referenceParts.delete(b);parent.set(b,a);versions.set(a,versions.get(a)!+1);raw.delete(b);raw.set(a,{id:a,faceUVs,area3D:A.area3D+B.area3D});
         diag.delete(b);diag.set(a,{id:a,sourceChart:diag.get(a)?.sourceChart??a,faces:faces.length,method:p.method,iterations:p.iterations,residual:p.residual,...shape,...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});effective=trial;
         report.accepted++;if(joinMode==='uv-similarity')report.rigidJoins=(report.rigidJoins??0)+1;if(joinMode==='open-chain')report.partialJoins=(report.partialJoins??0)+1;report.events.push({...event,accepted:true,joinMode});changed=true;break;
       }catch(error){rethrowUVStop(error);reject('solver-invalid');}
