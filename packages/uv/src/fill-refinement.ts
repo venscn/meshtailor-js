@@ -15,7 +15,7 @@ export interface FillReport {
   order:number[];gains:{id:number;area3D:number;areaFactor:number;linearFactor:number}[];
   history:{round:number;id:number|null;occupancy:number;areaFactor:number}[];
   shapeWaste:{id:number;area3D:number;boxWaste:number;shapeFill:number}[];
-  note:string;
+  note:string;densitySpreadBefore:number;densitySpreadAfter:number;
 }
 interface Island {chart:PackedChart;area3D:number;areaUV:number;w:number;h:number;triangles:[Vec2,Vec2,Vec2][];cache:Map<string,ShapeMask|null>}
 function area(c:PackedChart){let sum=0;for(const [a,b,d]of c.faceUVs.values())sum+=Math.abs((b[0]-a[0])*(d[1]-a[1])-(b[1]-a[1])*(d[0]-a[0]))*.5;return sum;}
@@ -36,7 +36,9 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
   const reference=new Map(raw.map(c=>[c.id,c.area3D]));
   const items:Island[]=base.packed.map(chart=>({chart,area3D:reference.get(chart.id)!,areaUV:area(chart),w:chart.bounds[2]-chart.bounds[0],h:chart.bounds[3]-chart.bounds[1],triangles:[...chart.faceUVs.values()].map(t=>t.map(p=>[p[0]-chart.bounds[0],p[1]-chart.bounds[1]]) as [Vec2,Vec2,Vec2]),cache:new Map()})).sort((a,b)=>b.area3D-a.area3D||a.chart.id-b.chart.id);
   if(items.some(i=>!(i.area3D>0&&i.areaUV>0)))throw Error('Fill requires valid positive-area charts.');
-  const report:FillReport={mode,resolution:R,before:base.occupancy,after:base.occupancy,beforeBox:base.boxOccupancy,afterBox:base.boxOccupancy,trials:0,accepted:0,rounds:0,stop:'converged',elapsedMs:0,order:items.map(i=>i.chart.id),gains:[],history:[],shapeWaste:items.map(i=>({id:i.chart.id,area3D:i.area3D,boxWaste:Math.max(0,i.w*i.h-i.areaUV),shapeFill:i.areaUV/(i.w*i.h)})).sort((a,b)=>b.boxWaste-a.boxWaste).slice(0,10),note:'轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。'};
+  const densities=items.map(i=>i.areaUV/i.area3D),minDensity=Math.min(...densities),spread=Math.max(...densities)/minDensity;
+  const caps=items.map(i=>Math.min(cap,Math.max(1,cap*minDensity/(i.areaUV/i.area3D))));
+  const report:FillReport={mode,resolution:R,densitySpreadBefore:spread,densitySpreadAfter:spread,before:base.occupancy,after:base.occupancy,beforeBox:base.boxOccupancy,afterBox:base.boxOccupancy,trials:0,accepted:0,rounds:0,stop:'converged',elapsedMs:0,order:items.map(i=>i.chart.id),gains:[],history:[],shapeWaste:items.map(i=>({id:i.chart.id,area3D:i.area3D,boxWaste:Math.max(0,i.w*i.h-i.areaUV),shapeFill:i.areaUV/(i.w*i.h)})).sort((a,b)=>b.boxWaste-a.boxWaste).slice(0,10),note:'轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。'};
   let checks=0;const local={tick:()=>{if((++checks&31)===0){work?.check();if(performance.now()-start>budget)throw new RasterBudget();}}};
   const getMask=(it:Island,gain:number,turn:boolean)=>{const key=`${gain.toPrecision(12)}:${turn}`;if(!it.cache.has(key))it.cache.set(key,rasterShape(it.triangles,it.w,it.h,gain,turn,R,base.padding,local));return it.cache.get(key)!;};
   const bestPlace=(board:RasterBoard,it:Island,gain:number):RasterPlacement|null=>{
@@ -51,6 +53,7 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
     for(let i=0;i<from;i++){const p=prefix[i]!;board.put(p.mask,p.x,p.y);result.push(p);}
     for(let i=from;i<items.length;i++){local.tick();const p=bestPlace(board,items[i]!,gains[i]!);if(!p)return null;board.put(p.mask,p.x,p.y);result.push(p);}return result;
   };
+  let stepNow=step;
   let gains=items.map(()=>1),placements:RasterPlacement[]|null=null;
   try {
     uvProgress(work,{stage:'pack',detail:'轮廓精排：建立保守占用网格与留白',current:0,total:items.length,unit:'岛'});
@@ -60,7 +63,7 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
       const count=mode==='uniform'?1:items.length;
       for(let i=0;i<count;i++){
         work?.check();if(report.trials>=maxTrials){report.stop='trial-budget';break;}
-        const next=gains.map((g,j)=>mode==='uniform'||j===i?Math.min(cap,g*(1+step)):g);
+        const next=gains.map((g,j)=>mode==='uniform'||j===i?Math.min(mode==='uniform'?cap:caps[j]!,g*(1+stepNow)):g);
         if(next.every((g,j)=>g<=gains[j]!+1e-10))continue;
         report.trials++;
         uvProgress(work,{stage:'pack',detail:`空白精排 ${round+1}/${roundLimit} 轮 · ${mode==='uniform'?'共同密度':`大岛优先 #${items[i]!.chart.id+1}`} · 占用 ${(report.after*100).toFixed(2)}%`,current:i+1,total:count,unit:'岛'});
@@ -68,7 +71,7 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
         if(proposal){placements=proposal;gains=next;changed++;report.accepted++;report.after=items.reduce((s,it,k)=>s+it.areaUV*gains[k]!,0);report.history.push({round:round+1,id:mode==='uniform'?null:items[i]!.chart.id,occupancy:report.after,areaFactor:next[i]!});}
       }
       if(report.stop==='trial-budget')break;
-      if(!changed){report.stop='converged';break;}
+      if(!changed){if(stepNow>.0101&&round<roundLimit-1){stepNow/=2;continue;}report.stop='converged';break;}
       if(round===roundLimit-1)report.stop='round-limit';
     }
   }catch(error){if(error instanceof RasterBudget)report.stop='time-budget';else throw error;}
@@ -87,10 +90,15 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
     // geometric guard also catches transformation and implementation mistakes.
     const q=checkUVTriangles(packed.flatMap(c=>[...c.faceUVs.values()]),100,work);
     const inside=packed.every(c=>c.bounds.every(Number.isFinite)&&c.bounds[0]>=base.padding-1e-9&&c.bounds[1]>=base.padding-1e-9&&c.bounds[2]<=1-base.padding+1e-9&&c.bounds[3]<=1-base.padding+1e-9);
-    work?.check();if(q.valid&&inside){report.after=q.area;report.afterBox=packed.reduce((s,c)=>s+(c.bounds[2]-c.bounds[0])*(c.bounds[3]-c.bounds[1]),0);result={...base,packed,occupancy:q.area,boxOccupancy:report.afterBox};}
+    work?.check();if(q.valid&&inside){report.after=q.area;report.afterBox=packed.reduce((s,c)=>s+(c.bounds[2]-c.bounds[0])*(c.bounds[3]-c.bounds[1]),0);result={...base,packed,occupancy:q.area,boxOccupancy:report.afterBox,packingMethod:'contour'};}
     else {report.stop='validation-rejected';report.note+=' 最终精排几何检查失败，回滚到完整基线。';}
   }
   if(result===base){report.after=base.occupancy;report.afterBox=base.boxOccupancy;gains=items.map(()=>1);}
-  report.gains=items.map((it,i)=>({id:it.chart.id,area3D:it.area3D,areaFactor:gains[i]!,linearFactor:Math.sqrt(gains[i]!)}));report.elapsedMs=performance.now()-start;
+  report.gains=items.map((it,i)=>({id:it.chart.id,area3D:it.area3D,areaFactor:gains[i]!,linearFactor:Math.sqrt(gains[i]!)}));const finalDensities=items.map((it,i)=>it.areaUV/it.area3D*gains[i]!);report.densitySpreadAfter=Math.max(...finalDensities)/Math.min(...finalDensities);report.elapsedMs=performance.now()-start;
   return{...result,packingReport:{...base.packingReport!,refinement:report}};
+}
+
+export function describeFill(report:FillReport):string {
+  const stop={converged:'本轮步长下无可接受改进','round-limit':'达到轮数上限','trial-budget':'达到尝试预算','time-budget':'达到搜索时间预算','raster-no-fit':'当前分辨率未找到不缩小的完整布局','validation-rejected':'最终验证不通过，已回退'}[report.stop];
+  return `空白精排：${(report.before*100).toFixed(2)}% → ${(report.after*100).toFixed(2)}%，增加 ${((report.after-report.before)*100).toFixed(2)} 个百分点；尝试 ${report.trials} 次，接受 ${report.accepted} 次。${stop}。最大/最小平均面积密度 ${report.densitySpreadAfter.toFixed(3)} 倍。`;
 }

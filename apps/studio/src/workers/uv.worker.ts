@@ -1,7 +1,7 @@
 import type { MeshData } from '@meshtailor/mesh-core';
 import { extractSeamEdgesFromUV } from '@meshtailor/chaining-seams';
-import { auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,auditSourceUV, postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildCharts, buildUnfoldGeometry, unwrapMesh, sourceUVPreview, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
-export type UVTarget = 'generated' | 'source' | 'stitch' | 'repack' | 'source-atlas';
+import { fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,auditSourceUV, postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildCharts, buildUnfoldGeometry, unwrapMesh, sourceUVPreview, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
+export type UVTarget = 'generated' | 'source' | 'stitch' | 'repack' | 'source-atlas' | 'fill';
 export interface UVSnapshot {
   repair?:import('@meshtailor/uv').SourceRepairReport;
   areaAudit?:AreaAudit;sourceAreaAudit?:AreaAudit;spatialReport?:SpatialReport;packingReport?:AtlasPacking['packingReport'];
@@ -22,7 +22,7 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     const {mesh,edges,target,config,seedCharts}=event.data;
     const budget=config?.timeBudgetMs??DEFAULT_UV_BUDGET_MS;
     if(!Number.isFinite(budget)||budget<1||budget>900_000)throw new Error('UV time budget must be between 1 and 900000 milliseconds.');
-    if(!['generated','source','stitch','repack','source-atlas'].includes(target))throw new Error('Unknown UV target.');
+    if(!['generated','source','stitch','repack','source-atlas','fill'].includes(target))throw new Error('Unknown UV target.');
     let sentAt=-Infinity,stageAt=start,stage='validate';const stages:Record<string,number>={};
     const work:UVWork={
       check(){if(performance.now()-start>budget)throw new UVWorkStopped(`UV 计算达到 ${(budget/1000).toFixed(1)} 秒预算。最后阶段：${last?.detail??'初始化'}。原网格未修改，可调整预算后重试或使用网格原始 UV。`);},
@@ -56,6 +56,10 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
           repair:result.repair,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,
           metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
       }
+    }else if(target==='fill'){
+      if(!seedCharts?.length)throw new Error('精排需要一份完整 UV 结果。');
+      const result=fillCurrentUV(mesh,seedCharts,seams,config,work);
+      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,packingReport:result.packingReport,pageReport:result.pageReport,addedSeams:[],removedSeams:[],metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
     }else if(target==='stitch'||target==='repack'){
       if(!seedCharts?.length)throw new Error('后处理需要当前已完成的 UV 快照。先生成或提取 UV，再执行邻岛缝合/只重排。');
       const result=postprocessUV(mesh,seedCharts,seams,target,config,work);seams=new Set(result.seams);

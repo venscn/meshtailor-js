@@ -5,7 +5,7 @@ import type { PackedChart } from './preview.js';
 export interface RawChart {id:number; faceUVs:Map<number,[Vec2,Vec2,Vec2]>; area3D:number}
 export type PackingMethod = 'auto'|'maxrects'|'shelf';
 export interface PackOptions extends FillOptions { neighborHints?:{a:number;b:number;weight:number}[]; normalizationReferenceArea?:number; packingOrder?:'area'|'legacy'; tinyIslandAreaFraction?:number; maxTinyAreaBoost?:number; /** Internal common texel density for multiple pages. */ fixedScale?:number; padding:number; rotate:boolean; rotationSteps:number; packing?:PackingMethod }
-export interface AtlasPacking {packed:PackedChart[]; occupancy:number; boxOccupancy:number; scale:number; padding:number; packingMethod:'maxrects'|'shelf'; packingReport?:{refinement?:FillReport;order:'area'|'legacy';placementOrder:number[];searchAttempts:number;failedFits:number;areaBoosts:{id:number;factor:number}[]}}
+export interface AtlasPacking {packed:PackedChart[]; occupancy:number; boxOccupancy:number; scale:number; padding:number; packingMethod:'maxrects'|'shelf'|'contour'|'existing'; packingReport?:{refinement?:FillReport;order:'area'|'legacy';placementOrder:number[];searchAttempts:number;failedFits:number;areaBoosts:{id:number;factor:number}[]}}
 interface Rect {x:number;y:number;w:number;h:number}
 interface OrientedChart {id:number;coords:Map<number,[Vec2,Vec2,Vec2]>;w:number;h:number;area:number;surfaceArea:number}
 interface Placement extends Rect { id:number;rotated:boolean }
