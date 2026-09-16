@@ -1,3 +1,4 @@
+import {tryLargeRecut} from './large-recut.js';
 import {refineAtlas,describeFill} from './fill-refinement.js';
 import {checkUVTriangles} from './uv-quality.js';
 import type {AtlasPacking} from './atlas-pack.js';
@@ -38,7 +39,16 @@ export function fillCurrentUV(input:MeshData,seed:readonly PackedChart[],seams:R
   if(!quality.valid)throw Error('当前 UV 仍有翻面、退化或岛间重叠，请先“Extract + 整理原 UV”，不能直接填空。');
   if(seed.some(c=>c.bounds[0]<padding-1e-9||c.bounds[1]<padding-1e-9||c.bounds[2]>1-padding+1e-9||c.bounds[3]>1-padding+1e-9))throw Error('当前岛不满足单页边界 / 所设留白，请先“只重排当前岛”，再精排。');
   const baseline:AtlasPacking={packed:[...seed],occupancy:quality.area,boxOccupancy:seed.reduce((s,c)=>s+(c.bounds[2]-c.bounds[0])*(c.bounds[3]-c.bounds[1]),0),scale:1,padding,packingMethod:'existing',packingReport:{order:'area',placementOrder:raw.slice().sort((a,b)=>b.area3D-a.area3D).map(c=>c.id),searchAttempts:0,failedFits:0,areaBoosts:[]}};
-  const result=refineAtlas(baseline,raw,{...options,fillMode:options.fillMode==='uniform'?'uniform':'area-priority'},work);
+  let result=refineAtlas(baseline,raw,{...options,fillMode:options.fillMode==='uniform'?'uniform':'area-priority'},work);
+  let effective=new Set(seams),addedSeams:string[]=[];
+  if(options.fillRecutLarge){
+    const regular=result.packingReport!.refinement!;
+    const trial=tryLargeRecut(mesh,result,effective,{...options,fillMode:options.fillMode==='uniform'?'uniform':'area-priority'},work,seed);
+    result=trial.result;effective=trial.seams;addedSeams=trial.report.addedSeams;
+    // Ordinary search telemetry remains its own stage. Recut reports its own
+    // before/after, rather than relabeling second-stage gains as total gains.
+    result={...result,packingReport:{...result.packingReport!,refinement:{...regular,recut:trial.report}}};
+  }
   const report=result.packingReport!.refinement!;
-  return{...result,seams:[...seams],addedSeams:[] as string[],removedSeams:[] as string[],warnings:[describeFill(report),'精排仅移动、旋转和有界统一缩放 UV 岛；未改变任何源面或裁切。大岛优先模式不再严格等密度，新 UV 需要重烘焙。','轮廓包围盒可以互相覆盖，其面积总和不是实际纹理占用率。高轮廓浪费只提示检查切缝，不会自动切碎。'],pageReport:{mode:'single' as const,requested:1,actual:1,geometryComponents:null,retainedSharedBoundaryRatio:1,pages:[{id:0,charts:raw.map(c=>c.id),faces:input.faces.length,sourceMaterials:[...new Set(input.faces.map(f=>f.uvSpace??'default'))],occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,scale:1}]}};
+  return{...result,seams:[...effective],addedSeams,removedSeams:[] as string[],warnings:[describeFill(report),...(report.recut?[`可选大岛切缝试验：尝试 ${report.recut.trials}，${report.recut.accepted?'接受一次，仅恢复原接缝':'未接受，保留原岛'}。${report.recut.note}`]:[]),report.recut?.accepted?'已接受显式大岛旧接缝试验：新增一岛，源面不变；新布局需要重新烘焙。':'精排仅移动、旋转和有界统一缩放 UV 岛；未改变任何源面或裁切。大岛优先模式不再严格等密度，新 UV 需要重烘焙。','轮廓包围盒可以互相覆盖，其面积总和不是实际纹理占用率。高轮廓浪费本身不触发拆分；大岛旧接缝试验必须显式开启。'],pageReport:{mode:'single' as const,requested:1,actual:1,geometryComponents:null,retainedSharedBoundaryRatio:1,pages:[{id:0,charts:result.packed.map(c=>c.id),faces:input.faces.length,sourceMaterials:[...new Set(input.faces.map(f=>f.uvSpace??'default'))],occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,scale:1}]}};
 }

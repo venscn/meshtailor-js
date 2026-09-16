@@ -58,8 +58,8 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
       }
     }else if(target==='fill'){
       if(!seedCharts?.length)throw new Error('精排需要一份完整 UV 结果。');
-      const result=fillCurrentUV(mesh,seedCharts,seams,config,work);
-      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,packingReport:result.packingReport,pageReport:result.pageReport,addedSeams:[],removedSeams:[],metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
+      const result=fillCurrentUV(mesh,seedCharts,seams,config,work);seams=new Set(result.seams);
+      snapshot={packed:result.packed,geometry:buildUnfoldGeometry(mesh,result.packed,seams,work),seams:result.seams,target,warnings:result.warnings,packingReport:result.packingReport,pageReport:result.pageReport,addedSeams:result.addedSeams,removedSeams:[],metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
     }else if(target==='stitch'||target==='repack'){
       if(!seedCharts?.length)throw new Error('后处理需要当前已完成的 UV 快照。先生成或提取 UV，再执行邻岛缝合/只重排。');
       const result=postprocessUV(mesh,seedCharts,seams,target,config,work);seams=new Set(result.seams);

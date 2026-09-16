@@ -1,16 +1,18 @@
+import type {LargeRecutOptions,LargeRecutReport} from './large-recut.js';
 import type {Vec2} from '@meshtailor/mesh-core';
 import type {PackedChart} from './preview.js';
 import type {RawChart,AtlasPacking} from './atlas-pack.js';
 import {checkUVTriangles} from './uv-quality.js';
 import {uvProgress,type UVWork} from './work.js';
 import {RasterBoard,RasterBudget,rasterShape,quarterTurnPoint,type ShapeMask,type RasterPlacement} from './shape-raster.js';
-export interface FillOptions {
+export interface FillOptions extends LargeRecutOptions {
   fillStrategy?:'adaptive'|'legacy';fillMinStep?:number;fillQuarterTurns?:2|4;
   fillMode?:'off'|'uniform'|'area-priority';fillResolution?:number;fillRounds?:number;
   /** AREA, not length. Other islands never shrink below the starting atlas. */
   fillWarmupPasses?:number;fillStep?:number;fillMaxAreaGain?:number;fillTimeBudgetMs?:number;fillMaxTrials?:number;
 }
 export interface FillReport {
+  recut?:LargeRecutReport;
   mode:'uniform'|'area-priority';resolution:number;before:number;after:number;beforeBox:number;afterBox:number;
   settings:{step:number;maxAreaGain:number;maxRounds:number;warmupPasses:number;timeBudgetMs:number;maxTrials:number;rotate:boolean};
   adaptive?:{strategy:string;seed:string;localAccepted:number;reflowAccepted:number;failedTrials:number;smallerAfterFailure:number;skippedAtCap:number;attempts:{id:number;tries:number;accepted:number;failed:number;nextStep:number;minStepFailed:boolean}[]};
@@ -23,6 +25,7 @@ export interface FillReport {
 interface Island {chart:PackedChart;area3D:number;areaUV:number;w:number;h:number;triangles:[Vec2,Vec2,Vec2][];cache:Map<string,ShapeMask|null>}
 function area(c:PackedChart){let sum=0;for(const [a,b,d]of c.faceUVs.values())sum+=Math.abs((b[0]-a[0])*(d[1]-a[1])-(b[1]-a[1])*(d[0]-a[0]))*.5;return sum;}
 export function validateFillOptions(o:FillOptions):void {
+  if(o.fillRecutLarge!==undefined&&typeof o.fillRecutLarge!=='boolean')throw Error('Invalid recut flag.');
   if(o.fillStrategy!==undefined&&!['adaptive','legacy'].includes(o.fillStrategy))throw Error('Unknown fill strategy.');
   if(o.fillQuarterTurns!==undefined&&![2,4].includes(o.fillQuarterTurns))throw Error('Fill quarter turns must be 2 or 4.');
   if(o.fillMinStep!==undefined&&(!Number.isFinite(o.fillMinStep)||o.fillMinStep<.001||o.fillMinStep>.25))throw Error('Invalid fill minimum step.');

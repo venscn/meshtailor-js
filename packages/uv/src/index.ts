@@ -35,3 +35,4 @@ export * from './rigid-uv-join.js';
 export * from './fill-refinement.js';
 
 export * from './playback-policy.js';
+export * from './large-recut.js';
