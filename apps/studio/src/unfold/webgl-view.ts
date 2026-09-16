@@ -139,7 +139,7 @@ export class UnfoldWebGLView {
   }
   setGeometry(data:UnfoldGeometry|null,{resetCamera=true}:{resetCamera?:boolean}={}){
     this.data=data;this.positions=data?data.source.slice():new Float32Array(0);this.modelScale=data?sourceModelScale(data.source):1;this.lastSelection='';this.lastPose='';this.motionKey='';
-    if(!data){this.overlapPass?.releaseTargets();this.diagnosticNotice.hidden=true;this.activeCount=this.contextCount=this.seamCount=0;this.labelHost.replaceChildren();this.labels=[];this.hingeLabels=[];this.invalidate();return;}
+    if(!data){this.emphasis=null;this.focusSpheres=[];this.canvas.dataset.playbackFocus='restored';this.canvas.dataset.opaqueIslands='[]';this.canvas.dataset.interactionActive='false';this.overlapPass?.releaseTargets();this.diagnosticNotice.hidden=true;this.activeCount=this.contextCount=this.seamCount=0;this.labelHost.replaceChildren();this.labels=[];this.hingeLabels=[];this.invalidate();return;}
     // Reuse the fixed position/index buffers; replace only the two immutable attributes.
     const gl=this.gl;
     for(const b of this.buffers.splice(7))gl.deleteBuffer(b);

@@ -11,7 +11,7 @@ export const DEFAULT_LOAD_PIPELINE:Readonly<LoadPipelineConfig>=Object.freeze({v
 export type PipelineTarget='generated'|'source'|'source-atlas'|'stitch'|'repack'|'fill';
 export type StepState='pending'|'running'|'completed'|'skipped'|'error'|'cancelled';
 export interface PipelineStep {id:UVOperationStep;label:string;enabled:boolean;reason?:string;state:StepState;startedMs?:number;elapsedMs?:number;detail?:string}
-export interface PipelineTrace {version:1;target:PipelineTarget;origin:'model-load'|'manual';status:'running'|'completed'|'error'|'cancelled'|'timeout';steps:PipelineStep[];elapsedMs:number;config?:LoadPipelineConfig}
+export interface PipelineTrace {version:1;target:PipelineTarget;origin:'model-load'|'manual';status:'running'|'completed'|'error'|'cancelled'|'timeout';steps:PipelineStep[];elapsedMs:number;config?:LoadPipelineConfig;settings?:Partial<UnwrapOptions>}
 /** Reject incompatible imported configs. Browser storage failure never blocks loading. */
 export function validateLoadPipeline(value:unknown):LoadPipelineConfig {
   if(!value||typeof value!=='object')throw Error('流程配置必须是 JSON 对象。');
@@ -59,7 +59,7 @@ export class PipelineRecorder {
   readonly trace:PipelineTrace;
   private current:PipelineStep|undefined;
   constructor(target:PipelineTarget,config:Partial<UnwrapOptions>,plan:LoadPipelineConfig|undefined,private now:()=>number){
-    this.trace={version:1,target,origin:plan?'model-load':'manual',status:'running',steps:pipelineSteps(target,config,plan),elapsedMs:0,...(plan?{config:{...plan}}:{})};
+    this.trace={version:1,target,origin:plan?'model-load':'manual',status:'running',settings:structuredClone(config),steps:pipelineSteps(target,config,plan),elapsedMs:0,...(plan?{config:{...plan}}:{})};
   }
   enter(id:UVOperationStep){
     if(this.trace.status!=='running'||this.current?.id===id)return;

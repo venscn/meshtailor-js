@@ -48,3 +48,5 @@ button,summary{-webkit-tap-highlight-color:transparent}
 .pipeline-log li[data-state=skipped]{color:var(--quiet)}.pipeline-log li[data-state=running]>div{color:var(--accent)}
 .pipeline-log small{grid-column:1/-1;overflow-wrap:anywhere;font-size:10px;line-height:1.4;margin:0!important;max-height:42px;overflow:auto}
 .pipeline-state{font:9px/1.6 var(--mono);color:var(--muted);white-space:nowrap}
+
+.pipeline-current{padding:7px 8px;margin:6px 0;border-left:2px solid var(--accent,#7eaaa0);background:rgba(140,165,160,.06);font-size:11px;line-height:1.5;overflow-wrap:anywhere}

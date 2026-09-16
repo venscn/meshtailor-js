@@ -1,4 +1,4 @@
-import {terminalPipeline,type LoadPipelineConfig} from './load-pipeline';
+import {PipelineRecorder,resolveLoadPipeline,terminalPipeline,type LoadPipelineConfig} from './load-pipeline';
 import { useEffect, useRef, useState } from 'react';
 import type { UnwrapOptions, PackedChart } from '@meshtailor/uv';
 import type { MeshData } from '@meshtailor/mesh-core';
@@ -18,7 +18,9 @@ export function useUVSnapshot(mesh:MeshData,edges:Set<string>,target:UVTarget,co
     const start=performance.now();
     const identity={mesh,edges,target,config,seedCharts,pipeline};
     const backup=(target==='stitch'||target==='repack'||target==='source-atlas'||target==='fill')&&completed.current?.mesh===mesh?completed.current.snapshot:null;
-    setState({...identity,snapshot:backup,error:null,phase:'starting',progress:null,elapsedMs:0});
+    let resolved={target,config};try{if(pipeline)resolved=resolveLoadPipeline(mesh,pipeline,config);}catch{/* Worker returns the explicit configuration error. */}
+    const initial={stage:'validate' as const,detail:'等待 Worker 启动',elapsedMs:0,pipeline:new PipelineRecorder(resolved.target,resolved.config??{},pipeline,()=>0).snapshot()};
+    setState({...identity,snapshot:backup,error:null,phase:'starting',progress:initial,elapsedMs:0});
     const finish=(snapshot:UVSnapshot|null,error:string|null,phase:UVPhase)=>{
       if(disposed||done)return;done=true;clearInterval(clock);
       if(snapshot)completed.current={mesh,snapshot};else if(backup)snapshot=backup;

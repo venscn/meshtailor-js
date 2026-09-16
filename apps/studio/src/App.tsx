@@ -83,11 +83,11 @@ export default function App(){
   const cancel=()=>{uvState.cancel();operation.current++;seamWorker.current?.terminate();seamWorker.current=null;abortDownload.current?.abort();abortDownload.current=null;setBusy(null);setPlaying(false);};
   const begin=(message:string)=>{cancel();setLoadError(null);setBusy(message);return operation.current;};
   const changeLoadPlan=(plan:LoadPipelineConfig)=>{setLoadPlan(plan);try{window.localStorage.setItem(PIPELINE_STORAGE_KEY,JSON.stringify(plan));}catch{setNotice('浏览器不允许保存设置，本次会话仍生效。');}};
-  const rerunLoadPlan=()=>{try{const resolved=resolveLoadPipeline(mesh,loadPlan,uvConfig);cancel();player.pause();setUVSeed(undefined);setSeamEdges(new Set());setUVTarget(resolved.target);setTaskPlan({...loadPlan});setLoadError(null);}catch(error){setLoadError(String(error));}};
+  const rerunLoadPlan=()=>{try{const resolved=resolveLoadPipeline(mesh,loadPlan,uvConfig);cancel();player.pause();setUVSeed(undefined);setSeamEdges(new Set());setUVTarget(resolved.target);setUVConfig({...uvConfig,...resolved.config});setTaskPlan({...loadPlan});setLoadError(null);}catch(error){setLoadError(String(error));}};
   const replaceMesh=(m:MeshData,report:MeshImportReport|null=null)=>{
     prepareViewportMesh(m); // Reject malformed input before React/topology/Three see it.
     const recommended=recommendUnwrap(m).options,resolved=resolveLoadPipeline(m,loadPlan,recommended);
-    setTaskPlan({...loadPlan});setUVSeed(undefined);setMesh(m);setImportReport(report);setUVConfig(recommended);setUVTarget(resolved.target);setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
+    setTaskPlan({...loadPlan});setUVSeed(undefined);setMesh(m);setImportReport(report);setUVConfig({...recommended,...resolved.config});setUVTarget(resolved.target);setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
   };
   const loadUnfoldDemo=()=>{cancel();setLoadError(null);try{const demo=makeUnfoldDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');setToolTab('animation');setNotice('六岛立方体：拖动 0–100% 进度，观察同色编号的面片移入对应 UV 岛。');}catch(error){setLoadError(String(error));}};
   const loadHingeDemo=()=>{cancel();setLoadError(null);try{const demo=makeHingeDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice('三块折角带：点“分块陈列”，再缓慢拖动 28–70%，看各铰链真实转动。');}catch(error){setLoadError(String(error));}};
@@ -173,7 +173,7 @@ export default function App(){
         </nav>
         <div className="sidebar-scroll">
           <div id="tools-mesh" role="tabpanel" aria-labelledby="tool-mesh" hidden={toolTab!=='mesh'}>
-        <LoadPipelinePanel state={{config:loadPlan,mesh,options:uvConfig,trace:uvState.trace,loading:!!busy||uvState.loading,inputStatus:busy??`输入已就绪 · ${mesh.name} · ${stats.triangles.toLocaleString()} 面 · FBX/glTF 焊接 ${weld}（参数在导入设置）`,error:loadError??uvState.error}} onChange={changeLoadPlan} onRun={rerunLoadPlan} onCancel={cancel}/>
+        <LoadPipelinePanel state={{config:loadPlan,mesh,options:uvConfig,trace:uvState.trace,loading:!!busy||uvState.loading,acquiring:!!busy,inputStatus:busy??`输入已就绪 · ${mesh.name} · ${stats.triangles.toLocaleString()} 面 · FBX/glTF 焊接 ${weld}（参数在导入设置）`,error:loadError??uvState.error}} onChange={changeLoadPlan} onRun={rerunLoadPlan} onCancel={cancel}/>
         <section><h3>本地模型</h3><div className="button-grid"><button onClick={()=>resetForMesh(makeCube())}>Cube</button><button onClick={()=>resetForMesh(makeCylinder(20))}>Cylinder</button><button onClick={()=>resetForMesh(makeTorsoGrid())}>Torso</button></div>
           <label className="file-label">选择 OBJ / FBX / GLB / GLTF<input ref={importInput} type="file" multiple accept=".obj,.fbx,.glb,.gltf,.bin" onChange={e=>{const files=Array.from(e.target.files??[]);if(files.length)void loadFiles(files);e.target.value='';}}/></label>
           <small>可拖入文件。glTF 与配套 .bin 请一起选择。只导入网格，不显示材质贴图。</small>

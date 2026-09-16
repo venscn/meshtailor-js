@@ -1,6 +1,6 @@
 import {attachScrubSession} from '/apps/studio/src/unfold/scrub-session.js';
 import {PipelinePanel} from '/apps/studio/src/unfold/pipeline-panel.js';
-import {readLoadPipeline,PIPELINE_STORAGE_KEY,resolveLoadPipeline,terminalPipeline} from '/apps/studio/src/unfold/load-pipeline.js';
+import {PipelineRecorder,readLoadPipeline,PIPELINE_STORAGE_KEY,resolveLoadPipeline,terminalPipeline} from '/apps/studio/src/unfold/load-pipeline.js';
 import * as core from '/packages/mesh-core/src/index.js';
 import * as uv from '/packages/uv/src/index.js';
 import { makeHingeDemo, makeUnfoldDemo, makeFragmentationDemo, makeOverlapDemo } from '/apps/studio/src/unfold/demo.js';
@@ -16,7 +16,7 @@ let inspectionIndex=null, timelineGeometry=null, timelineKey='';
 let chartConfig={...uv.DEFAULT_UNWRAP};
 let postSeed;
 let loadPlan;try{loadPlan=readLoadPipeline(window.localStorage);}catch{loadPlan=readLoadPipeline();}
-let pipelineTrace=null,pipelineRunning=false,pipelineStarted=0;
+let pipelineTrace=null,pipelineRunning=false,pipelineStarted=0,committedMesh=null,jobBackup=null;
 const pipelinePanel=new PipelinePanel(plan=>{loadPlan=plan;try{localStorage.setItem(PIPELINE_STORAGE_KEY,JSON.stringify(plan));}catch{}renderPipeline();},()=>solve(loadPlan),()=>{cancel();pause();});
 $('pipeline-host').append(pipelinePanel.element);
 function renderPipeline(){if(mesh)pipelinePanel.update({config:loadPlan,mesh,options:chartConfig,trace:pipelineTrace,loading:pipelineRunning,inputStatus:`已读取 ${mesh.name} · ${mesh.faces.length.toLocaleString()} 面 · 离线 OBJ / 内置样例入口`});}
@@ -105,15 +105,18 @@ function update(patch={},focus=null){
   $('queue-prev').disabled=focusIndex<=0;$('queue-next').disabled=focusIndex<0||focusIndex>=options.selected.length-1;
 }
 function seekQueue(direction){pause();const schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,$('reverse').checked,options.timeline),index=Math.max(0,Math.min(options.selected.length-1,(inspectionIndex??schedule.focusIndex)+direction));update({progress:uv.islandTimelineProgress($('reverse').checked?1:0,index,options.selected.length,options.order,options.handoff,options.timeline)},index);}
-function cancel(){sequence++;jobHandle?.cancel();jobHandle=null;$('cancel').disabled=true;$('solve').disabled=false;if(pipelineRunning){pipelineTrace=terminalPipeline(pipelineTrace,'cancelled',performance.now()-pipelineStarted,'用户取消；保留上一份完整结果');pipelineRunning=false;renderPipeline();}}
+function restoreJobBackup(){if(!jobBackup||jobBackup.mesh!==mesh)return;snapshot=jobBackup.snapshot;options.selected=jobBackup.selected;options.progress=jobBackup.progress;inspection=jobBackup.inspection;options.focusFace=inspection.face;view.setGeometry(snapshot.geometry,{resetCamera:false});rebuildTimeline();list();update();reportUV();window.lab.ready=true;}
+function cancel(){sequence++;jobHandle?.cancel();jobHandle=null;$('cancel').disabled=true;$('solve').disabled=false;if(pipelineRunning){pipelineTrace=terminalPipeline(pipelineTrace,'cancelled',performance.now()-pipelineStarted,'用户取消；保留上一份完整结果');pipelineRunning=false;restoreJobBackup();renderPipeline();}}
 async function solve(plan){
   // Browser click events are not serialized configuration objects.
   if(plan?.version!==1)plan=undefined;
   cancel();pause();
   if(plan){try{const resolved=resolveLoadPipeline(mesh,plan,{...chartConfig,atlasPageMode:$('atlas-page-mode').value});$('target').value=resolved.target;}catch(e){fail(e.message);return;}}
-  pipelineTrace=null;pipelineRunning=true;pipelineStarted=performance.now();renderPipeline();window.lab.ready=false;window.lab.progressEvents=[];
+  {const p=plan?resolveLoadPipeline(mesh,plan,chartConfig):{target:$('target').value,config:chartConfig};pipelineTrace=new PipelineRecorder(p.target,p.config,plan,()=>0).snapshot();}
+  pipelineRunning=true;pipelineStarted=performance.now();renderPipeline();window.lab.ready=false;window.lab.progressEvents=[];
   const token=sequence,start=performance.now();let lastProgress=null,clock;
-  const backup=['stitch','repack','source-atlas','fill'].includes($('target').value)?snapshot:null;
+  const backup=committedMesh===mesh?snapshot:null;
+  jobBackup=backup?{mesh,snapshot:backup,selected:[...options.selected],progress:options.progress,inspection}:null;
   $('error').hidden=true;snapshot=null;inspection=EMPTY_INSPECTION;options.focusFace=null;selectionStatus();view.setGeometry(null);$('islands').replaceChildren();
   const c=$('uv'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
   $('status').textContent='启动 UV Worker…';$('solve').disabled=true;$('cancel').disabled=false;
@@ -124,7 +127,7 @@ async function solve(plan){
     });
     clock=setInterval(()=>{if(token===sequence)$('status').textContent=describeUVProgress(lastProgress,performance.now()-start);},500);
     const result=await jobHandle.result;if(token!==sequence)return;
-    snapshot=result;pipelineTrace=snapshot.pipeline??pipelineTrace;inspection=EMPTY_INSPECTION;jobHandle=null;options.selected=snapshot.geometry.islands.map(i=>i.id);options.progress=0;options.focusFace=null;
+    snapshot=result;committedMesh=mesh;jobBackup=null;pipelineTrace=snapshot.pipeline??pipelineTrace;inspection=EMPTY_INSPECTION;jobHandle=null;options.selected=snapshot.geometry.islands.map(i=>i.id);options.progress=0;options.focusFace=null;
     rebuildTimeline();view.setOptions(options);view.setGeometry(snapshot.geometry,{resetCamera:framedMesh!==mesh});framedMesh=mesh;list();update();const m=snapshot.metrics;
     $('title').textContent=`${mesh.name} · ${mesh.faces.length.toLocaleString()} 三角面 · ${snapshot.packed.length} 岛`;
     $('status').textContent=(m?`生成 UV：翻面 / 退化 / 正面积重叠检查通过\n有效面积占用 ${(m.occupancy*100).toFixed(1)}% · 包围盒面积总和（可覆盖） ${(m.boxOccupancy*100).toFixed(1)}%\n${m.packingMethod} 排布 · 新增 ${snapshot.addedSeams.length} 条 UV 补切\n`:'原始 UV：未修复、未重新排布\n')+`Worker 完成 · ${(snapshot.timing.elapsedMs/1000).toFixed(2)} 秒\n`+snapshot.warnings.join('\n')+(snapshot.fragmentation?`\n分割诊断：${snapshot.fragmentation.inputComponents} 个源分量 → ${snapshot.fragmentation.initialCharts} 个初始区域 → ${snapshot.fragmentation.outputCharts} 岛；小于16面的岛 ${snapshot.fragmentation.tinyCharts}\n补切原因：${JSON.stringify(snapshot.fragmentation.reasons)}`:'');

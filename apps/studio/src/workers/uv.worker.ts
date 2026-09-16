@@ -41,9 +41,9 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
         const now=performance.now();
         if(stage!==progress.stage){stages[stage]=(stages[stage]??0)+now-stageAt;stage=progress.stage;stageAt=now;}
         recorder!.detail(progress.detail);
-        last={...progress,pipeline:recorder!.snapshot(),facesDone:progress.facesDone??last?.facesDone,facesTotal:progress.facesTotal??last?.facesTotal,islandsDone:progress.islandsDone??last?.islandsDone,elapsedMs:now-start};
+        last={...progress,facesDone:progress.facesDone??last?.facesDone,facesTotal:progress.facesTotal??last?.facesTotal,islandsDone:progress.islandsDone??last?.islandsDone,elapsedMs:now-start};
         // Bound message traffic; progress is observation, never a synthetic completion percentage.
-        if(now-sentAt>=100){sentAt=now;self.postMessage({type:'progress',progress:last} satisfies UVMessage);}
+        if(now-sentAt>=100){sentAt=now;self.postMessage({type:'progress',progress:{...last,pipeline:recorder!.snapshot()}} satisfies UVMessage);}
       }
     };
     work.report({stage:'validate',detail:'Worker 已启动，检查输入',facesDone:0,facesTotal:mesh.faces.length,islandsDone:0});

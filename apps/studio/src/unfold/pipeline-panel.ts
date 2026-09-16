@@ -1,7 +1,7 @@
 import {DEFAULT_LOAD_PIPELINE,validateLoadPipeline,type LoadPipelineConfig,type PipelineTrace,pipelineSteps,resolveLoadPipeline} from './load-pipeline.js';
 import type {MeshData} from '@meshtailor/mesh-core';
 import type {UnwrapOptions} from '@meshtailor/uv';
-export interface PipelinePanelState {config:LoadPipelineConfig;mesh:MeshData;options:Partial<UnwrapOptions>;trace:PipelineTrace|null;loading:boolean;inputStatus?:string;error?:string|null}
+export interface PipelinePanelState {config:LoadPipelineConfig;mesh:MeshData;options:Partial<UnwrapOptions>;trace:PipelineTrace|null;loading:boolean;acquiring?:boolean;inputStatus?:string;error?:string|null}
 const names={pending:'等待',running:'进行中',completed:'完成',skipped:'跳过',error:'失败',cancelled:'已取消'};
 /** Shared production panel: React and offline lab mount the same controls and log.
  * Trace updates never rebuild the form or steal focus from a settings input. */
@@ -11,7 +11,7 @@ export class PipelinePanel {
   private readonly get=(id:string)=>this.element.querySelector(`[data-pipeline="${id}"]`) as HTMLInputElement;
   constructor(private onChange:(plan:LoadPipelineConfig)=>void,private onRun:()=>void,private onCancel:()=>void){
     this.element.className='pipeline-panel';this.element.dataset.testid='load-pipeline';
-    this.element.innerHTML=`<h3>载入模型 · 自动处理流程</h3>
+    this.element.innerHTML=`<h3>载入模型 · 自动处理流程</h3><div class="pipeline-current" role="status" data-pipeline="current"></div>
       <small data-pipeline="input">读取输入 → 解析网格 → 保留原 UV / 材质 → 拓扑准备</small>
       <div class="pipeline-presets"><button type="button" data-pipeline="standard">标准整理</button><button type="button" data-pipeline="filled">整理＋填空</button><button type="button" data-pipeline="raw">原样检查</button></div>
       <label>UV 来源<select aria-label="Load pipeline source" data-pipeline="source"><option value="auto">自动：有原 UV 则整理，否则生成</option><option value="generated">重新分区并生成 UV</option><option value="inspect">原样检查（不修改坐标）</option></select></label>
@@ -42,7 +42,7 @@ export class PipelinePanel {
     this.get('raw').onclick=()=>this.onChange({...DEFAULT_LOAD_PIPELINE,source:'inspect',fill:false});
     this.get('run').onclick=()=>this.onRun();this.get('cancel').onclick=()=>this.onCancel();
     this.get('export').onclick=()=>this.save('meshtailor-load-pipeline.json',this.state?.config);
-    this.get('report').onclick=()=>this.save('meshtailor-pipeline-report.json',{version:1,mesh:{name:this.state?.mesh.name,faces:this.state?.mesh.faces.length},flow:this.state?.trace,parameters:this.state?.options,exportedAt:new Date().toISOString()});
+    this.get('report').onclick=()=>this.save('meshtailor-pipeline-report.json',{version:1,mesh:{name:this.state?.mesh.name,faces:this.state?.mesh.faces.length},flow:this.state?.trace,parameters:this.state?.trace?.settings??this.state?.options,exportedAt:new Date().toISOString()});
     this.get('import-button').onclick=()=>this.get('import').click();
     this.get('import').onchange=async()=>{const file=this.get('import').files?.[0];if(!file)return;try{if(file.size>100_000)throw Error('流程文件过大。');this.onChange(validateLoadPipeline(JSON.parse(await file.text())));}catch(e){this.showError(String(e));}finally{this.get('import').value='';}};
   }
@@ -60,7 +60,9 @@ export class PipelinePanel {
     this.showError(state.error??configError);if(configError)this.get('run').disabled=true;
     const trace=state.trace;
     this.element.dataset.status=trace?.status??'planned';
-    this.get('trace-title').textContent=trace?`${trace.origin==='model-load'?'自动流程':'手动操作'} · ${trace.status==='completed'?'已完成':trace.status==='running'?'执行中':trace.status==='cancelled'?'已取消':trace.status==='timeout'?'超时':'失败'} · ${(trace.elapsedMs/1000).toFixed(1)}s`:'下次载入的计划（尚未执行）';
+    const active=trace?.steps.find(s=>s.state==='running');
+    this.get('current').textContent=state.acquiring?'正在读取并解析模型…':state.loading?(active?`进行中 · ${active.label}`:'等待 Worker 启动…'):state.error?`失败 · ${state.error}`:trace?.status==='completed'?`已完成 · ${trace.steps.find(s=>s.id==='fill')?.state==='completed'?'包含填补空白':'未执行填补空白'}`:trace?.status==='cancelled'?'已取消 · 未完成步骤不计为成功':trace?.status==='timeout'?'任务超时 · 保留上一份完整结果':trace?.status==='error'?'任务失败 · 详见实际步骤记录':'下次载入将按以下配置执行';
+    this.get('trace-title').textContent=state.acquiring?'输入 / 前置任务处理中 · 下方为上一计算记录':trace?`${trace.origin==='model-load'?'自动流程':'手动操作'} · ${trace.status==='completed'?'已完成':trace.status==='running'?'执行中':trace.status==='cancelled'?'已取消':trace.status==='timeout'?'超时':'失败'} · ${(trace.elapsedMs/1000).toFixed(1)}s`:'下次载入的计划（尚未执行）';
     this.get('draft-note').textContent=trace?.config&&JSON.stringify(trace.config)!==JSON.stringify(state.config)?'配置已修改，仅下次载入或点击重跑生效。下方日志仍是本次实际执行，未冒充新配置已运行。':'配置保存在本浏览器；修改不会打断当前任务。步骤按依赖顺序执行，不能任意拖动。';
     const list=this.get('trace');list.replaceChildren();
     for(const row of trace?.steps??planned??[]){const li=document.createElement('li');li.dataset.step=row.id;li.dataset.state=row.state;const title=document.createElement('div'),detail=document.createElement('small'),badge=document.createElement('span');title.textContent=row.label;badge.className='pipeline-state';badge.textContent=names[row.state]+(row.elapsedMs!==undefined?` ${(row.elapsedMs/1000).toFixed(2)}s`:'');detail.textContent=row.reason??row.detail??'';li.append(title,badge,detail);list.append(li);}
