@@ -44,16 +44,17 @@ flat in float vChart;
 ${FOCUS_GLSL}
 out vec4 result;
 void main(){
+  vec3 surfaceNormal=cross(dFdx(vWorld),dFdy(vWorld));vec3 baryWidth=fwidth(bary);
   if(focusVisibility(vWorld,vChart)<focusThreshold(gl_FragCoord.xy))discard;
   if(lineMode){if(dashed&&mod(gl_FragCoord.x+gl_FragCoord.y,12.0)<4.0)discard;result=vec4(lineColor,opacity);return;}
   vec3 c=vColor;
   if(faceTones){uint h=uint(face)*1664525u+1013904223u;c*=.84+float((h>>16u)&255u)/255.0*.30;}
   if(checker){float check=mod(floor(vUV.x*16.0)+floor(vUV.y*16.0),2.0);c*=mix(.7,1.0,check);}
-  vec3 n=cross(dFdx(vWorld),dFdy(vWorld));float len=length(n);
+  vec3 n=surfaceNormal;float len=length(n);
   c*=len>1e-10?.78+.22*abs(n.z/len):1.0;
   if(opacity<.99)c=mix(c,vec3(.34,.39,.48),.7);
   if(face==focus)c=mix(c,vec3(1.0),.4);
-  if(wire||face==focus||edgeOnly){vec3 e=smoothstep(vec3(0.0),fwidth(bary)*1.1,bary);float edge=1.0-min(min(e.x,e.y),e.z);if(edgeOnly){if(edge<.05)discard;result=vec4(1,1,1,edge);return;}c=mix(c,face==focus?vec3(1.0):c*.42,edge*.82);}
+  if(wire||face==focus||edgeOnly){vec3 e=smoothstep(vec3(0.0),baryWidth*1.1,bary);float edge=1.0-min(min(e.x,e.y),e.z);if(edgeOnly){if(edge<.05)discard;result=vec4(1,1,1,edge);return;}c=mix(c,face==focus?vec3(1.0):c*.42,edge*.82);}
   result=vec4(c,opacity);
 }`;
 
