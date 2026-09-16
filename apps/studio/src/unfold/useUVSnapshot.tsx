@@ -17,7 +17,7 @@ export function useUVSnapshot(mesh:MeshData,edges:Set<string>,target:UVTarget,co
     let disposed=false,done=false,job:ReturnType<typeof startUVJob>|undefined;
     const start=performance.now();
     const identity={mesh,edges,target,config,seedCharts,pipeline};
-    const backup=(target==='stitch'||target==='repack'||target==='source-atlas'||target==='fill')&&completed.current?.mesh===mesh?completed.current.snapshot:null;
+    const backup=completed.current?.mesh===mesh?completed.current.snapshot:null;
     let resolved={target,config};try{if(pipeline)resolved=resolveLoadPipeline(mesh,pipeline,config);}catch{/* Worker returns the explicit configuration error. */}
     const initial={stage:'validate' as const,detail:'等待 Worker 启动',elapsedMs:0,pipeline:new PipelineRecorder(resolved.target,resolved.config??{},pipeline,()=>0).snapshot()};
     setState({...identity,snapshot:backup,error:null,phase:'starting',progress:initial,elapsedMs:0});

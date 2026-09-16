@@ -1,5 +1,5 @@
 import {LoadPipelinePanel} from './unfold/LoadPipelinePanel';
-import {readLoadPipeline,PIPELINE_STORAGE_KEY,resolveLoadPipeline,type LoadPipelineConfig} from './unfold/load-pipeline';
+import {DEFAULT_LOAD_PIPELINE,readLoadPipeline,PIPELINE_STORAGE_KEY,resolveLoadPipeline,type LoadPipelineConfig} from './unfold/load-pipeline';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   buildTopology, makeCube, makeCylinder, makeTorsoGrid, makeComplexExample, meshToOBJ,
@@ -84,14 +84,14 @@ export default function App(){
   const begin=(message:string)=>{cancel();setLoadError(null);setBusy(message);return operation.current;};
   const changeLoadPlan=(plan:LoadPipelineConfig)=>{setLoadPlan(plan);try{window.localStorage.setItem(PIPELINE_STORAGE_KEY,JSON.stringify(plan));}catch{setNotice('浏览器不允许保存设置，本次会话仍生效。');}};
   const rerunLoadPlan=()=>{try{const resolved=resolveLoadPipeline(mesh,loadPlan,uvConfig);cancel();player.pause();setUVSeed(undefined);setSeamEdges(new Set());setUVTarget(resolved.target);setUVConfig({...uvConfig,...resolved.config});setTaskPlan({...loadPlan});setLoadError(null);}catch(error){setLoadError(String(error));}};
-  const replaceMesh=(m:MeshData,report:MeshImportReport|null=null)=>{
+  const replaceMesh=(m:MeshData,report:MeshImportReport|null=null,plan=loadPlan)=>{
     prepareViewportMesh(m); // Reject malformed input before React/topology/Three see it.
-    const recommended=recommendUnwrap(m).options,resolved=resolveLoadPipeline(m,loadPlan,recommended);
-    setTaskPlan({...loadPlan});setUVSeed(undefined);setMesh(m);setImportReport(report);setUVConfig({...recommended,...resolved.config});setUVTarget(resolved.target);setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
+    const recommended=recommendUnwrap(m).options,resolved=resolveLoadPipeline(m,plan,recommended);
+    setTaskPlan({...plan});setUVSeed(undefined);setMesh(m);setImportReport(report);setUVConfig({...recommended,...resolved.config});setUVTarget(resolved.target);setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
   };
-  const loadUnfoldDemo=()=>{cancel();setLoadError(null);try{const demo=makeUnfoldDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');setToolTab('animation');setNotice('六岛立方体：拖动 0–100% 进度，观察同色编号的面片移入对应 UV 岛。');}catch(error){setLoadError(String(error));}};
-  const loadHingeDemo=()=>{cancel();setLoadError(null);try{const demo=makeHingeDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice('三块折角带：点“分块陈列”，再缓慢拖动 28–70%，看各铰链真实转动。');}catch(error){setLoadError(String(error));}};
-  const loadOverlapDemo=()=>{cancel();setLoadError(null);try{const demo=makeOverlapDemo();replaceMesh(demo.mesh);setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('source');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice('合成马鞍：在“刚性平面网”阶段看同岛重叠条纹；最终原 UV 是无重叠的菱形。');}catch(error){setLoadError(String(error));}};
+  const loadUnfoldDemo=()=>{cancel();setLoadError(null);try{const demo=makeUnfoldDemo();replaceMesh(demo.mesh,null,{...DEFAULT_LOAD_PIPELINE});setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');setToolTab('animation');setNotice('六岛立方体：拖动 0–100% 进度，观察同色编号的面片移入对应 UV 岛。');}catch(error){setLoadError(String(error));}};
+  const loadHingeDemo=()=>{cancel();setLoadError(null);try{const demo=makeHingeDemo();replaceMesh(demo.mesh,null,{...DEFAULT_LOAD_PIPELINE});setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice('三块折角带：点“分块陈列”，再缓慢拖动 28–70%，看各铰链真实转动。');}catch(error){setLoadError(String(error));}};
+  const loadOverlapDemo=()=>{cancel();setLoadError(null);try{const demo=makeOverlapDemo();replaceMesh(demo.mesh,null,{...DEFAULT_LOAD_PIPELINE});setSeamEdges(demo.edges);setChains(demo.chains);setFrames(demo.frames);setStep(-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('source');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice('合成马鞍：在“刚性平面网”阶段看同岛重叠条纹；最终原 UV 是无重叠的菱形。');}catch(error){setLoadError(String(error));}};
   const resetForMesh=(m:MeshData)=>{cancel();setLoadError(null);try{replaceMesh(m);}catch(error){setLoadError(String(error));}};
   const loadFiles=async(files:File[])=>{
     const id=begin('Importing mesh…');
