@@ -1,10 +1,11 @@
+import {refineAtlas,validateFillOptions,type FillOptions,type FillReport} from './fill-refinement.js';
 import { uvProgress, type UVWork } from './work.js';
 import type { Vec2 } from '@meshtailor/mesh-core';
 import type { PackedChart } from './preview.js';
 export interface RawChart {id:number; faceUVs:Map<number,[Vec2,Vec2,Vec2]>; area3D:number}
 export type PackingMethod = 'auto'|'maxrects'|'shelf';
-export interface PackOptions { neighborHints?:{a:number;b:number;weight:number}[]; normalizationReferenceArea?:number; packingOrder?:'area'|'legacy'; tinyIslandAreaFraction?:number; maxTinyAreaBoost?:number; /** Internal common texel density for multiple pages. */ fixedScale?:number; padding:number; rotate:boolean; rotationSteps:number; packing?:PackingMethod }
-export interface AtlasPacking {packed:PackedChart[]; occupancy:number; boxOccupancy:number; scale:number; padding:number; packingMethod:'maxrects'|'shelf'; packingReport?:{order:'area'|'legacy';placementOrder:number[];searchAttempts:number;failedFits:number;areaBoosts:{id:number;factor:number}[]}}
+export interface PackOptions extends FillOptions { neighborHints?:{a:number;b:number;weight:number}[]; normalizationReferenceArea?:number; packingOrder?:'area'|'legacy'; tinyIslandAreaFraction?:number; maxTinyAreaBoost?:number; /** Internal common texel density for multiple pages. */ fixedScale?:number; padding:number; rotate:boolean; rotationSteps:number; packing?:PackingMethod }
+export interface AtlasPacking {packed:PackedChart[]; occupancy:number; boxOccupancy:number; scale:number; padding:number; packingMethod:'maxrects'|'shelf'; packingReport?:{refinement?:FillReport;order:'area'|'legacy';placementOrder:number[];searchAttempts:number;failedFits:number;areaBoosts:{id:number;factor:number}[]}}
 interface Rect {x:number;y:number;w:number;h:number}
 interface OrientedChart {id:number;coords:Map<number,[Vec2,Vec2,Vec2]>;w:number;h:number;area:number;surfaceArea:number}
 interface Placement extends Rect { id:number;rotated:boolean }
@@ -85,6 +86,7 @@ function shelfAttempt(charts:OrientedChart[],scale:number,pad:number,rotate:bool
   return placements;
 }
 export function packAtlas(charts:RawChart[],options:Partial<PackOptions>={},work?:UVWork):AtlasPacking{
+  validateFillOptions(options);
   const opts={padding:.003,rotate:true,rotationSteps:12,packing:'auto' as PackingMethod,packingOrder:'area' as const,tinyIslandAreaFraction:0,maxTinyAreaBoost:1,...options};
   if(!['area','legacy'].includes(opts.packingOrder)||!Number.isFinite(opts.tinyIslandAreaFraction)||opts.tinyIslandAreaFraction<0||opts.tinyIslandAreaFraction>.1||!Number.isFinite(opts.maxTinyAreaBoost)||opts.maxTinyAreaBoost<1||opts.maxTinyAreaBoost>4)throw new Error('Invalid area allocation settings. Tiny AREA boost must be 1..4.');
   if(!charts.length)throw new Error('Cannot pack empty atlas.');
@@ -116,5 +118,6 @@ export function packAtlas(charts:RawChart[],options:Partial<PackOptions>={},work
     const w=(p.rotated?r.h:r.w)*bestScale,h=(p.rotated?r.w:r.h)*bestScale;
     return{id:r.id,faceUVs,bounds:[x,y,x+w,y+h] as [number,number,number,number],polygon:[[x,y],[x+w,y],[x+w,y+h],[x,y+h]] as Vec2[]};
   });
-  return{packed,occupancy:raw.reduce((s,r)=>s+r.area,0)*bestScale**2,boxOccupancy:raw.reduce((s,r)=>s+r.w*r.h,0)*bestScale**2,scale:bestScale,padding:opts.padding,packingMethod,packingReport:{order:opts.packingOrder,placementOrder:best.map(p=>p.id),searchAttempts,failedFits,areaBoosts:boosts.filter(b=>b.factor>1)}};
+  const baseline:AtlasPacking={packed,occupancy:raw.reduce((s,r)=>s+r.area,0)*bestScale**2,boxOccupancy:raw.reduce((s,r)=>s+r.w*r.h,0)*bestScale**2,scale:bestScale,padding:opts.padding,packingMethod,packingReport:{order:opts.packingOrder,placementOrder:best.map(p=>p.id),searchAttempts,failedFits,areaBoosts:boosts.filter(b=>b.factor>1)}};
+  return refineAtlas(baseline,charts,opts,work);
 }

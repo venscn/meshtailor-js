@@ -15,6 +15,7 @@ export interface PagedAtlas extends AtlasPacking {pageReport?:PageReport;spatial
 export function packConnectedAtlas(mesh:MeshData,raw:RawChart[],opts:Partial<PackOptions>&PageOptions={},work?:UVWork):PagedAtlas {
   const mode=opts.atlasPageMode??'single',requested=opts.atlasPageCount??2;
   if(!['single','adjacency','components','spatial'].includes(mode)||!Number.isInteger(requested)||requested<1||requested>64)throw new Error('Atlas pages: choose single/adjacency/components/spatial and a page target of 1..64.');
+  if(mode!=='single'&&opts.fillMode&&opts.fillMode!=='off')throw new Error('轮廓空白精排当前支持单页 atlas。请改为单页，或关闭精排以保留多页共同密度。');
   const spatialReport=buildSpatialNeighbors(mesh,raw,opts,work);
   opts={...opts,normalizationReferenceArea:raw.reduce((sum,c)=>sum+c.area3D,0),neighborHints:opts.spatialNeighbors===false?[]:spatialReport.links.map(l=>({a:l.a,b:l.b,weight:l.score}))};
   if(mode==='single'){
