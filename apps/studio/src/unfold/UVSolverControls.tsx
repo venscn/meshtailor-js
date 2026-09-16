@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
+import { describeFill, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
 import type { UVSnapshot } from '../workers/uv.worker';
 /** Draft settings are applied together: dragging a control never launches dozens of solvers. */
-export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onProcess:(operation:'connected'|'stitch'|'repack',config:UnwrapOptions)=>void;onAuto:(goal:'large'|'balanced')=>void;value:UnwrapOptions;onChange:(v:UnwrapOptions)=>void;snapshot:UVSnapshot|null}){
+export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onProcess:(operation:'connected'|'stitch'|'repack'|'fill',config:UnwrapOptions)=>void;onAuto:(goal:'large'|'balanced')=>void;value:UnwrapOptions;onChange:(v:UnwrapOptions)=>void;snapshot:UVSnapshot|null}){
   const [draft,setDraft]=useState(value),patch=(v:Partial<UnwrapOptions>)=>setDraft(d=>({...d,...v}));
   useEffect(()=>setDraft(value),[value]);
   return <details className="uv-solver-controls" open><summary>UV 求解与排布</summary>
@@ -23,6 +23,17 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onP
       <label className="check"><input aria-label="Reuse valid UV shapes" type="checkbox" checked={draft.mergeOptions?.reuseValidUV!==false} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,reuseValidUV:e.target.checked}})}/>重解失败时尝试保留形状缝合</label><small>沿真实共享边对齐现有 UV；保留必要开缝，限制两岛平均密度差不超过 25%，仍检查重叠与形变。不因空间靠近而焊接。</small>
       <label>目标岛数（不牺牲有效性）<input aria-label="Merge target" type="number" min="1" value={draft.mergeOptions?.targetCharts??1} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,targetCharts:+e.target.value}})}/></label>
       <label className="check"><input aria-label="Preserve material boundaries" type="checkbox" checked={draft.mergeOptions?.respectMaterials??false} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,respectMaterials:e.target.checked}})}/>后处理不跨源材质边界缝合</label>
+    </details>
+    <details open className="uv-fill-controls"><summary>空白精排 · 大岛优先</summary>
+      <button className="primary" aria-label="Refine current atlas" disabled={!snapshot?.metrics?.validated} onClick={()=>onProcess('fill',{...draft,fillMode:draft.fillMode==='uniform'?'uniform':'area-priority'})}>填补空白（保留当前岛 / 切缝）</button>
+      <label>精排模式<select aria-label="Fill mode" value={draft.fillMode==='uniform'?'uniform':'area-priority'} onChange={e=>patch({fillMode:e.target.value as UnwrapOptions['fillMode']})}><option value="area-priority">从大到小逐岛扩张</option><option value="uniform">全岛共同放大（保持密度比例）</option></select></label>
+      <label>每步面积增量 %<input aria-label="Fill step" type="number" min=".5" max="25" step=".5" value={(draft.fillStep??.08)*100} onChange={e=>patch({fillStep:+e.target.value/100})}/></label>
+      <label>面积增益 / 密度差上限<input aria-label="Fill area cap" type="number" min="1" max="3" step=".1" value={draft.fillMaxAreaGain??1.6} onChange={e=>patch({fillMaxAreaGain:+e.target.value})}/></label>
+      <label>最大轮数<input aria-label="Fill rounds" type="number" min="1" max="24" value={draft.fillRounds??4} onChange={e=>patch({fillRounds:+e.target.value})}/></label>
+      <label>轮廓搜索网格<select aria-label="Fill resolution" value={draft.fillResolution??512} onChange={e=>patch({fillResolution:+e.target.value})}><option value="256">256（快速 / 保守）</option><option value="512">512（默认）</option><option value="1024">1024（更细 / 更慢）</option></select></label>
+      <label>精排搜索预算（秒）<input aria-label="Fill budget" type="number" min="1" max="120" value={(draft.fillTimeBudgetMs??15000)/1000} onChange={e=>patch({fillTimeBudgetMs:+e.target.value*1000})}/></label>
+      <small>不缩小其他岛腾空间，不拉伸宽高。8% 面积增量约为 3.9% 边长；默认最多 1.6 倍面积。轮廓栅格可利用凹口，但不保证最优。仅支持有效单页，原样重叠 UV 须先整理。可在预算停止后继续精排，不会无界累积大岛密度。</small>
+      {snapshot?.packingReport?.refinement&&<div role="status" data-testid="fill-report"><p>{describeFill(snapshot.packingReport.refinement)}</p><small>可检查形状 / 切缝的岛：{snapshot.packingReport.refinement.shapeWaste.slice(0,5).map(c=>`#${c.id+1}（轮廓/框 ${(c.shapeFill*100).toFixed(0)}%）`).join('、')}。只是诊断，不会自动再切。</small></div>}
     </details>
     <details open><summary>面积与空间邻居</summary>
       <label className="check"><input aria-label="Organize source merges" type="checkbox" checked={draft.sourceAtlasMerge??true} onChange={e=>patch({sourceAtlasMerge:e.target.checked})}/>整理原 UV 时尝试共享边缝合</label>
@@ -69,6 +80,6 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onP
     </details>
     <div className="button-grid two"><button className="primary" onClick={()=>onChange({...draft})}>应用并重新展开</button><button onClick={()=>{setDraft({...DEFAULT_UNWRAP});onChange({...DEFAULT_UNWRAP});}}>恢复默认（固定参数）</button></div>
     {snapshot?.fragmentation&&<p>分裂来源：{snapshot.fragmentation.inputComponents} 个原几何连通分量 → {snapshot.fragmentation.initialCharts} 个初始区域 → {snapshot.fragmentation.outputCharts} 个最终岛；小于16面：{snapshot.fragmentation.tinyCharts}。<br/>补切原因：{Object.entries(snapshot.fragmentation.reasons).map(([k,v])=>`${k}: ${v}`).join(' · ')||'无'}。</p>}
-    {snapshot?.metrics&&<div className="uv-quality-stats"><b>有效 UV 占用 {(snapshot.metrics.occupancy*100).toFixed(1)}%</b><span>包围盒占用 {(snapshot.metrics.boxOccupancy*100).toFixed(1)}%</span><span>{snapshot.addedSeams?.length??0} 条补切 · {snapshot.diagnostics?.filter(d=>d.method==='tutte').length??0} 个 Tutte 岛</span><span>实际排布：{snapshot.metrics.packingMethod??'MaxRects'}</span><span>生成 UV 已检查翻面、退化和正面积重叠</span></div>}
+    {snapshot?.metrics&&<div className="uv-quality-stats"><b>有效 UV 占用 {(snapshot.metrics.occupancy*100).toFixed(1)}%</b><span>包围盒面积总和 {(snapshot.metrics.boxOccupancy*100).toFixed(1)}%（可互相覆盖）</span><span>{snapshot.addedSeams?.length??0} 条补切 · {snapshot.diagnostics?.filter(d=>d.method==='tutte').length??0} 个 Tutte 岛</span><span>实际排布：{snapshot.metrics.packingMethod??'MaxRects'}</span><span>生成 UV 已检查翻面、退化和正面积重叠</span></div>}
   </details>;
 }

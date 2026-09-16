@@ -137,7 +137,7 @@ export default function App(){
       worker.postMessage({kind,mesh,options:{strategy:uvConfig.chartPolicy==='legacy'?'legacy':'adaptive',goal:uvConfig.chartPolicy==='balanced'?'balanced':'large',regionOptions:{...uvConfig.regionOptions,maxChartFaces:uvConfig.maxChartFaces},curvatureQuantile:curvature,structuralRings:rings,maxEdges}} satisfies SeamJob);
     }catch(error){setBusy(null);setLoadError(String(error));}
   };
-  const processUV=(operation:'connected'|'stitch'|'repack',config:UnwrapOptions)=>{
+  const processUV=(operation:'connected'|'stitch'|'repack'|'fill',config:UnwrapOptions)=>{
     if(operation!=='connected'&&!snapshot)return;
     cancel();setLoadError(null);setViewMode('unfold');setShowAllSeams(true);setPlaying(false);
     if(operation==='connected'){
@@ -145,7 +145,7 @@ export default function App(){
       setNotice('前处理：从连通块开始，仅在必要时补切，再执行验证式邻岛缝合。原 UV 保留在模型中；新 UV 需要重烘焙。');
     }else{
       setUVSeed(snapshot!.packed);setSeamEdges(new Set(snapshot!.seams));setUVConfig({...config});setUVTarget(operation);
-      setNotice(operation==='stitch'?'后处理：基于当前岛和共享接缝尝试缝合，不重新运行 baseline。':'只重排当前岛；不改变岛数，不把同页摆放冒充缝合。');
+      setNotice(operation==='fill'?'按3D表面积从大到小精排当前UV；保持全部岛与切缝，预算停止后可继续。':operation==='stitch'?'后处理：基于当前岛和共享接缝尝试缝合，不重新运行 baseline。':'只重排当前岛；不改变岛数，不把同页摆放冒充缝合。');
     }
   };
   const seek=(next:number)=>{setPlaying(false);setStep(Math.max(0,Math.min(frames.length-1,next)));};

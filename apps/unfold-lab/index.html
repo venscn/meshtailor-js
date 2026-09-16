@@ -74,6 +74,17 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <label>后处理保留材质边界<input id="merge-materials" type="checkbox"></label>
 <small id="audit-summary" role="status"></small><small id="post-summary" role="status"></small>
 </details>
+<details open id="fill-controls"><summary>空白精排 · 大岛优先</summary>
+<button id="post-fill" class="primary">填补空白（保留当前岛 / 切缝）</button>
+<label>精排模式<select id="fill-mode"><option value="area-priority">从大到小逐岛扩张</option><option value="uniform">全岛共同放大（保持密度比例）</option></select></label>
+<label>每步面积增量 %<input id="fill-step" type="number" min=".5" max="25" step=".5" value="8"></label>
+<label>面积增益 / 密度差上限<input id="fill-cap" type="number" min="1" max="3" step=".1" value="1.6"></label>
+<label>最大轮数<input id="fill-rounds" type="number" min="1" max="24" value="4"></label>
+<label>搜索网格<select id="fill-resolution"><option value="256">256（快速）</option><option value="512" selected>512（默认）</option><option value="1024">1024（更细更慢）</option></select></label>
+<label>搜索预算（秒）<input id="fill-budget" type="number" min="1" max="120" value="15"></label>
+<small>只移动、旋转和有界等比例放大，不改切缝，不缩小其他岛。面积放大 1.6 倍，边长仅 √1.6 倍。仅支持单页；多页请先只重排为单页。原 UV 重叠时须先整理。</small>
+<p id="fill-summary" role="status"></p><small id="fill-shapes"></small>
+</details>
 <details open><summary>面积与空间邻居</summary>
 <label>局部修复无效原 UV<input id="source-repair" type="checkbox" checked></label><small>只重做含内部重叠/混合翻面/退化的原岛；其余形状保留，原输入不变。</small><p id="repair-summary" role="status"></p>
 <label>允许保留形状缝合<input id="reuse-uv-shape" type="checkbox" checked></label>
@@ -88,7 +99,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
 </details>
 <label>单岛面数预算<input id="chart-faces" type="number" min="8" max="20000" step="128" value="8192"></label>
 <label>区域法线锥角<input id="chart-cone" type="number" min="1" max="178" value="80"></label>
-<label>最大角形变比<input id="chart-stretch" type="number" min="1" max="1000" value="30"></label><label>UV 来源<select id="target"><option value="generated">重新展开 + 面积感知排布</option><option value="source-atlas">整理原 UV · 新 atlas</option><option value="source">保留原始 UV（不修复 / 不重排）</option><option value="stitch" disabled>当前邻岛缝合结果</option><option value="repack" disabled>当前重排结果</option></select></label>
+<label>最大角形变比<input id="chart-stretch" type="number" min="1" max="1000" value="30"></label><label>UV 来源<select id="target"><option value="generated">重新展开 + 面积感知排布</option><option value="source-atlas">整理原 UV · 新 atlas</option><option value="source">保留原始 UV（不修复 / 不重排）</option><option value="stitch" disabled>当前邻岛缝合结果</option><option value="repack" disabled>当前重排结果</option><option value="fill" disabled>当前轮廓精排结果</option></select></label>
 <label>原 UV 显示<select id="source-layout"><option value="materials">材质分框（不改原坐标）</option><option value="overlay">原位叠加（诊断）</option></select></label><label>求解方式<select id="solver"><option value="auto">LSCM → 检查 → Tutte 回退</option><option value="lscm">仅 LSCM</option><option value="tutte">凸边界 Tutte</option></select></label>
 <label>排布策略<select id="packing"><option value="auto">自动 MaxRects / Shelf</option><option value="maxrects">MaxRects（≤1024 岛）</option><option value="shelf">Shelf 大岛数快速排布</option></select></label>
 <label>UV 任务预算（秒）<input id="budget" type="number" min="5" max="900" step="5" value="120"></label>
