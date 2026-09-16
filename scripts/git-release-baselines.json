@@ -131,5 +131,12 @@
     "commit": "0549c8738fa56a3d603b87fb2670de69269bab06",
     "tagType": "tag",
     "commitsSincePrevious": 8
+  },
+  {
+    "tag": "v0.4.15",
+    "refObject": "8a3fa53a70ce07b27e492e2b3f3c09ee8a65881a",
+    "commit": "827629fca854fe201c11f02c4e49acadcb118318",
+    "tagType": "tag",
+    "commitsSincePrevious": 7
   }
 ]
