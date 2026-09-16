@@ -12,7 +12,9 @@ function overlaps(a:Vec2[],b:Vec2[],epsilon:number):boolean{
   }
   return true;
 }
-/** Scale-normalized checks with a spatial grid; no silent sampled overlap test. */
+/** Scale-normalized checks with a spatial grid; no silent sampled overlap test.
+ * SAT contact tolerance 1e-12 rejects thin positive slivers from similarity joins
+ * that the older 1e-10 tolerance admitted; exact edge contact remains allowed. */
 export function checkUVTriangles(faces: readonly [Vec2,Vec2,Vec2][], maxOverlapCount=100,work?:UVWork,onOverlap?:(a:number,b:number)=>void):UVQuality{
   let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
   for(const f of faces)for(const p of f){if(!p.every(Number.isFinite))return {triangles:faces.length,flipped:0,degenerate:faces.length,overlaps:0,area:0,valid:false};minX=Math.min(minX,p[0]);minY=Math.min(minY,p[1]);maxX=Math.max(maxX,p[0]);maxY=Math.max(maxY,p[1]);}
@@ -26,7 +28,7 @@ export function checkUVTriangles(faces: readonly [Vec2,Vec2,Vec2][], maxOverlapC
     if(!usable[i])continue;const t=norm[i]!,xs=t.map(p=>p[0]),ys=t.map(p=>p[1]);
     const x0=Math.floor(Math.min(...xs)*size),x1=Math.min(size-1,Math.floor(Math.max(...xs)*size)),y0=Math.floor(Math.min(...ys)*size),y1=Math.min(size-1,Math.floor(Math.max(...ys)*size));
     const candidates=new Set<number>();for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)for(const j of grid.get(y*size+x)??[])candidates.add(j);
-    for(const j of candidates)if(overlaps(t,norm[j]!,1e-10)){overlapCount++;onOverlap?.(i,j);if(overlapCount>=maxOverlapCount)break;}
+    for(const j of candidates)if(overlaps(t,norm[j]!,1e-12)){overlapCount++;onOverlap?.(i,j);if(overlapCount>=maxOverlapCount)break;}
     if(overlapCount>=maxOverlapCount)break;
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const key=y*size+x,list=grid.get(key)??[];list.push(i);grid.set(key,list);}
   }
