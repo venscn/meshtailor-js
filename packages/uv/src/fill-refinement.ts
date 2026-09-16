@@ -115,7 +115,7 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
         if(proposal){placements=proposal;gains=next;changed++;report.accepted++;report.after=items.reduce((s,it,k)=>s+it.areaUV*gains[k]!,0);report.history.push({round:round+1,id:mode==='uniform'?null:items[i]!.chart.id,occupancy:report.after,areaFactor:next[i]!});}
       }
       if(report.stop==='trial-budget')break;
-      if(!changed){if(adaptive&&mode==='area-priority'){if(attempts.some((s,i)=>!s.minStepFailed&&gains[i]!<caps[i]!-1e-10)&&round<roundLimit-1)continue;}else if(stepNow>.0101&&round<roundLimit-1){stepNow/=2;continue;}report.stop='converged';break;}
+      if(!changed){if(adaptive&&mode==='area-priority'){if(attempts.some((s,i)=>!s.minStepFailed&&gains[i]!<caps[i]!-1e-10)){if(round<roundLimit-1)continue;report.stop='round-limit';break;}}else if(stepNow>.0101&&round<roundLimit-1){stepNow/=2;continue;}report.stop='converged';break;}
       if(round===roundLimit-1)report.stop='round-limit';
     }
   }catch(error){if(error instanceof RasterBudget)report.stop='time-budget';else throw error;}

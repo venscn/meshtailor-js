@@ -8,7 +8,7 @@ try {
  const page=await browser.page();await page.send('Emulation.setDeviceMetricsOverride',{width:1500,height:960,deviceScaleFactor:1,mobile:false});
  const tree=await page.send('Page.getFrameTree');await page.send('Page.setDocumentContent',{frameId:tree.frameTree.frame.id,html:await readFile('unfold-lab.html','utf8')});await page.waitFor('window.lab?.ready',20000);
  await page.evaluate(`window.layers=()=>{lab.view.draw();const r=lab.view.getOverlapCounts();let two=0,three=0,max=0;for(const n of r.counts){if(n===2)two++;if(n>=3)three++;max=Math.max(max,n);}return {two,three,max,width:r.width,height:r.height,error:lab.view.gl.getError()};};`);
- await check('new controls default to near-coplanar without pausing the player',async()=>{assert.equal(await page.evaluate('document.querySelector("#overlap-mode").value'),'coplanar');assert.equal(await page.evaluate('document.querySelector("#face-tones").checked'),true);});
+ await check('new controls default to motion-adaptive without pausing the player',async()=>{assert.equal(await page.evaluate('document.querySelector("#overlap-mode").value'),'auto');assert.equal(await page.evaluate('document.querySelector("#face-tones").checked'),true);});
  await check('real Worker builds one saddle UV island with valid final diamond',async()=>{
   await page.evaluate('document.querySelector("#overlap-demo").click()');await page.waitFor('lab.ready',20000);
   const r=await page.evaluate('({name:lab.mesh.name,faces:lab.mesh.faces.length,islands:lab.snapshot.packed.length,valid:lab.uv.checkUVTriangles([...lab.snapshot.packed[0].faceUVs.values()]).valid,hinges:lab.snapshot.geometry.hinge.angle.length})');assert.equal(r.islands,1);assert.equal(r.faces,4);assert.equal(r.valid,true);assert.ok(r.hinges>0);return r;
