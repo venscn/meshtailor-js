@@ -3,6 +3,7 @@ import * as uv from '/packages/uv/src/index.js';
 import { makeHingeDemo, makeUnfoldDemo, makeFragmentationDemo, makeOverlapDemo } from '/apps/studio/src/unfold/demo.js';
 import { UnfoldWebGLView } from '/apps/studio/src/unfold/webgl-view.js';
 import { DEFAULT_AUTO_FRAME } from '/apps/studio/src/unfold/camera-policy.js';
+import {attachUVSelection,applyBoxSelection} from '/apps/studio/src/unfold/uv-box-selection.js';
 import { drawUVSnapshot, pickUVFace } from '/apps/studio/src/unfold/uv-drawing.js';
 import {startUVJob,describeUVProgress} from '/apps/studio/src/unfold/uv-job-client.js';
 import { EMPTY_INSPECTION, selectInspectionIsland, resolveInspectionPick } from '/apps/studio/src/unfold/selection-policy.js';
@@ -167,12 +168,13 @@ function tick(now){
   }
   clockLast=playing&&!document.hidden?now:null;requestAnimationFrame(tick);
 }requestAnimationFrame(tick);
-$('uv').onclick=e=>{if(!snapshot)return;const r=$('uv').getBoundingClientRect(),hit=pickUVFace(snapshot,r.width,r.height,e.clientX-r.left,e.clientY-r.top,options.selected);if(hit)pick(hit.id,hit.face,e.shiftKey||e.ctrlKey||e.metaKey);};
+function boxSelect(hits,mode){if(!snapshot)return;inspection={islands:applyBoxSelection(inspection.islands,hits,snapshot.geometry.islands.map(i=>i.id),mode),face:null};pause();options.selected=[...inspection.islands];options.focusFace=null;list();update({progress:0});}
+attachUVSelection($('uv'),()=>({snapshot,selected:inspection.islands}),boxSelect,pick);
 $('export').onclick=()=>{if(!snapshot)return;const text=core.meshToOBJ(uv.meshWithPreviewUV(mesh,snapshot.packed)),url=URL.createObjectURL(new Blob([text],{type:'text/plain'})),a=document.createElement('a');a.href=url;a.download='meshtailor-target-uv.obj';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 $('diagnostic').onclick=()=>{if(!snapshot)return;const report={version:'0.4.12',asset:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},config:chartConfig,fragmentation:snapshot.fragmentation,repair:snapshot.repair,sourceAudit:snapshot.sourceAudit,areaAudit:snapshot.areaAudit,sourceAreaAudit:snapshot.sourceAreaAudit,spatialReport:snapshot.spatialReport,packingReport:snapshot.packingReport,merge:snapshot.merge,pageReport:snapshot.pageReport,uvSpaces:snapshot.geometry.atlas.spaces,metrics:snapshot.metrics,warnings:snapshot.warnings,timing:snapshot.timing};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='meshtailor-diagnostic.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 new ResizeObserver(drawUV).observe($('uvhost'));
 if($('clear-face'))$('clear-face').onclick=clearFace;
-window.lab={ready:false,view,options,errors,update,select,pick,clearFace,get inspection(){return inspection;},load,solve,postprocess,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
+window.lab={ready:false,view,options,errors,update,select,pick,boxSelect,clearFace,get inspection(){return inspection;},load,solve,postprocess,pause,uv,core,cancel,progressEvents:[],get snapshot(){return snapshot;},get mesh(){return mesh;},get playing(){return playing;}};
 for(const button of document.querySelectorAll('[data-tool]'))button.onclick=()=>{
   for(const tab of document.querySelectorAll('[data-tool]')){
     const selected=tab===button;tab.setAttribute('aria-selected',String(selected));

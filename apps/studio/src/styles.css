@@ -151,3 +151,10 @@ footer{flex:0 0 24px;display:flex;align-items:center;justify-content:space-betwe
 .overlap-legend[data-mode="unavailable"]{color:#eab1a1;border-left-color:#b96955}
 .overlap-legend[hidden]{display:none}
 .overlap-controls{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
+
+/* Box selection is an overlay, never a UV transform or part of export. */
+.uv-selection-box{position:absolute;pointer-events:none;z-index:8;border:1px solid #a9c9d0;background:#88b9c522;box-sizing:border-box;}
+.uv-selection-box[data-mode=invert]{border-style:dashed;border-color:#f0c979;background:#f0c97918}
+.uv-selection-box[data-mode=subtract]{border-style:dashed;border-color:#df9c91}
+.uv-selection-box[hidden]{display:none}
+.uv-box-hint{position:absolute;bottom:5px;left:8px;font-size:10px;color:#a5abad;pointer-events:none;background:#1b1d1faa;padding:2px 4px;}

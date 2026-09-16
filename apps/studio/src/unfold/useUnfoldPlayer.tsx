@@ -4,6 +4,7 @@ import type { UVSnapshot } from '../workers/uv.worker';
 import type { UnfoldDisplay } from './webgl-view';
 import { DEFAULT_AUTO_FRAME } from './camera-policy';
 import { DEFAULT_OVERLAP_MODE, DEFAULT_OVERLAP_TOLERANCE, DEFAULT_OVERLAP_OPACITY, type OverlapMode } from './overlap-policy';
+import { applyBoxSelection, type BoxMode } from './uv-box-selection';
 import { EMPTY_INSPECTION, selectInspectionIsland, resolveInspectionPick, type InspectionSelection } from './selection-policy';
 export type UnfoldScope='all'|'single'|'selected';
 export function useUnfoldPlayer(snapshot:UVSnapshot|null){
@@ -79,6 +80,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
     reset();applyInspection(next.state);setScope(additive?'selected':'single');
     if(!additive)seek(local); // Inspect the current pose instead of snapping to 3D.
   };
+  const boxSelect=(hits:number[],mode:BoxMode)=>{const ids=applyBoxSelection(inspection.current.islands,hits,all,mode);reset();applyInspection({islands:ids,face:null});setScope('selected');};
   const changeScope=(value:UnfoldScope)=>{
     reset();setScope(value);
     const ids=value==='all'?[]:value==='single'?[selection[0]??all[0]].filter((id):id is number=>id!==undefined):selection;
@@ -103,7 +105,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const toggle=()=>{setInspectionIndex(null);if(!snapshot||!active.length)return;if(!playing&&(reverse?ref.current<=0:ref.current>=1)){ref.current=reverse?1:0;setProgress(ref.current);}setPlaying(x=>!x);};
   const fit=(kind:'orbit'|'uv'|'current')=>{setAutoFrame(false);setCameraCommand(c=>({kind,key:c.key+1}));};
   return {rate,setRate,wallDuration,overlapMode,setOverlapMode,overlapTolerance,setOverlapTolerance,overlapOpacity,setOverlapOpacity,faceTones,setFaceTones,timeline,skipStatic,changeSkipStatic:(v:boolean)=>{reset();setSkipStatic(v);},motionTolerance,changeMotionTolerance:(v:number)=>{if(Number.isFinite(v)&&v>=0&&v<=.001){reset();setMotionTolerance(v);}},nominalDuration,handoff,changeHandoff,holdNet,changeHoldNet,schedule,focusIndex,remaining,seekStage,seekQueue,hingeWave,setHingeWave:(v:boolean)=>{reset();setHingeWave(v);},showHinges,setShowHinges,showTemporaryCuts,setShowTemporaryCuts,autoFrame,setAutoFrame,scope,selection,active,all,order,path,progress,playing,seconds,duration,reverse,loop,separation,context,checker,labels,focusFace,cameraCommand,
-    select,pick,changeScope,changeOrder,nextIsland,seek,toggle,fit,pause:()=>setPlaying(false),setPath:(v:UnfoldPath)=>{reset();setPath(v);},setSeconds,setReverse,setLoop,setSeparation:(v:number)=>{reset();setSeparation(v);},setContext,setChecker,setLabels,
+    select,pick,boxSelect,changeScope,changeOrder,nextIsland,seek,toggle,fit,pause:()=>setPlaying(false),setPath:(v:UnfoldPath)=>{reset();setPath(v);},setSeconds,setReverse,setLoop,setSeparation:(v:number)=>{reset();setSeparation(v);},setContext,setChecker,setLabels,
     clear,clearFace};
 }
 export type UnfoldPlayer=ReturnType<typeof useUnfoldPlayer>;
