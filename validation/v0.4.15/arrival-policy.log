@@ -1,0 +1,26 @@
+PASS Default uses .8 second hold and 1 second fade
+PASS Bounds, NaN and zero durations
+PASS Starting midway does not relight old arrivals
+PASS No tail until the complete local motion ends
+PASS Arrival starts fully opaque at the actual UV endpoint
+PASS Hold persists without restarting at constant progress
+PASS Mid fade is continuous, neither opaque nor background
+PASS Ends at background without another event or a frame loop
+PASS Multiple arrivals maintain independent clocks
+PASS Display timer is unrelated to subsequent progress/speed
+PASS pause clears and never leaks a presentation tail
+PASS off clears and never leaks a presentation tail
+PASS dither clears and never leaks a presentation tail
+PASS reverse clears and never leaks a presentation tail
+PASS rewind clears and never leaks a presentation tail
+PASS end clears and never leaks a presentation tail
+PASS source clears and never leaks a presentation tail
+PASS Resume cannot relight islands completed before pause
+PASS Changing selected queue clears previous island IDs
+PASS Changing geometry / disposing can reset all state
+PASS Changing settings affects display only, without restarting
+PASS Both settings zero restores legacy immediate dim
+PASS Compressed timeline uses the actual island endpoint
+PASS Forward wrap does not retain previous cycle tails
+PASS Source session supports first-frame crossing without phantom old arrivals
+PASS Presentation never mutates the geometry timeline or selection

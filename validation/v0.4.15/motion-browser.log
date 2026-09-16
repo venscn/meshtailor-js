@@ -1,0 +1,28 @@
+PASS DPR 1: default automatically skips unchanged spans with camera independent
+PASS DPR 1: geometry profiling is cached, not rerun on every frame
+PASS DPR 1: flat cube skips hinge and UV fit, reducing 12s base to 4.8s per island
+PASS DPR 1: skipped stage buttons collapse to one displayed pose
+PASS DPR 1: scrub uses identical compact clocks for poses, state and phase labels
+PASS DPR 1: no long motionless interior intervals across dense whole-queue sampling
+PASS DPR 1: skip switch restores fixed 12s stages for comparison, then re-enables compaction
+PASS DPR 1: manual teaching hold remains opt-in even with automatic pruning enabled
+PASS DPR 1: variable duration settings invalidate cached profile once
+PASS DPR 1: area-ordered selection and strict mode use actual selected durations
+PASS DPR 1: actual forward RAF playback finishes on shortened clock with no tail
+PASS DPR 1: actual reverse RAF playback finishes on shortened clock with no tail
+PASS DPR 1: endpoints exactly match source and exported target positions
+PASS DPR 1: no runtime errors or WebGL errors
+PASS DPR 2: default automatically skips unchanged spans with camera independent
+PASS DPR 2: geometry profiling is cached, not rerun on every frame
+PASS DPR 2: flat cube skips hinge and UV fit, reducing 12s base to 4.8s per island
+PASS DPR 2: skipped stage buttons collapse to one displayed pose
+PASS DPR 2: scrub uses identical compact clocks for poses, state and phase labels
+PASS DPR 2: no long motionless interior intervals across dense whole-queue sampling
+PASS DPR 2: skip switch restores fixed 12s stages for comparison, then re-enables compaction
+PASS DPR 2: manual teaching hold remains opt-in even with automatic pruning enabled
+PASS DPR 2: variable duration settings invalidate cached profile once
+PASS DPR 2: area-ordered selection and strict mode use actual selected durations
+PASS DPR 2: actual forward RAF playback finishes on shortened clock with no tail
+PASS DPR 2: actual reverse RAF playback finishes on shortened clock with no tail
+PASS DPR 2: endpoints exactly match source and exported target positions
+PASS DPR 2: no runtime errors or WebGL errors

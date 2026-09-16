@@ -1,0 +1,142 @@
+{
+  "suite": "Whole-context playback ghost, actual WebGL pixels",
+  "cases": [
+    {
+      "name": "DPR1: Paused selected queue stays solid",
+      "passed": true
+    },
+    {
+      "name": "DPR1: During playback whole waiting islands dim even far outside old sphere",
+      "passed": true,
+      "details": {
+        "changed": 51952,
+        "ids": [
+          0
+        ],
+        "context": 6,
+        "active": 3
+      }
+    },
+    {
+      "name": "DPR1: Both relay islands remain opaque including tail",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Fully completed UV island enters hold while next island stays opaque",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Pause restores exact prior pixels without resetting pose/camera/selection",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Restore original hidden context exactly",
+      "passed": true,
+      "details": {
+        "delta": 51952,
+        "restored": 0
+      }
+    },
+    {
+      "name": "DPR1: Restore original dim context exactly",
+      "passed": true,
+      "details": {
+        "delta": 51952,
+        "restored": 0
+      }
+    },
+    {
+      "name": "DPR1: Restore original solid context exactly",
+      "passed": true,
+      "details": {
+        "delta": 51952,
+        "restored": 0
+      }
+    },
+    {
+      "name": "DPR1: Endpoints restore even if caller flag is still true",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Off overrides ghost without touching geometry",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Geometry disposal restores diagnostic session state",
+      "passed": true
+    },
+    {
+      "name": "DPR1: No JS or WebGL errors",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Paused selected queue stays solid",
+      "passed": true
+    },
+    {
+      "name": "DPR2: During playback whole waiting islands dim even far outside old sphere",
+      "passed": true,
+      "details": {
+        "changed": 206161,
+        "ids": [
+          0
+        ],
+        "context": 6,
+        "active": 3
+      }
+    },
+    {
+      "name": "DPR2: Both relay islands remain opaque including tail",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Fully completed UV island enters hold while next island stays opaque",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Pause restores exact prior pixels without resetting pose/camera/selection",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Restore original hidden context exactly",
+      "passed": true,
+      "details": {
+        "delta": 206161,
+        "restored": 0
+      }
+    },
+    {
+      "name": "DPR2: Restore original dim context exactly",
+      "passed": true,
+      "details": {
+        "delta": 206161,
+        "restored": 0
+      }
+    },
+    {
+      "name": "DPR2: Restore original solid context exactly",
+      "passed": true,
+      "details": {
+        "delta": 206161,
+        "restored": 0
+      }
+    },
+    {
+      "name": "DPR2: Endpoints restore even if caller flag is still true",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Off overrides ghost without touching geometry",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Geometry disposal restores diagnostic session state",
+      "passed": true
+    },
+    {
+      "name": "DPR2: No JS or WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 24
+}

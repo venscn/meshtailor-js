@@ -1,0 +1,16 @@
+PASS Pipeline panel discoverable from header
+PASS Default explicitly shows disabled automatic fill
+PASS Changing plan is not automatic recomputation
+PASS Disable merge is a real plan switch
+PASS Explicit run executes source-atlas then exactly one fill
+PASS UI trace exposes actual completion and durations
+PASS Worker receives configured budget and rounds
+PASS Turning off fill preserves last output until rerun
+PASS Rerun with fill off really skips it
+PASS Config editing during running job cannot rewrite active plan
+PASS Cancel immediately preserves last complete atlas
+PASS Cancelled job cannot overwrite a newer inspection run
+PASS Raw inspection keeps original islands rather than reporting a hidden merge
+PASS New imported model uses chosen auto plan, not previous manual target
+PASS Main policy rejects inspect on missing UV without silent fallback
+PASS No browser JS or WebGL errors

@@ -1,3 +1,35 @@
+# v0.4.15 实际验证
+
+范围：UV到达展示状态、连续颜色／透明度、轮廓与编号，以及播放／拖动会话恢复。未修改UV求解、缝合、排布或运动几何。证据目录 `validation/v0.4.15/`。
+
+| 测试 | 结果 | 证据 |
+|---|---:|---|
+| 到达事件、真实秒计时、连续权重、暂停／回拖／零时长处理 | 26项通过 | `arrival-policy.json` |
+| 真实WebGL像素：亮显、渐隐两端及中点、轮廓／编号、原状态恢复 | 30项通过，DPI1/2 | `arrival-pixels.json` |
+| 实际RAF播放、真实指针拖动、松手、静止拖动等待、64×、设置 | 10项通过 | `arrival-workbench-final.json` |
+| 上下文半透明及精确恢复 | 24项通过 | `ghost-pixels.json` |
+| 播放／拖动事件生命周期 | 17项通过 | `session-browser.json` |
+| 自由相机 | 39项通过 | `camera-browser.json` |
+| 逐岛接力 | 28项通过 | `relay-browser.json` |
+| 跳过静止区间 | 28项通过 | `motion-browser.json` |
+| 两级选择／工作台 | 39项通过 | `selection-browser.json` |
+| 重叠显示真实像素 | 42项通过 | `overlap-browser.json` |
+| 自动处理流程浏览器 | 16项通过 | `pipeline-browser.json` |
+
+核心21项、铰链17项、选择20项、面积／倍速、接力、静止时间映射、运动检测、流程策略、Git工具均以退出码0结束，详见各同名log/exit。离线包从当前TS代码重新构建。新旧回归未删除恢复、相机或几何端点断言；只有“已完成即淡化”的断言被更新为到达亮显。
+
+像素测试使用实际Chromium软件WebGL和生产渲染器，仅固定显示时钟以精确读取0.8秒前后和渐隐中点；不是模拟GL。工作台测试使用实际墙钟、RAF、CDP鼠标操作，不模拟动画时钟。三角形在真实目标位置上的像素与实体参考一致；中间像素与两端均不同，最终像素与普通半透明背景一致。展示过程中源位置、当前姿态、进度、相机、选择未变化。
+
+### 明确未通过／未执行
+
+`full-build.exit=127`：实际构建停在 `vite: not found`。`full-types.exit=2`：缺少Node类型定义。`npm-registry.exit=1`：实际探测已固定React版本，DNS为`EAI_AGAIN`。
+
+修改的3份TSX语法转译通过，见 `tsx-syntax.json`，但不是全量类型检查。纯TS模块均经过严格smoke编译。未完成完整React主入口联调、Three通用导入、Safari或macOS/Windows实机认证。未重跑正确Corset/FlightHelmet的完整UV求解；它们的夹具仍原样保留，历史证据见下文。不把旧测试当作本轮新通过。
+
+最终ZIP的干净Git、文件逐字节、tag、bundle和解压复跑验证另附交付记录；下列内容为历史版本记录，不替代本节。
+
+---
+
 # v0.4.14 实际验证
 
 本版记录在 `validation/v0.4.14/`。在原v0.4.13基础上修改自动执行编排、可视化配置与播放/拖动期间的全局上下文半透明，没有重写UV优化算法。具体操作见 [RELEASE-0.4.14.md](RELEASE-0.4.14.md)。

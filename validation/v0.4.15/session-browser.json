@@ -1,0 +1,97 @@
+{
+  "suite": "Playback-only emphasis and real pointer/key scrub lifecycle",
+  "host": "Offline workbench + shared production modules; not React root",
+  "cases": [
+    {
+      "name": "Programmatic seek while paused never dims waiting islands",
+      "passed": true
+    },
+    {
+      "name": "Actual Play event dims non-moving selected islands",
+      "passed": true,
+      "details": {
+        "session": true,
+        "focus": "active",
+        "opaque": [
+          1
+        ],
+        "p": 0.17011823361823364,
+        "playing": true,
+        "context": "dim"
+      }
+    },
+    {
+      "name": "Actual Pause event restores without moving camera or seeking",
+      "passed": true
+    },
+    {
+      "name": "Pointer held on progress slider begins temporary emphasis",
+      "passed": true
+    },
+    {
+      "name": "Drag across queue updates opaque islands using actual timeline",
+      "passed": true,
+      "details": {
+        "ids": [
+          0,
+          2,
+          1
+        ],
+        "expected": [
+          0,
+          2,
+          1
+        ]
+      }
+    },
+    {
+      "name": "Pointer release outside slider ends session and restores",
+      "passed": true
+    },
+    {
+      "name": "Keyboard range navigation has explicit start and end",
+      "passed": true
+    },
+    {
+      "name": "Pointer cancellation restores rather than latching opacity",
+      "passed": true
+    },
+    {
+      "name": "Loss of capture restores display",
+      "passed": true
+    },
+    {
+      "name": "Window blur ends a held scrub gesture",
+      "passed": true
+    },
+    {
+      "name": "Drag during playback stops clock; release does not auto-resume",
+      "passed": true
+    },
+    {
+      "name": "Almost finished relay island stays solid until full local end",
+      "passed": true
+    },
+    {
+      "name": "Forward natural completion restores all prior display",
+      "passed": true
+    },
+    {
+      "name": "Reverse natural completion restores all prior display",
+      "passed": true
+    },
+    {
+      "name": "Changing emphasis opacity never computes new UV or changes camera",
+      "passed": true
+    },
+    {
+      "name": "Geometry replacement cannot retain old ghost overlay",
+      "passed": true
+    },
+    {
+      "name": "No JS or WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 17
+}

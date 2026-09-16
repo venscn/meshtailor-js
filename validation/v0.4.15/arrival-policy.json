@@ -1,0 +1,109 @@
+{
+  "passed": 26,
+  "cases": [
+    {
+      "name": "Default uses .8 second hold and 1 second fade",
+      "passed": true
+    },
+    {
+      "name": "Bounds, NaN and zero durations",
+      "passed": true
+    },
+    {
+      "name": "Starting midway does not relight old arrivals",
+      "passed": true
+    },
+    {
+      "name": "No tail until the complete local motion ends",
+      "passed": true
+    },
+    {
+      "name": "Arrival starts fully opaque at the actual UV endpoint",
+      "passed": true
+    },
+    {
+      "name": "Hold persists without restarting at constant progress",
+      "passed": true
+    },
+    {
+      "name": "Mid fade is continuous, neither opaque nor background",
+      "passed": true
+    },
+    {
+      "name": "Ends at background without another event or a frame loop",
+      "passed": true
+    },
+    {
+      "name": "Multiple arrivals maintain independent clocks",
+      "passed": true
+    },
+    {
+      "name": "Display timer is unrelated to subsequent progress/speed",
+      "passed": true
+    },
+    {
+      "name": "pause clears and never leaks a presentation tail",
+      "passed": true
+    },
+    {
+      "name": "off clears and never leaks a presentation tail",
+      "passed": true
+    },
+    {
+      "name": "dither clears and never leaks a presentation tail",
+      "passed": true
+    },
+    {
+      "name": "reverse clears and never leaks a presentation tail",
+      "passed": true
+    },
+    {
+      "name": "rewind clears and never leaks a presentation tail",
+      "passed": true
+    },
+    {
+      "name": "end clears and never leaks a presentation tail",
+      "passed": true
+    },
+    {
+      "name": "source clears and never leaks a presentation tail",
+      "passed": true
+    },
+    {
+      "name": "Resume cannot relight islands completed before pause",
+      "passed": true
+    },
+    {
+      "name": "Changing selected queue clears previous island IDs",
+      "passed": true
+    },
+    {
+      "name": "Changing geometry / disposing can reset all state",
+      "passed": true
+    },
+    {
+      "name": "Changing settings affects display only, without restarting",
+      "passed": true
+    },
+    {
+      "name": "Both settings zero restores legacy immediate dim",
+      "passed": true
+    },
+    {
+      "name": "Compressed timeline uses the actual island endpoint",
+      "passed": true
+    },
+    {
+      "name": "Forward wrap does not retain previous cycle tails",
+      "passed": true
+    },
+    {
+      "name": "Source session supports first-frame crossing without phantom old arrivals",
+      "passed": true
+    },
+    {
+      "name": "Presentation never mutates the geometry timeline or selection",
+      "passed": true
+    }
+  ]
+}

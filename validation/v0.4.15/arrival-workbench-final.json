@@ -1,0 +1,87 @@
+{
+  "suite": "Arrival presentation / real playback and scrub wall-time",
+  "scope": "Offline workbench + shared production Worker/WebGL, not React root",
+  "cases": [
+    {
+      "name": "Both controls have defaults and no automatic re-solving",
+      "passed": true
+    },
+    {
+      "name": "Changing timing never changes camera, snapshot, progress or geometry",
+      "passed": true
+    },
+    {
+      "name": "Actual RAF playback reaches UV and keeps landed island at full colour",
+      "passed": true,
+      "details": {
+        "t": [
+          {
+            "id": 1,
+            "phase": "hold",
+            "weight": 1,
+            "opacity": 1,
+            "ageSeconds": 0.13490000000002328
+          }
+        ],
+        "playing": true,
+        "p": 0.38058048433048436,
+        "geometry": true
+      }
+    },
+    {
+      "name": "Fade continues with real time while successor animates",
+      "passed": true,
+      "details": {
+        "a": [
+          {
+            "id": 1,
+            "phase": "fade",
+            "weight": 0.5877605325405045,
+            "opacity": 0.6619636366832138,
+            "ageSeconds": 1.2970999999999768
+          }
+        ],
+        "p": 0.4179736467236465,
+        "playing": true
+      }
+    },
+    {
+      "name": "Actual Pause cancels presentation immediately",
+      "passed": true
+    },
+    {
+      "name": "Stationary held scrub still runs its hold and fade",
+      "passed": true
+    },
+    {
+      "name": "64x leaves hold seconds unchanged and does not lengthen the queue",
+      "passed": true,
+      "details": {
+        "hold": 0.9,
+        "fade": 0.9,
+        "tail": [
+          {
+            "id": 1,
+            "phase": "hold",
+            "weight": 1,
+            "opacity": 1,
+            "ageSeconds": 0.13230000000004657
+          }
+        ]
+      }
+    },
+    {
+      "name": "Reverse playback does not relight old arrivals",
+      "passed": true
+    },
+    {
+      "name": "Input validation keeps empty controls from injecting NaN",
+      "passed": true
+    },
+    {
+      "name": "No camera resets, unexpected UV jobs or errors",
+      "passed": true
+    }
+  ],
+  "passed": 10
+}

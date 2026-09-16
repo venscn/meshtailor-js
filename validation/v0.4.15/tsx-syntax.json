@@ -1,0 +1,17 @@
+{
+  "scope": "syntax transpilation only; not full React typecheck",
+  "reports": [
+    {
+      "path": "apps/studio/src/App.tsx",
+      "syntaxPassed": true
+    },
+    {
+      "path": "apps/studio/src/unfold/UnfoldControls.tsx",
+      "syntaxPassed": true
+    },
+    {
+      "path": "apps/studio/src/unfold/useUnfoldPlayer.tsx",
+      "syntaxPassed": true
+    }
+  ]
+}

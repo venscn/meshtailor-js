@@ -1,0 +1,17 @@
+PASS Programmatic seek while paused never dims waiting islands
+PASS Actual Play event dims non-moving selected islands
+PASS Actual Pause event restores without moving camera or seeking
+PASS Pointer held on progress slider begins temporary emphasis
+PASS Drag across queue updates opaque islands using actual timeline
+PASS Pointer release outside slider ends session and restores
+PASS Keyboard range navigation has explicit start and end
+PASS Pointer cancellation restores rather than latching opacity
+PASS Loss of capture restores display
+PASS Window blur ends a held scrub gesture
+PASS Drag during playback stops clock; release does not auto-resume
+PASS Almost finished relay island stays solid until full local end
+PASS Forward natural completion restores all prior display
+PASS Reverse natural completion restores all prior display
+PASS Changing emphasis opacity never computes new UV or changes camera
+PASS Geometry replacement cannot retain old ghost overlay
+PASS No JS or WebGL errors

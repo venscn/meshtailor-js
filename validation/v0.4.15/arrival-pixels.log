@@ -1,0 +1,30 @@
+PASS Landing stays opaque and at target while successor keeps moving
+PASS Hold has exactly the opaque reference colour, not an arbitrary flash
+PASS Hold lasts .8 wall seconds with no progress changes
+PASS Early fade has no abrupt material recolour
+PASS True mid-fade GPU pixel differs from both endpoints
+PASS Fade reaches identical legacy background pixels
+PASS Fade changes no pose, selection, camera or timing
+PASS Labels ease with surface instead of snapping
+PASS Strict sequential boundary never flashes all waiting islands solid
+PASS Pause restores the previous display immediately and cancels all tails
+PASS Reverse and loop wrap clear the previous forward arrival
+PASS Natural completion restores rather than adding a full-queue delay
+PASS Geometry replacement clears old timers and stale IDs
+PASS Several fast arrivals have independent opacity without a two-tail cap
+PASS No shader, Javascript or WebGL errors
+PASS Landing stays opaque and at target while successor keeps moving
+PASS Hold has exactly the opaque reference colour, not an arbitrary flash
+PASS Hold lasts .8 wall seconds with no progress changes
+PASS Early fade has no abrupt material recolour
+PASS True mid-fade GPU pixel differs from both endpoints
+PASS Fade reaches identical legacy background pixels
+PASS Fade changes no pose, selection, camera or timing
+PASS Labels ease with surface instead of snapping
+PASS Strict sequential boundary never flashes all waiting islands solid
+PASS Pause restores the previous display immediately and cancels all tails
+PASS Reverse and loop wrap clear the previous forward arrival
+PASS Natural completion restores rather than adding a full-queue delay
+PASS Geometry replacement clears old timers and stale IDs
+PASS Several fast arrivals have independent opacity without a two-tail cap
+PASS No shader, Javascript or WebGL errors

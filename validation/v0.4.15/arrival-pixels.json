@@ -1,0 +1,290 @@
+{
+  "suite": "UV arrival hold + continuous fade: production WebGL pixels",
+  "cases": [
+    {
+      "name": "DPR1: Landing stays opaque and at target while successor keeps moving",
+      "passed": true,
+      "details": {
+        "s": [
+          {
+            "id": 0,
+            "phase": "hold",
+            "weight": 1,
+            "opacity": 1,
+            "ageSeconds": 0
+          }
+        ],
+        "motion": [
+          {
+            "id": 1,
+            "progress": 0.1500100000000001
+          }
+        ],
+        "pos": [
+          -4,
+          -0.800000011920929,
+          0,
+          -2,
+          -0.800000011920929,
+          0,
+          -3,
+          1,
+          0
+        ],
+        "target": [
+          -4,
+          -0.800000011920929,
+          0,
+          -2,
+          -0.800000011920929,
+          0,
+          -3,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "name": "DPR1: Hold has exactly the opaque reference colour, not an arbitrary flash",
+      "passed": true,
+      "details": {
+        "reference": [
+          94,
+          177,
+          212,
+          255
+        ],
+        "hold": [
+          94,
+          177,
+          212,
+          255
+        ]
+      }
+    },
+    {
+      "name": "DPR1: Hold lasts .8 wall seconds with no progress changes",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Early fade has no abrupt material recolour",
+      "passed": true
+    },
+    {
+      "name": "DPR1: True mid-fade GPU pixel differs from both endpoints",
+      "passed": true,
+      "details": {
+        "held": [
+          94,
+          177,
+          212,
+          255
+        ],
+        "mid": [
+          65,
+          100,
+          119,
+          255
+        ],
+        "ghost": [
+          38,
+          46,
+          52,
+          255
+        ],
+        "state": [
+          {
+            "id": 0,
+            "phase": "fade",
+            "weight": 0.5,
+            "opacity": 0.5900000000000001,
+            "ageSeconds": 1.3
+          }
+        ]
+      }
+    },
+    {
+      "name": "DPR1: Fade reaches identical legacy background pixels",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Fade changes no pose, selection, camera or timing",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Labels ease with surface instead of snapping",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Strict sequential boundary never flashes all waiting islands solid",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Pause restores the previous display immediately and cancels all tails",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Reverse and loop wrap clear the previous forward arrival",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Natural completion restores rather than adding a full-queue delay",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Geometry replacement clears old timers and stale IDs",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Several fast arrivals have independent opacity without a two-tail cap",
+      "passed": true
+    },
+    {
+      "name": "DPR1: No shader, Javascript or WebGL errors",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Landing stays opaque and at target while successor keeps moving",
+      "passed": true,
+      "details": {
+        "s": [
+          {
+            "id": 0,
+            "phase": "hold",
+            "weight": 1,
+            "opacity": 1,
+            "ageSeconds": 0
+          }
+        ],
+        "motion": [
+          {
+            "id": 1,
+            "progress": 0.1500100000000001
+          }
+        ],
+        "pos": [
+          -4,
+          -0.800000011920929,
+          0,
+          -2,
+          -0.800000011920929,
+          0,
+          -3,
+          1,
+          0
+        ],
+        "target": [
+          -4,
+          -0.800000011920929,
+          0,
+          -2,
+          -0.800000011920929,
+          0,
+          -3,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "name": "DPR2: Hold has exactly the opaque reference colour, not an arbitrary flash",
+      "passed": true,
+      "details": {
+        "reference": [
+          94,
+          177,
+          212,
+          255
+        ],
+        "hold": [
+          94,
+          177,
+          212,
+          255
+        ]
+      }
+    },
+    {
+      "name": "DPR2: Hold lasts .8 wall seconds with no progress changes",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Early fade has no abrupt material recolour",
+      "passed": true
+    },
+    {
+      "name": "DPR2: True mid-fade GPU pixel differs from both endpoints",
+      "passed": true,
+      "details": {
+        "held": [
+          94,
+          177,
+          212,
+          255
+        ],
+        "mid": [
+          65,
+          100,
+          119,
+          255
+        ],
+        "ghost": [
+          38,
+          46,
+          52,
+          255
+        ],
+        "state": [
+          {
+            "id": 0,
+            "phase": "fade",
+            "weight": 0.5,
+            "opacity": 0.5900000000000001,
+            "ageSeconds": 1.3
+          }
+        ]
+      }
+    },
+    {
+      "name": "DPR2: Fade reaches identical legacy background pixels",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Fade changes no pose, selection, camera or timing",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Labels ease with surface instead of snapping",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Strict sequential boundary never flashes all waiting islands solid",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Pause restores the previous display immediately and cancels all tails",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Reverse and loop wrap clear the previous forward arrival",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Natural completion restores rather than adding a full-queue delay",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Geometry replacement clears old timers and stale IDs",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Several fast arrivals have independent opacity without a two-tail cap",
+      "passed": true
+    },
+    {
+      "name": "DPR2: No shader, Javascript or WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 30
+}
