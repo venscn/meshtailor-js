@@ -47,9 +47,15 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
       <label className="check"><input aria-label="Hold rigid net" type="checkbox" checked={p.holdNet} onChange={e=>p.changeHoldNet(e.target.checked)}/>平面网额外停留</label>
       <small>仅相邻两岛尾段交叠。等待岛留在 3D，完成岛留在 UV。</small>
     </details>
+    <details open><summary>当前播放岛 · 避遮挡</summary>
+      <label className="check"><input aria-label="Playback focus dissolve" type="checkbox" checked={p.focusMode==='dither'} onChange={e=>p.setFocusMode(e.target.checked?'dither':'off')}/>周边模型局部散点淡出</label>
+      <label>球形范围<input aria-label="Focus sphere radius" type="range" min="1" max="3" step=".1" value={p.focusRadius} onChange={e=>p.setFocusRadius(+e.target.value)}/><small>{p.focusRadius.toFixed(1)} × 当前岛半径</small></label>
+      <label>遮挡面残留<input aria-label="Focus retained opacity" type="range" min=".02" max=".8" step=".01" value={p.focusRetained} onChange={e=>p.setFocusRetained(+e.target.value)}/><small>{Math.round(p.focusRetained*100)}%</small></label>
+      <small>只影响当前岛周围球形范围内的其他面片；接力中的两岛保持实体。无需相机跟随，暂停也可观察。</small>
+    </details>
     <details open className="overlap-controls" data-testid="overlap-controls"><summary>重叠与面片识别</summary>
-      <label>重叠提示<select aria-label="Overlap visualization" value={p.overlapMode} onChange={e=>p.setOverlapMode(e.target.value as OverlapMode)}><option value="coplanar">同岛近共面重叠 · 默认</option><option value="projected">视线叠层 · 含前后遮挡</option><option value="off">关闭</option></select></label>
-      <small>{p.overlapMode==='projected'?'视线叠层包含普通遮挡，不代表几何相交。':'近共面提示只检测当前可见表层附近的同岛面片。'}</small>
+      <label>重叠提示<select aria-label="Overlap visualization" value={p.overlapMode} onChange={e=>p.setOverlapMode(e.target.value as OverlapMode)}><option value="auto">自动 · 运动岛视线叠层</option><option value="coplanar">同岛近共面重叠</option><option value="projected">视线叠层 · 含前后遮挡</option><option value="off">关闭</option></select></label>
+      <small>{p.overlapMode==='auto'?'铰链尚未展平时也提示当前运动岛的视线叠层；静止后切为近共面提示。投影遮挡不等于碰撞。':p.overlapMode==='projected'?'视线叠层包含普通遮挡，不代表几何相交。':'近共面提示只检测当前可见表层附近的同岛面片。'}</small>
       <label className="check"><input aria-label="Triangle tone variation" type="checkbox" checked={p.faceTones} onChange={e=>p.setFaceTones(e.target.checked)}/>三角形明暗分色（保留岛色）</label>
       <label>条纹强度 <b>{Math.round(p.overlapOpacity*100)}%</b><input aria-label="Overlap hatch opacity" type="range" min=".1" max="1" step=".01" value={p.overlapOpacity} onChange={e=>p.setOverlapOpacity(+e.target.value)}/></label>
       <details><summary>检测容差</summary><label>距离 / 模型最长边 %<input aria-label="Overlap relative tolerance percent" type="number" min=".0001" max="1" step=".001" value={p.overlapTolerance*100} onChange={e=>{const v=+e.target.value;if(Number.isFinite(v)&&v>=.0001&&v<=1)p.setOverlapTolerance(v/100);}}/></label><small>默认 0.01%。过大会把靠得很近的平行面算作重叠；不是精确自交验证。</small></details>

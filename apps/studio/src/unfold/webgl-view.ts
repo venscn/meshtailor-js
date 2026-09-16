@@ -3,10 +3,11 @@ import { viewportSize } from '../viewport-math.js';
 import { cameraBasis, cameraMatrix, pickFace, projectPoint, type OrbitCamera } from './camera-math.js';
 import type { Vec3 } from '@meshtailor/mesh-core';
 import { CameraFollowPolicy, DEFAULT_AUTO_FRAME } from './camera-policy.js';
+import {FOCUS_GLSL,focusSettings,playbackFocusSpheres,uploadFocusUniforms,type FocusSettings,type FocusSphere} from './focus-policy.js';
 import { OverlapPass } from './overlap-pass.js';
 import { overlapSettings, overlapLegend, sourceModelScale, type OverlapSettings } from './overlap-policy.js';
 
-export interface UnfoldDisplay extends UnfoldOptions, OverlapSettings {
+export interface UnfoldDisplay extends UnfoldOptions, OverlapSettings, FocusSettings {
   showHinges?:boolean; showTemporaryCuts?:boolean;
   /** Opt-in only. A camera gesture disables following until explicitly re-enabled. */
   autoFrame?:boolean;
@@ -23,11 +24,13 @@ precision highp int;
 layout(location=0) in vec3 position;
 layout(location=1) in vec3 color;
 layout(location=2) in vec2 uv;
+layout(location=3) in float chart;
+flat out float vChart;
 uniform mat4 mvp;
 out vec3 vColor; out vec3 vWorld; out vec2 vUV; out vec3 bary;
 flat out int face;
 void main(){
-  vColor=color; vWorld=position; vUV=uv; face=gl_VertexID/3;
+  vChart=chart;vColor=color; vWorld=position; vUV=uv; face=gl_VertexID/3;
   int k=gl_VertexID%3; bary=k==0?vec3(1,0,0):k==1?vec3(0,1,0):vec3(0,0,1);
   gl_Position=mvp*vec4(position,1.0);
 }`;
@@ -37,8 +40,11 @@ precision highp int;
 in vec3 vColor; in vec3 vWorld; in vec2 vUV; in vec3 bary; flat in int face;
 uniform float opacity; uniform bool wire; uniform bool checker; uniform bool lineMode;
 uniform vec3 lineColor; uniform int focus; uniform bool dashed; uniform bool faceTones; uniform bool edgeOnly;
+flat in float vChart;
+${FOCUS_GLSL}
 out vec4 result;
 void main(){
+  if(focusVisibility(vWorld,vChart)<focusThreshold(gl_FragCoord.xy))discard;
   if(lineMode){if(dashed&&mod(gl_FragCoord.x+gl_FragCoord.y,12.0)<4.0)discard;result=vec4(lineColor,opacity);return;}
   vec3 c=vColor;
   if(faceTones){uint h=uint(face)*1664525u+1013904223u;c*=.84+float((h>>16u)&255u)/255.0*.30;}
@@ -63,11 +69,13 @@ export class UnfoldWebGLView {
   private overlapPass: OverlapPass | null = null;
   private overlapFailure: string | null = null;
   private modelScale = 1;
+  private focusSpheres:FocusSphere[]=[];
   private readonly observer: ResizeObserver;
   private program!: WebGLProgram;
   private vao!: WebGLVertexArrayObject;
   private positionBuffer!: WebGLBuffer;
   private activeBuffer!: WebGLBuffer;
+  private motionBuffer!:WebGLBuffer;private motionCount=0;private motionKey='';
   private contextBuffer!: WebGLBuffer;
   private hingeBuffer!:WebGLBuffer; private temporaryBuffer!:WebGLBuffer;
   private hingeCount=0; private temporaryCount=0; private lastPose="";
@@ -119,7 +127,7 @@ export class UnfoldWebGLView {
     for(const name of ['mvp','opacity','wire','checker','lineMode','lineColor','focus','dashed','faceTones','edgeOnly'])this.uniforms.set(name,gl.getUniformLocation(program,name)!);
     this.vao=gl.createVertexArray()!;this.atlasVAO=gl.createVertexArray()!;
     this.buffers=[];
-    this.positionBuffer=this.buffer();this.activeBuffer=this.buffer();this.contextBuffer=this.buffer();this.seamBuffer=this.buffer();this.hingeBuffer=this.buffer();this.temporaryBuffer=this.buffer();
+    this.positionBuffer=this.buffer();this.activeBuffer=this.buffer();this.contextBuffer=this.buffer();this.seamBuffer=this.buffer();this.hingeBuffer=this.buffer();this.temporaryBuffer=this.buffer();this.motionBuffer=this.buffer();
   }
   private buffer(){const b=this.gl.createBuffer()!;this.buffers.push(b);return b;}
   private uniform(name:string){return this.uniforms.get(name)!;}
@@ -128,11 +136,11 @@ export class UnfoldWebGLView {
     gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,size,gl.FLOAT,false,0,0);
   }
   setGeometry(data:UnfoldGeometry|null,{resetCamera=true}:{resetCamera?:boolean}={}){
-    this.data=data;this.positions=data?data.source.slice():new Float32Array(0);this.modelScale=data?sourceModelScale(data.source):1;this.lastSelection='';this.lastPose='';
+    this.data=data;this.positions=data?data.source.slice():new Float32Array(0);this.modelScale=data?sourceModelScale(data.source):1;this.lastSelection='';this.lastPose='';this.motionKey='';
     if(!data){this.overlapPass?.releaseTargets();this.diagnosticNotice.hidden=true;this.activeCount=this.contextCount=this.seamCount=0;this.labelHost.replaceChildren();this.labels=[];this.hingeLabels=[];this.invalidate();return;}
     // Reuse the fixed position/index buffers; replace only the two immutable attributes.
     const gl=this.gl;
-    for(const b of this.buffers.splice(6))gl.deleteBuffer(b);
+    for(const b of this.buffers.splice(7))gl.deleteBuffer(b);
     gl.bindVertexArray(this.vao);
     this.attribute(0,3,this.positions,true,this.positionBuffer);
     const colors=new Float32Array(data.source.length);
@@ -176,6 +184,9 @@ export class UnfoldWebGLView {
       this.makeLabels();
     }
     writeUnfoldPositions(data,options,this.positions);
+    this.focusSpheres=playbackFocusSpheres(data,this.positions,this.options,this.modelScale);
+    this.canvas.dataset.focusSpheres=JSON.stringify(this.focusSpheres);
+    this.canvas.dataset.focusMode=focusSettings(options).mode;
     const poseKey=JSON.stringify([options.progress,ids,options.path,options.separation,options.order,options.handoff,options.holdNet,options.hingeWave,options.context]);
     // This is the only animation-driven camera write. A held pointer suspends it;
     // a drag/wheel latches it off before modifying the user's camera.
@@ -195,6 +206,8 @@ export class UnfoldWebGLView {
     this.canvas.dataset.targetError=options.progress===1&&ids.length===data.islands.length?String(this.positions.reduce((m,v,i)=>Math.max(m,Math.abs(v-data.target[i]!)),0)):'not-at-all-target';
     this.canvas.dataset.sourceError=options.progress===0?String(this.positions.reduce((m,v,i)=>Math.max(m,Math.abs(v-data.source[i]!)),0)):'not-at-source';
     const schedule=sampleUnfoldSchedule(options.progress,ids.length,options.order,options.handoff,false,options.timeline);
+    const movingIDs=schedule.active.map(a=>ids[a.index]!);
+    const movingKey=JSON.stringify(movingIDs);if(movingKey!==this.motionKey){this.motionKey=movingKey;const set=new Set(movingIDs),ix:number[]=[];for(let f=0;f<data.faceChart.length;f++)if(set.has(data.faceChart[f]!))ix.push(f*3,f*3+1,f*3+2);this.motionCount=ix.length;gl.bindVertexArray(this.vao);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.motionBuffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(ix),gl.DYNAMIC_DRAW);}
     this.canvas.dataset.completed=String(schedule.completed);
     this.canvas.dataset.waiting=String(schedule.waiting);
     this.canvas.dataset.animating=JSON.stringify(schedule.active.map(a=>({id:ids[a.index],progress:a.progress})));
@@ -255,6 +268,7 @@ export class UnfoldWebGLView {
   }
   /** Public snapshot for regression diagnostics, not a second animation implementation. */
   getPositions(){return this.positions.slice();}
+  getFocusState(){return {settings:focusSettings(this.options),spheres:this.focusSpheres};}
   getCamera(){return {...this.camera,target:[...this.camera.target]};}
   /** Opt-in debug readback, never invoked by ordinary playback. */
   getOverlapCounts(){return this.overlapPass?.readCounts()??{width:0,height:0,counts:new Uint8Array()};}
@@ -265,12 +279,16 @@ export class UnfoldWebGLView {
     if(settings.mode==='off'){
       this.overlapPass?.releaseTargets();this.canvas.dataset.overlapMode='off';return;
     }
+    const autoMoving=settings.mode==='auto'&&this.motionCount>0;
+    const effectiveMode=settings.mode==='auto'?(autoMoving?'projected':'coplanar'):settings.mode;
+    this.canvas.dataset.overlapEffective=effectiveMode;
     try{
       if(!this.overlapFailure){
         this.overlapPass??=new OverlapPass(gl);
-        this.overlapPass.render({vao:this.vao,active:this.activeBuffer,activeCount:this.activeCount,context:this.contextBuffer,contextCount:this.contextCount,
+        this.overlapPass.render({focusSpheres:this.focusSpheres,focusRetained:focusSettings(this.options).retained,vao:this.vao,active:this.activeBuffer,activeCount:this.activeCount,context:this.contextBuffer,contextCount:this.contextCount,
           solidContext:this.options.context==='solid',mvp,camera:this.camera,width:this.canvas.width,height:this.canvas.height,dpr:this.size.dpr,
-          mode:settings.mode,tolerance:settings.tolerance,modelScale:this.modelScale,opacity:settings.opacity});
+          countActive:autoMoving?this.motionBuffer:undefined,countActiveCount:autoMoving?this.motionCount:undefined,
+          mode:effectiveMode,tolerance:settings.tolerance,modelScale:this.modelScale,opacity:settings.opacity});
       }
     }catch(error){
       // Diagnostic failure must not turn a working mesh viewer into an error screen.
@@ -279,7 +297,7 @@ export class UnfoldWebGLView {
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.useProgram(this.program);gl.bindVertexArray(this.vao);
       gl.enable(gl.DEPTH_TEST);gl.depthMask(true);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
     }
-    const text=this.overlapFailure?'重叠提示不可用（基础视图仍可操作）：'+this.overlapFailure:overlapLegend(settings.mode);
+    const text=this.overlapFailure?'重叠提示不可用（基础视图仍可操作）：'+this.overlapFailure:(settings.mode==='auto'?`自动 · ${autoMoving?'仅当前运动岛 · ':''}`:'')+overlapLegend(effectiveMode);
     if(this.diagnosticNotice.textContent!==text)this.diagnosticNotice.textContent=text;
     this.diagnosticNotice.dataset.mode=this.overlapFailure?'unavailable':settings.mode;
     this.canvas.dataset.overlapMode=this.diagnosticNotice.dataset.mode;
@@ -297,7 +315,9 @@ export class UnfoldWebGLView {
     gl.uniform1i(this.uniform('checker'),Number(this.options.checker));gl.uniform1i(this.uniform('wire'),Number(this.options.wireframe));gl.uniform1i(this.uniform('focus'),this.options.focusFace??-1);
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.disable(gl.CULL_FACE);
     gl.uniform1i(this.uniform('lineMode'),1);gl.uniform3f(this.uniform('lineColor'),.23,.31,.39);gl.uniform1f(this.uniform('opacity'),.8);
+    gl.uniform1i(gl.getUniformLocation(this.program,'focusCount'),0);
     gl.disable(gl.DEPTH_TEST);gl.bindVertexArray(this.atlasVAO);gl.drawArrays(gl.LINES,0,this.atlasLineCount);
+    uploadFocusUniforms(gl,this.program,this.focusSpheres,focusSettings(this.options).retained);
     gl.bindVertexArray(this.vao);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
     gl.uniform1i(this.uniform('lineMode'),0);
     gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1,1);

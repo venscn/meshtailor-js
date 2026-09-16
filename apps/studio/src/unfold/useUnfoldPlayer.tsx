@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { areaOrderedIslands, validPlaybackRate, DEFAULT_SEPARATION, buildMotionTimeline, motionLocal, DEFAULT_SKIP_STATIC, DEFAULT_MOTION_RELATIVE_EPSILON, DEFAULT_UNFOLD_ORDER, DEFAULT_HANDOFF, MIN_HANDOFF, unfoldDuration, sampleUnfoldSchedule, islandTimelineProgress, hingePlaybackProgress, advanceUnfoldPlayback, islandProgress, type UnfoldOrder, type UnfoldPath } from '@meshtailor/uv';
 import type { UVSnapshot } from '../workers/uv.worker';
 import type { UnfoldDisplay } from './webgl-view';
+import {FOCUS_DEFAULTS} from './focus-policy';
 import { DEFAULT_AUTO_FRAME } from './camera-policy';
 import { DEFAULT_OVERLAP_MODE, DEFAULT_OVERLAP_TOLERANCE, DEFAULT_OVERLAP_OPACITY, type OverlapMode } from './overlap-policy';
 import { applyBoxSelection, type BoxMode } from './uv-box-selection';
@@ -21,6 +22,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const [context,setContext]=useState<UnfoldDisplay['context']>('dim'),[checker,setChecker]=useState(false),[labels,setLabels]=useState(true);
   const [hingeWave,setHingeWave]=useState(true),[showHinges,setShowHinges]=useState(true),[showTemporaryCuts,setShowTemporaryCuts]=useState(true),[autoFrame,setAutoFrame]=useState(DEFAULT_AUTO_FRAME);
   const [overlapMode,setOverlapMode]=useState<OverlapMode>(DEFAULT_OVERLAP_MODE),[overlapTolerance,setOverlapTolerance]=useState(DEFAULT_OVERLAP_TOLERANCE),[overlapOpacity,setOverlapOpacity]=useState(DEFAULT_OVERLAP_OPACITY),[faceTones,setFaceTones]=useState(true);
+  const [focusMode,setFocusMode]=useState<'off'|'dither'>(FOCUS_DEFAULTS.focusMode),[focusRadius,setFocusRadius]=useState(FOCUS_DEFAULTS.focusRadius),[focusRetained,setFocusRetained]=useState(FOCUS_DEFAULTS.focusRetained);
   const [focusFace,setFocusFace]=useState<number|null>(null);
   // Synchronous ref also handles consecutive pointer events before React paints.
   // Playback's `active` list is not an implicit inspection selection.
@@ -104,7 +106,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const nextIsland=(direction:number)=>{const index=Math.max(0,all.indexOf(selection[0]??-1)),id=all[(index+direction+all.length)%all.length];if(id!==undefined)select(id);};
   const toggle=()=>{setInspectionIndex(null);if(!snapshot||!active.length)return;if(!playing&&(reverse?ref.current<=0:ref.current>=1)){ref.current=reverse?1:0;setProgress(ref.current);}setPlaying(x=>!x);};
   const fit=(kind:'orbit'|'uv'|'current')=>{setAutoFrame(false);setCameraCommand(c=>({kind,key:c.key+1}));};
-  return {rate,setRate,wallDuration,overlapMode,setOverlapMode,overlapTolerance,setOverlapTolerance,overlapOpacity,setOverlapOpacity,faceTones,setFaceTones,timeline,skipStatic,changeSkipStatic:(v:boolean)=>{reset();setSkipStatic(v);},motionTolerance,changeMotionTolerance:(v:number)=>{if(Number.isFinite(v)&&v>=0&&v<=.001){reset();setMotionTolerance(v);}},nominalDuration,handoff,changeHandoff,holdNet,changeHoldNet,schedule,focusIndex,remaining,seekStage,seekQueue,hingeWave,setHingeWave:(v:boolean)=>{reset();setHingeWave(v);},showHinges,setShowHinges,showTemporaryCuts,setShowTemporaryCuts,autoFrame,setAutoFrame,scope,selection,active,all,order,path,progress,playing,seconds,duration,reverse,loop,separation,context,checker,labels,focusFace,cameraCommand,
+  return {focusMode,setFocusMode,focusRadius,setFocusRadius,focusRetained,setFocusRetained,rate,setRate,wallDuration,overlapMode,setOverlapMode,overlapTolerance,setOverlapTolerance,overlapOpacity,setOverlapOpacity,faceTones,setFaceTones,timeline,skipStatic,changeSkipStatic:(v:boolean)=>{reset();setSkipStatic(v);},motionTolerance,changeMotionTolerance:(v:number)=>{if(Number.isFinite(v)&&v>=0&&v<=.001){reset();setMotionTolerance(v);}},nominalDuration,handoff,changeHandoff,holdNet,changeHoldNet,schedule,focusIndex,remaining,seekStage,seekQueue,hingeWave,setHingeWave:(v:boolean)=>{reset();setHingeWave(v);},showHinges,setShowHinges,showTemporaryCuts,setShowTemporaryCuts,autoFrame,setAutoFrame,scope,selection,active,all,order,path,progress,playing,seconds,duration,reverse,loop,separation,context,checker,labels,focusFace,cameraCommand,
     select,pick,boxSelect,changeScope,changeOrder,nextIsland,seek,toggle,fit,pause:()=>setPlaying(false),setPath:(v:UnfoldPath)=>{reset();setPath(v);},setSeconds,setReverse,setLoop,setSeparation:(v:number)=>{reset();setSeparation(v);},setContext,setChecker,setLabels,
     clear,clearFace};
 }

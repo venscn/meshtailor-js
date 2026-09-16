@@ -1,3 +1,4 @@
+import {FOCUS_GLSL,uploadFocusUniforms,type FocusSphere} from './focus-policy.js';
 import { cameraBasis, type OrbitCamera } from './camera-math.js';
 import { diagnosticSize, overlapWorldTolerance, type OverlapMode } from './overlap-policy.js';
 
@@ -18,12 +19,15 @@ precision highp float;
 precision highp int;
 in vec3 world;flat in uint islandID;
 uniform vec3 eye;uniform vec3 forward;uniform float farPlane;uniform bool eligible;
+uniform vec2 pixelScale;
+${FOCUS_GLSL}
 layout(location=0) out vec4 normalData;
 layout(location=1) out vec4 identityData;
 layout(location=2) out vec4 linearData;
 ${PACK}
 void main(){
   vec3 n=cross(dFdx(world),dFdy(world));float len=length(n);if(len<1e-20)discard;
+  if(focusVisibility(world,float(islandID)-1.0)<focusThreshold(gl_FragCoord.xy*pixelScale))discard;
   normalData=vec4(n/len*.5+.5,eligible?1.0:0.0);
   identityData=vec4(encode24(islandID),1.0);
   uint depth=uint(round(clamp(dot(world-eye,forward)/farPlane,0.0,1.0)*16777215.0));
@@ -82,12 +86,14 @@ void main(){
 
 interface Program { handle: WebGLProgram; uniforms: Map<string, WebGLUniformLocation | null> }
 export interface OverlapDraw {
+  focusSpheres?:readonly FocusSphere[];focusRetained?:number;
   vao: WebGLVertexArrayObject;
   active: WebGLBuffer; activeCount: number;
+  countActive?:WebGLBuffer;countActiveCount?:number;
   context: WebGLBuffer; contextCount: number; solidContext: boolean;
   mvp: Float32Array; camera: OrbitCamera;
   width: number; height: number; dpr: number;
-  mode: Exclude<OverlapMode, 'off'>; tolerance: number; modelScale: number; opacity: number;
+  mode: Exclude<OverlapMode, 'off'|'auto'>; tolerance: number; modelScale: number; opacity: number;
 }
 
 /** GPU-only visible-surface diagnostic, NOT a mesh self-intersection solver.
@@ -174,7 +180,7 @@ export class OverlapPass {
       gl.colorMask(true,true,true,true);gl.depthMask(true);gl.depthFunc(gl.LEQUAL);gl.enable(gl.DEPTH_TEST);gl.disable(gl.BLEND);
       gl.viewport(0,0,this.width,this.height);gl.bindVertexArray(a.vao);
       gl.bindFramebuffer(gl.FRAMEBUFFER,this.front);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-      const p=this.surface;gl.useProgram(p.handle);gl.uniformMatrix4fv(this.u(p,'mvp'),false,a.mvp);
+      const p=this.surface;gl.useProgram(p.handle);uploadFocusUniforms(gl,p.handle,a.focusSpheres??[],a.focusRetained??.12);gl.uniform2f(this.u(p,'pixelScale'),a.width/this.width,a.height/this.height);gl.uniformMatrix4fv(this.u(p,'mvp'),false,a.mvp);
       gl.uniform3fv(this.u(p,'eye'),basis.eye);gl.uniform3fv(this.u(p,'forward'),basis.forward);gl.uniform1f(this.u(p,'farPlane'),far);
       if(a.solidContext&&a.contextCount){gl.uniform1i(this.u(p,'eligible'),0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,a.context);gl.drawElements(gl.TRIANGLES,a.contextCount,gl.UNSIGNED_INT,0);}
       gl.uniform1i(this.u(p,'eligible'),1);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,a.active);gl.drawElements(gl.TRIANGLES,a.activeCount,gl.UNSIGNED_INT,0);
@@ -185,7 +191,8 @@ export class OverlapPass {
       gl.uniform2f(this.u(q,'resolution'),this.width,this.height);gl.uniform1f(this.u(q,'aspect'),a.width/a.height);
       gl.uniform1f(this.u(q,'farPlane'),far);gl.uniform1f(this.u(q,'tolerance'),overlapWorldTolerance(a.modelScale,a.tolerance,far));gl.uniform1i(this.u(q,'projected'),Number(a.mode==='projected'));
       gl.enable(gl.BLEND);gl.blendEquation(gl.FUNC_ADD);gl.blendFunc(gl.ONE,gl.ONE);
-      gl.drawElements(gl.TRIANGLES,a.activeCount,gl.UNSIGNED_INT,0);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,a.countActive??a.active);
+      gl.drawElements(gl.TRIANGLES,a.countActiveCount??a.activeCount,gl.UNSIGNED_INT,0);
       // Only the intersection's pixels are painted; original island colors remain elsewhere.
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,a.width,a.height);gl.bindVertexArray(this.screenVAO);
       const r=this.screen;gl.useProgram(r.handle);this.texture(r,'layers',0,this.textures[3]!);

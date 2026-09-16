@@ -13,7 +13,7 @@ let inspectionIndex=null, timelineGeometry=null, timelineKey='';
 let chartConfig={...uv.DEFAULT_UNWRAP};
 let postSeed;
 let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,sequence=0;
-const options={overlapMode:'coplanar',overlapTolerance:.0001,overlapOpacity:.72,faceTones:true,skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
+const options={focusMode:'dither',focusRadius:1.2,focusRetained:.12,overlapMode:'auto',overlapTolerance:.0001,overlapOpacity:.72,faceTones:true,skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
 const view=new UnfoldWebGLView($('view'),(id,face,add)=>pick(id,face,add),e=>{if(e)fail(e);},()=>{options.autoFrame=false;$('frame').checked=false;view.setOptions(options);cameraStatus();});
 function cameraStatus(){$('frame').checked=options.autoFrame;$('camera-status').textContent=options.autoFrame?'自动跟随中；操作相机会立即关闭跟随，动画继续。':'手动相机：动画不改变视角。适配按钮只执行一次。';}
@@ -147,6 +147,7 @@ $('source-layout').onchange=()=>{chartConfig.sourceUVLayout=$('source-layout').v
 $('solve').onclick=solve;$('cancel').onclick=()=>{cancel();$('status').textContent='已取消本次求解。';};$('target').onchange=solve;
 $('all').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update({progress:0});};$('none').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=[];list();update({progress:0});};
 $('separation').oninput=()=>{pause();update({separation:Number($('separation').value),progress:0});};$('in-place').onclick=()=>{pause();$('separation').value='0';update({separation:0,progress:0});};
+$('focus-dissolve').onchange=()=>update({focusMode:$('focus-dissolve').checked?'dither':'off'});$('focus-radius').oninput=()=>update({focusRadius:Number($('focus-radius').value)});$('focus-retained').oninput=()=>update({focusRetained:Number($('focus-retained').value)});
 $('overlap-mode').onchange=()=>update({overlapMode:$('overlap-mode').value});
 $('overlap-opacity').oninput=()=>update({overlapOpacity:Number($('overlap-opacity').value)});
 $('overlap-tolerance').onchange=()=>{const n=Number($('overlap-tolerance').value);if(Number.isFinite(n)&&n>=.0001&&n<=1)update({overlapTolerance:n/100});};

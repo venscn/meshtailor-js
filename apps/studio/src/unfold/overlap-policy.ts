@@ -1,6 +1,6 @@
 /** Render-only diagnostics. These settings must never enter UV solving or motion timing. */
-export type OverlapMode = 'off' | 'coplanar' | 'projected';
-export const DEFAULT_OVERLAP_MODE: OverlapMode = 'coplanar';
+export type OverlapMode = 'off' | 'auto' | 'coplanar' | 'projected';
+export const DEFAULT_OVERLAP_MODE: OverlapMode = 'auto';
 /** Near-coincident surfaces within 0.01% of the source model's longest side. */
 export const DEFAULT_OVERLAP_TOLERANCE = 1e-4;
 export const DEFAULT_OVERLAP_OPACITY = .72;
@@ -14,7 +14,7 @@ export interface OverlapSettings {
 const finite = (n: number | undefined, fallback: number) => Number.isFinite(n) ? n! : fallback;
 export function overlapSettings(s: OverlapSettings) {
   return {
-    mode: (['off', 'coplanar', 'projected'] as const).includes(s.overlapMode!) ? s.overlapMode! : DEFAULT_OVERLAP_MODE,
+    mode: (['off', 'auto', 'coplanar', 'projected'] as const).includes(s.overlapMode!) ? s.overlapMode! : DEFAULT_OVERLAP_MODE,
     tolerance: Math.max(1e-6, Math.min(.01, finite(s.overlapTolerance, DEFAULT_OVERLAP_TOLERANCE))),
     opacity: Math.max(.1, Math.min(1, finite(s.overlapOpacity, DEFAULT_OVERLAP_OPACITY))),
     faceTones: s.faceTones !== false,
@@ -41,6 +41,7 @@ export function overlapWorldTolerance(scale: number, relative: number, far: numb
   return Math.max(scale * relative, 2 * far / 16777215);
 }
 export function overlapLegend(mode: OverlapMode) {
+  if (mode === 'auto') return '自动叠层：运动岛视线叠层（非几何相交），静止时近共面检查';
   if (mode === 'off') return '重叠提示已关闭';
   const kind = mode === 'projected' ? '视线叠层（含前后遮挡，非几何相交）' : '同岛近共面重叠（当前可见表层）';
   return `${kind} · 橙色斜纹：2 层 · 玫红交叉纹：3 层及以上`;
