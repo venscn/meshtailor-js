@@ -11,6 +11,7 @@ try{
  const options={fillMode:'area-priority',fillResolution:256,fillRounds:6,fillStep:.08,fillMaxAreaGain:1.6,fillTimeBudgetMs:30000,padding:.003};
  const base=uv.packAtlas(raw),r=uv.packAtlas(raw,options),f=r.packingReport.refinement;
  test('concavity refinement increases real occupancy',()=>assert.ok(r.occupancy>base.occupancy+.08,JSON.stringify(f)));
+ test('report records effective settings for reproduction',()=>assert.deepEqual(f.settings,{step:.08,maxAreaGain:1.6,maxRounds:6,warmupPasses:3,timeBudgetMs:30000,maxTrials:128,rotate:true}));
  test('baseline remains immutable',()=>assert.equal(JSON.stringify(raw,(_,v)=>v instanceof Map?[...v]:v),source));
  test('all original islands preserved',()=>assert.deepEqual(r.packed.map(p=>p.id),raw.map(p=>p.id)));
  test('large source area first, not array/id order',()=>assert.deepEqual(f.order,[3,11,90]));
