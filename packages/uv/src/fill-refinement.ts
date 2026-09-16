@@ -7,11 +7,11 @@ import {RasterBoard,RasterBudget,rasterShape,type ShapeMask,type RasterPlacement
 export interface FillOptions {
   fillMode?:'off'|'uniform'|'area-priority';fillResolution?:number;fillRounds?:number;
   /** AREA, not length. Other islands never shrink below the starting atlas. */
-  fillStep?:number;fillMaxAreaGain?:number;fillTimeBudgetMs?:number;fillMaxTrials?:number;
+  fillWarmupPasses?:number;fillStep?:number;fillMaxAreaGain?:number;fillTimeBudgetMs?:number;fillMaxTrials?:number;
 }
 export interface FillReport {
   mode:'uniform'|'area-priority';resolution:number;before:number;after:number;beforeBox:number;afterBox:number;
-  trials:number;accepted:number;rounds:number;stop:'converged'|'round-limit'|'trial-budget'|'time-budget'|'raster-no-fit'|'validation-rejected';elapsedMs:number;
+  trials:number;accepted:number;commonAccepted:number;rounds:number;stop:'converged'|'round-limit'|'trial-budget'|'time-budget'|'raster-no-fit'|'validation-rejected';elapsedMs:number;
   order:number[];gains:{id:number;area3D:number;areaFactor:number;linearFactor:number}[];
   history:{round:number;id:number|null;occupancy:number;areaFactor:number}[];
   shapeWaste:{id:number;area3D:number;boxWaste:number;shapeFill:number}[];
@@ -23,7 +23,7 @@ export function validateFillOptions(o:FillOptions):void {
   if(o.fillMode!==undefined&&!['off','uniform','area-priority'].includes(o.fillMode))throw Error('Unknown fill refinement mode.');
   for(const [name,value,min,max,integer]of [
     ['fillResolution',o.fillResolution,128,1024,true],['fillRounds',o.fillRounds,1,24,true],
-    ['fillStep',o.fillStep,.005,.25,false],['fillMaxAreaGain',o.fillMaxAreaGain,1,3,false],
+    ['fillWarmupPasses',o.fillWarmupPasses,0,8,true],['fillStep',o.fillStep,.005,.25,false],['fillMaxAreaGain',o.fillMaxAreaGain,1,3,false],
     ['fillTimeBudgetMs',o.fillTimeBudgetMs,50,120000,true],['fillMaxTrials',o.fillMaxTrials,1,5000,true],
   ] as const)if(value!==undefined&&(!Number.isFinite(value)||value<min||value>max||integer&&!Number.isInteger(value)))throw Error(`Invalid ${name} (${min}..${max}).`);
 }
@@ -38,7 +38,7 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
   if(items.some(i=>!(i.area3D>0&&i.areaUV>0)))throw Error('Fill requires valid positive-area charts.');
   const densities=items.map(i=>i.areaUV/i.area3D),minDensity=Math.min(...densities),spread=Math.max(...densities)/minDensity;
   const caps=items.map(i=>Math.min(cap,Math.max(1,cap*minDensity/(i.areaUV/i.area3D))));
-  const report:FillReport={mode,resolution:R,densitySpreadBefore:spread,densitySpreadAfter:spread,before:base.occupancy,after:base.occupancy,beforeBox:base.boxOccupancy,afterBox:base.boxOccupancy,trials:0,accepted:0,rounds:0,stop:'converged',elapsedMs:0,order:items.map(i=>i.chart.id),gains:[],history:[],shapeWaste:items.map(i=>({id:i.chart.id,area3D:i.area3D,boxWaste:Math.max(0,i.w*i.h-i.areaUV),shapeFill:i.areaUV/(i.w*i.h)})).sort((a,b)=>b.boxWaste-a.boxWaste).slice(0,10),note:'轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。'};
+  const report:FillReport={mode,resolution:R,densitySpreadBefore:spread,densitySpreadAfter:spread,before:base.occupancy,after:base.occupancy,beforeBox:base.boxOccupancy,afterBox:base.boxOccupancy,trials:0,accepted:0,commonAccepted:0,rounds:0,stop:'converged',elapsedMs:0,order:items.map(i=>i.chart.id),gains:[],history:[],shapeWaste:items.map(i=>({id:i.chart.id,area3D:i.area3D,boxWaste:Math.max(0,i.w*i.h-i.areaUV),shapeFill:i.areaUV/(i.w*i.h)})).sort((a,b)=>b.boxWaste-a.boxWaste).slice(0,10),note:'轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。'};
   let checks=0;const local={tick:()=>{if((++checks&31)===0){work?.check();if(performance.now()-start>budget)throw new RasterBudget();}}};
   const getMask=(it:Island,gain:number,turn:boolean)=>{const key=`${gain.toPrecision(12)}:${turn}`;if(!it.cache.has(key))it.cache.set(key,rasterShape(it.triangles,it.w,it.h,gain,turn,R,base.padding,local));return it.cache.get(key)!;};
   const bestPlace=(board:RasterBoard,it:Island,gain:number):RasterPlacement|null=>{
@@ -57,13 +57,23 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
   let gains=items.map(()=>1),placements:RasterPlacement[]|null=null;
   try {
     uvProgress(work,{stage:'pack',detail:'轮廓精排：建立保守占用网格与留白',current:0,total:items.length,unit:'岛'});
-    placements=arrange(gains);if(!placements)report.stop='raster-no-fit';
+    placements=arrange(gains);
+    // Cheap equal-density tightening first. It avoids spending an entire costly
+    // coordinate-descent sweep discovering the SAME feasible gain for all islands.
+    if(placements&&mode==='area-priority')for(let pass=0;pass<(options.fillWarmupPasses??3);pass++){
+      if(report.trials>=maxTrials){report.stop='trial-budget';break;}
+      const next=gains.map(g=>Math.min(cap,g*(1+step)));if(next.every((g,i)=>g<=gains[i]!+1e-10))break;
+      report.trials++;uvProgress(work,{stage:'pack',detail:`轮廓精排：全岛共同放大试装 ${pass+1}（不改变密度比例）`});
+      const proposal=arrange(next);if(!proposal)break;placements=proposal;gains=next;report.accepted++;report.commonAccepted++;
+      report.after=items.reduce((s,it,i)=>s+it.areaUV*gains[i]!,0);report.history.push({round:0,id:null,occupancy:report.after,areaFactor:gains[0]!});
+    }
+    if(!placements)report.stop='raster-no-fit';
     else for(let round=0;round<roundLimit;round++){
       report.rounds=round+1;let changed=0;
       const count=mode==='uniform'?1:items.length;
       for(let i=0;i<count;i++){
         work?.check();if(report.trials>=maxTrials){report.stop='trial-budget';break;}
-        const next=gains.map((g,j)=>mode==='uniform'||j===i?Math.min(mode==='uniform'?cap:caps[j]!,g*(1+stepNow)):g);
+        const next=gains.map((g,j)=>mode==='uniform'||j===i?Math.max(g,Math.min(mode==='uniform'?cap:caps[j]!,g*(1+stepNow))):g);
         if(next.every((g,j)=>g<=gains[j]!+1e-10))continue;
         report.trials++;
         uvProgress(work,{stage:'pack',detail:`空白精排 ${round+1}/${roundLimit} 轮 · ${mode==='uniform'?'共同密度':`大岛优先 #${items[i]!.chart.id+1}`} · 占用 ${(report.after*100).toFixed(2)}%`,current:i+1,total:count,unit:'岛'});
