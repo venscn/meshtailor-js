@@ -1,0 +1,43 @@
+{
+  "suite": "Hand-paint UV objective / real offline workbench",
+  "scope": "Offline workbench; production Worker, geometry and renderer; not React",
+  "cases": [
+    {
+      "name": "Paint is default and controls are actually present",
+      "passed": true
+    },
+    {
+      "name": "Default gear preserves major planar panels in production worker",
+      "passed": true,
+      "details": {
+        "faces": 1536,
+        "islands": 5,
+        "methods": [
+          "lscm",
+          "planar-shape",
+          "lscm",
+          "lscm",
+          "planar-shape"
+        ]
+      }
+    },
+    {
+      "name": "Method report explains actual solve, not only selected preference",
+      "passed": true,
+      "details": "实际方法：lscm: 3 · planar-shape: 2"
+    },
+    {
+      "name": "Solver controls neither move camera nor modify current completed UV until apply",
+      "passed": true
+    },
+    {
+      "name": "Gear UV endpoint remains exact and permits island-only selection",
+      "passed": true
+    },
+    {
+      "name": "No hidden forced-circle solver or rendering error",
+      "passed": true
+    }
+  ],
+  "passed": 6
+}

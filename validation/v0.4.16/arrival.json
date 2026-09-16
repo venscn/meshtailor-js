@@ -1,0 +1,101 @@
+{
+  "passed": 24,
+  "cases": [
+    {
+      "name": "Defaults are 1x animation seconds",
+      "passed": true
+    },
+    {
+      "name": "No tail before geometric arrival",
+      "passed": true
+    },
+    {
+      "name": "Full colour at exact arrival",
+      "passed": true
+    },
+    {
+      "name": "Hold in timeline coordinates",
+      "passed": true
+    },
+    {
+      "name": "Mid fade at 1.3 animation seconds",
+      "passed": true
+    },
+    {
+      "name": "Tail ends after 1.8 animation seconds",
+      "passed": true
+    },
+    {
+      "name": "Wall time cannot advance a stationary scrub",
+      "passed": true
+    },
+    {
+      "name": "Seeking and reversed sampling produce identical states",
+      "passed": true
+    },
+    {
+      "name": "Direct mid-timeline seek needs no arrival event history",
+      "passed": true
+    },
+    {
+      "name": "Rewind restores hold, not stale fade",
+      "passed": true
+    },
+    {
+      "name": "1x advances the same track by rate-scaled time",
+      "passed": true
+    },
+    {
+      "name": "2x advances the same track by rate-scaled time",
+      "passed": true
+    },
+    {
+      "name": "4x advances the same track by rate-scaled time",
+      "passed": true
+    },
+    {
+      "name": "8x advances the same track by rate-scaled time",
+      "passed": true
+    },
+    {
+      "name": "16x advances the same track by rate-scaled time",
+      "passed": true
+    },
+    {
+      "name": "64x advances the same track by rate-scaled time",
+      "passed": true
+    },
+    {
+      "name": "Rate switch is continuous and uses current progress",
+      "passed": true
+    },
+    {
+      "name": "off disables track",
+      "passed": true
+    },
+    {
+      "name": "dither disables track",
+      "passed": true
+    },
+    {
+      "name": "Pause and scrub release restore original display",
+      "passed": true
+    },
+    {
+      "name": "Both global endpoints restore display",
+      "passed": true
+    },
+    {
+      "name": "Zero durations disable track",
+      "passed": true
+    },
+    {
+      "name": "Compressed motion end and zero-duration islands",
+      "passed": true
+    },
+    {
+      "name": "No mutation to selection or geometry schedule",
+      "passed": true
+    }
+  ]
+}

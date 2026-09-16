@@ -1,0 +1,22 @@
+
+> meshtailor-js@0.4.15 test:fill:adaptive
+> node scripts/fill-adaptive-smoke.mjs
+
+PASS Largest remains first, not small-first disguised optimization
+PASS Largest does not fit but smaller is still attempted and grown
+PASS Largest never shrinks to purchase room
+PASS Multiple fair descending sweeps really occur
+PASS Failed big island step decreases independently
+PASS Min step is tested, not falsely converged before use
+PASS Local vacancy growth is actually used
+PASS All faces and original snapshot retained
+PASS Final global triangles are valid
+PASS Actual density cap / no shrink
+PASS Common mode still shares identical gains
+PASS Quarter rotation 0 preserves triangle signed area
+PASS Quarter rotation 1 preserves triangle signed area
+PASS Quarter rotation 2 preserves triangle signed area
+PASS Quarter rotation 3 preserves triangle signed area
+PASS Invalid controls rejected
+PASS Untried smaller steps at last sweep are not called convergence
+PASS Trial budget is not called convergence

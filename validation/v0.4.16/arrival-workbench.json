@@ -1,0 +1,97 @@
+{
+  "suite": "Timeline arrival / actual workbench playback rates and scrub",
+  "scope": "Offline workbench and shared production modules, not React root",
+  "cases": [
+    {
+      "name": "Both controls label 1x animation seconds and retain defaults",
+      "passed": true
+    },
+    {
+      "name": "Actual RAF reaches exact target before fade",
+      "passed": true,
+      "details": {
+        "a": [
+          {
+            "id": 1,
+            "phase": "hold",
+            "weight": 1,
+            "opacity": 1,
+            "ageSeconds": 0.34669999999999956
+          }
+        ],
+        "playing": true,
+        "geometry": true
+      }
+    },
+    {
+      "name": "Changing speed during playback uses same progress track without a reset",
+      "passed": true,
+      "details": {
+        "before": 0.38331196581196586,
+        "after": 0.38331196581196586,
+        "playing": true,
+        "D": 28.08
+      }
+    },
+    {
+      "name": "Pause immediately restores previous context",
+      "passed": true
+    },
+    {
+      "name": "Stationary held scrub freezes arrival; forward scrub advances it",
+      "passed": true,
+      "details": {
+        "held": {
+          "p": 0.379,
+          "a": [
+            {
+              "id": 1,
+              "phase": "hold",
+              "weight": 1,
+              "opacity": 1,
+              "ageSeconds": 0.2423199999999991
+            }
+          ]
+        },
+        "mid": [
+          {
+            "id": 1,
+            "phase": "fade",
+            "weight": 0.48596164005171427,
+            "opacity": 0.5784885448424057,
+            "ageSeconds": 1.3093599999999985
+          }
+        ]
+      }
+    },
+    {
+      "name": "1x and 4x real RAF share animation ages but differ in wall duration",
+      "passed": true,
+      "details": [
+        {
+          "rate": 1,
+          "elapsed": 1942.5,
+          "hold": 770
+        },
+        {
+          "rate": 4,
+          "elapsed": 536.3000000000466,
+          "hold": 258.80000000004657
+        }
+      ]
+    },
+    {
+      "name": "Reverse playback restores fade and hold in reverse order",
+      "passed": true
+    },
+    {
+      "name": "Natural playback completion restores rather than adding unscaled delay",
+      "passed": true
+    },
+    {
+      "name": "No camera resets, geometry jobs or WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 9
+}

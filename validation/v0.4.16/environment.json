@@ -1,0 +1,25 @@
+{
+  "node": "22.16.0",
+  "globalTsc": "5.8.3",
+  "npmInstall": {
+    "exit": 124,
+    "limitSeconds": 25,
+    "success": false
+  },
+  "build": {
+    "exit": 1,
+    "reason": "workspace exit127: vite not found"
+  },
+  "fullTypecheck": {
+    "exit": 2,
+    "reason": "missing @types/node"
+  },
+  "browser": "Chromium software WebGL",
+  "realInput": "hash-pinned examples/verified-models; corrected user ZIP only",
+  "notValidated": [
+    "full React/Vite root build",
+    "general GLTFLoader or FBXLoader end-to-end",
+    "macOS / Windows / Safari native runtime",
+    "semantic sewing-pattern correctness"
+  ]
+}

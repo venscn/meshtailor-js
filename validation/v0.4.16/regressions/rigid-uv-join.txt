@@ -1,0 +1,5 @@
+
+> meshtailor-js@0.4.15 test:rigid-uv-join
+> node scripts/rigid-uv-join-smoke.mjs
+
+10 shape-preserving UV stitch checks passed

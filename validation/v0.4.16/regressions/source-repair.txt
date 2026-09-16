@@ -1,0 +1,5 @@
+
+> meshtailor-js@0.4.15 test:source-repair
+> node scripts/source-repair-smoke.mjs
+
+12 local source UV repair checks passed

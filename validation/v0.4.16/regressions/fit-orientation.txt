@@ -1,0 +1,9 @@
+
+> meshtailor-js@0.4.15 test:fit-orientation
+> node scripts/fit-orientation-smoke.mjs
+
+gear positive areas throughout UV fit; polar islands 1
+knot positive areas throughout UV fit; polar islands 1
+garment positive areas throughout UV fit; polar islands 0
+assembly positive areas throughout UV fit; polar islands 1
+17 rotation-safe fitting checks passed.

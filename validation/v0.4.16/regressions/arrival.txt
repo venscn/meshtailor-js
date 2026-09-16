@@ -1,0 +1,28 @@
+
+> meshtailor-js@0.4.15 test:arrival
+> node scripts/arrival-presentation-smoke.mjs
+
+PASS Defaults are 1x animation seconds
+PASS No tail before geometric arrival
+PASS Full colour at exact arrival
+PASS Hold in timeline coordinates
+PASS Mid fade at 1.3 animation seconds
+PASS Tail ends after 1.8 animation seconds
+PASS Wall time cannot advance a stationary scrub
+PASS Seeking and reversed sampling produce identical states
+PASS Direct mid-timeline seek needs no arrival event history
+PASS Rewind restores hold, not stale fade
+PASS 1x advances the same track by rate-scaled time
+PASS 2x advances the same track by rate-scaled time
+PASS 4x advances the same track by rate-scaled time
+PASS 8x advances the same track by rate-scaled time
+PASS 16x advances the same track by rate-scaled time
+PASS 64x advances the same track by rate-scaled time
+PASS Rate switch is continuous and uses current progress
+PASS off disables track
+PASS dither disables track
+PASS Pause and scrub release restore original display
+PASS Both global endpoints restore display
+PASS Zero durations disable track
+PASS Compressed motion end and zero-duration islands
+PASS No mutation to selection or geometry schedule

@@ -1,0 +1,105 @@
+{
+  "passed": 12,
+  "cases": [
+    {
+      "name": "Default objective prioritizes paintable shape",
+      "passed": true
+    },
+    {
+      "name": "Planar rectangular silhouette exactly preserved",
+      "passed": true
+    },
+    {
+      "name": "Legacy explicit circular embedding remains an auditable opt-in",
+      "passed": true
+    },
+    {
+      "name": "Free boundary ARAP escapes circular initial boundary",
+      "passed": true,
+      "detail": {
+        "initial": 0.023759005927892037,
+        "final": 0,
+        "iterations": 2
+      }
+    },
+    {
+      "name": "A planar hole is not automatically cut open or made circular",
+      "passed": true
+    },
+    {
+      "name": "Production unwrap preserves planar gear teeth and hole as one island",
+      "passed": true
+    },
+    {
+      "name": "Shape guard allows rotation/translation/uniform scale",
+      "passed": true
+    },
+    {
+      "name": "Shape guard detects collapse of garment proportions",
+      "passed": true
+    },
+    {
+      "name": "Invalid objectives fail explicitly",
+      "passed": true
+    },
+    {
+      "name": "Cancelled ARAP never returns a partial result",
+      "passed": true
+    },
+    {
+      "name": "gear both objectives keep all source faces and valid UV",
+      "passed": true
+    },
+    {
+      "name": "garment both objectives keep all source faces and valid UV",
+      "passed": true
+    }
+  ],
+  "models": [
+    {
+      "id": "gear",
+      "goal": "compact",
+      "faces": 1536,
+      "islands": 4,
+      "methods": {
+        "lscm": 4
+      },
+      "occupancy": 0.4135960879028578,
+      "elapsedMs": 181.41525999999976
+    },
+    {
+      "id": "gear",
+      "goal": "paint",
+      "faces": 1536,
+      "islands": 5,
+      "methods": {
+        "lscm": 3,
+        "planar-shape": 2
+      },
+      "occupancy": 0.27751801768058854,
+      "elapsedMs": 127.98327400000016
+    },
+    {
+      "id": "garment",
+      "goal": "compact",
+      "faces": 3072,
+      "islands": 10,
+      "methods": {
+        "lscm": 10
+      },
+      "occupancy": 0.4594489002696051,
+      "elapsedMs": 181.16660199999978
+    },
+    {
+      "id": "garment",
+      "goal": "paint",
+      "faces": 3072,
+      "islands": 10,
+      "methods": {
+        "lscm": 10
+      },
+      "occupancy": 0.4594489002696051,
+      "elapsedMs": 199.00642300000027
+    }
+  ]
+}

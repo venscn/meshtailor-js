@@ -1,0 +1,67 @@
+[
+  {
+    "command": "npm run test:core",
+    "exit": 0,
+    "seconds": 5.352118139999902
+  },
+  {
+    "command": "npm run test:parameterization",
+    "exit": 0,
+    "seconds": 3.006971083999815
+  },
+  {
+    "command": "npm run test:source-repair",
+    "exit": 0,
+    "seconds": 2.699891191000006
+  },
+  {
+    "command": "npm run test:rigid-uv-join",
+    "exit": 0,
+    "seconds": 2.704639393999969
+  },
+  {
+    "command": "npm run test:hinge",
+    "exit": 0,
+    "seconds": 3.7519726360001187
+  },
+  {
+    "command": "npm run test:orientation",
+    "exit": 0,
+    "seconds": 2.7536012980001487
+  },
+  {
+    "command": "npm run test:fit-orientation",
+    "exit": 0,
+    "seconds": 4.2401349730000675
+  },
+  {
+    "command": "npm run test:selection",
+    "exit": 0,
+    "seconds": 2.447852881000017
+  },
+  {
+    "command": "npm run test:load-pipeline",
+    "exit": 0,
+    "seconds": 2.8357171999998627
+  },
+  {
+    "command": "npm run test:camera",
+    "exit": 0,
+    "seconds": 2.5580550770000627
+  },
+  {
+    "command": "npm run test:fill:adaptive",
+    "exit": 0,
+    "seconds": 2.280941713000175
+  },
+  {
+    "command": "npm run test:arrival",
+    "exit": 0,
+    "seconds": 2.29648543899998
+  },
+  {
+    "command": "npm run test:uv-box",
+    "exit": 0,
+    "seconds": 2.31257861600011
+  }
+]

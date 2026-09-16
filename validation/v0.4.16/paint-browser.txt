@@ -1,0 +1,6 @@
+PASS Paint is default and controls are actually present
+PASS Default gear preserves major planar panels in production worker
+PASS Method report explains actual solve, not only selected preference
+PASS Solver controls neither move camera nor modify current completed UV until apply
+PASS Gear UV endpoint remains exact and permits island-only selection
+PASS No hidden forced-circle solver or rendering error

@@ -1,0 +1,5 @@
+
+> meshtailor-js@0.4.15 test:parameterization
+> node scripts/parameterization-smoke.mjs
+
+PASS: 10 parameterization regressions (folded panel, strict overlap, tube slit, LSCM/Tutte).

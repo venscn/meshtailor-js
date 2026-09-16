@@ -1,0 +1,46 @@
+PASS Default objective prioritizes paintable shape
+PASS Planar rectangular silhouette exactly preserved
+PASS Legacy explicit circular embedding remains an auditable opt-in
+PASS Free boundary ARAP escapes circular initial boundary
+PASS A planar hole is not automatically cut open or made circular
+PASS Production unwrap preserves planar gear teeth and hole as one island
+PASS Shape guard allows rotation/translation/uniform scale
+PASS Shape guard detects collapse of garment proportions
+PASS Invalid objectives fail explicitly
+PASS Cancelled ARAP never returns a partial result
+{
+  id: 'gear',
+  goal: 'compact',
+  faces: 1536,
+  islands: 4,
+  methods: { lscm: 4 },
+  occupancy: 0.4135960879028578,
+  elapsedMs: 181.41525999999976
+}
+{
+  id: 'gear',
+  goal: 'paint',
+  faces: 1536,
+  islands: 5,
+  methods: { lscm: 3, 'planar-shape': 2 },
+  occupancy: 0.27751801768058854,
+  elapsedMs: 127.98327400000016
+}
+{
+  id: 'garment',
+  goal: 'compact',
+  faces: 3072,
+  islands: 10,
+  methods: { lscm: 10 },
+  occupancy: 0.4594489002696051,
+  elapsedMs: 181.16660199999978
+}
+{
+  id: 'garment',
+  goal: 'paint',
+  faces: 3072,
+  islands: 10,
+  methods: { lscm: 10 },
+  occupancy: 0.4594489002696051,
+  elapsedMs: 199.00642300000027
+}

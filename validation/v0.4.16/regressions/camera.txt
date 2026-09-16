@@ -1,0 +1,14 @@
+
+> meshtailor-js@0.4.15 test:camera
+> node scripts/camera-policy-smoke.mjs
+
+PASS Studio and lab share a manual-camera default
+PASS A new renderer never enables follow implicitly
+PASS Ordinary progress updates keep manual mode
+PASS An explicit enable requests an immediate fit even when paused
+PASS First manual input interrupts follow and signals UI exactly once
+PASS Stale enabled props cannot override the manual camera for later frames
+PASS Acknowledging off does not itself resume follow
+PASS Only an explicit off/on transition re-arms follow
+PASS Manual input while already in manual mode is idempotent
+PASS Explicitly disabling follow preserves manual ownership

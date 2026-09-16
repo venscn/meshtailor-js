@@ -1,0 +1,9 @@
+PASS Both controls label 1x animation seconds and retain defaults
+PASS Actual RAF reaches exact target before fade
+PASS Changing speed during playback uses same progress track without a reset
+PASS Pause immediately restores previous context
+PASS Stationary held scrub freezes arrival; forward scrub advances it
+PASS 1x and 4x real RAF share animation ages but differ in wall duration
+PASS Reverse playback restores fade and hold in reverse order
+PASS Natural playback completion restores rather than adding unscaled delay
+PASS No camera resets, geometry jobs or WebGL errors

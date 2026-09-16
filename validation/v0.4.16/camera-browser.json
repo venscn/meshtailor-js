@@ -1,0 +1,164 @@
+{
+  "suite": "Free camera during actual hinge playback",
+  "host": "Offline lab with production WebGL renderer, classic UV Worker, real CDP mouse input",
+  "softwareWebGL": true,
+  "cases": [
+    {
+      "name": "DPR 1: hinge path defaults to manual mode in UI and renderer",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: actual play advances geometry while preserving the whole camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: orbit drag during play changes yaw/pitch and survives later frames",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: right-button pan during play changes target without snap-back",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: wheel zoom during play remains exactly where the user leaves it",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: pause/resume and reverse playback never reset the manual camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: forward and reverse loop boundaries keep the camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: scrubbing all stages and switching scope/path never performs an implicit fit",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: opt-in follow starts immediately when paused, not only at next frame",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: manual orbit interrupts opt-in follow, updates checkbox and keeps playback running",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: manual pan interrupts opt-in follow, updates checkbox and keeps playback running",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: manual zoom interrupts opt-in follow, updates checkbox and keeps playback running",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: late enabled UI props cannot re-enable follow after a gesture",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: fit current selection is one-shot, keeps orbit orientation and does not pause play",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: 3D/UV view buttons fit once and hand control straight back to the user",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: held pointer suspends follow and cancellation never re-enables it",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: viewport resizing changes projection size, not camera pose",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: re-solving UV for the same source mesh retains the manual camera",
+      "passed": true
+    },
+    {
+      "name": "WebGL context recovery reuploads buffers without resetting the manual camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 1: source/UV endpoints and real WebGL drawing are unchanged",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: hinge path defaults to manual mode in UI and renderer",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: actual play advances geometry while preserving the whole camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: orbit drag during play changes yaw/pitch and survives later frames",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: right-button pan during play changes target without snap-back",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: wheel zoom during play remains exactly where the user leaves it",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: pause/resume and reverse playback never reset the manual camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: forward and reverse loop boundaries keep the camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: scrubbing all stages and switching scope/path never performs an implicit fit",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: opt-in follow starts immediately when paused, not only at next frame",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: manual orbit interrupts opt-in follow, updates checkbox and keeps playback running",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: manual pan interrupts opt-in follow, updates checkbox and keeps playback running",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: manual zoom interrupts opt-in follow, updates checkbox and keeps playback running",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: late enabled UI props cannot re-enable follow after a gesture",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: fit current selection is one-shot, keeps orbit orientation and does not pause play",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: 3D/UV view buttons fit once and hand control straight back to the user",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: held pointer suspends follow and cancellation never re-enables it",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: viewport resizing changes projection size, not camera pose",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: re-solving UV for the same source mesh retains the manual camera",
+      "passed": true
+    },
+    {
+      "name": "DPR 2: source/UV endpoints and real WebGL drawing are unchanged",
+      "passed": true
+    }
+  ],
+  "passed": 39
+}
