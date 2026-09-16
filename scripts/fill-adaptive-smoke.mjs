@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';import {writeFile} from 'node:fs/promise
 const c=await compileCore(),cases=[];const check=(name,fn)=>{fn();cases.push({name,passed:true});console.log('PASS',name)};
 try{const u=await c.load('packages/uv/src/index.js'),r=await c.load('packages/uv/src/shape-raster.js');
 const chart=(id,x,y,w,h)=>({id,bounds:[x,y,x+w,y+h],polygon:[],faceUVs:new Map([[id*2,[[x,y],[x+w,y],[x+w,y+h]]],[id*2+1,[[x,y],[x+w,y+h],[x,y+h]]]])});
-const packed=[chart(9,.003,.003,.994,.65),chart(1,.003,.7,.12,.12)],raw=packed.map((c,i)=>({...c,area3D:i?1:100}));
+const packed=[chart(9,.003,.003,.994,.65),chart(1,.003,.7,.12,.12)],raw=packed.map((c,i)=>({...c,area3D:i?.12*.12:.994*.65}));
 const base={packed,occupancy:.994*.65+.12*.12,boxOccupancy:.994*.65+.12*.12,scale:1,padding:.003,packingMethod:'existing',packingReport:{order:'area',placementOrder:[9,1],searchAttempts:0,failedFits:0,areaBoosts:[]}};
 const before=JSON.stringify([...packed[0].faceUVs]);const result=u.refineAtlas(base,raw,{fillMode:'area-priority',fillRounds:10,fillTimeBudgetMs:30000,fillWarmupPasses:0,fillMaxAreaGain:2,fillResolution:256});const f=result.packingReport.refinement;
 check('Largest remains first, not small-first disguised optimization',()=>assert.deepEqual(f.order,[9,1]));

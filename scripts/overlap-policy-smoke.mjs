@@ -5,7 +5,7 @@ const c=await compileCore(),report={suite:'Render-only overlap policy',cases:[]}
 try {
  const m=await c.load('apps/studio/src/unfold/overlap-policy.js');
  const test=(name,fn)=>{fn();report.cases.push({name,passed:true});console.log('PASS',name);};
- test('near-coplanar is default; not indiscriminate X-ray counting',()=>assert.equal(m.overlapSettings({}).mode,'coplanar'));
+ test('auto is default; moving islands use projected diagnostics',()=>assert.equal(m.overlapSettings({}).mode,'auto'));
  test('off is preserved',()=>assert.equal(m.overlapSettings({overlapMode:'off'}).mode,'off'));
  test('invalid mode and NaN values fall back',()=>assert.deepEqual(m.overlapSettings({overlapMode:'unknown',overlapTolerance:NaN,overlapOpacity:Infinity}),m.overlapSettings({})));
  test('tolerance and alpha are bounded',()=>{const a=m.overlapSettings({overlapTolerance:-1,overlapOpacity:12});assert.equal(a.tolerance,1e-6);assert.equal(a.opacity,1);});
