@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict';
+import {writeFile} from 'node:fs/promises';
+import {compileCore} from './lib/compiled-core.mjs';
+const c=await compileCore(),tests=[];
+try{
+ const uv=await c.load('packages/uv/src/index.js'),ras=await c.load('packages/uv/src/shape-raster.js');
+ const test=(name,fn)=>{fn();tests.push(name);};
+ const rectangle=(id,w,h,area=w*h)=>({id,area3D:area,faceUVs:new Map([[id*10,[[0,0],[w,0],[w,h]]],[id*10+1,[[0,0],[w,h],[0,h]]]])});
+ const l=rectangle(3,2,1);l.area3D=3;l.faceUVs.set(32,[[0,1],[1,1],[1,2]]);l.faceUVs.set(33,[[0,1],[1,2],[0,2]]);
+ const raw=[rectangle(11,.88,.88),l,rectangle(90,.15,.15)],source=JSON.stringify(raw,(_,v)=>v instanceof Map?[...v]:v);
+ const options={fillMode:'area-priority',fillResolution:256,fillRounds:6,fillStep:.08,fillMaxAreaGain:1.6,fillTimeBudgetMs:30000,padding:.003};
+ const base=uv.packAtlas(raw),r=uv.packAtlas(raw,options),f=r.packingReport.refinement;
+ test('concavity refinement increases real occupancy',()=>assert.ok(r.occupancy>base.occupancy+.08,JSON.stringify(f)));
+ test('baseline remains immutable',()=>assert.equal(JSON.stringify(raw,(_,v)=>v instanceof Map?[...v]:v),source));
+ test('all original islands preserved',()=>assert.deepEqual(r.packed.map(p=>p.id),raw.map(p=>p.id)));
+ test('large source area first, not array/id order',()=>assert.deepEqual(f.order,[3,11,90]));
+ test('bounded area gain and no island shrink',()=>assert.ok(f.gains.every(g=>g.areaFactor>=1&&g.areaFactor<=1.6+1e-10)));
+ test('linear factor is square root of area factor',()=>f.gains.forEach(g=>assert.ok(Math.abs(g.linearFactor**2-g.areaFactor)<1e-10)));
+ test('accepted states have strictly increasing real occupancy',()=>f.history.forEach((h,i)=>assert.ok(h.occupancy>(i?f.history[i-1].occupancy:f.before))));
+ test('all triangle faces retained',()=>assert.deepEqual(r.packed.flatMap(p=>[...p.faceUVs.keys()]),raw.flatMap(p=>[...p.faceUVs.keys()])));
+ test('pooled exact UV check has no fold or overlap',()=>assert.ok(uv.checkUVTriangles(r.packed.flatMap(p=>[...p.faceUVs.values()])).valid));
+ test('output area equals geometric sum',()=>assert.ok(Math.abs(uv.checkUVTriangles(r.packed.flatMap(p=>[...p.faceUVs.values()])).area-r.occupancy)<1e-12));
+ test('island edge ratios unchanged under similarity',()=>r.packed.forEach(ch=>{const b=base.packed.find(b=>b.id===ch.id),g=f.gains.find(g=>g.id===ch.id).linearFactor;for(const [fi,t]of ch.faceUVs){const before=b.faceUVs.get(fi);for(let k=0;k<3;k++)assert.ok(Math.abs(Math.hypot(...t[k].map((x,j)=>x-t[(k+1)%3][j]))/Math.hypot(...before[k].map((x,j)=>x-before[(k+1)%3][j]))-g)<1e-9);}}));
+ test('shape boxes may overlap without triangles overlapping',()=>assert.ok(r.boxOccupancy>r.occupancy+.05));
+ test('off mode equals unchanged baseline',()=>assert.deepEqual(uv.packAtlas(raw,{fillMode:'off'}),base));
+ const u=uv.packAtlas(raw,{...options,fillMode:'uniform'});
+ test('strict density grows all islands equally',()=>{const g=u.packingReport.refinement.gains;assert.ok(g.every(x=>Math.abs(x.areaFactor-g[0].areaFactor)<1e-12));assert.ok(u.occupancy>base.occupancy);});
+ const limited=uv.packAtlas(raw,{...options,fillMaxTrials:1});
+ test('trial exhaustion returns complete valid result',()=>{assert.equal(limited.packingReport.refinement.stop,'trial-budget');assert.equal(limited.packed.length,raw.length);assert.ok(limited.occupancy>=base.occupancy);});
+ test('invalid config rejected even before refinement',()=>{for(const op of [{fillMode:'bad'},{fillStep:0},{fillMaxAreaGain:8},{fillRounds:NaN},{fillResolution:Infinity},{fillTimeBudgetMs:0}])assert.throws(()=>uv.packAtlas(raw,op));});
+ test('global cancellation is propagated, not swallowed as local budget',()=>assert.throws(()=>uv.refineAtlas(base,raw,options,{check(){throw new uv.UVWorkStopped('cancelled');},report(){}}),/cancelled/));
+ const rects=[rectangle(0,1,1),rectangle(1,1,1)],full=uv.packAtlas(rects,{fillMode:'area-priority',fillResolution:128});
+ test('near-full rectangles cannot be forced through border',()=>{assert.ok(full.occupancy>=uv.packAtlas(rects).occupancy);assert.ok(full.packed.every(p=>p.bounds[2]<=1-.003+1e-9&&p.bounds[3]<=1-.003+1e-9));});
+ const mask=ras.rasterShape([[[0,0],[.125,0],[0,.125]]],.125,.125,1,false,256,0),board=new ras.RasterBoard(128,2);
+ board.put(mask,0,0);
+ test('clipped dilation at tile edge has no row wrap',()=>{assert.equal(board.fits(mask,0,0),false);assert.equal(board.fits(mask,80,0),true);});
+ test('reserved gutter is not usable concavity space',()=>assert.equal(board.fits(mask,34,0),false));
+ test('space beyond gutter remains usable',()=>assert.equal(board.fits(mask,36,0),true));
+ // Independently check minimum distance across these simple chart boundaries.
+ const pointSegment=(p,a,b)=>{const d=b.map((v,i)=>v-a[i]),den=d[0]**2+d[1]**2,t=Math.max(0,Math.min(1,((p[0]-a[0])*d[0]+(p[1]-a[1])*d[1])/den));return Math.hypot(p[0]-a[0]-t*d[0],p[1]-a[1]-t*d[1]);};
+ let gap=Infinity;for(let i=0;i<r.packed.length;i++)for(let j=0;j<i;j++)for(const a of r.packed[i].faceUVs.values())for(const b of r.packed[j].faceUVs.values())for(let k=0;k<3;k++)for(let h=0;h<3;h++)gap=Math.min(gap,pointSegment(a[k],b[h],b[(h+1)%3]),pointSegment(b[h],a[k],a[(k+1)%3]));
+ test('geometric inter-island gutter >= twice per-side padding',()=>assert.ok(gap>=.006-1e-9,String(gap)));
+ console.log(tests.length+' fill checks passed; '+(base.occupancy*100).toFixed(2)+'% -> '+(r.occupancy*100).toFixed(2)+'%');
+ const arg=process.argv.indexOf('--report');if(arg>=0)await writeFile(process.argv[arg+1],JSON.stringify({tests,refinement:f,minimumGap:gap},null,2));
+}finally{await c.cleanup();}
