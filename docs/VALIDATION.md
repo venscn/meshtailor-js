@@ -1,3 +1,55 @@
+# v0.4.16 验证范围
+
+本节是本轮结果；下文旧版本记录不计作本轮已执行测试。
+
+## 已实际通过
+
+| 检查 | 结果 / 记录 |
+|---|---|
+| 动画统一时钟纯策略 | 24项，`validation/v0.4.16/arrival.json` |
+| 真实WebGL像素与倒放/拖动采样 | 28项、DPR1/2，`arrival-browser.json` |
+| 实际RAF倍速、按住进度停止、回拖、暂停恢复 | 9项，`arrival-workbench.json` |
+| 自由边界、平面孔洞/齿形、形变保护 | 12项，`paint-shape.json` |
+| 细交叠反例与接触区分 | 8项，`test:uv-sliver` |
+| 真正Worker/工作台目标切换、齿轮输出 | 6项，`paint-browser.json` |
+| 自由相机与两级选择浏览器回归 | 39项＋39项，`camera-browser.json` / `selection-browser.json` |
+| 其他核心、铰链、方向、原UV修复、刚性缝合、流程、框选及自适应填空 | 13个实际命令全部退出0，`regressions/results.json` |
+| 正确真实人台/头盔 | 92/173岛，18,324/94,722面全部保留，生产Worker和OBJ重读通过 |
+| 固定源轮廓界限 | 96/235个有效原源岛检查，最大变化1.349754/1.492194；不是对所有像素/语义的保证 |
+| 独立导出几何检查 | GEOS/Shapely，1e−14 UV²阈值，两模型正面积交叠0，源顶点/面顺序不变 |
+
+普通排布占用率（未额外填空）：人台57.5548%，头盔40.7063%。上一版同路径为66.9154%/62.4867%，新目标为保轮廓而不是最少岛或最满图。该降低已明确报告，不用多重叠放面积掩盖。
+
+本环境本次完整Worker约7.13秒 / 71.24秒；共享CPU、浏览器并发会影响它，不是独占基准或用户机器性能保证。任务总预算设置240秒，ARAP外迭代24、形变上限1.5、未开启额外填空。
+
+### 发现后已拒绝的候选
+
+第一次新ARAP候选在头盔上压扁极小面，增加各向异性拒绝门槛后重跑。后续独立检查又检出一个约1.0e−13 UV²细交叠，收紧接触容差并新增反例，再运行全部真实计算。最终通过的文件哈希见 `independent-geometry.json`。不把这些被拒绝候选计为通过，不用其OBJ替代最终交付。
+
+## 尚未通过或不在本轮范围
+
+实际 `npm install --ignore-scripts` 被25秒超时终止（124），未得到可用依赖。实际 `npm run build` 的Vite子进程退出127；`npm run typecheck`退出2，缺Node类型。记录见environment.json/build.txt/typecheck.txt。没有凭历史诊断把本轮失败一概宣称为DNS原因。
+
+通过的浏览器测试为Chromium软件WebGL、离线工作台与共享生产模块；不是完整React主入口认证。真实资产使用哈希锁定静态glTF/bin解码＋生产装配/Worker，不是通用Three.GLTFLoader或FBXLoader入口认证。没有macOS/Windows/Safari实机验证，没有人工语义识别评分、自动服装纸样认证或纹理烘焙。
+
+## 复跑
+
+```bash
+npm run test:arrival
+npm run test:arrival:browser
+npm run test:arrival:workbench
+npm run test:paint-shape
+npm run test:paint-shape:browser
+npm run test:uv-sliver
+node scripts/verified-models-smoke.mjs --models examples/verified-models --out validation/local-paint --export --snapshots --config '{"timeBudgetMs":240000}'
+node scripts/paint-reference-audit.mjs --root validation/local-paint --report validation/local-paint/reference.json
+python validation/v0.4.16/independent-geometry-check.py --root validation/local-paint
+```
+
+Python仅用于额外QA，不是工程运行依赖。最终ZIP再解压的记录将单独交付，不以打包前日志冒充。
+
+---
+
 # v0.4.15 实际验证
 
 范围：UV到达展示状态、连续颜色／透明度、轮廓与编号，以及播放／拖动会话恢复。未修改UV求解、缝合、排布或运动几何。证据目录 `validation/v0.4.15/`。
