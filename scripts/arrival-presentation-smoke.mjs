@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {writeFile} from 'node:fs/promises';
+import {compileCore} from './lib/compiled-core.mjs';
+const c=await compileCore(),cases=[];
+const check=(name,fn)=>{fn();cases.push({name,passed:true});console.log('PASS',name)};
+try {
+ const {ArrivalPresentation,arrivalSettings}=await c.load('apps/studio/src/unfold/arrival-presentation.js');
+ const uv=await c.load('packages/uv/src/index.js');
+ const o={progress:.3,selected:[10,4,8],order:'relay',handoff:.85,path:'direct',separation:0,interactionActive:true,focusMode:'ghost'};
+ const fresh=()=>{const a=new ArrivalPresentation();a.update(o,0);return a};
+ const land=(a,t=100)=>a.update({...o,progress:1.0001/2.7},t);
+ check('Default uses .8 second hold and 1 second fade',()=>assert.deepEqual(arrivalSettings({}),{hold:.8,fade:1}));
+ check('Bounds, NaN and zero durations',()=>{assert.deepEqual(arrivalSettings({arrivalHoldSeconds:NaN,arrivalFadeSeconds:Infinity}),{hold:.8,fade:1});assert.deepEqual(arrivalSettings({arrivalHoldSeconds:-1,arrivalFadeSeconds:99}),{hold:0,fade:5})});
+ check('Starting midway does not relight old arrivals',()=>assert.deepEqual(new ArrivalPresentation().update({...o,progress:.8},0),[]));
+ check('No tail until the complete local motion ends',()=>assert.deepEqual(fresh().update({...o,progress:.999999/2.7},100),[]));
+ check('Arrival starts fully opaque at the actual UV endpoint',()=>{const s=land(fresh());assert.equal(s[0].id,10);assert.equal(s[0].opacity,1);assert.equal(s[0].phase,'hold')});
+ check('Hold persists without restarting at constant progress',()=>{const a=fresh();land(a);const s=land(a,899);assert.equal(s[0].opacity,1);assert.ok(s[0].ageSeconds>.79)});
+ check('Mid fade is continuous, neither opaque nor background',()=>{const a=fresh();land(a);const s=land(a,1400);assert.ok(Math.abs(s[0].opacity-.59)<1e-12);assert.equal(s[0].phase,'fade')});
+ check('Ends at background without another event or a frame loop',()=>{const a=fresh();land(a);assert.deepEqual(land(a,1901),[]);assert.deepEqual(land(a,3901),[])});
+ check('Multiple arrivals maintain independent clocks',()=>{const a=fresh();land(a);const s=a.update({...o,progress:1.851/2.7},1100);assert.equal(s.length,2);assert.ok(s[0].opacity<1);assert.equal(s[1].opacity,1)});
+ check('Display timer is unrelated to subsequent progress/speed',()=>{const a=fresh(),b=fresh();land(a);land(b);assert.equal(a.update({...o,progress:1.1/2.7},1300)[0].opacity,b.update({...o,progress:1.8/2.7},1300)[0].opacity)});
+ for(const reason of ['pause','off','dither','reverse','rewind','end','source'])check(reason+' clears and never leaks a presentation tail',()=>{const a=fresh();land(a);const patch={pause:{interactionActive:false},off:{focusMode:'off'},dither:{focusMode:'dither'},reverse:{playbackReverse:true},rewind:{progress:.2},end:{progress:1},source:{progress:0}}[reason];assert.deepEqual(a.update({...o,progress:.4,...patch},200),[])});
+ check('Resume cannot relight islands completed before pause',()=>{const a=fresh();land(a);a.update({...o,progress:.4,interactionActive:false},200);assert.deepEqual(a.update({...o,progress:.4},201),[])});
+ check('Changing selected queue clears previous island IDs',()=>{const a=fresh();land(a);assert.deepEqual(a.update({...o,progress:.4,selected:[8,4]},200),[])});
+ check('Changing geometry / disposing can reset all state',()=>{const a=fresh();land(a);a.reset();assert.deepEqual(land(a,200),[])});
+ check('Changing settings affects display only, without restarting',()=>{const a=fresh();land(a);const s=a.update({...o,progress:.4,arrivalHoldSeconds:0,arrivalFadeSeconds:2},1100);assert.ok(Math.abs(s[0].opacity-.59)<1e-12)});
+ check('Both settings zero restores legacy immediate dim',()=>{const a=fresh();assert.deepEqual(a.update({...o,progress:.4,arrivalHoldSeconds:0,arrivalFadeSeconds:0},100),[])});
+ check('Compressed timeline uses the actual island endpoint',()=>{const profiles=[.4,0,.8].map((d,i)=>({id:i,segments:[],duration:d,skipped:1-d}));const timeline=uv.createMotionTimeline(profiles,.85),a=new ArrivalPresentation();const v={...o,timeline,selected:[0,1,2]};a.update({...v,progress:.01},0);const s=a.update({...v,progress:.41/timeline.span},100);assert.deepEqual(s.map(x=>x.id),[0])});
+ check('Forward wrap does not retain previous cycle tails',()=>{const a=fresh();land(a);a.update({...o,progress:.02},200);assert.deepEqual(a.update({...o,progress:.03},400),[])});
+ check('Source session supports first-frame crossing without phantom old arrivals',()=>{const a=new ArrivalPresentation();a.update({...o,progress:0},0);assert.deepEqual(land(a).map(x=>x.id),[10])});
+ check('Presentation never mutates the geometry timeline or selection',()=>{const a=fresh(),before=JSON.stringify(o);land(a);land(a,1200);assert.equal(JSON.stringify(o),before)});
+ const i=process.argv.indexOf('--report');if(i>=0)await writeFile(process.argv[i+1],JSON.stringify({passed:cases.length,cases},null,2));
+}finally{await c.cleanup()}
