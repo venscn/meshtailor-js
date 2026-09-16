@@ -54,13 +54,15 @@ try{
      // This runner's current generated modes all produce a single atlas.
      // Pooling multiple intentionally separate pages would require per-page checks.
      assert.equal(s.pageReport?.pages?.length??1,1,'Run single-page validation separately from multi-page tests');
+     report.candidateQuality=globalQuality;
+     if(!globalQuality.valid)await writeFile(join(destination,`${name}-REJECTED.json`),JSON.stringify({quality:globalQuality,packed:s.packed.map(p=>({...p,faceUVs:[...p.faceUVs]})),diagnostics:s.diagnostics}));
      assert.equal(globalQuality.valid,true,'Invalid pooled atlas');assert.equal(globalQuality.triangles,mesh.faces.length);
      const exported=uv.meshWithPreviewUV(mesh,s.packed),obj=core.meshToOBJ(exported),reloaded=core.parseOBJ(obj);
      assert.equal(reloaded.faces.length,mesh.faces.length);
      assert.ok(reloaded.faces.every((f,i)=>f.uvs.every((p,k)=>p.every((x,j)=>Math.abs(x-exported.faces[i].uvs[k][j])<1e-8))),'UV round-trip mismatch');
      const islands=uv.buildCharts(reloaded,seamLib.extractSeamEdgesFromUV(reloaded)).length;
      assert.equal(islands,s.packed.length,'Export changed UV island count');
-     report.result={ok:true,islands:s.packed.length,timing:s.timing,metrics:s.metrics,merge:s.merge,repair:s.repair,fragmentation:s.fragmentation,areaAudit:s.areaAudit,spatialReport:s.spatialReport,pageReport:s.pageReport,packingReport:s.packingReport,warnings:s.warnings,coverage:seen.size,globalQuality,exportedFaces:reloaded.faces.length,exportedIslands:islands,areaDensityRange:[Math.min(...s.areaAudit.islands.map(i=>i.densityRatio)),Math.max(...s.areaAudit.islands.map(i=>i.densityRatio))]};
+     report.result={ok:true,diagnostics:s.diagnostics,islands:s.packed.length,timing:s.timing,metrics:s.metrics,merge:s.merge,repair:s.repair,fragmentation:s.fragmentation,areaAudit:s.areaAudit,spatialReport:s.spatialReport,pageReport:s.pageReport,packingReport:s.packingReport,warnings:s.warnings,coverage:seen.size,globalQuality,exportedFaces:reloaded.faces.length,exportedIslands:islands,areaDensityRange:[Math.min(...s.areaAudit.islands.map(i=>i.densityRatio)),Math.max(...s.areaAudit.islands.map(i=>i.densityRatio))]};
      if(process.argv.includes('--export')){await writeFile(join(destination,`${name}-organized.obj`),obj);await writeFile(join(destination,`${name}-original.obj`),core.meshToOBJ(mesh));}
      if(process.argv.includes('--snapshots'))await writeFile(join(destination,`${name}-${mode}-mesh.json`),JSON.stringify({mesh,packed:s.packed.map(p=>({...p,faceUVs:[...p.faceUVs]})),seams:s.seams,report:report.result}));
     }

@@ -1,7 +1,7 @@
 import {PipelineRecorder,resolveLoadPipeline,type LoadPipelineConfig,type PipelineTrace} from '../unfold/load-pipeline.js';
 import type { MeshData } from '@meshtailor/mesh-core';
 import { extractSeamEdgesFromUV } from '@meshtailor/chaining-seams';
-import { fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,auditSourceUV, postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildCharts, buildUnfoldGeometry, unwrapMesh, sourceUVPreview, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
+import { checkUVTriangles,fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,auditSourceUV, postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildCharts, buildUnfoldGeometry, unwrapMesh, sourceUVPreview, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
 export type UVTarget = 'generated' | 'source' | 'stitch' | 'repack' | 'source-atlas' | 'fill';
 export interface UVSnapshot {
   pipeline?:PipelineTrace;
@@ -66,7 +66,7 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
         seams=new Set(result.seams);
         snapshot={target,sourceAudit,sourceAreaAudit,packed:result.packed,seams:result.seams,
           warnings:['当前显示的是整理后的新 atlas，不是未经修改的源 UV。可用“原样检查”回到原坐标。',...result.warnings],
-          repair:result.repair,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,
+          diagnostics:result.diagnostics,repair:result.repair,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,
           metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
       }
     }else if(target==='fill'){
@@ -77,7 +77,7 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     }else if(target==='stitch'||target==='repack'){
       if(!seedCharts?.length)throw new Error('后处理需要当前已完成的 UV 快照。先生成或提取 UV，再执行邻岛缝合/只重排。');
       const result=postprocessUV(mesh,seedCharts,seams,target,config,work);seams=new Set(result.seams);
-      snapshot={packed:result.packed,seams:result.seams,target,warnings:result.warnings,repair:result.repair,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
+      snapshot={packed:result.packed,seams:result.seams,target,warnings:result.warnings,diagnostics:result.diagnostics,repair:result.repair,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.removedSeams,addedSeams:result.addedSeams,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
     }else{
       const result=unwrapMesh(mesh,seams,config,work);seams=new Set(result.seams);
       snapshot={packed:result.packed,seams:result.seams,target,warnings:result.warnings,fragmentation:result.fragmentation,merge:result.merge,pageReport:result.pageReport,spatialReport:result.spatialReport,packingReport:result.packingReport,removedSeams:result.merge?.removedSeams,addedSeams:result.addedSeams,diagnostics:result.diagnostics,metrics:{occupancy:result.occupancy,boxOccupancy:result.boxOccupancy,padding:result.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:result.packingMethod}};
@@ -92,6 +92,13 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
         packingReport:filled.packingReport,pageReport:filled.pageReport,
         warnings:[...snapshot.warnings,...filled.warnings],
         metrics:{occupancy:filled.occupancy,boxOccupancy:filled.boxOccupancy,padding:filled.padding,validated:true,elapsedMs:performance.now()-start,packingMethod:filled.packingMethod}};
+    }
+    // Validate the actual complete packed page, not only each independently
+    // rescaled chart. No numerical collapse may be published as validated:true.
+    if(target!=='source'){
+      const pages=new Map<number,PackedChart[]>();
+      for(const chart of snapshot.packed){const id=chart.atlasPage??0,list=pages.get(id)??[];list.push(chart);pages.set(id,list);}
+      for(const [id,charts]of pages){const q=checkUVTriangles(charts.flatMap(c=>[...c.faceUVs.values()]),100,work);if(!q.valid)throw Error(`最终 UV 页 ${id+1} 验证失败：翻面 ${q.flipped}，退化 ${q.degenerate}，重叠 ${q.overlaps}；没有提交部分结果。`);}
     }
     work.step?.('correspondence');
     snapshot.geometry=buildUnfoldGeometry(mesh,snapshot.packed,seams,work);
