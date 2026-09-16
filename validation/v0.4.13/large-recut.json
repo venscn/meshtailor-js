@@ -1,0 +1,66 @@
+{
+  "passed": 10,
+  "cases": [
+    {
+      "name": "A known source boundary can split one eligible large parent",
+      "passed": true
+    },
+    {
+      "name": "Children retain all original faces without duplication",
+      "passed": true
+    },
+    {
+      "name": "Both children exceed 25% of parent",
+      "passed": true
+    },
+    {
+      "name": "Only original split boundary is proposed",
+      "passed": true
+    },
+    {
+      "name": "No arbitrary seam is invented for an uncut large island",
+      "passed": true
+    },
+    {
+      "name": "Small parent cannot become a recut candidate",
+      "passed": true
+    },
+    {
+      "name": "Invalid thresholds rejected",
+      "passed": true
+    },
+    {
+      "name": "Gainless split is rejected rather than claiming fewer blanks",
+      "passed": true
+    },
+    {
+      "name": "Rejected transaction returns original geometry/UV/seams",
+      "passed": true
+    },
+    {
+      "name": "Default fill never implicitly enables recut",
+      "passed": true
+    }
+  ],
+  "trial": {
+    "enabled": true,
+    "before": 0.988036,
+    "after": 0.988036,
+    "accepted": false,
+    "trials": 1,
+    "addedSeams": [],
+    "candidates": [
+      {
+        "parent": 3,
+        "areaFraction": 1,
+        "children": [
+          3,
+          4
+        ],
+        "reason": "insufficient-gain",
+        "occupancy": 0.988036
+      }
+    ],
+    "note": "仅尝试恢复原模型中已有的大块接缝；一次最多接受一处分为两块，子块至少占父块25%（可配置）。不是语义识别，不自动重新缝合。"
+  }
+}

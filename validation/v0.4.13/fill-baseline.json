@@ -1,0 +1,226 @@
+{
+  "tests": [
+    "concavity refinement increases real occupancy",
+    "report records effective settings for reproduction",
+    "baseline remains immutable",
+    "all original islands preserved",
+    "large source area first, not array/id order",
+    "bounded area gain and no island shrink",
+    "linear factor is square root of area factor",
+    "accepted states have strictly increasing real occupancy",
+    "all triangle faces retained",
+    "pooled exact UV check has no fold or overlap",
+    "output area equals geometric sum",
+    "island edge ratios unchanged under similarity",
+    "shape boxes may overlap without triangles overlapping",
+    "off mode equals unchanged baseline",
+    "strict density grows all islands equally",
+    "trial exhaustion returns complete valid result",
+    "invalid config rejected even before refinement",
+    "global cancellation is propagated, not swallowed as local budget",
+    "near-full rectangles cannot be forced through border",
+    "clipped dilation at tile edge has no row wrap",
+    "reserved gutter is not usable concavity space",
+    "space beyond gutter remains usable",
+    "geometric inter-island gutter >= twice per-side padding"
+  ],
+  "refinement": {
+    "mode": "area-priority",
+    "resolution": 256,
+    "settings": {
+      "step": 0.08,
+      "maxAreaGain": 1.6,
+      "maxRounds": 6,
+      "warmupPasses": 3,
+      "timeBudgetMs": 30000,
+      "maxTrials": 256,
+      "rotate": true
+    },
+    "densitySpreadBefore": 1.0000000000000009,
+    "densitySpreadAfter": 1,
+    "before": 0.4468462029860594,
+    "after": 0.7149539247776953,
+    "beforeBox": 0.5645333169437774,
+    "afterBox": 0.903253307110044,
+    "trials": 15,
+    "accepted": 15,
+    "commonAccepted": 3,
+    "rounds": 5,
+    "stop": "converged",
+    "elapsedMs": 89.69131799999968,
+    "order": [
+      3,
+      11,
+      90
+    ],
+    "gains": [
+      {
+        "id": 3,
+        "area3D": 3,
+        "areaFactor": 1.6,
+        "linearFactor": 1.2649110640673518
+      },
+      {
+        "id": 11,
+        "area3D": 0.7744,
+        "areaFactor": 1.6,
+        "linearFactor": 1.2649110640673518
+      },
+      {
+        "id": 90,
+        "area3D": 0.0225,
+        "areaFactor": 1.5999999999999985,
+        "linearFactor": 1.264911064067351
+      }
+    ],
+    "history": [
+      {
+        "round": 0,
+        "id": null,
+        "occupancy": 0.4825938992249442,
+        "areaFactor": 1.08
+      },
+      {
+        "round": 0,
+        "id": null,
+        "occupancy": 0.5212014111629397,
+        "areaFactor": 1.1664
+      },
+      {
+        "round": 0,
+        "id": null,
+        "occupancy": 0.5628975240559749,
+        "areaFactor": 1.2597120000000002
+      },
+      {
+        "round": 1,
+        "id": 3,
+        "occupancy": 0.5984779727834721,
+        "areaFactor": 1.3604889600000003
+      },
+      {
+        "round": 1,
+        "id": 11,
+        "occupancy": 0.6076624726149968,
+        "areaFactor": 1.3604889600000003
+      },
+      {
+        "round": 1,
+        "id": 90,
+        "occupancy": 0.607929325980453,
+        "areaFactor": 1.3604889600000003
+      },
+      {
+        "round": 2,
+        "id": 3,
+        "occupancy": 0.64635621060615,
+        "areaFactor": 1.4693280768000003
+      },
+      {
+        "round": 2,
+        "id": 11,
+        "occupancy": 0.6562754704241965,
+        "areaFactor": 1.4693280768000003
+      },
+      {
+        "round": 2,
+        "id": 90,
+        "occupancy": 0.6565636720588893,
+        "areaFactor": 1.4693280768000003
+      },
+      {
+        "round": 3,
+        "id": 3,
+        "occupancy": 0.698064707454642,
+        "areaFactor": 1.5868743229440005
+      },
+      {
+        "round": 3,
+        "id": 11,
+        "occupancy": 0.7087775080581323,
+        "areaFactor": 1.5868743229440005
+      },
+      {
+        "round": 3,
+        "id": 90,
+        "occupancy": 0.7090887658236005,
+        "areaFactor": 1.5868743229440005
+      },
+      {
+        "round": 4,
+        "id": 3,
+        "occupancy": 0.7137229349779853,
+        "areaFactor": 1.6
+      },
+      {
+        "round": 4,
+        "id": 11,
+        "occupancy": 0.7149191685090373,
+        "areaFactor": 1.6
+      },
+      {
+        "round": 4,
+        "id": 90,
+        "occupancy": 0.7149539247776951,
+        "areaFactor": 1.5999999999999985
+      }
+    ],
+    "shapeWaste": [
+      {
+        "id": 3,
+        "area3D": 3,
+        "boxWaste": 0.11768711395771797,
+        "shapeFill": 0.75
+      },
+      {
+        "id": 11,
+        "area3D": 0.7744,
+        "boxWaste": 0,
+        "shapeFill": 1
+      },
+      {
+        "id": 90,
+        "area3D": 0.0225,
+        "boxWaste": 0,
+        "shapeFill": 1
+      }
+    ],
+    "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。",
+    "adaptive": {
+      "strategy": "adaptive",
+      "seed": "contour-reflow",
+      "localAccepted": 8,
+      "reflowAccepted": 4,
+      "failedTrials": 0,
+      "smallerAfterFailure": 0,
+      "skippedAtCap": 3,
+      "attempts": [
+        {
+          "id": 3,
+          "tries": 4,
+          "accepted": 4,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 11,
+          "tries": 4,
+          "accepted": 4,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 90,
+          "tries": 4,
+          "accepted": 4,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        }
+      ]
+    }
+  },
+  "minimumGap": 0.011036715260247076
+}

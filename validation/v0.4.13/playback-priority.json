@@ -1,0 +1,78 @@
+{
+  "suite": "playback-area-rate",
+  "passed": 18,
+  "cases": [
+    {
+      "name": "All islands sorted by source triangle area not id",
+      "passed": true
+    },
+    {
+      "name": "Multi-select click order cannot override area",
+      "passed": true
+    },
+    {
+      "name": "Duplicates/stale indices removed, deterministic area ties",
+      "passed": true
+    },
+    {
+      "name": "Single island remains single",
+      "passed": true
+    },
+    {
+      "name": "Empty queue",
+      "passed": true
+    },
+    {
+      "name": "Area cache is snapshot scoped",
+      "passed": true
+    },
+    {
+      "name": "0.25x clock and ETA",
+      "passed": true
+    },
+    {
+      "name": "0.5x clock and ETA",
+      "passed": true
+    },
+    {
+      "name": "1x clock and ETA",
+      "passed": true
+    },
+    {
+      "name": "2x clock and ETA",
+      "passed": true
+    },
+    {
+      "name": "4x clock and ETA",
+      "passed": true
+    },
+    {
+      "name": "8x clock and ETA",
+      "passed": true
+    },
+    {
+      "name": "16x clock and ETA",
+      "passed": true
+    },
+    {
+      "name": "32x clock and ETA",
+      "passed": true
+    },
+    {
+      "name": "64x clock and ETA",
+      "passed": true
+    },
+    {
+      "name": "Rate change preserves pose and integrates remaining elapsed",
+      "passed": true
+    },
+    {
+      "name": "High speed reverse wraps loops correctly",
+      "passed": true
+    },
+    {
+      "name": "Invalid rate rejected",
+      "passed": true
+    }
+  ]
+}

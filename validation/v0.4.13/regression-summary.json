@@ -1,0 +1,78 @@
+[
+  {
+    "name": "selection-browser",
+    "seconds": 1.8882172107696533,
+    "finalPassedCases": 39,
+    "initialExit": 1,
+    "finalEvidence": "selection-browser.json",
+    "correction": "Historical tests asserted click/ID order; updated to required area order. Other assertions retained. Final report captured from successful rerun."
+  },
+  {
+    "name": "camera-browser",
+    "seconds": 46.574198484420776,
+    "finalPassedCases": 39,
+    "initialExit": 0,
+    "finalEvidence": "camera-browser.json"
+  },
+  {
+    "name": "relay-browser",
+    "seconds": 1.322862148284912,
+    "finalPassedCases": 28,
+    "initialExit": 1,
+    "finalEvidence": "relay-browser.json",
+    "correction": "Historical tests asserted click/ID order; updated to required area order. Other assertions retained. Final report captured from successful rerun."
+  },
+  {
+    "name": "motion-browser",
+    "seconds": 3.041611671447754,
+    "finalPassedCases": 28,
+    "initialExit": 1,
+    "finalEvidence": "motion-browser.json",
+    "correction": "Historical tests asserted click/ID order; updated to required area order. Other assertions retained. Final report captured from successful rerun."
+  },
+  {
+    "name": "fill-browser",
+    "seconds": 4.550253391265869,
+    "finalPassedCases": 17,
+    "initialExit": 0,
+    "finalEvidence": "fill-browser.json"
+  },
+  {
+    "name": "overlap-browser",
+    "seconds": 18.507115840911865,
+    "finalPassedCases": 42,
+    "initialExit": 0,
+    "finalEvidence": "overlap-browser.json"
+  },
+  {
+    "name": "core",
+    "seconds": 3.1337804794311523,
+    "finalPassedCases": 21,
+    "initialExit": 0,
+    "finalEvidence": "core.json"
+  },
+  {
+    "name": "hinge",
+    "exit": 0,
+    "seconds": 1.977546215057373
+  },
+  {
+    "name": "overlap-policy",
+    "seconds": 1.9765641689300537,
+    "finalPassedCases": 12,
+    "initialExit": 0,
+    "finalEvidence": "overlap-policy.json"
+  },
+  {
+    "name": "area-allocation",
+    "exit": 0,
+    "seconds": 2.1340861320495605
+  },
+  {
+    "name": "fill-adaptive",
+    "seconds": 2.188183307647705,
+    "finalPassedCases": 18,
+    "initialExit": 0,
+    "finalEvidence": "fill-adaptive.json"
+  }
+]

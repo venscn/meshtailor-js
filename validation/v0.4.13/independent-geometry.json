@@ -1,0 +1,32 @@
+{
+  "engine": "Independent GEOS / Shapely 2.1.2",
+  "toleranceUVArea": 1e-14,
+  "assets": {
+    "Corset": {
+      "fileSHA256": "96e39678a32a17da72b9621d7b183530a4474c51807c733e30248749adf9840a",
+      "triangles": 18324,
+      "candidatePairs": 115927,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "positiveOrientation": true,
+      "geometryAndFacesUnchanged": true,
+      "geometricOccupancy": 0.8398163056630487,
+      "uvMinimum": 0.003,
+      "uvMaximum": 0.9969637225519168,
+      "seconds": 1.352933701999973
+    },
+    "FlightHelmet": {
+      "fileSHA256": "d909089f824276bec5f87a165cd8c687f05939202a48b525a6687a1e664f4de0",
+      "triangles": 94722,
+      "candidatePairs": 653047,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "positiveOrientation": true,
+      "geometryAndFacesUnchanged": true,
+      "geometricOccupancy": 0.7357946655598693,
+      "uvMinimum": 0.003,
+      "uvMaximum": 0.9969318389524913,
+      "seconds": 6.99489367000001
+    }
+  }
+}

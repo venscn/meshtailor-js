@@ -1,0 +1,224 @@
+{
+  "passed": 18,
+  "cases": [
+    {
+      "name": "Largest remains first, not small-first disguised optimization",
+      "passed": true
+    },
+    {
+      "name": "Largest does not fit but smaller is still attempted and grown",
+      "passed": true
+    },
+    {
+      "name": "Largest never shrinks to purchase room",
+      "passed": true
+    },
+    {
+      "name": "Multiple fair descending sweeps really occur",
+      "passed": true
+    },
+    {
+      "name": "Failed big island step decreases independently",
+      "passed": true
+    },
+    {
+      "name": "Min step is tested, not falsely converged before use",
+      "passed": true
+    },
+    {
+      "name": "Local vacancy growth is actually used",
+      "passed": true
+    },
+    {
+      "name": "All faces and original snapshot retained",
+      "passed": true
+    },
+    {
+      "name": "Final global triangles are valid",
+      "passed": true
+    },
+    {
+      "name": "Actual density cap / no shrink",
+      "passed": true
+    },
+    {
+      "name": "Common mode still shares identical gains",
+      "passed": true
+    },
+    {
+      "name": "Quarter rotation 0 preserves triangle signed area",
+      "passed": true
+    },
+    {
+      "name": "Quarter rotation 1 preserves triangle signed area",
+      "passed": true
+    },
+    {
+      "name": "Quarter rotation 2 preserves triangle signed area",
+      "passed": true
+    },
+    {
+      "name": "Quarter rotation 3 preserves triangle signed area",
+      "passed": true
+    },
+    {
+      "name": "Invalid controls rejected",
+      "passed": true
+    },
+    {
+      "name": "Untried smaller steps at last sweep are not called convergence",
+      "passed": true
+    },
+    {
+      "name": "Trial budget is not called convergence",
+      "passed": true
+    }
+  ],
+  "example": {
+    "mode": "area-priority",
+    "resolution": 256,
+    "settings": {
+      "step": 0.08,
+      "maxAreaGain": 2,
+      "maxRounds": 10,
+      "warmupPasses": 0,
+      "timeBudgetMs": 30000,
+      "maxTrials": 256,
+      "rotate": true
+    },
+    "densitySpreadBefore": 1,
+    "densitySpreadAfter": 2,
+    "before": 0.6605,
+    "after": 0.6748999999999999,
+    "beforeBox": 0.6605,
+    "afterBox": 0.6749,
+    "trials": 20,
+    "accepted": 10,
+    "commonAccepted": 0,
+    "rounds": 10,
+    "stop": "round-limit",
+    "elapsedMs": 23.392929000000095,
+    "order": [
+      9,
+      1
+    ],
+    "gains": [
+      {
+        "id": 9,
+        "area3D": 0.6461,
+        "areaFactor": 1,
+        "linearFactor": 1
+      },
+      {
+        "id": 1,
+        "area3D": 0.0144,
+        "areaFactor": 2,
+        "linearFactor": 1.4142135623730951
+      }
+    ],
+    "history": [
+      {
+        "round": 1,
+        "id": 1,
+        "occupancy": 0.661652,
+        "areaFactor": 1.08
+      },
+      {
+        "round": 2,
+        "id": 1,
+        "occupancy": 0.66289616,
+        "areaFactor": 1.1664
+      },
+      {
+        "round": 3,
+        "id": 1,
+        "occupancy": 0.6642398528,
+        "areaFactor": 1.2597120000000002
+      },
+      {
+        "round": 4,
+        "id": 1,
+        "occupancy": 0.665691041024,
+        "areaFactor": 1.3604889600000003
+      },
+      {
+        "round": 5,
+        "id": 1,
+        "occupancy": 0.66725832430592,
+        "areaFactor": 1.4693280768000003
+      },
+      {
+        "round": 6,
+        "id": 1,
+        "occupancy": 0.6689509902503936,
+        "areaFactor": 1.5868743229440005
+      },
+      {
+        "round": 7,
+        "id": 1,
+        "occupancy": 0.6707790694704251,
+        "areaFactor": 1.7138242687795207
+      },
+      {
+        "round": 8,
+        "id": 1,
+        "occupancy": 0.6727533950280591,
+        "areaFactor": 1.8509302102818825
+      },
+      {
+        "round": 9,
+        "id": 1,
+        "occupancy": 0.6748856666303038,
+        "areaFactor": 1.9990046271044333
+      },
+      {
+        "round": 10,
+        "id": 1,
+        "occupancy": 0.6749,
+        "areaFactor": 2
+      }
+    ],
+    "shapeWaste": [
+      {
+        "id": 9,
+        "area3D": 0.6461,
+        "boxWaste": 0,
+        "shapeFill": 1
+      },
+      {
+        "id": 1,
+        "area3D": 0.0144,
+        "boxWaste": 0,
+        "shapeFill": 1
+      }
+    ],
+    "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。",
+    "adaptive": {
+      "strategy": "adaptive",
+      "seed": "current-layout",
+      "localAccepted": 10,
+      "reflowAccepted": 0,
+      "failedTrials": 10,
+      "smallerAfterFailure": 10,
+      "skippedAtCap": 0,
+      "attempts": [
+        {
+          "id": 9,
+          "tries": 10,
+          "accepted": 0,
+          "failed": 10,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 1,
+          "tries": 10,
+          "accepted": 10,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        }
+      ]
+    }
+  }
+}

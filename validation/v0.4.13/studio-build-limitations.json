@@ -1,0 +1,14 @@
+[
+  {
+    "check": "registry",
+    "exit": 6
+  },
+  {
+    "check": "studio-build",
+    "exit": 127
+  },
+  {
+    "check": "studio-typecheck",
+    "exit": 2
+  }
+]

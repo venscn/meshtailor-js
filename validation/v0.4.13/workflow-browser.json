@@ -1,0 +1,161 @@
+{
+  "suite": "Area queue, live rates and modifier box selection",
+  "host": "Offline UI using production worker/view/pointer controller, not React main entry",
+  "cases": [
+    {
+      "name": "DPR1: all queue descending by real area, not ID",
+      "passed": true
+    },
+    {
+      "name": "DPR1: multi-select preserves explicit set but sorts playback by area",
+      "passed": true
+    },
+    {
+      "name": "DPR1: unmodified real pointer drag selects island only",
+      "passed": true,
+      "details": {
+        "selected": [
+          1
+        ],
+        "inspection": [
+          1
+        ],
+        "face": null,
+        "p": 0,
+        "playing": false,
+        "camera": "{\"yaw\":0.38,\"pitch\":0.22,\"distance\":2.5185588516450275,\"target\":[0,0,0]}"
+      }
+    },
+    {
+      "name": "DPR1: Shift drag adds island and queue remains area ordered",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Alt drag inverses selected island; second use restores it",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Ctrl drag subtracts without touching others",
+      "passed": true
+    },
+    {
+      "name": "DPR1: box can cover many islands in one transaction",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Escape cancels live box without modifying selection",
+      "passed": true
+    },
+    {
+      "name": "DPR1: backwards drag works; hit triangle not box direction",
+      "passed": true
+    },
+    {
+      "name": "DPR1: speed choices include slow and very fast",
+      "passed": true
+    },
+    {
+      "name": "DPR1: changing speed keeps camera, progress, mesh and timeline identities",
+      "passed": true
+    },
+    {
+      "name": "DPR1: wall-time status changes with multiplier",
+      "passed": true,
+      "details": "已完成 0 / 1 · 等待 0 · 播放中 #1 (25.0%)\n16× 总时长 0.4 秒（1× 6.4 秒） · 剩余 0.3 秒"
+    },
+    {
+      "name": "DPR1: live playback does not pause when rate changes",
+      "passed": true
+    },
+    {
+      "name": "DPR1: high speed can complete without tail delay",
+      "passed": true
+    },
+    {
+      "name": "DPR1: default focus and automatic overlap enabled with no camera follow",
+      "passed": true
+    },
+    {
+      "name": "DPR1: no WebGL or uncaught JS errors",
+      "passed": true
+    },
+    {
+      "name": "DPR2: all queue descending by real area, not ID",
+      "passed": true
+    },
+    {
+      "name": "DPR2: multi-select preserves explicit set but sorts playback by area",
+      "passed": true
+    },
+    {
+      "name": "DPR2: unmodified real pointer drag selects island only",
+      "passed": true,
+      "details": {
+        "selected": [
+          1
+        ],
+        "inspection": [
+          1
+        ],
+        "face": null,
+        "p": 0,
+        "playing": false,
+        "camera": "{\"yaw\":0.38,\"pitch\":0.22,\"distance\":2.5185588516450275,\"target\":[0,0,0]}"
+      }
+    },
+    {
+      "name": "DPR2: Shift drag adds island and queue remains area ordered",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Alt drag inverses selected island; second use restores it",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Ctrl drag subtracts without touching others",
+      "passed": true
+    },
+    {
+      "name": "DPR2: box can cover many islands in one transaction",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Escape cancels live box without modifying selection",
+      "passed": true
+    },
+    {
+      "name": "DPR2: backwards drag works; hit triangle not box direction",
+      "passed": true
+    },
+    {
+      "name": "DPR2: speed choices include slow and very fast",
+      "passed": true
+    },
+    {
+      "name": "DPR2: changing speed keeps camera, progress, mesh and timeline identities",
+      "passed": true
+    },
+    {
+      "name": "DPR2: wall-time status changes with multiplier",
+      "passed": true,
+      "details": "已完成 0 / 1 · 等待 0 · 播放中 #1 (25.0%)\n16× 总时长 0.4 秒（1× 6.4 秒） · 剩余 0.3 秒"
+    },
+    {
+      "name": "DPR2: live playback does not pause when rate changes",
+      "passed": true
+    },
+    {
+      "name": "DPR2: high speed can complete without tail delay",
+      "passed": true
+    },
+    {
+      "name": "DPR2: default focus and automatic overlap enabled with no camera follow",
+      "passed": true
+    },
+    {
+      "name": "DPR2: no WebGL or uncaught JS errors",
+      "passed": true
+    }
+  ],
+  "passed": 32
+}

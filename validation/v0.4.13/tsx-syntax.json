@@ -1,0 +1,5 @@
+{
+  "files": 11,
+  "errors": [],
+  "scope": "Syntax transpilation ONLY. Does not resolve React types, bundle Vite, or run main Studio."
+}

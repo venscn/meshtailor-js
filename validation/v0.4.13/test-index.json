@@ -1,0 +1,103 @@
+{
+  "sourceBase": "v0.4.12",
+  "correctInputArchiveSHA256": "284decae81fda986f3c291bf4bebee473221b4eabe7078c65ed44adaf9ffb563",
+  "scope": "Production core/worker/native WebGL + offline UI. Full React/Vite build gate remains failed.",
+  "reports": [
+    {
+      "file": "camera-browser.json",
+      "casesPassed": 39
+    },
+    {
+      "file": "core.json",
+      "casesPassed": 21
+    },
+    {
+      "file": "fill-adaptive.json",
+      "casesPassed": 18
+    },
+    {
+      "file": "fill-baseline.json",
+      "casesPassed": null
+    },
+    {
+      "file": "fill-browser.json",
+      "casesPassed": 17
+    },
+    {
+      "file": "focus-overlap-browser.json",
+      "casesPassed": 18
+    },
+    {
+      "file": "focus-policy.json",
+      "casesPassed": 11
+    },
+    {
+      "file": "independent-geometry.json",
+      "casesPassed": null
+    },
+    {
+      "file": "large-recut-real.json",
+      "casesPassed": null
+    },
+    {
+      "file": "large-recut.json",
+      "casesPassed": 10
+    },
+    {
+      "file": "motion-browser.json",
+      "casesPassed": 28
+    },
+    {
+      "file": "overlap-browser.json",
+      "casesPassed": 42
+    },
+    {
+      "file": "overlap-policy.json",
+      "casesPassed": 12
+    },
+    {
+      "file": "overlap-workbench.json",
+      "casesPassed": 17
+    },
+    {
+      "file": "playback-priority.json",
+      "casesPassed": 18
+    },
+    {
+      "file": "pure-execution.json",
+      "casesPassed": null
+    },
+    {
+      "file": "real-corset-browser.json",
+      "casesPassed": null
+    },
+    {
+      "file": "regression-summary.json",
+      "casesPassed": null
+    },
+    {
+      "file": "relay-browser.json",
+      "casesPassed": 28
+    },
+    {
+      "file": "selection-browser.json",
+      "casesPassed": 39
+    },
+    {
+      "file": "studio-build-limitations.json",
+      "casesPassed": null
+    },
+    {
+      "file": "tsx-syntax.json",
+      "casesPassed": null
+    },
+    {
+      "file": "uv-box.json",
+      "casesPassed": 12
+    },
+    {
+      "file": "workflow-browser.json",
+      "casesPassed": 32
+    }
+  ]
+}

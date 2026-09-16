@@ -1,0 +1,49 @@
+{
+  "passed": 11,
+  "cases": [
+    {
+      "name": "Current island never dissolved",
+      "passed": true
+    },
+    {
+      "name": "Other surface inside sphere dissolved locally",
+      "passed": true
+    },
+    {
+      "name": "Same other island outside sphere stays solid",
+      "passed": true
+    },
+    {
+      "name": "Smooth feather at boundary",
+      "passed": true
+    },
+    {
+      "name": "Both relay islands protected",
+      "passed": true
+    },
+    {
+      "name": "Zero temporal strength means no cutaway",
+      "passed": true
+    },
+    {
+      "name": "Sphere center follows transformed vertices",
+      "passed": true
+    },
+    {
+      "name": "Endpoint 0 leaves no sphere",
+      "passed": true
+    },
+    {
+      "name": "Endpoint 1 leaves no sphere",
+      "passed": true
+    },
+    {
+      "name": "Off leaves no sphere",
+      "passed": true
+    },
+    {
+      "name": "Controls sanitized",
+      "passed": true
+    }
+  ]
+}

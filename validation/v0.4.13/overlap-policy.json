@@ -1,0 +1,54 @@
+{
+  "suite": "Render-only overlap policy",
+  "cases": [
+    {
+      "name": "auto is default; moving islands use projected diagnostics",
+      "passed": true
+    },
+    {
+      "name": "off is preserved",
+      "passed": true
+    },
+    {
+      "name": "invalid mode and NaN values fall back",
+      "passed": true
+    },
+    {
+      "name": "tolerance and alpha are bounded",
+      "passed": true
+    },
+    {
+      "name": "face tones can be disabled without switching detection",
+      "passed": true
+    },
+    {
+      "name": "texture allocation is capped across extreme viewports",
+      "passed": true
+    },
+    {
+      "name": "small views remain full resolution",
+      "passed": true
+    },
+    {
+      "name": "device maximum texture size is obeyed",
+      "passed": true
+    },
+    {
+      "name": "source scale uses longest side not island count or hinge spread",
+      "passed": true
+    },
+    {
+      "name": "empty geometry scale stays finite",
+      "passed": true
+    },
+    {
+      "name": "linear depth precision floor is explicit",
+      "passed": true
+    },
+    {
+      "name": "legend never calls projected occlusion a collision",
+      "passed": true
+    }
+  ],
+  "passed": 12
+}

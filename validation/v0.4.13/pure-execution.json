@@ -1,0 +1,34 @@
+[
+  {
+    "test": "playback-priority",
+    "exit": 0
+  },
+  {
+    "test": "uv-box",
+    "exit": 0
+  },
+  {
+    "test": "focus-policy",
+    "exit": 0
+  },
+  {
+    "test": "fill-adaptive",
+    "exit": 0
+  },
+  {
+    "test": "large-recut",
+    "exit": 0
+  },
+  {
+    "test": "fill-baseline",
+    "exit": 0
+  },
+  {
+    "test": "orientation",
+    "exit": 0
+  },
+  {
+    "test": "fit-orientation",
+    "exit": 0
+  }
+]

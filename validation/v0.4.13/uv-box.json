@@ -1,0 +1,53 @@
+{
+  "passed": 12,
+  "cases": [
+    {
+      "name": "Contained actual triangle intersects",
+      "passed": true
+    },
+    {
+      "name": "Rectangle inside a triangle intersects",
+      "passed": true
+    },
+    {
+      "name": "No false selection of empty concavity from only bounds",
+      "passed": true
+    },
+    {
+      "name": "Rectangle reverse direction equivalent",
+      "passed": true
+    },
+    {
+      "name": "Thin crossing edges caught",
+      "passed": true
+    },
+    {
+      "name": "Plain drag replaces explicit island selection",
+      "passed": true
+    },
+    {
+      "name": "Shift adds",
+      "passed": true
+    },
+    {
+      "name": "Alt inverts only box hits",
+      "passed": true
+    },
+    {
+      "name": "Repeated inverse restores selection",
+      "passed": true
+    },
+    {
+      "name": "Ctrl removes and ignores stale ids",
+      "passed": true
+    },
+    {
+      "name": "Empty plain rectangle clears",
+      "passed": true
+    },
+    {
+      "name": "Modifier mapping and precedence",
+      "passed": true
+    }
+  ]
+}
