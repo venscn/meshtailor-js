@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.12",
+  "version": "0.4.13",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -82,7 +82,15 @@
     "test:verified-models:browser": "node scripts/verified-models-browser-smoke.mjs",
     "test:fill": "node scripts/fill-refinement-smoke.mjs",
     "test:fill:browser": "node scripts/fill-browser-smoke.mjs",
-    "test:fill:real": "node scripts/fill-verified-models.mjs"
+    "test:fill:real": "node scripts/fill-verified-models.mjs",
+    "test:playback-priority": "node scripts/playback-priority-smoke.mjs",
+    "test:uv-box": "node scripts/uv-box-smoke.mjs",
+    "test:focus": "node scripts/focus-policy-smoke.mjs",
+    "test:focus:browser": "node scripts/focus-overlap-browser-smoke.mjs",
+    "test:workflow:browser": "node scripts/workflow-controls-browser-smoke.mjs",
+    "test:fill:adaptive": "node scripts/fill-adaptive-smoke.mjs",
+    "test:recut-large": "node scripts/large-recut-smoke.mjs",
+    "test:recut-large:real": "node scripts/large-recut-real-smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
