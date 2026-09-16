@@ -9,7 +9,7 @@ check('Smooth feather at boundary',()=>{const v=f.focusVisibility([1.8,0,0],2,[s
 check('Both relay islands protected',()=>assert.equal(f.focusVisibility([0,0,0],3,[sphere,{...sphere,id:3}],.12),1));
 check('Zero temporal strength means no cutaway',()=>assert.equal(f.focusVisibility([0,0,0],2,[{...sphere,strength:0}],.12),1));
 const g={source:new Float32Array(9),islands:[{id:1,faces:[0]}]};
-const options={progress:.5,selected:[1],order:'sequential',separation:0,path:'direct'};
+const options={focusMode:'dither',interactionActive:true,progress:.5,selected:[1],order:'sequential',separation:0,path:'direct'};
 const pos=new Float32Array([10,0,0,12,0,0,10,2,0]);
 check('Sphere center follows transformed vertices',()=>{const s=f.playbackFocusSpheres(g,pos,options,2)[0];assert.deepEqual(s.center,[11,1,0]);assert.ok(Math.abs(s.radius-Math.SQRT2*1.2)<1e-8);});
 for(const progress of [0,1])check(`Endpoint ${progress} leaves no sphere`,()=>assert.deepEqual(f.playbackFocusSpheres(g,pos,{...options,progress},2),[]));

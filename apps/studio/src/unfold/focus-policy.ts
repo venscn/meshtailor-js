@@ -1,13 +1,13 @@
 import {sampleUnfoldSchedule,type UnfoldGeometry,type UnfoldOptions} from '@meshtailor/uv';
-export interface FocusSettings {focusMode?:'off'|'dither';focusRadius?:number;focusRetained?:number}
+export interface FocusSettings {focusMode?:'off'|'ghost'|'dither';focusRadius?:number;focusRetained?:number;/** True only during play or a live timeline gesture. */interactionActive?:boolean;focusOpacity?:number}
 export interface FocusSphere {id:number;center:[number,number,number];radius:number;strength:number}
-export const FOCUS_DEFAULTS={focusMode:'dither' as const,focusRadius:1.2,focusRetained:.12};
-export function focusSettings(s:FocusSettings){return{mode:s.focusMode==='off'?'off':'dither',radius:Math.max(1,Math.min(3,Number.isFinite(s.focusRadius)?s.focusRadius!:1.2)),retained:Math.max(.02,Math.min(.8,Number.isFinite(s.focusRetained)?s.focusRetained!:.12))};}
+export const FOCUS_DEFAULTS={focusMode:'ghost' as const,focusRadius:1.2,focusRetained:.12,focusOpacity:.18};
+export function focusSettings(s:FocusSettings){return{mode:s.focusMode==='off'?'off':s.focusMode==='dither'?'dither':'ghost',opacity:Math.max(.03,Math.min(.65,Number.isFinite(s.focusOpacity)?s.focusOpacity!:.18)),radius:Math.max(1,Math.min(3,Number.isFinite(s.focusRadius)?s.focusRadius!:1.2)),retained:Math.max(.02,Math.min(.8,Number.isFinite(s.focusRetained)?s.focusRetained!:.12))};}
 const smooth=(x:number)=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
 /** Sphere follows the CURRENT transformed island, not source center or future UV.
  * Both active islands in a handoff are protected; endpoints leave no stale bubble. */
 export function playbackFocusSpheres(data:UnfoldGeometry,positions:Float32Array,o:UnfoldOptions&FocusSettings,modelScale:number):FocusSphere[]{
- const s=focusSettings(o);if(s.mode==='off')return [];
+ const s=focusSettings(o);if(s.mode!=='dither'||o.interactionActive!==true)return [];
  const schedule=sampleUnfoldSchedule(o.progress,o.selected.length,o.order,o.handoff,false,o.timeline);
  return schedule.active.slice(0,2).map(a=>{
   const id=o.selected[a.index]!,island=data.islands.find(i=>i.id===id)!;
@@ -49,4 +49,13 @@ export function uploadFocusUniforms(gl:WebGL2RenderingContext,program:WebGLProgr
  spheres.slice(0,2).forEach((s,i)=>{data.set([...s.center,s.radius],i*4);ids[i]=s.id;strength[i]=s.strength;});
  const u=(name:string)=>gl.getUniformLocation(program,name);
  gl.uniform1i(u('focusCount'),Math.min(2,spheres.length));gl.uniform4fv(u('focusSpheres[0]'),data);gl.uniform2iv(u('focusIDs'),ids);gl.uniform2fv(u('focusStrength'),strength);gl.uniform1f(u('focusRetained'),retained);
+}
+
+/** Null means restore the caller's exact context/selection display. Both relay
+ * entries stay opaque until their entire local timeline reaches its endpoint. */
+export function playbackEmphasis(o:UnfoldOptions&FocusSettings):number[]|null {
+  if(o.interactionActive!==true||focusSettings(o).mode!=='ghost')return null;
+  const schedule=sampleUnfoldSchedule(o.progress,o.selected.length,o.order,o.handoff,false,o.timeline);
+  const ids=schedule.active.map(a=>o.selected[a.index]!).filter(id=>id!==undefined);
+  return ids.length?ids:null;
 }

@@ -3,7 +3,7 @@ import { viewportSize } from '../viewport-math.js';
 import { cameraBasis, cameraMatrix, pickFace, projectPoint, type OrbitCamera } from './camera-math.js';
 import type { Vec3 } from '@meshtailor/mesh-core';
 import { CameraFollowPolicy, DEFAULT_AUTO_FRAME } from './camera-policy.js';
-import {FOCUS_GLSL,focusSettings,playbackFocusSpheres,uploadFocusUniforms,type FocusSettings,type FocusSphere} from './focus-policy.js';
+import {FOCUS_GLSL,playbackEmphasis,focusSettings,playbackFocusSpheres,uploadFocusUniforms,type FocusSettings,type FocusSphere} from './focus-policy.js';
 import { OverlapPass } from './overlap-pass.js';
 import { overlapSettings, overlapLegend, sourceModelScale, type OverlapSettings } from './overlap-policy.js';
 
@@ -90,6 +90,7 @@ export class UnfoldWebGLView {
   private positions = new Float32Array(0);
   private options: UnfoldDisplay = {progress:0,selected:[],order:DEFAULT_UNFOLD_ORDER,path:'staged',separation:DEFAULT_SEPARATION,context:'dim',wireframe:false,checker:false,labels:true,xray:false,focusFace:null,autoFrame:DEFAULT_AUTO_FRAME};
   private active = new Set<number>();
+  private emphasis:number[]|null=null;
   private activeCount=0; private contextCount=0; private seamCount=0;
   private camera: OrbitCamera = {yaw:.65,pitch:.35,distance:8,target:[0,0,0]};
   private readonly cameraFollow = new CameraFollowPolicy();
@@ -173,12 +174,17 @@ export class UnfoldWebGLView {
     const data=this.data,gl=this.gl,ids=selectedIslands(data,options.selected);
     this.options={...options,selected:ids};
     this.active=new Set(ids);
-    const key=JSON.stringify([ids,options.context,options.showHinges]);
+    this.emphasis=playbackEmphasis(this.options);
+    const solid=this.emphasis?new Set(this.emphasis):this.active;
+    this.canvas.dataset.playbackFocus=this.emphasis?'active':'restored';
+    this.canvas.dataset.opaqueIslands=JSON.stringify([...solid]);
+    this.canvas.dataset.interactionActive=String(options.interactionActive===true);
+    const key=JSON.stringify([ids,options.context,options.showHinges,this.emphasis]);
     if(key!==this.lastSelection){
       this.lastSelection=key;
       const active:number[]=[],context:number[]=[],lines:number[]=[];
-      for(let fi=0;fi<data.faceChart.length;fi++)(this.active.has(data.faceChart[fi]!)?active:context).push(fi*3,fi*3+1,fi*3+2);
-      for(let i=0;i<data.boundaries.length;i+=2)if(this.active.has(data.faceChart[Math.floor(data.boundaries[i]!/3)]!))lines.push(data.boundaries[i]!,data.boundaries[i+1]!);
+      for(let fi=0;fi<data.faceChart.length;fi++)(solid.has(data.faceChart[fi]!)?active:context).push(fi*3,fi*3+1,fi*3+2);
+      for(let i=0;i<data.boundaries.length;i+=2)if(solid.has(data.faceChart[Math.floor(data.boundaries[i]!/3)]!))lines.push(data.boundaries[i]!,data.boundaries[i+1]!);
       gl.bindVertexArray(this.vao);
       for(const [buffer,indices]of [[this.activeBuffer,active],[this.contextBuffer,context],[this.seamBuffer,lines]] as const){gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,buffer);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint32Array(indices),gl.STATIC_DRAW);}
       this.activeCount=active.length;this.contextCount=context.length;this.seamCount=lines.length;
@@ -269,7 +275,7 @@ export class UnfoldWebGLView {
   }
   /** Public snapshot for regression diagnostics, not a second animation implementation. */
   getPositions(){return this.positions.slice();}
-  getFocusState(){return {settings:focusSettings(this.options),spheres:this.focusSpheres};}
+  getFocusState(){return {settings:focusSettings(this.options),spheres:this.focusSpheres,emphasis:this.emphasis,interactionActive:this.options.interactionActive===true};}
   getCamera(){return {...this.camera,target:[...this.camera.target]};}
   /** Opt-in debug readback, never invoked by ordinary playback. */
   getOverlapCounts(){return this.overlapPass?.readCounts()??{width:0,height:0,counts:new Uint8Array()};}
@@ -287,7 +293,7 @@ export class UnfoldWebGLView {
       if(!this.overlapFailure){
         this.overlapPass??=new OverlapPass(gl);
         this.overlapPass.render({focusSpheres:this.focusSpheres,focusRetained:focusSettings(this.options).retained,vao:this.vao,active:this.activeBuffer,activeCount:this.activeCount,context:this.contextBuffer,contextCount:this.contextCount,
-          solidContext:this.options.context==='solid',mvp,camera:this.camera,width:this.canvas.width,height:this.canvas.height,dpr:this.size.dpr,
+          solidContext:!this.emphasis&&this.options.context==='solid',mvp,camera:this.camera,width:this.canvas.width,height:this.canvas.height,dpr:this.size.dpr,
           countActive:autoMoving?this.motionBuffer:undefined,countActiveCount:autoMoving?this.motionCount:undefined,
           mode:effectiveMode,tolerance:settings.tolerance,modelScale:this.modelScale,opacity:settings.opacity});
       }
@@ -322,8 +328,8 @@ export class UnfoldWebGLView {
     gl.bindVertexArray(this.vao);gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);
     gl.uniform1i(this.uniform('lineMode'),0);
     gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1,1);
-    if(this.options.context!=='hidden'&&this.contextCount){
-      const dim=this.options.context==='dim';gl.depthMask(!dim);gl.uniform1f(this.uniform('opacity'),dim?.20:1);
+    if((this.emphasis||this.options.context!=='hidden')&&this.contextCount){
+      const dim=!!this.emphasis||this.options.context==='dim';gl.depthMask(!dim);gl.uniform1f(this.uniform('opacity'),this.emphasis?focusSettings(this.options).opacity:dim?.20:1);
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.contextBuffer);gl.drawElements(gl.TRIANGLES,this.contextCount,gl.UNSIGNED_INT,0);
     }
     gl.depthMask(true);gl.uniform1f(this.uniform('opacity'),1);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.activeBuffer);gl.drawElements(gl.TRIANGLES,this.activeCount,gl.UNSIGNED_INT,0);
@@ -347,6 +353,7 @@ export class UnfoldWebGLView {
       const center:Vec3=[0,0,0];for(const fi of label.faces)for(let k=0;k<9;k++)center[k%3]+=this.positions[fi*9+k]!;
       for(let a=0;a<3;a++)center[a]/=label.faces.length*3;
       const p=projectPoint(center,mvp,size.width,size.height),visible=!!p&&p[2]>=-1&&p[2]<=1&&p[0]>=0&&p[0]<=size.width&&p[1]>=0&&p[1]<=size.height;
+      label.el.style.opacity=this.emphasis&&!this.emphasis.includes(label.id)?'.22':'1';
       label.el.hidden=!visible;if(p&&visible)label.el.style.transform=`translate(${p[0]}px,${p[1]}px) translate(-50%,-50%)`;
     }
     for(const label of this.hingeLabels){

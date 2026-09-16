@@ -14,6 +14,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const [handoff,setHandoff]=useState(DEFAULT_HANDOFF),[holdNet,setHoldNet]=useState(false);
   const [skipStatic,setSkipStatic]=useState(DEFAULT_SKIP_STATIC),[motionTolerance,setMotionTolerance]=useState(DEFAULT_MOTION_RELATIVE_EPSILON);
   const [inspectionIndex,setInspectionIndex]=useState<number|null>(null);
+  const [scrubbing,setScrubbing]=useState(false);
   const [progress,setProgress]=useState(0),[playing,setPlaying]=useState(false),[seconds,setSeconds]=useState(12);
   const [rate,setRateState]=useState(1);
   const rateRef=useRef(rate);rateRef.current=rate;
@@ -22,7 +23,8 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const [context,setContext]=useState<UnfoldDisplay['context']>('dim'),[checker,setChecker]=useState(false),[labels,setLabels]=useState(true);
   const [hingeWave,setHingeWave]=useState(true),[showHinges,setShowHinges]=useState(true),[showTemporaryCuts,setShowTemporaryCuts]=useState(true),[autoFrame,setAutoFrame]=useState(DEFAULT_AUTO_FRAME);
   const [overlapMode,setOverlapMode]=useState<OverlapMode>(DEFAULT_OVERLAP_MODE),[overlapTolerance,setOverlapTolerance]=useState(DEFAULT_OVERLAP_TOLERANCE),[overlapOpacity,setOverlapOpacity]=useState(DEFAULT_OVERLAP_OPACITY),[faceTones,setFaceTones]=useState(true);
-  const [focusMode,setFocusMode]=useState<'off'|'dither'>(FOCUS_DEFAULTS.focusMode),[focusRadius,setFocusRadius]=useState(FOCUS_DEFAULTS.focusRadius),[focusRetained,setFocusRetained]=useState(FOCUS_DEFAULTS.focusRetained);
+  const [focusMode,setFocusMode]=useState<'off'|'ghost'|'dither'>(FOCUS_DEFAULTS.focusMode),[focusRadius,setFocusRadius]=useState(FOCUS_DEFAULTS.focusRadius),[focusRetained,setFocusRetained]=useState(FOCUS_DEFAULTS.focusRetained);
+  const [focusOpacity,setFocusOpacity]=useState(FOCUS_DEFAULTS.focusOpacity);
   const [focusFace,setFocusFace]=useState<number|null>(null);
   // Synchronous ref also handles consecutive pointer events before React paints.
   // Playback's `active` list is not an implicit inspection selection.
@@ -45,7 +47,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const focusIndex=!playing&&inspectionIndex!==null&&inspectionIndex<active.length?inspectionIndex:schedule.focusIndex;
   const wallDuration=duration/rate;
   const remaining=wallDuration*(reverse?progress:1-progress);
-  useEffect(()=>{setPlaying(false);setProgress(0);ref.current=0;applyInspection(EMPTY_INSPECTION);setInspectionIndex(null);},[snapshot]);
+  useEffect(()=>{setPlaying(false);setScrubbing(false);setProgress(0);ref.current=0;applyInspection(EMPTY_INSPECTION);setInspectionIndex(null);},[snapshot]);
   useEffect(()=>{
     if(!playing||!snapshot||!active.length)return;
     let raf=0,last:number|null=null,live=true;
@@ -63,7 +65,7 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
     raf=requestAnimationFrame(tick);return()=>{live=false;cancelAnimationFrame(raf);document.removeEventListener('visibilitychange',visibility);};
   },[playing,snapshot,active.length,duration,reverse,loop]);
   const seek=(value:number)=>{setPlaying(false);setInspectionIndex(null);const t=Math.max(0,Math.min(1,value));ref.current=t;setProgress(t);};
-  const reset=()=>seek(0);
+  const reset=()=>{setScrubbing(false);seek(0);};
   const select=(id:number,_face:number|null=null,additive=false)=>{
     if(!all.includes(id))return;
     const base=additive&&scope==='all'?{islands:all,face:null}:inspection.current;
@@ -104,10 +106,10 @@ export function useUnfoldPlayer(snapshot:UVSnapshot|null){
   const seekStage=(pose:number)=>{seek(islandTimelineProgress(timeline?.entries[focusIndex]?motionLocal(timeline.entries[focusIndex]!.profile,pose):hingePlaybackProgress(pose,holdNet),focusIndex,active.length,order,handoff,timeline));setInspectionIndex(focusIndex);};
   const seekQueue=(direction:number)=>{const i=Math.max(0,Math.min(active.length-1,focusIndex+direction));seek(islandTimelineProgress(reverse?1:0,i,active.length,order,handoff,timeline));setInspectionIndex(i);};
   const nextIsland=(direction:number)=>{const index=Math.max(0,all.indexOf(selection[0]??-1)),id=all[(index+direction+all.length)%all.length];if(id!==undefined)select(id);};
-  const toggle=()=>{setInspectionIndex(null);if(!snapshot||!active.length)return;if(!playing&&(reverse?ref.current<=0:ref.current>=1)){ref.current=reverse?1:0;setProgress(ref.current);}setPlaying(x=>!x);};
+  const toggle=()=>{setScrubbing(false);setInspectionIndex(null);if(!snapshot||!active.length)return;if(!playing&&(reverse?ref.current<=0:ref.current>=1)){ref.current=reverse?1:0;setProgress(ref.current);}setPlaying(x=>!x);};
   const fit=(kind:'orbit'|'uv'|'current')=>{setAutoFrame(false);setCameraCommand(c=>({kind,key:c.key+1}));};
-  return {focusMode,setFocusMode,focusRadius,setFocusRadius,focusRetained,setFocusRetained,rate,setRate,wallDuration,overlapMode,setOverlapMode,overlapTolerance,setOverlapTolerance,overlapOpacity,setOverlapOpacity,faceTones,setFaceTones,timeline,skipStatic,changeSkipStatic:(v:boolean)=>{reset();setSkipStatic(v);},motionTolerance,changeMotionTolerance:(v:number)=>{if(Number.isFinite(v)&&v>=0&&v<=.001){reset();setMotionTolerance(v);}},nominalDuration,handoff,changeHandoff,holdNet,changeHoldNet,schedule,focusIndex,remaining,seekStage,seekQueue,hingeWave,setHingeWave:(v:boolean)=>{reset();setHingeWave(v);},showHinges,setShowHinges,showTemporaryCuts,setShowTemporaryCuts,autoFrame,setAutoFrame,scope,selection,active,all,order,path,progress,playing,seconds,duration,reverse,loop,separation,context,checker,labels,focusFace,cameraCommand,
-    select,pick,boxSelect,changeScope,changeOrder,nextIsland,seek,toggle,fit,pause:()=>setPlaying(false),setPath:(v:UnfoldPath)=>{reset();setPath(v);},setSeconds,setReverse,setLoop,setSeparation:(v:number)=>{reset();setSeparation(v);},setContext,setChecker,setLabels,
+  return {scrubbing,setScrubbing:(active:boolean)=>{setPlaying(false);setScrubbing(active);},interactionActive:playing||scrubbing,focusOpacity,setFocusOpacity,focusMode,setFocusMode,focusRadius,setFocusRadius,focusRetained,setFocusRetained,rate,setRate,wallDuration,overlapMode,setOverlapMode,overlapTolerance,setOverlapTolerance,overlapOpacity,setOverlapOpacity,faceTones,setFaceTones,timeline,skipStatic,changeSkipStatic:(v:boolean)=>{reset();setSkipStatic(v);},motionTolerance,changeMotionTolerance:(v:number)=>{if(Number.isFinite(v)&&v>=0&&v<=.001){reset();setMotionTolerance(v);}},nominalDuration,handoff,changeHandoff,holdNet,changeHoldNet,schedule,focusIndex,remaining,seekStage,seekQueue,hingeWave,setHingeWave:(v:boolean)=>{reset();setHingeWave(v);},showHinges,setShowHinges,showTemporaryCuts,setShowTemporaryCuts,autoFrame,setAutoFrame,scope,selection,active,all,order,path,progress,playing,seconds,duration,reverse,loop,separation,context,checker,labels,focusFace,cameraCommand,
+    select,pick,boxSelect,changeScope,changeOrder,nextIsland,seek,toggle,fit,pause:()=>{setPlaying(false);setScrubbing(false);},setPath:(v:UnfoldPath)=>{reset();setPath(v);},setSeconds,setReverse,setLoop,setSeparation:(v:number)=>{reset();setSeparation(v);},setContext,setChecker,setLabels,
     clear,clearFace};
 }
 export type UnfoldPlayer=ReturnType<typeof useUnfoldPlayer>;

@@ -1,3 +1,4 @@
+import {attachScrubSession} from '/apps/studio/src/unfold/scrub-session.js';
 import {PipelinePanel} from '/apps/studio/src/unfold/pipeline-panel.js';
 import {readLoadPipeline,PIPELINE_STORAGE_KEY,resolveLoadPipeline,terminalPipeline} from '/apps/studio/src/unfold/load-pipeline.js';
 import * as core from '/packages/mesh-core/src/index.js';
@@ -21,12 +22,13 @@ $('pipeline-host').append(pipelinePanel.element);
 function renderPipeline(){if(mesh)pipelinePanel.update({config:loadPlan,mesh,options:chartConfig,trace:pipelineTrace,loading:pipelineRunning,inputStatus:`已读取 ${mesh.name} · ${mesh.faces.length.toLocaleString()} 面 · 离线 OBJ / 内置样例入口`});}
 
 let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,sequence=0;
-const options={focusMode:'dither',focusRadius:1.2,focusRetained:.12,overlapMode:'auto',overlapTolerance:.0001,overlapOpacity:.72,faceTones:true,skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
+let scrubbing=false;
+const options={interactionActive:false,focusOpacity:.18,focusMode:'ghost',focusRadius:1.2,focusRetained:.12,overlapMode:'auto',overlapTolerance:.0001,overlapOpacity:.72,faceTones:true,skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
 const view=new UnfoldWebGLView($('view'),(id,face,add)=>pick(id,face,add),e=>{if(e)fail(e);},()=>{options.autoFrame=false;$('frame').checked=false;view.setOptions(options);cameraStatus();});
 function cameraStatus(){$('frame').checked=options.autoFrame;$('camera-status').textContent=options.autoFrame?'自动跟随中；操作相机会立即关闭跟随，动画继续。':'手动相机：动画不改变视角。适配按钮只执行一次。';}
 function fail(message){$('error').hidden=false;$('error').textContent=String(message);}
-function pause(){playing=false;clockLast=null;$('play').textContent='播放展开';}
+function pause(){playing=false;scrubbing=false;clockLast=null;options.interactionActive=false;view.setOptions(options);$('play').textContent='播放展开';}
 function drawUV(){if(!snapshot)return;const host=$('uvhost'),c=$('uv'),d=Math.min(devicePixelRatio,2),ctx=c.getContext('2d');c.width=Math.max(1,Math.round(host.clientWidth*d));c.height=Math.max(1,Math.round(host.clientHeight*d));ctx.setTransform(d,0,0,d,0,0);drawUVSnapshot(ctx,snapshot,host.clientWidth,host.clientHeight,options);}
 function list(){if(!snapshot)return;$('islands').replaceChildren();for(const island of snapshot.geometry.islands.slice(0,100)){const row=document.createElement('div');row.className='island'+(inspection.islands.includes(island.id)?' selected':'');const box=document.createElement('input');box.type='checkbox';box.checked=options.selected.includes(island.id);box.setAttribute('aria-label','选中岛 '+(island.id+1));box.onchange=()=>select(island.id,null,true);const b=document.createElement('button');b.innerHTML=`<i style="background:rgb(${uv.islandColor(island.id).map(x=>Math.round(x*255)).join(',')})"></i>#${island.id+1} · ${island.faces.length} 面`;b.onclick=()=>select(island.id,null,false);row.append(box,b);$('islands').append(row);}}
 function clearFace(){inspection={...inspection,face:null};options.focusFace=null;update();}
@@ -81,6 +83,7 @@ function rebuildTimeline(){
 function update(patch={},focus=null){
   if(Object.hasOwn(patch,"progress"))inspectionIndex=focus;
   Object.assign(options,patch);
+  options.interactionActive=playing||scrubbing;
   rebuildTimeline();
   $('overlap-mode').value=options.overlapMode;$('overlap-opacity').value=options.overlapOpacity;$('face-tones').checked=options.faceTones;$('overlap-tolerance').value=options.overlapTolerance*100;
   view.setOptions(options);cameraStatus();drawUV();selectionStatus();
@@ -159,7 +162,7 @@ $('source-layout').onchange=()=>{chartConfig.sourceUVLayout=$('source-layout').v
 $('solve').onclick=solve;$('cancel').onclick=()=>{cancel();$('status').textContent='已取消本次求解。';};$('target').onchange=solve;
 $('all').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update({progress:0});};$('none').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=[];list();update({progress:0});};
 $('separation').oninput=()=>{pause();update({separation:Number($('separation').value),progress:0});};$('in-place').onclick=()=>{pause();$('separation').value='0';update({separation:0,progress:0});};
-$('focus-dissolve').onchange=()=>update({focusMode:$('focus-dissolve').checked?'dither':'off'});$('focus-radius').oninput=()=>update({focusRadius:Number($('focus-radius').value)});$('focus-retained').oninput=()=>update({focusRetained:Number($('focus-retained').value)});
+$('focus-dissolve').onchange=()=>{$('focus-mode').value=$('focus-dissolve').checked?'ghost':'off';update({focusMode:$('focus-mode').value});};$('focus-mode').onchange=()=>{$('focus-dissolve').checked=$('focus-mode').value!=='off';update({focusMode:$('focus-mode').value});};$('focus-opacity').oninput=()=>update({focusOpacity:Number($('focus-opacity').value)});$('focus-radius').oninput=()=>update({focusRadius:Number($('focus-radius').value)});$('focus-retained').oninput=()=>update({focusRetained:Number($('focus-retained').value)});
 $('overlap-mode').onchange=()=>update({overlapMode:$('overlap-mode').value});
 $('overlap-opacity').oninput=()=>update({overlapOpacity:Number($('overlap-opacity').value)});
 $('overlap-tolerance').onchange=()=>{const n=Number($('overlap-tolerance').value);if(Number.isFinite(n)&&n>=.0001&&n<=1)update({overlapTolerance:n/100});};
@@ -168,7 +171,8 @@ $('wave').onchange=()=>{pause();update({hingeWave:$('wave').checked,progress:0})
 for(const [id,key]of [['face-tones','faceTones'],['frame','autoFrame'],['hinges','showHinges'],['temporary','showTemporaryCuts'],['checker','checker']])$(id).onchange=()=>update({[key]:$(id).checked});
 $('handoff').oninput=()=>{pause();update({handoff:Number($('handoff').value),progress:0});};$('skip-static').onchange=()=>{pause();update({skipStatic:$('skip-static').checked,progress:0});};$('motion-tolerance').onchange=()=>{const v=Number($('motion-tolerance').value);if(Number.isFinite(v)&&v>=0&&v<=.001){pause();update({motionTolerance:v,progress:0});}};$('hold-net').onchange=()=>{pause();update({holdNet:$('hold-net').checked,progress:0});};$('queue-prev').onclick=()=>seekQueue(-1);$('queue-next').onclick=()=>seekQueue(1);$('seconds').onchange=()=>update();$('rate').onchange=()=>update();$('reverse').onchange=()=>update();
 $('order').onchange=()=>{pause();update({order:$('order').value,progress:0});};$('context').onchange=()=>update({context:$('context').value});$('fit-current').onclick=()=>view.fitCurrent();$('orbit').onclick=()=>view.fit('orbit');$('front').onclick=()=>view.fit('uv');
-$('progress').oninput=()=>{pause();update({progress:Number($('progress').value)});};$('play').onclick=()=>{if(playing){pause();return;}if(!snapshot||!options.selected.length)return;playing=true;inspectionIndex=null;clockLast=null;const reverse=$('reverse').checked;if((!reverse&&options.progress===1)||(reverse&&options.progress===0))update({progress:reverse?1:0});$('play').textContent='暂停';};
+attachScrubSession($('progress'),active=>{playing=false;scrubbing=active;clockLast=null;$('play').textContent='播放展开';update();});
+$('progress').oninput=()=>{playing=false;clockLast=null;$('play').textContent='播放展开';update({progress:Number($('progress').value)});};$('play').onclick=()=>{if(playing){pause();return;}if(!snapshot||!options.selected.length)return;scrubbing=false;playing=true;inspectionIndex=null;clockLast=null;const reverse=$('reverse').checked;if((!reverse&&options.progress===1)||(reverse&&options.progress===0))update({progress:reverse?1:0});$('play').textContent='暂停';update();};
 // Visibility resets the timestamp so time spent in a hidden tab is not replayed.
 let clockLast=null;document.addEventListener('visibilitychange',()=>{clockLast=null;});
 function tick(now){

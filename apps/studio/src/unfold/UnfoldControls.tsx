@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import {attachScrubSession} from './scrub-session';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { islandColor, islandProgress, HINGE_STAGES, type UnfoldOrder, type UnfoldPath } from '@meshtailor/uv';
 import type { UVSnapshot, UVTarget } from '../workers/uv.worker';
 import type { OverlapMode } from './overlap-policy';
@@ -48,10 +49,13 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
       <small>仅相邻两岛尾段交叠。等待岛留在 3D，完成岛留在 UV。</small>
     </details>
     <details open><summary>当前播放岛 · 避遮挡</summary>
-      <label className="check"><input aria-label="Playback focus dissolve" type="checkbox" checked={p.focusMode==='dither'} onChange={e=>p.setFocusMode(e.target.checked?'dither':'off')}/>周边模型局部散点淡出</label>
-      <label>球形范围<input aria-label="Focus sphere radius" type="range" min="1" max="3" step=".1" value={p.focusRadius} onChange={e=>p.setFocusRadius(+e.target.value)}/><small>{p.focusRadius.toFixed(1)} × 当前岛半径</small></label>
-      <label>遮挡面残留<input aria-label="Focus retained opacity" type="range" min=".02" max=".8" step=".01" value={p.focusRetained} onChange={e=>p.setFocusRetained(+e.target.value)}/><small>{Math.round(p.focusRetained*100)}%</small></label>
-      <small>只影响当前岛周围球形范围内的其他面片；接力中的两岛保持实体。无需相机跟随，暂停也可观察。</small>
+      <label className="check"><input aria-label="Playback focus dissolve" type="checkbox" checked={p.focusMode!=='off'} onChange={e=>p.setFocusMode(e.target.checked?'ghost':'off')}/>播放 / 拖动期间突出当前展开岛</label>
+      <label>突出方式<select aria-label="Playback emphasis mode" value={p.focusMode} onChange={e=>p.setFocusMode(e.target.value as 'off'|'ghost'|'dither')}><option value="ghost">其他岛整体半透明（默认）</option><option value="dither">局部球形散点（旧方式）</option><option value="off">关闭</option></select></label>
+      <label>其他岛不透明度<input aria-label="Playback ghost opacity" type="range" min=".03" max=".65" step=".01" value={p.focusOpacity} onChange={e=>p.setFocusOpacity(+e.target.value)}/><small>{Math.round(p.focusOpacity*100)}% · 暂停 / 松手后恢复原显示</small></label>
+      <small>等待和已完成的岛均淡化；接力中的两岛保持实体，直到各自动画完全结束。不改变选择、UV 或相机。</small>
+      <details><summary>旧球形散点选项（仅旧方式有效）</summary><label>球形范围<input aria-label="Focus sphere radius" type="range" min="1" max="3" step=".1" value={p.focusRadius} onChange={e=>p.setFocusRadius(+e.target.value)}/><small>{p.focusRadius.toFixed(1)} × 当前岛半径</small></label>
+      <label>遮挡面残留<input aria-label="Focus retained opacity" type="range" min=".02" max=".8" step=".01" value={p.focusRetained} onChange={e=>p.setFocusRetained(+e.target.value)}/><small>{Math.round(p.focusRetained*100)}%</small></label></details>
+      <small>旧球形方式也只在播放或拖动期间启用；暂停和手势结束均恢复。</small>
     </details>
     <details open className="overlap-controls" data-testid="overlap-controls"><summary>重叠与面片识别</summary>
       <label>重叠提示<select aria-label="Overlap visualization" value={p.overlapMode} onChange={e=>p.setOverlapMode(e.target.value as OverlapMode)}><option value="auto">自动 · 运动岛视线叠层</option><option value="coplanar">同岛近共面重叠</option><option value="projected">视线叠层 · 含前后遮挡</option><option value="off">关闭</option></select></label>
@@ -83,6 +87,8 @@ export function UnfoldControls({player:p,snapshot,target,onTarget,onExport,onDem
 }
 
 export function UnfoldTransport({player:p,disabled}:{player:UnfoldPlayer;disabled:boolean}){
+  const range=useRef<HTMLInputElement>(null),scrub=useRef(p.setScrubbing);scrub.current=p.setScrubbing;
+  useEffect(()=>{if(!range.current)return;return attachScrubSession(range.current,active=>scrub.current(active));},[]);
   const blocked=disabled||!p.active.length;
   return <div className="unfold-transport">
     <div className="unfold-play-row">
@@ -93,7 +99,7 @@ export function UnfoldTransport({player:p,disabled}:{player:UnfoldPlayer;disable
       <span className="queue-summary">{p.schedule.completed} / {p.active.length} 岛 · 剩余 {p.remaining.toFixed(1)} s</span>
       <b className="play-percent">{(p.progress*100).toFixed(1)}%</b>
     </div>
-    <div className="unfold-progress"><button onClick={()=>p.seek(0)} disabled={disabled}>3D · 0%</button><input aria-label="Unfold progress" type="range" min="0" max="1" step=".001" value={p.progress} onChange={e=>p.seek(+e.target.value)} disabled={disabled}/><button onClick={()=>p.seek(1)} disabled={blocked}>UV · 100%</button></div>
+    <div className="unfold-progress"><button onClick={()=>p.seek(0)} disabled={disabled}>3D · 0%</button><input ref={range} aria-label="Unfold progress" type="range" min="0" max="1" step=".001" value={p.progress} onChange={e=>p.seek(+e.target.value)} disabled={disabled}/><button onClick={()=>p.seek(1)} disabled={blocked}>UV · 100%</button></div>
     {p.path==='hinge'&&<div className="hinge-stage-buttons">{HINGE_STAGES.map(s=><button key={s.t} disabled={blocked} onClick={()=>p.seekStage(s.t)}>{s.label}</button>)}</div>}
     <div className="queue-navigation" data-testid="island-schedule-status">
       <button disabled={blocked||p.focusIndex<=0} onClick={()=>p.seekQueue(-1)}>上一个岛</button>

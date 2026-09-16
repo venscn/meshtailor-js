@@ -4,7 +4,7 @@ const c=await compileCore(),report={suite:'Local playback cutaway + early projec
 const entry=`
 import {UnfoldWebGLView} from '/apps/studio/src/unfold/webgl-view.js';
 window.errors=[];window.view=new UnfoldWebGLView(document.querySelector('#view'),()=>{},e=>{if(e)errors.push(e)});
-window.options={progress:0,selected:[0],order:'relay',path:'direct',separation:0,context:'solid',wireframe:false,checker:false,labels:false,xray:false,focusFace:null,faceTones:false,overlapMode:'off',focusMode:'off'};
+window.options={interactionActive:true,progress:0,selected:[0],order:'relay',path:'direct',separation:0,context:'solid',wireframe:false,checker:false,labels:false,xray:false,focusFace:null,faceTones:false,overlapMode:'off',focusMode:'off'};
 window.tri=[-1,-.8,0,1,-.8,0,0,1,0];window.shift=(t,x=0,y=0,z=0)=>t.map((v,i)=>v+[x,y,z][i%3]);
 window.use=(triangles,ids,selected=[...new Set(ids)])=>{const source=new Float32Array(triangles.flat());window.geometry={source,target:source.slice(),uv:new Float32Array(ids.length*6),faceChart:Int32Array.from(ids),boundaries:new Uint32Array(),islands:[...new Set(ids)].map(id=>({id,faces:ids.flatMap((v,i)=>v===id?[i]:[]),sourceCenter:[0,0,0],targetCenter:[0,0,0],direction:[0,0,1]})),atlas:{min:[0,0],max:[1,1],center:[.5,.5],scale:2.6},radius:4};Object.assign(options,{selected,progress:0,focusMode:'off',overlapMode:'off'});view.setGeometry(geometry);view.setOptions(options);view.fit('uv');view.draw();};
 window.update=patch=>{Object.assign(options,patch);view.setOptions(options);view.draw();};
