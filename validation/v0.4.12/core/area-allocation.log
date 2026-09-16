@@ -1,0 +1,5 @@
+
+> meshtailor-js@0.4.11 test:area-allocation
+> node scripts/area-allocation-smoke.mjs
+
+22 area allocation checks passed: original small island >900x share; normalized density ratio 1; large-first placement; <=2x area boost; no mutation.

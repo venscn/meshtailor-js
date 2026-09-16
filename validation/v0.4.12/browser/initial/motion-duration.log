@@ -1,0 +1,26 @@
+PASS DPR 1: default automatically skips unchanged spans with camera independent
+PASS DPR 1: geometry profiling is cached, not rerun on every frame
+PASS DPR 1: flat cube skips hinge and UV fit, reducing 12s base to 4.8s per island
+PASS DPR 1: skipped stage buttons collapse to one displayed pose
+PASS DPR 1: scrub uses identical compact clocks for poses, state and phase labels
+PASS DPR 1: no long motionless interior intervals across dense whole-queue sampling
+PASS DPR 1: skip switch restores fixed 12s stages for comparison, then re-enables compaction
+PASS DPR 1: manual teaching hold remains opt-in even with automatic pruning enabled
+PASS DPR 1: variable duration settings invalidate cached profile once
+PASS DPR 1: selection order and strict mode use actual selected durations
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: {"elapsed":6.501399999999907,"expected":2.0999999999999996,"frames":67,"maximum":2,"islands":[0,1,2,3,4,5]}
+    at file:///mnt/data/packing-work/meshtailor-js/scripts/motion-browser-smoke.mjs:44:11
+    at async check (file:///mnt/data/packing-work/meshtailor-js/scripts/motion-browser-smoke.mjs:6:44)
+    at async file:///mnt/data/packing-work/meshtailor-js/scripts/motion-browser-smoke.mjs:40:37 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '=='
+}
+
+Node.js v22.16.0

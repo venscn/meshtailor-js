@@ -1,0 +1,59 @@
+
+> meshtailor-js@0.4.11 test:atlas
+> node scripts/atlas-smoke.mjs
+
+{
+  name: 'cube',
+  faces: 12,
+  islands: 6,
+  occupancy: 0.6428826627994975,
+  addedSeams: 0,
+  methods: { lscm: 6 },
+  ms: 55.04573900000014
+}
+{
+  name: 'closed-cube',
+  faces: 12,
+  islands: 2,
+  occupancy: 0.47425727800291184,
+  addedSeams: 4,
+  methods: { lscm: 2 },
+  ms: 6.326896999999917
+}
+{
+  name: 'knot',
+  faces: 2304,
+  islands: 1,
+  occupancy: 0.13432028784511388,
+  addedSeams: 0,
+  methods: { lscm: 1 },
+  ms: 1694.943077
+}
+{
+  name: 'garment',
+  faces: 3072,
+  islands: 1,
+  occupancy: 0.3266810431483536,
+  addedSeams: 0,
+  methods: { lscm: 1 },
+  ms: 614.8756359999988
+}
+{
+  name: 'gear',
+  faces: 1536,
+  islands: 3,
+  occupancy: 0.46237208406245733,
+  addedSeams: 156,
+  methods: { lscm: 3 },
+  ms: 598.6585560000003
+}
+{
+  name: 'assembly',
+  faces: 5632,
+  islands: 8,
+  occupancy: 0.47691309835739826,
+  addedSeams: 302,
+  methods: { lscm: 7, tutte: 1 },
+  ms: 1573.7270980000012
+}
+PASS: area-aware packing and all complex LOW assets.

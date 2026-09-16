@@ -1,72 +1,78 @@
-# Validation — v0.4.11
+# Validation — v0.4.12
 
-日期：2026-09-15。历史 v0.4.10 验证保存在 `VALIDATION-0.4.10.md`。本文件只报告本轮实际执行；源码构建、真实模型算法、离线浏览器、完整 Studio 分开。
+日期：2026-09-16。上一版验证原样保存在 `VALIDATION-0.4.11.md`。本文件区分真实模型、生产Worker、离线WebGL、语法检查和完整React构建，不把一个范围的成功替代另一个。
 
-## 输入身份
+## 正确模型、设置与对照
 
-唯一使用 `meshtailor-test-models(1).zip`（2,763,968字节，SHA256 `284decae81fda986f3c291bf4bebee473221b4eabe7078c65ed44adaf9ffb563`）。旧无 `(1)` 包不读取，不回退，不参与任何本轮统计。正确四文件现随包置于 `examples/verified-models/`，逐字节哈希门槛见专项脚本。
+沿用唯一正确上传 `meshtailor-test-models(1).zip`，SHA256 `284decae81fda986f3c291bf4bebee473221b4eabe7078c65ed44adaf9ffb563`；四份glTF/bin已在 `examples/verified-models`，每次执行哈希检查。不读取旧错误压缩包，不下载替代模型。
 
-## 真实模型与整张 atlas
+运行：
 
-证据：`validation/v0.4.11/after-Corset-source-atlas.json`、`after-FlightHelmet-source-atlas.json`，对照旧 HEAD 的 `before-*.json`。
+```bash
+npm run test:fill:real -- --out validation/local-fill-real
+```
+
+包装器调用原生产Worker回归：512格、4轮、8%面积步长、1.6倍面积上限、最多128次试装、90秒搜索预算，整体预算240秒，导出并重读所有面/UV。90秒是本轮测试预算，不是界面默认15秒。实际两者都在尝试预算停止，而不是用完90秒；不宣称全局最优。
 
 | 项目 | Corset | FlightHelmet |
 |---|---:|---:|
-| 三角形（全部保留） | 18,324 | 94,722 |
-| 生产装配后连通块 | 75 | 85 |
-| 源 UV 岛 / 当前新 UV 岛 | 98 / **79** | 237 / **130** |
-| 修复的原 UV 岛 | #72、#73 | #6、#12 |
-| 接受共享边缝合 | 19 | 107 |
-| 新图最大平均密度比误差 | <1e-12 | <1e-12 |
-| 全图翻面 / 退化 / 正面积交叠 | **0 / 0 / 0** | **0 / 0 / 0** |
-| 导出OBJ重读岛数 | 79 | 130 |
-| 本次 Node Worker 记录的完整耗时 | 2.43秒 | 23.00秒 |
+| 面数，全部保留 | 18,324 | 94,722 |
+| UV岛：精排前→后→导出再读 | 79→79→79 | 130→130→130 |
+| 有效几何面积占用：前→后 | 66.9154%→78.5223% | 62.4867%→71.6196% |
+| 最大/最小平均面积密度比 | 1.1664 | 1.08 |
+| 全图翻面/退化/正面积重叠 | 0/0/0 | 0/0/0 |
+| 128次试装中接受 | 124 | 93 |
+| 其中共同放大预试装 | 1 | 1 |
+| 实际开始的逐岛轮数 | 2 | 1 |
+| 精排及最终验证耗时 | 21.26秒 | 38.18秒 |
+| 整条Worker流程耗时 | 25.79秒 | 80.78秒 |
 
-这些耗时是本制作环境的单次记录，测试时存在其他并发工作，不是独占机器基准或用户机器性能保证。此前同代码执行的头盔Worker也曾约18.9秒。报告包含真实阶段耗时、面积、关联图、全部缝合事件、失败原因、输入未修改断言及导出检验；岛数不使用空间组数替代。
+证据在 `validation/v0.4.12/real-refined/*-source-atlas.json`。后续补充“有效配置”报告字段没有改变几何算法；最终ZIP复验单独记录。耗时可能受同机其他任务影响，不是独占机器或特定GPU基准。回归使用真实固定格式解码器 + 生产assembleMeshParts，不等于Three.GLTFLoader入口的完整认证。
 
-### 独立导出几何检查
+## 独立导出检查
 
-除应用自己的 `checkUVTriangles`，还对**导出的OBJ**做了一次独立 GEOS/Shapely 2.1.2 的 STRtree + 三角形多边形求交检查。不是调用本工程UV检查器，也不是从截图猜测。
+`independent-geometry.json` 使用独立Shapely2.1.2/GEOS，不调用本工程UV检查器：STRtree筛选所有三角面候选对，再计算真实多边形交集。Corset 117,370对、Helmet 653,573对，最大交集面积均0；`1e-14 UV²`容差下正面积重叠对0。所有面UV正向，0.003页边距满足；顶点、面、顺序与导入后的源OBJ逐元素一致。报告绑定实际导出OBJ的SHA256。
 
-Corset检查95,760对接触候选，头盔检查534,284对候选（含正常共享边）；两者交集最大面积均为0，超过 `1e-14 UV²` 容差的正面积重叠对均为0。检查报告绑定对应OBJ的SHA256，见 `independent-geometry-check.json`。此为制作环境的独立QA，不是JS工程的运行依赖；通用应用和自带回归不要求Python/Shapely。
+源JSON报告随工程；OBJ另在结果ZIP中，防止重复将大几何写进Git历史。可通过上面的命令重新导出，再用可选QA脚本：
 
-## 回归套件
+```bash
+python validation/v0.4.12/independent-geometry-check.py --root validation/local-fill-real
+```
 
-| 套件 | 本轮结果 | 证据 |
-|---|---:|---|
-| 核心 / 参数化 / 展开 / 保护 / 面积 / 邻居等24个脚本 | **24套退出0** | `core/summary.json`、各日志 |
-| 新局部修复 | 12项通过 | `core/source-repair.log` |
-| 新保留必要开缝连接 | 9项通过 | `core/chart-join.log` |
-| 新保留UV形状缝合 | 10项通过 | `core/rigid-uv-join.log` |
-| 两个正确真实模型的浏览器流程 | **18项通过** | `corrected-models-browser.json` |
-| 自由相机浏览器 | 39项通过 | `browser/camera-browser.json` |
-| 逐岛接力浏览器 | 28项通过 | `browser/relay-browser.json` |
-| 静止跳过浏览器 | 28项通过 | `browser/motion-browser.json` |
-| 两级选择浏览器 | 39项通过 | `browser/selection-browser.json` |
-| 叠层WebGL像素回归 | 42项通过 | `browser/overlap-browser.json` |
-| 前处理/后处理工作流浏览器 | 16项通过 | `browser/uv-optimization-browser.json` |
-| 面积/邻居/导出工作流浏览器 | 15项通过 | `browser/area-spatial-browser.json` |
+此独立QA需自行提供NumPy/Shapely，不是JS工程运行、测试或安装的必须依赖。
 
-新算法三个小套件已包含在上述24套内，不重复相加冒充更多独立测试。24套还覆盖了旧的21核心、33展开、17铰链等断言；精确计数按原始报告，不用“退出0”自动扩写为若干未执行断言。
+## 本轮测试
 
-## 浏览器范围及性能警告
+| 套件 | 结果/说明 | 证据 |
+|---|---|---|
+| 轮廓精排纯几何 | 23项通过；凹口44.68%→71.50%；共同密度、上限、失败回退、取消、边距、源不变 | `fill-unit.json` |
+| 新功能真实浏览器 | 17项；实际按钮、生产Worker、连续两次填空、源不变、导出/动画目标一致、相机保留、全局超时回退 | `browser/fill.json` |
+| 自由相机浏览器 | 39项 | `browser/camera.json` |
+| 逐岛接力浏览器 | 28项 | `browser/relay.json` |
+| 静止跳过浏览器 | 28项 | `browser/motion.json` |
+| 两级选择浏览器 | 39项 | `browser/selection.json` |
+| 原核心/装箱/分页/面积/源UV/合并/客户端/展开/铰链/时间线/选择/Worker | 12个独立脚本退出0 | `core/summary.txt`及各日志 |
+| Git工具自身 | 22项 | `core/git.log` |
+| 修改的TSX语法转译 | 无语法诊断；不是类型检查 | `environment/tsx-syntax-only.json` |
 
-实际运行 Chromium + SwiftShader（无硬件GPU）的**离线工作台与生产Worker/WebGL**。真实模型测试从哈希锁定的静态glTF/bin经生产网格装配送入浏览器，检查实际Worker岛数、局部修复、全图有效性、OBJ重读、动画终点、先岛后面/二次取消、恢复原UV、控制台与布局。截图是这两份真实输入的运行画面，版本标记0.4.11，不是设计稿或替代网格。
+浏览器为真实Chromium软件WebGL，含真实鼠标事件和RAF；使用离线工作台与主工程共用生产模块。截图明确标记“合成验证片”，不是人台或头盔的外观图。
 
-**大模型专项为避免软件叠层通道的额外开销，关闭了实时重叠着色；全图重叠由独立数值检查完成。** 叠层着色本身另有42项实际WebGL像素测试，但不能把它算成默认设置下94,722面头盔的流畅认证。
+### 发现并修正的测试假设
 
-初次大模型调试触发15秒CDP超时；测试工具后来允许显式90秒单次命令预算（小套件默认仍15秒），不改变应用Worker120秒任务预算，也不修改算法断言。真实头盔的整组选择操作在软件渲染测试中累计约45.6秒；截图也明显慢。因此**只证明功能结果，不声称大模型交互流畅、实时帧率达标或已完成硬件GPU性能认证**。这些耗时记录在案例的 `milliseconds` 字段。
+初轮软件渲染的DPR2曾错过很短的双岛交接采样，使旧测试 `maximum===2` 失败；201点密集几何/调度检查仍明确出现2岛且不超过2。现在真实RAF检查观察到1–2岛，并必须访问全部6岛；完整区间的最大活动数由密集采样验证。播放基准延长后预期时长同步乘以秒数。没有修改播放算法来迎合测试。
 
-制作环境禁止通过浏览器导航到localhost（ERR_BLOCKED_BY_ADMINISTRATOR）；专项用CDP载入离线HTML并注入正确模型数据，实际Worker仍在浏览器内创建。没有称其为网络部署/HTTP完整导航联调。
+选择测试曾假设120毫秒必然有新绘制帧。改为有3秒上限地等待实际进度增加，再继续检查未暂停、队列、面切换。初轮失败日志和一次调整测试时长时的预期乘数错误均保留在 `browser/initial/`，不抹去失败历史。
 
-## 未通过或未覆盖
+## 未通过或不在本次范围
 
-本轮 `npm run build` 实际退出127（`vite: not found`）；`npm run typecheck` 实际退出2（缺少Node类型依赖）。日志在 `environment/`。不把核心严格TS编译或TSX语法检查冒充完整UI类型检查。
+- npm安装实际失败：`EAI_AGAIN registry.npmjs.org/@types/node`。`environment/npm-install.log`。
+- 完整 `npm run build` 退出127，`vite: not found`。
+- 完整 `npm run typecheck` 退出2，缺少Node类型定义。语法转译不能替代它。
+- 未完成完整React/Three Studio主页面、GLTFLoader/FBX入口的端到端测试；未进行macOS/Windows/Safari实机认证。
+- 不保证连续旋转全局最优、不保证填到100%、不替代裁切评审；没有实施自动二次切碎、自动贴图烘焙、多页精排或视角/语义重要性分析。
 
-未成功安装React/Three/Vite依赖，因此没有完成真实 `GLTFLoader` / FBXLoader 导入、完整React页面E2E、贴图加载或生产Vite包认证。专用fixture解码器仅支持这四个固定文件，并且拒绝其他glTF格式，不替换应用加载器。
+本轮实现的纯JS/TS运行不需要Python。Git版本检查和最终解压逐文件比对见外部最终交付验证报告；只有从最终ZIP实际再次执行的项目才标记为最终包复验。
 
-未做macOS/Windows/Safari或硬件GPU实机认证。未保证人类语义版型、全局最少岛、全局最优凹多边形装箱、全部动画姿态无自交。原始UV可能有意镜像/复用；新atlas通常需要重烘焙贴图。
+### 与旧版实际OBJ逐面比较
 
-## Git / 最终交付
-
-基于原 `v0.4.10` 连续小步提交，不移动旧tag。独立附注tag为 `v0.4.11`。发布后重新解压检查、跟踪文件逐字节核对、旧tag身份、bundle独立恢复和真实模型再次运行记录写入ZIP旁的交付验证报告；不由本源码测试清单代替。
+另对随结果包提供的v0.4.11基线OBJ与新版OBJ逐面比较（`export-before-after.json`）：全部3D顶点、三角面索引/顺序相同；每个三角形UV面积均不缩小，三条边长度变化符合同一个相似变换尺度（最大误差低于1e-6）。不是只检查增益报告数字。本轮截图见 `images/fill-0.4.12.png`，显示首次有效精排后的合成凹口测试片。

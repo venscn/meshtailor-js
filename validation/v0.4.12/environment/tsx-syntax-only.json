@@ -1,0 +1,22 @@
+{
+  "compiler": "5.8.3",
+  "scope": "Syntax transpile only; NOT typecheck/React build",
+  "result": [
+    {
+      "file": "apps/studio/src/App.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UVSolverControls.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UnfoldControls.tsx",
+      "errors": []
+    },
+    {
+      "file": "apps/studio/src/unfold/useUVSnapshot.tsx",
+      "errors": []
+    }
+  ]
+}

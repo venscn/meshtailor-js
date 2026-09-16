@@ -1,0 +1,22 @@
+{
+  "motion": {
+    "passed": 28,
+    "error": null
+  },
+  "selection": {
+    "passed": 39,
+    "error": null
+  },
+  "camera": {
+    "passed": 39,
+    "error": null
+  },
+  "relay": {
+    "passed": 28,
+    "error": null
+  },
+  "fill": {
+    "passed": 17,
+    "error": null
+  }
+}

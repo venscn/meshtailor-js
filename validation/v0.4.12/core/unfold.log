@@ -1,0 +1,142 @@
+
+> meshtailor-js@0.4.11 test:unfold
+> node scripts/unfold-smoke.mjs
+
+{
+  "suite": "Unfold correspondence, selection and endpoint regression",
+  "cases": [
+    {
+      "name": "One-click demo has six real charts and matching source UVs",
+      "passed": true
+    },
+    {
+      "name": "UV cube has six real islands, not a triangle-per-island proxy",
+      "passed": true
+    },
+    {
+      "name": "Source positions match traversal normalization exactly",
+      "passed": true
+    },
+    {
+      "name": "Every corner retains its exact face/UV pairing",
+      "passed": true
+    },
+    {
+      "name": "together/direct: 0% is EXACT source",
+      "passed": true
+    },
+    {
+      "name": "together/direct: 100% is EXACT shared UV target",
+      "passed": true
+    },
+    {
+      "name": "together/direct: scrubbing backward has no state accumulation",
+      "passed": true
+    },
+    {
+      "name": "together/staged: 0% is EXACT source",
+      "passed": true
+    },
+    {
+      "name": "together/staged: 100% is EXACT shared UV target",
+      "passed": true
+    },
+    {
+      "name": "together/staged: scrubbing backward has no state accumulation",
+      "passed": true
+    },
+    {
+      "name": "sequential/direct: 0% is EXACT source",
+      "passed": true
+    },
+    {
+      "name": "sequential/direct: 100% is EXACT shared UV target",
+      "passed": true
+    },
+    {
+      "name": "sequential/direct: scrubbing backward has no state accumulation",
+      "passed": true
+    },
+    {
+      "name": "sequential/staged: 0% is EXACT source",
+      "passed": true
+    },
+    {
+      "name": "sequential/staged: 100% is EXACT shared UV target",
+      "passed": true
+    },
+    {
+      "name": "sequential/staged: scrubbing backward has no state accumulation",
+      "passed": true
+    },
+    {
+      "name": "Single and multi selection leave ALL other vertices at source",
+      "passed": true
+    },
+    {
+      "name": "Empty selection leaves everything assembled",
+      "passed": true
+    },
+    {
+      "name": "Sequential schedule: completed/current/waiting islands differ",
+      "passed": true
+    },
+    {
+      "name": "Selections are deduplicated; custom selection order is retained",
+      "passed": true
+    },
+    {
+      "name": "Cut boundary keeps BOTH sides of each source seam",
+      "passed": true
+    },
+    {
+      "name": "Shared source vertex splits into distinct UV coordinates across seams",
+      "passed": true
+    },
+    {
+      "name": "Staged transition is continuous at both phase boundaries",
+      "passed": true
+    },
+    {
+      "name": "NaN/invalid settings cannot poison the GPU buffers",
+      "passed": true
+    },
+    {
+      "name": "Incomplete, duplicate and malformed atlas coverage fails loudly",
+      "passed": true
+    },
+    {
+      "name": "Original UV target rejects missing UVs instead of silently inventing them",
+      "passed": true
+    },
+    {
+      "name": "UV units, mirrors, overlaps and out-of-tile coordinates are preserved",
+      "passed": true
+    },
+    {
+      "name": "Exported OBJ contains the SAME UVs as the animation endpoint",
+      "passed": true
+    },
+    {
+      "name": "knot: generated target covers complex mesh with finite animated positions",
+      "passed": true
+    },
+    {
+      "name": "garment: generated target covers complex mesh with finite animated positions",
+      "passed": true
+    },
+    {
+      "name": "gear: generated target covers complex mesh with finite animated positions",
+      "passed": true
+    },
+    {
+      "name": "assembly: generated target covers complex mesh with finite animated positions",
+      "passed": true
+    },
+    {
+      "name": "Palette is deterministic and valid for 2D and GPU",
+      "passed": true
+    }
+  ],
+  "passed": 33
+}

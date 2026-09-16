@@ -1,0 +1,22 @@
+{
+  "Corset": {
+    "beforeSHA256": "f853908a5905eae7784c77b6624257cda0071a377868a9a290281dfb55b247ff",
+    "afterSHA256": "a0dce792a8aa152914ffa833024bc82c26111bbce2d68e1e4ad906ff3f7a4b33",
+    "faces": 18324,
+    "sameGeometryAndFaceOrder": true,
+    "smallestFaceAreaGain": 1.0799999999974148,
+    "largestFaceAreaGain": 1.2597120000010904,
+    "largestSimilarityScaleError": 3.4718894426077895e-12,
+    "everyTriangleDidNotShrink": true
+  },
+  "FlightHelmet": {
+    "beforeSHA256": "c5093cc9bafee0668732ae5ec874dc7f60dc8b828547a5ff9ec8aca0569ba7c9",
+    "afterSHA256": "c27914a491f4150e25e9d21d55f121bfc897647889f767b023fa09fc96e4477d",
+    "faces": 94722,
+    "sameGeometryAndFaceOrder": true,
+    "smallestFaceAreaGain": 1.079999999993972,
+    "largestFaceAreaGain": 1.1664000000417725,
+    "largestSimilarityScaleError": 3.324762687384464e-11,
+    "everyTriangleDidNotShrink": true
+  }
+}

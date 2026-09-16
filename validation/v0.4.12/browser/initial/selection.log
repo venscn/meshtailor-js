@@ -1,0 +1,49 @@
+PASS DPR 1: default playback-all is not an explicit inspection selection
+PASS DPR 1: first real UV click selects island only
+PASS DPR 1: second click selects triangle without changing geometry camera or progress
+PASS DPR 1: repeated click cancels triangle and preserves island
+PASS DPR 1: another triangle replaces the selected face
+PASS DPR 1: first click on another island clears face and never auto-selects a new one
+PASS DPR 1: island-list click and number label never choose a triangle
+PASS DPR 1: modifier selection adds an island without selecting face
+PASS DPR 1: picking a triangle in a multiselection does not collapse its queue
+PASS DPR 1: modifier deselects island and removes stale triangle focus
+PASS DPR 1: Escape first removes triangle then islands
+PASS DPR 1: real 3D ray pick selects triangle only after explicit island selection; UV click cancels it
+PASS DPR 1: face toggles during playback keep the clock and queue running
+PASS DPR 1: dragging camera never selects a triangle
+PASS DPR 1: switching tool tabs keeps the mesh UV and camera
+PASS DPR 1: new UV snapshot clears all face and island inspection
+PASS DPR 1: bounded canvas drawing buffers and independent scroll panels
+PASS responsive 1117px: no horizontal overflow and visible canvas
+PASS responsive 900px: no horizontal overflow and visible canvas
+PASS responsive 600px: no horizontal overflow and visible canvas
+PASS DPR 1: no uncaught browser errors and successful GPU draw
+PASS DPR 2: default playback-all is not an explicit inspection selection
+PASS DPR 2: first real UV click selects island only
+PASS DPR 2: second click selects triangle without changing geometry camera or progress
+PASS DPR 2: repeated click cancels triangle and preserves island
+PASS DPR 2: another triangle replaces the selected face
+PASS DPR 2: first click on another island clears face and never auto-selects a new one
+PASS DPR 2: island-list click and number label never choose a triangle
+PASS DPR 2: modifier selection adds an island without selecting face
+PASS DPR 2: picking a triangle in a multiselection does not collapse its queue
+PASS DPR 2: modifier deselects island and removes stale triangle focus
+PASS DPR 2: Escape first removes triangle then islands
+PASS DPR 2: real 3D ray pick selects triangle only after explicit island selection; UV click cancels it
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: false == true
+    at file:///mnt/data/packing-work/meshtailor-js/scripts/selection-browser-smoke.mjs:42:253
+    at async check (file:///mnt/data/packing-work/meshtailor-js/scripts/selection-browser-smoke.mjs:7:44)
+    at async file:///mnt/data/packing-work/meshtailor-js/scripts/selection-browser-smoke.mjs:41:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '=='
+}
+
+Node.js v22.16.0

@@ -1,0 +1,258 @@
+{
+  "suite": "Production UV Worker + contour refill controls in offline workbench",
+  "tests": [
+    "Load explicit concave fixture, not a real asset substitute",
+    "Actual button submits independent fill operation",
+    "Fill increases geometric area, not box-area counter",
+    "Island count and actual cuts do not change",
+    "No island loses UV area",
+    "Area cap and sorted trial order reach Worker",
+    "Worker returns actual trial and round progress",
+    "UI shows before/after, stop reason and density spread",
+    "All output triangles pass pooled geometry checks",
+    "Camera is not reframed by UV refinement",
+    "UV export preserves same coordinates and all faces",
+    "Final animation uses the refined target",
+    "Island-first face selection still toggles",
+    "Repeated fill starts at current result and does not compound density limit",
+    "Original input geometry and source UV unchanged",
+    "Global timeouts fail rather than fake completed refinement",
+    "No page errors or horizontal overflow"
+  ],
+  "initialRefinement": {
+    "mode": "area-priority",
+    "resolution": 256,
+    "settings": {
+      "step": 0.08,
+      "maxAreaGain": 1.6,
+      "maxRounds": 6,
+      "warmupPasses": 3,
+      "timeBudgetMs": 10000,
+      "maxTrials": 128,
+      "rotate": true
+    },
+    "densitySpreadBefore": 1.0000000000000007,
+    "densitySpreadAfter": 1.0000000000000002,
+    "before": 0.44684620298605926,
+    "after": 0.7149539247776947,
+    "beforeBox": 0.5645333169437773,
+    "afterBox": 0.9032533071100435,
+    "trials": 15,
+    "accepted": 15,
+    "commonAccepted": 3,
+    "rounds": 6,
+    "stop": "converged",
+    "elapsedMs": 164.5,
+    "order": [
+      0,
+      1,
+      2
+    ],
+    "gains": [
+      {
+        "id": 0,
+        "area3D": 0.0793178663493952,
+        "areaFactor": 1.6,
+        "linearFactor": 1.2649110640673518
+      },
+      {
+        "id": 1,
+        "area3D": 0.020474585233657208,
+        "areaFactor": 1.599999999999999,
+        "linearFactor": 1.2649110640673513
+      },
+      {
+        "id": 2,
+        "area3D": 0.0005948839976204645,
+        "areaFactor": 1.599999999999999,
+        "linearFactor": 1.2649110640673513
+      }
+    ],
+    "history": [
+      {
+        "round": 0,
+        "id": null,
+        "occupancy": 0.48259389922494406,
+        "areaFactor": 1.08
+      },
+      {
+        "round": 0,
+        "id": null,
+        "occupancy": 0.5212014111629395,
+        "areaFactor": 1.1664
+      },
+      {
+        "round": 0,
+        "id": null,
+        "occupancy": 0.5628975240559747,
+        "areaFactor": 1.2597120000000002
+      },
+      {
+        "round": 1,
+        "id": 0,
+        "occupancy": 0.5984779727834719,
+        "areaFactor": 1.3604889600000003
+      },
+      {
+        "round": 1,
+        "id": 1,
+        "occupancy": 0.6076624726149966,
+        "areaFactor": 1.3604889600000003
+      },
+      {
+        "round": 1,
+        "id": 2,
+        "occupancy": 0.6079293259804528,
+        "areaFactor": 1.3604889600000003
+      },
+      {
+        "round": 2,
+        "id": 0,
+        "occupancy": 0.6463562106061497,
+        "areaFactor": 1.4693280768000003
+      },
+      {
+        "round": 2,
+        "id": 1,
+        "occupancy": 0.6562754704241962,
+        "areaFactor": 1.4693280768000003
+      },
+      {
+        "round": 2,
+        "id": 2,
+        "occupancy": 0.656563672058889,
+        "areaFactor": 1.4693280768000003
+      },
+      {
+        "round": 3,
+        "id": 0,
+        "occupancy": 0.6980647074546418,
+        "areaFactor": 1.5868743229440005
+      },
+      {
+        "round": 3,
+        "id": 1,
+        "occupancy": 0.7087775080581321,
+        "areaFactor": 1.5868743229440005
+      },
+      {
+        "round": 3,
+        "id": 2,
+        "occupancy": 0.7090887658236003,
+        "areaFactor": 1.5868743229440005
+      },
+      {
+        "round": 4,
+        "id": 0,
+        "occupancy": 0.7137229349779851,
+        "areaFactor": 1.6
+      },
+      {
+        "round": 4,
+        "id": 1,
+        "occupancy": 0.7149191685090368,
+        "areaFactor": 1.599999999999999
+      },
+      {
+        "round": 4,
+        "id": 2,
+        "occupancy": 0.7149539247776947,
+        "areaFactor": 1.599999999999999
+      }
+    ],
+    "shapeWaste": [
+      {
+        "id": 0,
+        "area3D": 0.0793178663493952,
+        "boxWaste": 0.11768711395771797,
+        "shapeFill": 0.7499999999999999
+      },
+      {
+        "id": 1,
+        "area3D": 0.020474585233657208,
+        "boxWaste": 0,
+        "shapeFill": 1
+      },
+      {
+        "id": 2,
+        "area3D": 0.0005948839976204645,
+        "boxWaste": 0,
+        "shapeFill": 1
+      }
+    ],
+    "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。"
+  },
+  "result": {
+    "mode": "area-priority",
+    "resolution": 256,
+    "settings": {
+      "step": 0.08,
+      "maxAreaGain": 1.6,
+      "maxRounds": 6,
+      "warmupPasses": 3,
+      "timeBudgetMs": 10000,
+      "maxTrials": 128,
+      "rotate": true
+    },
+    "densitySpreadBefore": 1.166400000000001,
+    "densitySpreadAfter": 1.166400000000001,
+    "before": 0.8874563374572162,
+    "after": 0.8874563374572162,
+    "beforeBox": 1.1246593289738638,
+    "afterBox": 1.1246593289738638,
+    "trials": 13,
+    "accepted": 0,
+    "commonAccepted": 0,
+    "rounds": 4,
+    "stop": "converged",
+    "elapsedMs": 136.0999999998603,
+    "order": [
+      0,
+      1,
+      2
+    ],
+    "gains": [
+      {
+        "id": 0,
+        "area3D": 0.0793178663493952,
+        "areaFactor": 1,
+        "linearFactor": 1
+      },
+      {
+        "id": 1,
+        "area3D": 0.020474585233657208,
+        "areaFactor": 1,
+        "linearFactor": 1
+      },
+      {
+        "id": 2,
+        "area3D": 0.0005948839976204645,
+        "areaFactor": 1,
+        "linearFactor": 1
+      }
+    ],
+    "history": [],
+    "shapeWaste": [
+      {
+        "id": 0,
+        "area3D": 0.0793178663493952,
+        "boxWaste": 0.2372029915166476,
+        "shapeFill": 0.7500000000000001
+      },
+      {
+        "id": 1,
+        "area3D": 0.020474585233657208,
+        "boxWaste": 0,
+        "shapeFill": 1
+      },
+      {
+        "id": 2,
+        "area3D": 0.0005948839976204645,
+        "boxWaste": 0,
+        "shapeFill": 1
+      }
+    ],
+    "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。"
+  },
+  "passed": 17
+}

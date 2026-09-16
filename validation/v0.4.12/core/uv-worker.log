@@ -1,0 +1,26 @@
+
+> meshtailor-js@0.4.11 test:uv-worker
+> node scripts/uv-worker-smoke.mjs
+
+{
+  "suite": "Production UV job handler in Node worker_threads (not browser Worker loading)",
+  "cases": [
+    {
+      "name": "Generated UV worker transfers exact shared geometry, typed arrays and Maps",
+      "passed": true
+    },
+    {
+      "name": "Original-UV worker ignores unrelated baseline edges and preserves face UVs",
+      "passed": true
+    },
+    {
+      "name": "Missing source UV returns explicit error instead of a fallback or stale atlas",
+      "passed": true
+    },
+    {
+      "name": "Complex original-UV job transfers all per-corner correspondences",
+      "passed": true
+    }
+  ],
+  "passed": 4
+}

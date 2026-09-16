@@ -1,0 +1,18 @@
+PASS Load explicit concave fixture, not a real asset substitute
+PASS Actual button submits independent fill operation
+PASS Fill increases geometric area, not box-area counter
+PASS Island count and actual cuts do not change
+PASS No island loses UV area
+PASS Area cap and sorted trial order reach Worker
+PASS Worker returns actual trial and round progress
+PASS UI shows before/after, stop reason and density spread
+PASS All output triangles pass pooled geometry checks
+PASS Camera is not reframed by UV refinement
+PASS UV export preserves same coordinates and all faces
+PASS Final animation uses the refined target
+PASS Island-first face selection still toggles
+PASS Repeated fill starts at current result and does not compound density limit
+PASS Original input geometry and source UV unchanged
+PASS Global timeouts fail rather than fake completed refinement
+PASS No page errors or horizontal overflow
+{"passed":17}
