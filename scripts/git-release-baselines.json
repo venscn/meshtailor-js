@@ -152,5 +152,19 @@
     "commit": "0a26f0e74067ea546a1e0beb7aeb9d9ef30e5056",
     "tagType": "tag",
     "commitsSincePrevious": 8
+  },
+  {
+    "tag": "repack-0.4.18-1",
+    "refObject": "85250052b39eb5d541af9b84e0435fa98bbf354e",
+    "commit": "9f99307a185e50f4c616e69a5fea66b34fb8e4de",
+    "tagType": "tag",
+    "commitsSincePrevious": 4
+  },
+  {
+    "tag": "repack-0.4.18-2",
+    "refObject": "95ad67e3f0ea549c655b45ce492696bf88b2bf19",
+    "commit": "0100a3c62617c1941c3267a7aea2a0cedb076e48",
+    "tagType": "tag",
+    "commitsSincePrevious": 1
   }
 ]
