@@ -45,3 +45,5 @@ export * from './human-templates.js';
 export * from './peel-plan.js';
 
 export * from './source-features.js';
+
+export * from "./generation-policy.js";

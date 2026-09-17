@@ -1,21 +1,14 @@
-import type { MeshData, MeshAnalysis } from '@meshtailor/mesh-core';
-import { canonicalOrder, extractSeamEdgesFromUV, traceSeamChains, type SeamChain } from '@meshtailor/chaining-seams';
-import { generateGeometricSeams, type GeometricBaselineOptions } from '@meshtailor/runtime';
-import { recommendUnwrap, type UnwrapOptions } from '@meshtailor/uv';
-export interface SeamJob { kind:'baseline'|'uv-seams'|'auto-large'|'auto-balanced'; mesh:MeshData; options?:GeometricBaselineOptions }
+import {geometryOnlyMesh,type MeshData,type MeshAnalysis} from '@meshtailor/mesh-core';
+import {canonicalOrder,traceSeamChains,type SeamChain} from '@meshtailor/chaining-seams';
+import type {GeometricBaselineOptions} from '@meshtailor/runtime';
+import {unwrapMesh,geometryGenerationOptions,recommendUnwrap,type UnwrapOptions} from '@meshtailor/uv';
+export interface SeamJob {kind:'baseline'|'uv-seams'|'auto-large'|'auto-balanced';mesh:MeshData;options?:GeometricBaselineOptions}
 export type SeamResult={ok:true;edges:string[];chains:SeamChain[];elapsedMs:number;parameters?:UnwrapOptions;analysis?:MeshAnalysis;regionCount?:number;mergedCount?:number}|{ok:false;error:string};
 self.onmessage=(event:MessageEvent<SeamJob>)=>{
-  const start=performance.now();
-  try{
-    const {kind,mesh,options}=event.data;
-    if(kind!=='uv-seams'){
-      const goal=kind==='auto-balanced'?'balanced':kind==='auto-large'?'large':options?.goal??'large';
-      const recommendation=recommendUnwrap(mesh,goal),parameters=recommendation.options;
-      const result=generateGeometricSeams(mesh,kind.startsWith('auto-')?{strategy:'adaptive',goal,uvObjective:options?.uvObjective}:options);
-      self.postMessage({ok:true,edges:[...result.seamEdges],chains:result.chains,parameters,analysis:recommendation.analysis,regionCount:result.regions,mergedCount:result.mergedRegions,elapsedMs:performance.now()-start} satisfies SeamResult);
-    }else{
-      const edges=extractSeamEdgesFromUV(mesh),chains=canonicalOrder(mesh,traceSeamChains(mesh,edges));
-      self.postMessage({ok:true,edges:[...edges],chains,elapsedMs:performance.now()-start} satisfies SeamResult);
-    }
-  }catch(error){self.postMessage({ok:false,error:error instanceof Error?error.message:String(error)} satisfies SeamResult);}
+ const start=performance.now();try{
+  if(event.data.kind==='uv-seams')throw Error('原 UV 提取已移除，请从几何生成。');
+  const mesh=geometryOnlyMesh(event.data.mesh),r=recommendUnwrap(mesh,event.data.kind==='auto-balanced'?'balanced':'large');
+  const parameters=geometryGenerationOptions(mesh,r.options),u=unwrapMesh(mesh,new Set(),parameters),edges=new Set(u.seams);
+  self.postMessage({ok:true,edges:[...edges],chains:canonicalOrder(mesh,traceSeamChains(mesh,edges)),elapsedMs:performance.now()-start,parameters,analysis:r.analysis,regionCount:u.peel?.groups.length} satisfies SeamResult);
+ }catch(error){self.postMessage({ok:false,error:error instanceof Error?error.message:String(error)} satisfies SeamResult);}
 };

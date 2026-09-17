@@ -1,0 +1,57 @@
+{
+  "passed": 13,
+  "tests": [
+    {
+      "name": "Old local-storage source mode cannot re-enable original UV",
+      "passed": true
+    },
+    {
+      "name": "Old imported configuration is explicitly rejected",
+      "passed": true
+    },
+    {
+      "name": "Every geometry task overrides obsolete source hints and normal-cone mode",
+      "passed": true
+    },
+    {
+      "name": "Worker clone boundary does not invoke UV getters",
+      "passed": true
+    },
+    {
+      "name": "Default load is a complete geometry-generation Worker path",
+      "passed": true
+    },
+    {
+      "name": "Default load and Generate baseline share exact output, not just island count",
+      "passed": true
+    },
+    {
+      "name": "Runtime Generate baseline produces the identical actual cut set",
+      "passed": true
+    },
+    {
+      "name": "Worker rejects obsolete source even with a valid new plan",
+      "passed": true
+    },
+    {
+      "name": "Worker rejects obsolete source-atlas even with a valid new plan",
+      "passed": true
+    },
+    {
+      "name": "Postprocessing rejects an unmarked seed, rather than treating imported UV as generated",
+      "passed": true
+    },
+    {
+      "name": "Repack retains the current generated-island provenance",
+      "passed": true
+    },
+    {
+      "name": "Original-seam recut cannot be requested during fill",
+      "passed": true
+    },
+    {
+      "name": "GLTF import removes texture-coordinate attributes before Three parses them",
+      "passed": true
+    }
+  ]
+}

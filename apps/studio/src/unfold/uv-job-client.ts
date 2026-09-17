@@ -1,3 +1,4 @@
+import {geometryOnlyMesh} from '@meshtailor/mesh-core';
 import type { UVJob, UVJobProgress, UVMessage, UVSnapshot } from '../workers/uv.worker.js';
 export type UVFailureCode='cancelled'|'timeout'|'startup'|'worker'|'invalid';
 export class UVJobFailure extends Error {
@@ -27,7 +28,7 @@ export function startUVJob(job:UVJob,options:UVJobClientOptions):{result:Promise
   try{
     if(!Number.isFinite(timeout)||timeout<1||!Number.isFinite(startup)||startup<1)throw new Error('Invalid UV job timeout.');
     worker=options.createWorker();
-    hardTimer=setTimeout(()=>fail('timeout',`UV 任务超过 ${(timeout/1000).toFixed(1)} 秒，已强制终止。最后阶段：${last?.detail??'等待 Worker'}。可调整预算后重试或使用网格原始 UV。`),timeout);
+    hardTimer=setTimeout(()=>fail('timeout',`UV 任务超过 ${(timeout/1000).toFixed(1)} 秒，已强制终止。最后阶段：${last?.detail??'等待 Worker'}。可调整预算后重试（不使用原 UV 回退）。`),timeout);
     startTimer=setTimeout(()=>fail('startup','UV Worker 未在启动时限内响应，已终止。请检查浏览器控制台中的 Worker 加载错误后重试。'),startup);
     worker.onerror=e=>fail('worker','UV Worker 执行失败：'+(e.message||'unknown error'));
     worker.onmessageerror=()=>fail('worker','UV Worker 返回数据无法解析，任务已终止。');
@@ -43,7 +44,7 @@ export function startUVJob(job:UVJob,options:UVJobClientOptions):{result:Promise
       else if('ok' in data&&data.ok===false)fail(data.code??'invalid',data.error);
       else fail('worker','UV Worker 消息协议不匹配，请刷新页面后重试。');
     };
-    worker.postMessage(job);
+    worker.postMessage({...job,mesh:geometryOnlyMesh(job.mesh)});
   }catch(error){fail('worker',error instanceof Error?error.message:String(error));}
   return{result,cancel};
 }

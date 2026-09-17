@@ -1,4 +1,5 @@
-import { paintPanelSeams,recommendRegions, segmentMeshRegions, type ChartGoal, type RegionOptions, buildTopology, dot3, edgeKey, normalize3, sub3, triangleNormal, type MeshData, type Vec3 } from '@meshtailor/mesh-core';
+import {unwrapMesh,geometryGenerationOptions,recommendUnwrap} from '@meshtailor/uv';
+import { geometryOnlyMesh, type ChartGoal, type RegionOptions, buildTopology, dot3, normalize3, sub3, triangleNormal, type MeshData, type Vec3 } from '@meshtailor/mesh-core';
 import { canonicalOrder, traceSeamChains, type SeamChain } from '@meshtailor/chaining-seams';
 
 export interface GeometricBaselineOptions {
@@ -19,20 +20,17 @@ function faceNormals(mesh:MeshData):Vec3[]{return mesh.faces.map((f)=>triangleNo
 
 /**
  * Functional fallback while official learned weights are unavailable.
- * It combines dihedral saliency with coarse cross-sections along the longest object axis.
+ * The default is the same validated geometry-only generator as Studio.
+ * The old edge-saliency heuristic remains explicitly opt-in for historical QA.
  * This is deliberately not presented as the paper's learned result.
  */
 export function generateGeometricSeams(mesh:MeshData,opts:GeometricBaselineOptions={}):GeometricBaselineResult{
+  mesh=geometryOnlyMesh(mesh);
   if(opts.strategy!=='legacy'){
-    const recommended=recommendRegions(mesh,opts.goal??'large'),options={...recommended.options,...opts.regionOptions};
-    if(opts.uvObjective!=='compact'){
-      const panels=paintPanelSeams(mesh);
-      if(panels.panels.length&&panels.seams.size)return{seamEdges:panels.seams,chains:canonicalOrder(mesh,traceSeamChains(mesh,panels.seams)),scores:new Map(),regions:panels.panels.length,mergedRegions:0,regionOptions:options};
-    }
-    const result=segmentMeshRegions(mesh,options);
-    // Never truncate a connected region boundary to satisfy an edge budget.
-    // curvatureQuantile/structuralRings/maxEdges are legacy-only diagnostics.
-    return{seamEdges:result.seamEdges,chains:canonicalOrder(mesh,traceSeamChains(mesh,result.seamEdges)),scores:new Map(),regions:result.regions.length,mergedRegions:result.mergedRegions,regionOptions:options};
+    const recommended=recommendUnwrap(mesh,opts.goal??'large');
+    const config=geometryGenerationOptions(mesh,{...recommended.options,uvObjective:opts.uvObjective??'paint'});
+    const result=unwrapMesh(mesh,new Set(),config),seamEdges=new Set(result.seams);
+    return {seamEdges,chains:canonicalOrder(mesh,traceSeamChains(mesh,seamEdges)),scores:new Map(),regions:result.peel?.groups.length,mergedRegions:0};
   }
 
   const curvatureQuantile=opts.curvatureQuantile ?? 0.82;

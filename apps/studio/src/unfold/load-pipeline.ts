@@ -1,13 +1,13 @@
 import type {MeshData} from '@meshtailor/mesh-core';
-import type {UnwrapOptions} from '@meshtailor/uv';
+import {geometryGenerationOptions,type UnwrapOptions} from '@meshtailor/uv';
 import type {UVOperationStep} from '../../../../packages/uv/src/work.js';
-export const PIPELINE_STORAGE_KEY='meshtailor.load-pipeline.v1';
+export const PIPELINE_STORAGE_KEY='meshtailor.load-pipeline.v2';
 export interface LoadPipelineConfig {
-  version:1; source:'auto'|'generated'|'peel'|'inspect';
+  version:2; source:'geometry';
   repairInvalid:boolean; mergeAdjacent:boolean; fill:boolean;
   fillBudgetSeconds:number; fillRounds:number;
 }
-export const DEFAULT_LOAD_PIPELINE:Readonly<LoadPipelineConfig>=Object.freeze({version:1,source:'auto',repairInvalid:true,mergeAdjacent:true,fill:false,fillBudgetSeconds:15,fillRounds:8});
+export const DEFAULT_LOAD_PIPELINE:Readonly<LoadPipelineConfig>=Object.freeze({version:2,source:'geometry',repairInvalid:false,mergeAdjacent:false,fill:false,fillBudgetSeconds:15,fillRounds:8});
 export type PipelineTarget='generated'|'source'|'source-atlas'|'stitch'|'repack'|'fill'|'templates';
 export type StepState='pending'|'running'|'completed'|'skipped'|'error'|'cancelled';
 export interface PipelineStep {id:UVOperationStep;label:string;enabled:boolean;reason?:string;state:StepState;startedMs?:number;elapsedMs?:number;detail?:string}
@@ -16,43 +16,40 @@ export interface PipelineTrace {version:1;target:PipelineTarget;origin:'model-lo
 export function validateLoadPipeline(value:unknown):LoadPipelineConfig {
   if(!value||typeof value!=='object')throw Error('流程配置必须是 JSON 对象。');
   const s=value as Record<string,unknown>;
-  if(s.version!==1||!['auto','generated','peel','inspect'].includes(s.source as string))throw Error('流程配置版本或 UV 来源无效。');
+  if(s.version!==2||s.source!=='geometry')throw Error('流程配置版本或 UV 来源无效。');
   for(const k of ['repairInvalid','mergeAdjacent','fill'])if(typeof s[k]!=='boolean')throw Error(`流程配置 ${k} 必须为布尔值。`);
   if(typeof s.fillBudgetSeconds!=='number'||!Number.isFinite(s.fillBudgetSeconds)||s.fillBudgetSeconds<1||s.fillBudgetSeconds>120)throw Error('精排搜索预算必须为 1–120 秒。');
   if(typeof s.fillRounds!=='number'||!Number.isInteger(s.fillRounds)||s.fillRounds<1||s.fillRounds>24)throw Error('精排轮数必须为 1–24。');
-  return {version:1,source:s.source as LoadPipelineConfig['source'],repairInvalid:s.repairInvalid as boolean,mergeAdjacent:s.mergeAdjacent as boolean,fill:s.fill as boolean,fillBudgetSeconds:s.fillBudgetSeconds,fillRounds:s.fillRounds};
+  return {version:2,source:'geometry',repairInvalid:false,mergeAdjacent:s.mergeAdjacent as boolean,fill:s.fill as boolean,fillBudgetSeconds:s.fillBudgetSeconds,fillRounds:s.fillRounds};
 }
 export function readLoadPipeline(storage?:Pick<Storage,'getItem'>):LoadPipelineConfig {
-  try {const s=storage?.getItem(PIPELINE_STORAGE_KEY);if(s)return validateLoadPipeline(JSON.parse(s));}catch{/* corrupt, private or old storage: use versioned defaults */}
+  try {
+    const current=storage?.getItem(PIPELINE_STORAGE_KEY);if(current)return validateLoadPipeline(JSON.parse(current));
+    const old=storage?.getItem('meshtailor.load-pipeline.v1');
+    if(old){const v=JSON.parse(old);return validateLoadPipeline({...DEFAULT_LOAD_PIPELINE,fill:typeof v.fill==='boolean'?v.fill:false,fillBudgetSeconds:v.fillBudgetSeconds??15,fillRounds:v.fillRounds??8});}
+  }catch{/* Old/corrupt/private storage cannot re-enable source UV. */}
   return {...DEFAULT_LOAD_PIPELINE};
 }
-export function hasCompleteSourceUV(mesh:MeshData):boolean {
-  return mesh.faces.length>0&&mesh.faces.every(f=>f.uvs?.length===3&&f.uvs.every(p=>p?.length===2&&p.every(Number.isFinite)));
-}
+/** Kept for callers displaying an import audit, never used to choose a generator. */
+export function hasCompleteSourceUV(_mesh:MeshData):boolean {return false;}
 export function resolveLoadPipeline(mesh:MeshData,value:LoadPipelineConfig,base:Partial<UnwrapOptions>={}){
-  const plan=validateLoadPipeline(value),hasUV=hasCompleteSourceUV(mesh);
-  if(plan.source==='inspect'&&!hasUV)throw Error('该模型没有完整原 UV，不能原样检查。请选择自动或重新生成。');
-  if(plan.source==='inspect'&&plan.fill)throw Error('原样检查不修改 UV，不能同时启用填补空白。请改为自动整理。');
-  if(plan.fill&&base.atlasPageMode&&base.atlasPageMode!=='single')throw Error('自动填补空白当前只支持单页；请将 UV 页策略设为单页。');
-  const target:PipelineTarget=plan.source==='inspect'?'source':plan.source==='generated'||plan.source==='peel'||!hasUV?'generated':'source-atlas';
-  return {target,config:{...base,...(plan.source==='peel'?{initialSegmentation:'hierarchical',uvObjective:'paint',method:'auto',autoCut:true}:{}),humanTemplates:base.humanTemplates?{...base.humanTemplates,selectedCharts:undefined}:undefined,sourceRepairPolicy:plan.repairInvalid?'repair':'reject',sourceAtlasMerge:plan.mergeAdjacent,postMerge:plan.mergeAdjacent,
-    // No hidden nested refinement in packing. One explicit fill stage follows it.
+  const plan=validateLoadPipeline(value);
+  if(plan.fill&&base.atlasPageMode&&base.atlasPageMode!=='single')throw Error('自动填空只支持单页；请使用单页排布。');
+  return {target:'generated' as PipelineTarget,config:{...geometryGenerationOptions(mesh,base),postMerge:plan.mergeAdjacent,
     fillMode:'off',fillRecutLarge:false,fillTimeBudgetMs:plan.fillBudgetSeconds*1000,fillRounds:plan.fillRounds} as Partial<UnwrapOptions>};
 }
 export function pipelineSteps(target:PipelineTarget,config:Partial<UnwrapOptions>={},plan?:LoadPipelineConfig):PipelineStep[]{
-  const source=target==='source'||target==='source-atlas',organized=target!=='source';
+  const generated=target==='generated',edit=['stitch','repack','fill','templates'].includes(target);
   const rows:[UVOperationStep,string,boolean,string?][]=[
-    ['input','检查几何与任务配置',true],
-    ['extract','提取原 UV 岛 · 审计原坐标',source,'本次不读取原 UV'],
-    ['parameterize',config.initialSegmentation==='hierarchical'?'空间分组 → 组内开缝 → 自由边界剥展':'连通分区 · 参数化与必要补切',target==='generated','沿用现有 UV 岛'],
-    ['repair',config.sourceRepairPolicy==='reject'?'检查现有岛（局部修复关闭）':'验证现有岛 · 局部修复无效 UV', ['source-atlas','stitch','repack','templates'].includes(target),'本次不修复原岛'],
-    ['features','原 UV 可辨识性 · 主要轮廓与孔洞检查',target==='source-atlas'&&config.sourceFeaturePolicy!=='preserve'&&(config.uvObjective??'paint')==='paint'&&config.autoCut!==false&&(config.method??'auto')==='auto','保留原形模式 / 本次不是源 UV 整理'],
-    ['structure','结构模板 · 先规划侧缝再展平',['source-atlas','stitch','templates'].includes(target)&&config.structureTemplates!==false&&(config.uvObjective??'paint')==='paint'&&config.autoCut!==false&&(config.method??'auto')==='auto','结构模板关闭或本次仅重排/原样检查'],
-    ['merge','尝试共享边缝合',target==='stitch'||target==='source-atlas'&&config.sourceAtlasMerge!==false||target==='generated'&&config.postMerge===true,'已禁用或本次不适用'],
-    ['pack','按 3D 面积归一 · 大岛优先排布',organized&&target!=='fill','保持当前坐标 / 面积'],
-    ['fill','填补空白 · 轮廓精排',target==='fill'||!!plan?.fill,'未启用：不会自动填补空白'],
+    ['input','几何输入白名单 · 丢弃原 UV / 索引 / 提示',true],
+    ['parameterize','结构分组 → 规则开缝 → 自由边界剥展',generated,'本次编辑已有生成结果'],
+    ['repair','验证当前生成岛',edit&&target!=='fill','不读取或修复模型原 UV'],
+    ['structure','几何结构约束 · 保留主要轮廓',target==='templates','结构分析在生成阶段完成'],
+    ['merge','验证式缝合（仅当前生成岛）',target==='stitch'||generated&&config.postMerge===true,'未启用后缝合'],
+    ['pack','按 3D 面积归一 · 大岛优先排布',target!=='fill','保持当前生成岛的面积'],
+    ['fill','填补空白 · 多轮轮廓精排',target==='fill'||!!plan?.fill,'未启用：不会自动填空'],
     ['correspondence','建立 3D / UV 对应 · 铰链准备',true],
-    ['audit','面积统计 · 空间邻居 · 返回结果',true],
+    ['audit','面积 / 边界诊断 · 返回纯几何结果',true],
   ];
   return rows.map(([id,label,enabled,reason])=>({id,label,enabled,state:enabled?'pending':'skipped',...(!enabled?{reason}:{} )}));
 }
