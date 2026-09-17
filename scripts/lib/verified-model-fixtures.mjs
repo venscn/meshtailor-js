@@ -12,7 +12,7 @@ export const FIXTURES={
  FlightHelmet:{json:'c94a08a28305fb49a612cf273330a04e3dfc084306257d52dc00b4447eeb1091',bin:'9e623a27f837e1cc995d1380da5fd3becf4d29586fefba882fc0ba76b49f94bf',bytes:3227148}
 };
 const hash=b=>createHash('sha256').update(b).digest('hex');
-export async function loadVerifiedFixture(core,folder,name){
+export async function loadVerifiedFixture(core,folder,name,options={}){
  const expected=FIXTURES[name];if(!expected)throw new Error('Unknown verified fixture');
  const json=await readFile(join(folder,name,`${name}.gltf`)),bin=await readFile(join(folder,name,`${name}.bin`));
  if(hash(json)!==expected.json||hash(bin)!==expected.bin||bin.length!==expected.bytes)throw new Error(`${name}: file identity mismatch. Only the corrected user archive is accepted; no fallback to older files.`);
@@ -35,10 +35,10 @@ export async function loadVerifiedFixture(core,folder,name){
   const transform=p=>{const [x,y,z]=p.map((x,i)=>x*s[i]),[a,b,c,w]=q;const tx=2*(b*z-c*y),ty=2*(c*x-a*z),tz=2*(a*y-b*x);return [x+w*tx+b*tz-c*ty+t[0],y+w*ty+c*tx-a*tz+t[1],z+w*tz+a*ty-b*tx+t[2]];};
   for(const primitive of doc.meshes[n.mesh].primitives){
    if((primitive.mode??4)!==4||primitive.targets||primitive.extensions||primitive.indices===undefined)throw new Error('Unsupported primitive');
-   const positions=accessor(primitive.attributes.POSITION,'VEC3').map(transform),uv=accessor(primitive.attributes.TEXCOORD_0,'VEC2'),ids=accessor(primitive.indices,'SCALAR').flat(),faces=[];
-   if(ids.length%3||uv.length!==positions.length)throw new Error('Bad primitive counts');
+   const positions=accessor(primitive.attributes.POSITION,'VEC3').map(transform),uv=options.geometryOnly?undefined:accessor(primitive.attributes.TEXCOORD_0,'VEC2'),ids=accessor(primitive.indices,'SCALAR').flat(),faces=[];
+   if(ids.length%3||uv&&uv.length!==positions.length)throw new Error('Bad primitive counts');
    const mid=primitive.material,mat=doc.materials[mid],pid=parts.length;
-   for(let i=0;i<ids.length;i+=3){const tri=ids.slice(i,i+3);if(s[0]*s[1]*s[2]<0)[tri[1],tri[2]]=[tri[2],tri[1]];if(tri.some(v=>v>=positions.length))throw new Error('Index bounds');faces.push({vertices:tri,uvs:tri.map(v=>uv[v].slice()),uvSpace:`material:${mid}`,uvSpaceName:mat.name||`Material ${mid+1}`,sourcePart:`object:${pid}`});}
+   for(let i=0;i<ids.length;i+=3){const tri=ids.slice(i,i+3);if(s[0]*s[1]*s[2]<0)[tri[1],tri[2]]=[tri[2],tri[1]];if(tri.some(v=>v>=positions.length))throw new Error('Index bounds');faces.push({vertices:tri,...(uv?{uvs:tri.map(v=>uv[v].slice())}:{}),uvSpace:`material:${mid}`,uvSpaceName:mat.name||`Material ${mid+1}`,sourcePart:`object:${pid}`});}
    parts.push({name:n.name,positions,faces});
   }
  }
