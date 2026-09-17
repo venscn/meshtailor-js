@@ -1,0 +1,58 @@
+{
+  "scope": "Syntax only; missing React/Vite dependencies cannot be certified by this check",
+  "typescript": "5.8.3",
+  "files": [
+    {
+      "file": "apps/studio/src/App.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/MeshViewport.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/UVCanvas.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/main.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/unfold/CorrespondenceInspector.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/unfold/LoadPipelinePanel.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UVJobStatus.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UVSolverControls.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UnfoldControls.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/unfold/UnfoldViewport.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/unfold/useUVSnapshot.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/src/unfold/useUnfoldPlayer.tsx",
+      "diagnostics": []
+    },
+    {
+      "file": "apps/studio/tests/selection-hook.tsx",
+      "diagnostics": []
+    }
+  ]
+}

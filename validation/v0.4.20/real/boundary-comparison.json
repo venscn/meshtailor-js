@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Corset",
+    "kind": "baseline",
+    "charts": 150,
+    "length": 0.9777089126929547,
+    "edges": 1820,
+    "teeth": 16
+  },
+  {
+    "name": "Corset",
+    "kind": "blind",
+    "charts": 89,
+    "length": 0.500947174074476,
+    "edges": 310,
+    "teeth": 15
+  },
+  {
+    "name": "Corset",
+    "kind": "new",
+    "charts": 95,
+    "length": 0.7899532085640985,
+    "edges": 319,
+    "teeth": 6
+  },
+  {
+    "name": "FlightHelmet",
+    "kind": "blind",
+    "charts": 251,
+    "length": 28.55493889537827,
+    "edges": 2487,
+    "teeth": 220
+  },
+  {
+    "name": "FlightHelmet",
+    "kind": "new",
+    "charts": 192,
+    "length": 14.1978299716346,
+    "edges": 1459,
+    "teeth": 25
+  }
+]

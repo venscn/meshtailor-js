@@ -1,0 +1,102 @@
+{
+  "scope": "Offline workbench, actual Worker, DOM and WebGL; no full React claim",
+  "tests": [
+    {
+      "name": "Default auto-load exposes geometry-only policy and never retains original UV",
+      "passed": true
+    },
+    {
+      "name": "UI cannot request original-UV inspection, hints, or recovery",
+      "passed": true
+    },
+    {
+      "name": "Generate baseline default reconstructs both gear faces and holes from geometry",
+      "passed": true
+    },
+    {
+      "name": "Actual baseline button repeats exactly the default-loaded UV result",
+      "passed": true
+    },
+    {
+      "name": "Imported random original UV cannot affect the auto-load result",
+      "passed": true
+    },
+    {
+      "name": "Current generated result can be repacked with provenance preserved",
+      "passed": true
+    },
+    {
+      "name": "Fill operates on current generated islands without requesting source UV",
+      "passed": true
+    },
+    {
+      "name": "Pipeline reports geometry generation and explicit skipped fill, not original extraction",
+      "passed": true
+    },
+    {
+      "name": "Real UV clicks remain island first, then face, then face deselect",
+      "passed": true
+    },
+    {
+      "name": "Area-priority queue and speeds remain available",
+      "passed": true
+    },
+    {
+      "name": "Actual RAF playback preserves camera and restores context when paused",
+      "passed": true
+    },
+    {
+      "name": "Bundled corset button runs real geometry-only Worker without network",
+      "passed": true,
+      "detail": {
+        "faces": 18324,
+        "islands": 95,
+        "methods": {
+          "lscm": 63,
+          "human-contour-band": 8,
+          "planar-shape": 3,
+          "projected-free": 11,
+          "arap-free": 10
+        },
+        "sourceHints": 0,
+        "metrics": {
+          "occupancy": 0.5092340187218245,
+          "boxOccupancy": 0.8093406702245075,
+          "padding": 0.003,
+          "validated": true,
+          "elapsedMs": 2673.399999999907,
+          "packingMethod": "maxrects"
+        }
+      }
+    },
+    {
+      "name": "Bundled flight-helmet button runs real geometry-only Worker without network",
+      "passed": true,
+      "detail": {
+        "faces": 94722,
+        "islands": 192,
+        "methods": {
+          "lscm": 126,
+          "arap-free": 30,
+          "projected-free": 29,
+          "planar-shape": 5,
+          "human-contour-band": 2
+        },
+        "sourceHints": 0,
+        "metrics": {
+          "occupancy": 0.5590457836464805,
+          "boxOccupancy": 0.8652478237108612,
+          "padding": 0.003,
+          "validated": true,
+          "elapsedMs": 35807.89999999991,
+          "packingMethod": "maxrects"
+        }
+      }
+    },
+    {
+      "name": "No JavaScript or WebGL errors remain",
+      "passed": true
+    }
+  ],
+  "passed": 14
+}

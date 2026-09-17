@@ -1,0 +1,26 @@
+/** Metamorphic acceptance: original / absent / randomized UV, identical geometry.
+ * The reference UV is deliberately varied by this QA harness only. It is never
+ * passed as a seam, island hint, seed or fallback to the production generator. */
+import assert from'node:assert/strict';import{mkdir,writeFile}from'node:fs/promises';import{createHash}from'node:crypto';import{join}from'node:path';import{compileCore}from'./lib/compiled-core.mjs';import{loadVerifiedFixture}from'./lib/verified-model-fixtures.mjs';import{runGeometryJob}from'./lib/geometry-worker.mjs';
+const get=(n,d)=>{const i=process.argv.indexOf(n);return i<0?d:process.argv[i+1]},out=get('--out','validation/local-geometry-real'),names=get('--assets','Corset,FlightHelmet').split(','),fast=process.argv.includes('--one-variant');await mkdir(out,{recursive:true});const hash=x=>createHash('sha256').update(x).digest('hex'),compiled=await compileCore(),report={scope:'Actual hash-pinned models, production geometry-only Worker, no provided seams or hints. Full React/Three importer is a separate check.',models:[],passed:true};
+try{
+ const core=await compiled.load('packages/mesh-core/src/index.js'),uv=await compiled.load('packages/uv/src/index.js'),chain=await compiled.load('packages/chaining-seams/src/index.js'),pipeline=await compiled.load('apps/studio/src/unfold/load-pipeline.js'),guard=await compiled.load('packages/uv/src/boundary-guard.js');
+ for(const name of names){const loaded=await loadVerifiedFixture(core,'examples/verified-models',name),geometry=core.geometryOnlyMesh(loaded.mesh),geoHash=hash(JSON.stringify(geometry)),record={name,identity:loaded.identity,vertices:geometry.positions.length,faces:geometry.faces.length,variants:[]};let expected;
+  for(const kind of fast?['absent']:['original','absent','random']){
+   const mesh=kind==='original'?loaded.mesh:kind==='absent'?geometry:{...geometry,uvHints:[999,1],faces:geometry.faces.map((f,i)=>({...f,uvs:[[i%7,99],[.2,-i],[i*13,.04]],uvIndices:[i+18,i+2,i],originalChart:999-i}))};
+   const input=hash(JSON.stringify(mesh)),progress=[];console.log('START',name,kind);
+   const s=await runGeometryJob(compiled,{mesh,edges:[],target:'generated',pipeline:{...pipeline.DEFAULT_LOAD_PIPELINE},config:{timeBudgetMs:300000}},p=>{if(progress.at(-1)?.stage!==p.stage){progress.push({stage:p.stage,detail:p.detail,elapsedMs:p.elapsedMs});}});
+   assert.equal(s.inputPolicy,core.GEOMETRY_INPUT_POLICY);assert.equal(s.peel.sourceHintCharts,0);assert.ok(!s.sourceAudit&&!s.sourceAreaAudit&&!s.repair&&!s.features);
+   assert.equal(hash(JSON.stringify(mesh)),input,'Input mutated');assert.equal(hash(JSON.stringify(core.geometryOnlyMesh(mesh))),geoHash);
+   const seen=new Set();for(const c of s.packed){for(const fi of c.faceUVs.keys()){assert.ok(!seen.has(fi));seen.add(fi);}const local=uv.cutLocalMesh(geometry,[...c.faceUVs.keys()],new Set(s.seams)),coords=[];local.sourceFaces.forEach((f,i)=>local.triangles[i].forEach((v,k)=>{const p=c.faceUVs.get(f)[k];if(coords[v])assert.ok(Math.hypot(...p.map((x,j)=>x-coords[v][j]))<1e-8);coords[v]=p;}));assert.ok(guard.simpleUVBoundary(coords,local.boundaries),'Cut boundary/holes invalid');}
+   assert.equal(seen.size,geometry.faces.length);const quality=uv.checkUVTriangles(s.packed.flatMap(c=>[...c.faceUVs.values()]),100);assert.ok(quality.valid);
+   const obj=core.meshToOBJ(uv.meshWithPreviewUV(geometry,s.packed)),objHash=hash(obj),signature=hash(JSON.stringify({seams:s.seams,charts:s.packed.map(c=>({id:c.id,faceUVs:[...c.faceUVs]}))}));
+   if(expected){assert.equal(signature,expected.signature,'Original UV affected generated result');assert.equal(objHash,expected.objHash);}else expected={signature,objHash};
+   const reload=core.parseOBJ(obj),islands=uv.buildCharts(reload,chain.extractSeamEdgesFromUV(reload));assert.equal(islands.length,s.packed.length);assert.deepEqual(reload.positions,geometry.positions);assert.deepEqual(reload.faces.map(f=>f.vertices),geometry.faces.map(f=>f.vertices));
+   const boundary=core.auditPartitionBoundary(geometry,s.packed.map(c=>[...c.faceUVs.keys()])),item={kind,islands:s.packed.length,groups:s.peel.groups.length,signature,objHash,quality,boundary,elapsedMs:s.timing.elapsedMs,reasons:s.fragmentation?.reasons,methods:s.diagnostics.reduce((r,d)=>(r[d.method]=(r[d.method]??0)+1,r),{}),sourceUVUse:0,coverage:seen.size,exportIslands:islands.length,pipeline:s.pipeline.steps.map(p=>({id:p.id,state:p.state,elapsedMs:p.elapsedMs}))};record.variants.push(item);
+   if(kind==='absent'){await writeFile(join(out,name+'-generated.obj'),obj);if(process.argv.includes('--snapshot'))await writeFile(join(out,name+'-snapshot.json'),JSON.stringify({mesh:geometry,seams:s.seams,packed:s.packed.map(c=>({...c,faceUVs:[...c.faceUVs]})),peel:s.peel,inputPolicy:s.inputPolicy,metrics:s.metrics}));}
+   console.log('PASS',name,kind,'islands',s.packed.length,'teeth',boundary.teeth,'occupancy',quality.area,'hash',objHash);
+  }
+  record.originalAbsentRandomIdentical=fast?null:true;report.models.push(record);await writeFile(join(out,'report.json'),JSON.stringify(report,null,2));
+ }
+}catch(e){report.passed=false;report.error=String(e.stack??e);await writeFile(join(out,'report.json'),JSON.stringify(report,null,2));throw e;}finally{await compiled.cleanup()}

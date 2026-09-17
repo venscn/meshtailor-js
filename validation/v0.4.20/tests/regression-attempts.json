@@ -1,0 +1,102 @@
+[
+  {
+    "name": "geometry-input",
+    "code": 0,
+    "seconds": 2.554
+  },
+  {
+    "name": "boundary-regularization",
+    "code": 0,
+    "seconds": 2.879
+  },
+  {
+    "name": "candidate-contract",
+    "code": 0,
+    "seconds": 2.938
+  },
+  {
+    "name": "geometry-topology",
+    "code": 0,
+    "seconds": 2.652
+  },
+  {
+    "name": "geometry-policy",
+    "code": 0,
+    "seconds": 4.145
+  },
+  {
+    "name": "core",
+    "code": 0,
+    "seconds": 4.242
+  },
+  {
+    "name": "parameterization",
+    "code": 0,
+    "seconds": 3.684
+  },
+  {
+    "name": "unwrap-guards",
+    "code": 0,
+    "seconds": 4.639
+  },
+  {
+    "name": "camera-policy",
+    "code": 0,
+    "seconds": 3.336
+  },
+  {
+    "name": "schedule",
+    "code": 0,
+    "seconds": 3.496
+  },
+  {
+    "name": "motion-timing",
+    "code": 0,
+    "seconds": 2.954
+  },
+  {
+    "name": "selection",
+    "code": 0,
+    "seconds": 2.841
+  },
+  {
+    "name": "uv-box",
+    "code": 0,
+    "seconds": 2.793
+  },
+  {
+    "name": "arrival-presentation",
+    "code": 0,
+    "seconds": 2.571
+  },
+  {
+    "name": "overlap-policy",
+    "code": 0,
+    "seconds": 2.907
+  },
+  {
+    "name": "compact-layout",
+    "code": 0,
+    "seconds": 3.131
+  },
+  {
+    "name": "orientation",
+    "code": 0,
+    "seconds": 3.135
+  },
+  {
+    "name": "camera-browser",
+    "code": 0,
+    "seconds": 49.415
+  },
+  {
+    "name": "arrival-browser",
+    "code": 0,
+    "seconds": 9.949
+  },
+  {
+    "name": "selection-browser",
+    "code": 1,
+    "seconds": 23.19
+  }
+]

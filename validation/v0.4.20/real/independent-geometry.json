@@ -1,0 +1,28 @@
+{
+  "engine": "GEOS/Shapely 2.1.2",
+  "toleranceUVArea": 1e-14,
+  "assets": {
+    "Corset": {
+      "sha256": "0946c8476b435f7346abddccdb482cf51f69bb11d913e2db0d3325e47e527c28",
+      "faces": 18324,
+      "candidatePairs": 107506,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "occupancy": 0.5092340187218384,
+      "positiveOrientation": true,
+      "unchanged3D": true,
+      "seconds": 0.933553757000027
+    },
+    "FlightHelmet": {
+      "sha256": "b6e707f2c55eb156da33ab48f65d32a0b57a1301e06da6e65cd8f95f167d58a2",
+      "faces": 94722,
+      "candidatePairs": 666771,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "occupancy": 0.5590457836479256,
+      "positiveOrientation": true,
+      "unchanged3D": true,
+      "seconds": 6.524062851000053
+    }
+  }
+}

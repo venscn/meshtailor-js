@@ -1,0 +1,16 @@
+{
+  "inputPolicy": "geometry-only-v1",
+  "note": "Reference outputs for inspection outside the generator; importing an OBJ into Studio regenerates UV instead of using its UV. Source raw fixtures remain in examples/verified-models.",
+  "files": [
+    {
+      "asset": "Corset",
+      "objSHA256": "0946c8476b435f7346abddccdb482cf51f69bb11d913e2db0d3325e47e527c28",
+      "compressedBytes": 543551
+    },
+    {
+      "asset": "FlightHelmet",
+      "objSHA256": "b6e707f2c55eb156da33ab48f65d32a0b57a1301e06da6e65cd8f95f167d58a2",
+      "compressedBytes": 2826899
+    }
+  ]
+}
