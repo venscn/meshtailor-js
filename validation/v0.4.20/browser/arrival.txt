@@ -1,0 +1,29 @@
+PASS Landed island stays opaque at exact UV target; successor moves
+PASS Hold equals original opaque colour, not a flash
+PASS Stationary animation progress cannot consume hold/fade wall time
+PASS Early fade is continuous at .8 animation seconds
+PASS Middle fade GPU pixel differs from both endpoints
+PASS Fade completion equals background pixels
+PASS Scrubbing backwards restores identical colour and fade phase
+PASS 4x increments sample same track in one quarter of time
+PASS Re-evaluating presentation does not change landed pose or camera
+PASS Labels use same continuous animation fade
+PASS Sequential boundary never flashes all waiting islands solid
+PASS Pause and natural finish restore context immediately
+PASS Loop and re-seek are stateless, no stale wall-time events
+PASS No shader, Javascript or WebGL errors
+PASS Landed island stays opaque at exact UV target; successor moves
+PASS Hold equals original opaque colour, not a flash
+PASS Stationary animation progress cannot consume hold/fade wall time
+PASS Early fade is continuous at .8 animation seconds
+PASS Middle fade GPU pixel differs from both endpoints
+PASS Fade completion equals background pixels
+PASS Scrubbing backwards restores identical colour and fade phase
+PASS 4x increments sample same track in one quarter of time
+PASS Re-evaluating presentation does not change landed pose or camera
+PASS Labels use same continuous animation fade
+PASS Sequential boundary never flashes all waiting islands solid
+PASS Pause and natural finish restore context immediately
+PASS Loop and re-seek are stateless, no stale wall-time events
+PASS No shader, Javascript or WebGL errors
+
