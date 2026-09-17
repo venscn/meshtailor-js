@@ -9,7 +9,7 @@ try {
  const plan=pipe.resolveLoadPipeline(mesh,pipe.DEFAULT_LOAD_PIPELINE,uv.recommendUnwrap(mesh).options);
  assert.equal(plan.target,'source-atlas');assert.equal(seed.length,1);
  // Until the feature gate lands, this reproduces the user-visible one-square bug.
- const result=uv.postprocessUV(mesh,seed,edges,'stitch',plan.config);
+ const result=uv.postprocessUV(mesh,seed,edges,'source-atlas',plan.config);
  assert.ok(result.packed.length>1,'Default source-atlas incorrectly retains the whole gear as ONE rectangular UV');
  assert.equal(result.diagnostics.filter(d=>d.method==='planar-shape').length,2,'Both planar tooth silhouettes and centre holes must survive the default entry');
  console.log('PASS default source-UV feature preservation');

@@ -4,7 +4,7 @@ export interface UVProgress {
   stage:UVStage; detail:string; current?:number; total?:number; unit?:string;
   facesDone?:number; facesTotal?:number; islandsDone?:number;
 }
-export type UVOperationStep='input'|'extract'|'parameterize'|'repair'|'structure'|'merge'|'pack'|'fill'|'correspondence'|'audit';
+export type UVOperationStep='input'|'extract'|'parameterize'|'repair'|'features'|'structure'|'merge'|'pack'|'fill'|'correspondence'|'audit';
 export interface UVWork {
   check():void; report(progress:UVProgress):void;
   /** Coarse operation boundaries, separate from nested numerical progress. */

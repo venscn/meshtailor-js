@@ -43,3 +43,5 @@ export {uvShapeChange} from './shape-preservation.js';
 export * from './human-templates.js';
 
 export * from './peel-plan.js';
+
+export * from './source-features.js';
