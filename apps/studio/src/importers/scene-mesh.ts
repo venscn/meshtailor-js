@@ -29,7 +29,7 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
     totalSourceVertices+=attribute.count*instances;
     if(totalSourceVertices>maxTriangles*3)throw new Error('Source vertex count exceeds the import budget. Remove unused vertices or split the mesh.');
     if(totalTriangles>maxTriangles)throw new Error(`Import exceeds ${maxTriangles.toLocaleString()} triangles. Split or decimate this asset first.`);
-    const uv=geometry.getAttribute('uv'),v=new THREE.Vector3();
+    const v=new THREE.Vector3();
     for(let instance=0;instance<instances;instance++){
       const transform=obj.matrixWorld.clone();
       if((obj as THREE.InstancedMesh).isInstancedMesh){const m=new THREE.Matrix4();(obj as THREE.InstancedMesh).getMatrixAt(instance,m);transform.multiply(m);}
@@ -41,7 +41,6 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
         const ids:[number,number,number]=index?[index.getX(i),index.getX(i+1),index.getX(i+2)]:[i,i+1,i+2];
         // A negative world scale reverses triangle winding, including corner UV order.
         if(mirrored)[ids[1],ids[2]]=[ids[2],ids[1]];
-        const corner=(j:number):Vec2|null=>uv?[uv.getX(j),uv.getY(j)]:null;
         // Material groups are in index-buffer coordinates, before mirrored winding.
         const group=geometry.groups.find(g=>i>=g.start&&i<g.start+g.count);
         const material=Array.isArray(mesh.material)?mesh.material[group?.materialIndex??0]:mesh.material;
@@ -49,7 +48,7 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
         if(material&&!materialIds.has(material))materialIds.set(material,`material:${materialIds.size}`);
         const known=!!domain?.id||!!material?.name;
         if(!known)unknownDomains=true;
-        faces.push({vertices:ids,uvs:[corner(ids[0]),corner(ids[1]),corner(ids[2])],
+        faces.push({vertices:ids,
           uvSpace:domain?.id||(known&&material?materialIds.get(material)!:`object:${parts.length}`),
           uvSpaceName:domain?.name||(known&&material?material.name:`${obj.name||'Mesh'} · 材质未知`),
           sourcePart:`object:${parts.length}`});
@@ -59,7 +58,7 @@ export function sceneToMesh(root: THREE.Object3D, name: string, options: SceneIm
   });
   if(skinned)warnings.push(`${skinned} skinned mesh(es) imported at the loaded initial pose. Animation playback is not part of this import.`);
   const result=assembleMeshParts(parts,name,{weld:'boundary',...options});
-  if(unknownDomains)warnings.push('Some material identities are unavailable. Their UV views are conservatively separated by source object; this is not a recovered original atlas. Old geometry-only caches should be downloaded again.');
+  if(unknownDomains)warnings.push('Some material identities are unavailable. Object identity is retained as metadata. Original UV attributes are deliberately ignored.');
   result.report.warnings.push(...warnings);
   return result;
 }

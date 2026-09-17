@@ -1,5 +1,6 @@
 /** Small format helpers shared by browser imports, offline downloads and tests.
- * Geometry-only mode never rewrites accessors, transforms, UVs, skins or morphs.
+ * Geometry-only import drops TEXCOORD/TANGENT attributes before the renderer
+ * parses them; transforms, position/index accessors, skins and morphs survive.
  * It removes material/image references so missing textures cannot block a seam study.
  */
 export interface GLTFDocument {
@@ -23,7 +24,9 @@ export function geometryOnlyGLTF(input: GLTFDocument): GLTFDocument {
   }));
   for (const key of ['textures','images','samplers']) delete doc[key];
   for (const mesh of doc.meshes ?? []) for (const p of mesh.primitives) {
-    // Keep the original material index pointing to the lightweight stub.
+    const attributes=p.attributes as Record<string,number>|undefined;
+    if(attributes)for(const key of Object.keys(attributes))if(key.startsWith('TEXCOORD_')||key==='TANGENT')delete attributes[key];
+    // Keep the material index, never texture-coordinate inputs.
     if (p.extensions) for (const key of Object.keys(p.extensions)) if (visual(key)) delete p.extensions[key];
   }
   for (const key of ['extensionsUsed','extensionsRequired'] as const) if(doc[key]) doc[key] = doc[key]!.filter(n => !visual(n));

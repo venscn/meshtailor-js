@@ -11,6 +11,7 @@
     "@meshtailor/chaining-seams": "*",
     "@meshtailor/runtime": "*",
     "@meshtailor/model": "*",
-    "tsx": "^4.20.5"
+    "tsx": "^4.20.5",
+    "@meshtailor/uv": "*"
   }
 }
