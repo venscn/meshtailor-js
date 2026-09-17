@@ -1,15 +1,12 @@
 import { makeCube, type MeshData } from '@meshtailor/mesh-core';
 import { generateGeometricSeams, buildGenerationFrames } from '@meshtailor/runtime';
-import { buildCharts, planarPackPreview, meshWithPreviewUV } from '@meshtailor/uv';
 /** Small deterministic, genuinely six-island demo. No external asset or model. */
 export function makeUnfoldDemo(){
-  const original=makeCube();
-  // A teaching fixture with a promised six-panel layout must not inherit the
-  // production auto-segmentation policy; cube dihedrals define its six sides.
-  const result=generateGeometricSeams(original,{strategy:'legacy',structuralRings:0});
-  const packed=planarPackPreview(original,buildCharts(original,result.seamEdges));
-  const mesh=meshWithPreviewUV(original,packed);mesh.name='Six-island correspondence cube';
-  return {mesh,edges:result.seamEdges,chains:result.chains,frames:buildGenerationFrames(mesh,result.chains)};
+  // No prescribed UV or legacy baseline. The same geometry generator recognizes
+  // six area-significant coplanar sides, even though each side has only two faces.
+  const mesh=makeCube();for(const f of mesh.faces){delete f.uvs;delete f.uvIndices;}
+  mesh.name='Geometry-only cube';
+  return {mesh,edges:new Set<string>(),chains:[] as ReturnType<typeof generateGeometricSeams>['chains'],frames:[] as ReturnType<typeof buildGenerationFrames>};
 }
 
 /** Three genuinely bent, developable ribbons. Unlike the cube's already-flat

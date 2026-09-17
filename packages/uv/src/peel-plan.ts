@@ -30,7 +30,7 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   for(const comp of components){work?.check();const ca=comp.faces.reduce((s,f)=>s+frames[f]!.area,0);if(ca<total*fraction*2)continue;
     for(const root of comp.faces){if(visited[root])continue;const n=frames[root]!.normal,d=dot(n,frames[root]!.center),q=[root];visited[root]=1;let area=0;
       for(let h=0;h<q.length;h++){const i=q[h]!;area+=frames[i]!.area;if((h&511)===0)work?.check();for(const j of adj[i]!)if(!visited[j]&&dot(n,frames[j]!.normal)>1-1e-8&&mesh.faces[j]!.vertices.every(v=>Math.abs(dot(n,mesh.positions[v]!)-d)<tolerance)){visited[j]=1;q.push(j);}}
-      if(area>=Math.max(total*fraction,ca*.06)&&q.length>=4&&q.length<comp.faces.length){for(const fi of q)planes[fi]=planeCount;planeCount++;}
+      if(area>=Math.max(total*fraction,ca*.06)&&q.length>=2&&q.length<comp.faces.length){for(const fi of q)planes[fi]=planeCount;planeCount++;}
     }
   }
   const seams=new Set(cuts);

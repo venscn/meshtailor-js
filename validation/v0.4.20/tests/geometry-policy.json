@@ -1,5 +1,5 @@
 {
-  "passed": 13,
+  "passed": 14,
   "tests": [
     {
       "name": "Old local-storage source mode cannot re-enable original UV",
@@ -27,6 +27,10 @@
     },
     {
       "name": "Runtime Generate baseline produces the identical actual cut set",
+      "passed": true
+    },
+    {
+      "name": "Low-poly planar features are not discarded solely because each face has two triangles",
       "passed": true
     },
     {
