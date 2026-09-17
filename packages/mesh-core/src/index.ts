@@ -16,3 +16,5 @@ export * from './chart-regions.js';
 export * from './boundary-stitch.js';
 
 export * from './paint-panels.js';
+
+export * from "./geometry-input.js";

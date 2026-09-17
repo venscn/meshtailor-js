@@ -1,0 +1,25 @@
+{
+  "passed": 5,
+  "cases": [
+    {
+      "name": "Whitelist never reads coordinate/index/island getters",
+      "passed": true
+    },
+    {
+      "name": "No UV fields survive the input boundary",
+      "passed": true
+    },
+    {
+      "name": "Vertex and triangle identity preserved",
+      "passed": true
+    },
+    {
+      "name": "Copy is detached from source geometry",
+      "passed": true
+    },
+    {
+      "name": "Material and object metadata retained explicitly",
+      "passed": true
+    }
+  ]
+}
