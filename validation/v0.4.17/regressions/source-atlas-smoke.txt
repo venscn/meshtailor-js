@@ -1,0 +1,2 @@
+14 production source-atlas Worker checks passed: 12 raw overlaps -> 2 validated islands; original UV and mesh preserved; repack-only stays 12; invalid source locally repaired, strict rejection and timeout retained.
+

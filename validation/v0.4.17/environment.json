@@ -1,0 +1,9 @@
+{
+  "node": "v22.16.0",
+  "platform": "linux",
+  "registry": {
+    "error": "EAI_AGAIN",
+    "message": "getaddrinfo EAI_AGAIN registry.npmjs.org"
+  },
+  "fullUI": "See actual npm-install/build/typecheck logs; offline browser is not React certification"
+}

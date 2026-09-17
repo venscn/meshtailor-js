@@ -1,0 +1,65 @@
+{
+  "scope": "Real offline workbench, production Worker + WebGL, not React/Three import certification",
+  "cases": [
+    {
+      "name": "Structural template controls are enabled with deliberate double side cuts",
+      "passed": true
+    },
+    {
+      "name": "Correct Corset loads through production UV Worker and preserves all faces",
+      "passed": true,
+      "detail": {
+        "islands": 97,
+        "bottom": [
+          11,
+          93
+        ],
+        "maxAnisotropy": 1.1945409072246673
+      }
+    },
+    {
+      "name": "Changing seam controls is a draft and does not move camera/recompute UV",
+      "passed": true
+    },
+    {
+      "name": "Selecting a template panel exposes source-region and boundary correspondence without selecting a face",
+      "passed": true,
+      "detail": "结构：contour-band · 原区域 #12 → #12 / #94。上下边界：28 / 28 顶点 · 8 条真实侧缝边。"
+    },
+    {
+      "name": "Explicitly re-unwrapping BOTH selected halves can return one complete band",
+      "passed": true,
+      "detail": {
+        "islands": 96,
+        "maxAnisotropy": 1.2577439010326974
+      }
+    },
+    {
+      "name": "Explicit one-band result is reversible into two panels on real edges",
+      "passed": true
+    },
+    {
+      "name": "Only repacking preserves template metadata, cuts and chart count",
+      "passed": true
+    },
+    {
+      "name": "Animation endpoints exactly match the same final UV",
+      "passed": true
+    },
+    {
+      "name": "Gear generation retains two toothed planar faces plus structured side panels",
+      "passed": true,
+      "detail": {
+        "faces": 1536,
+        "planar": 2,
+        "islands": 6,
+        "applied": 1
+      }
+    },
+    {
+      "name": "No uncaught JavaScript or WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 10
+}

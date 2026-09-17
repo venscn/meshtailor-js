@@ -1,0 +1,13 @@
+PASS Contained actual triangle intersects
+PASS Rectangle inside a triangle intersects
+PASS No false selection of empty concavity from only bounds
+PASS Rectangle reverse direction equivalent
+PASS Thin crossing edges caught
+PASS Plain drag replaces explicit island selection
+PASS Shift adds
+PASS Alt inverts only box hits
+PASS Repeated inverse restores selection
+PASS Ctrl removes and ignores stale ids
+PASS Empty plain rectangle clears
+PASS Modifier mapping and precedence
+

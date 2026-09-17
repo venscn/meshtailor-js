@@ -1,0 +1,22 @@
+PASS empty inspection even when all islands can be in the playback queue
+PASS first triangle hit selects only its island
+PASS second hit on an explicitly selected island selects the triangle
+PASS third hit on the same triangle clears only the face
+PASS selecting another face replaces the current face
+PASS new island clears the previous face without selecting its hit face
+PASS list selection ignores ray-hit face entirely
+PASS label click on the same island clears face without toggling the island
+PASS modifier adds an island but never selects its face
+PASS face pick inside a multiselection keeps all islands
+PASS modifier deselects an island and clears triangle focus
+PASS Escape clears triangle before islands
+PASS reject unknown island
+PASS reject negative face
+PASS reject wrong owner
+PASS reject out of range
+PASS reject noninteger
+PASS reject NaN
+PASS repeated select/deselect does not mutate source state
+PASS rapid consecutive picks use sequential state, not a double-click special case
+PASS 20 cases
+

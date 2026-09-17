@@ -1,229 +1,39 @@
-# v0.4.16 验证范围
+# v0.4.17 验证范围
 
-本节是本轮结果；下文旧版本记录不计作本轮已执行测试。
+本节只统计本轮实际执行；后文旧版本记录不是本轮新认证。
 
-## 已实际通过
+## 已执行
 
-| 检查 | 结果 / 记录 |
-|---|---|
-| 动画统一时钟纯策略 | 24项，`validation/v0.4.16/arrival.json` |
-| 真实WebGL像素与倒放/拖动采样 | 28项、DPR1/2，`arrival-browser.json` |
-| 实际RAF倍速、按住进度停止、回拖、暂停恢复 | 9项，`arrival-workbench.json` |
-| 自由边界、平面孔洞/齿形、形变保护 | 12项，`paint-shape.json` |
-| 细交叠反例与接触区分 | 8项，`test:uv-sliver` |
-| 真正Worker/工作台目标切换、齿轮输出 | 6项，`paint-browser.json` |
-| 自由相机与两级选择浏览器回归 | 39项＋39项，`camera-browser.json` / `selection-browser.json` |
-| 其他核心、铰链、方向、原UV修复、刚性缝合、流程、框选及自适应填空 | 13个实际命令全部退出0，`regressions/results.json` |
-| 正确真实人台/头盔 | 92/173岛，18,324/94,722面全部保留，生产Worker和OBJ重读通过 |
-| 固定源轮廓界限 | 96/235个有效原源岛检查，最大变化1.349754/1.492194；不是对所有像素/语义的保证 |
-| 独立导出几何检查 | GEOS/Shapely，1e−14 UV²阈值，两模型正面积交叠0，源顶点/面顺序不变 |
-
-普通排布占用率（未额外填空）：人台57.5548%，头盔40.7063%。上一版同路径为66.9154%/62.4867%，新目标为保轮廓而不是最少岛或最满图。该降低已明确报告，不用多重叠放面积掩盖。
-
-本环境本次完整Worker约7.13秒 / 71.24秒；共享CPU、浏览器并发会影响它，不是独占基准或用户机器性能保证。任务总预算设置240秒，ARAP外迭代24、形变上限1.5、未开启额外填空。
-
-### 发现后已拒绝的候选
-
-第一次新ARAP候选在头盔上压扁极小面，增加各向异性拒绝门槛后重跑。后续独立检查又检出一个约1.0e−13 UV²细交叠，收紧接触容差并新增反例，再运行全部真实计算。最终通过的文件哈希见 `independent-geometry.json`。不把这些被拒绝候选计为通过，不用其OBJ替代最终交付。
-
-## 尚未通过或不在本轮范围
-
-实际 `npm install --ignore-scripts` 被25秒超时终止（124），未得到可用依赖。实际 `npm run build` 的Vite子进程退出127；`npm run typecheck`退出2，缺Node类型。记录见environment.json/build.txt/typecheck.txt。没有凭历史诊断把本轮失败一概宣称为DNS原因。
-
-通过的浏览器测试为Chromium软件WebGL、离线工作台与共享生产模块；不是完整React主入口认证。真实资产使用哈希锁定静态glTF/bin解码＋生产装配/Worker，不是通用Three.GLTFLoader或FBXLoader入口认证。没有macOS/Windows/Safari实机验证，没有人工语义识别评分、自动服装纸样认证或纹理烘焙。
-
-## 复跑
-
-```bash
-npm run test:arrival
-npm run test:arrival:browser
-npm run test:arrival:workbench
-npm run test:paint-shape
-npm run test:paint-shape:browser
-npm run test:uv-sliver
-node scripts/verified-models-smoke.mjs --models examples/verified-models --out validation/local-paint --export --snapshots --config '{"timeBudgetMs":240000}'
-node scripts/paint-reference-audit.mjs --root validation/local-paint --report validation/local-paint/reference.json
-python validation/v0.4.16/independent-geometry-check.py --root validation/local-paint
-```
-
-Python仅用于额外QA，不是工程运行依赖。最终ZIP再解压的记录将单独交付，不以打包前日志冒充。
-
----
-
-# v0.4.15 实际验证
-
-范围：UV到达展示状态、连续颜色／透明度、轮廓与编号，以及播放／拖动会话恢复。未修改UV求解、缝合、排布或运动几何。证据目录 `validation/v0.4.15/`。
-
-| 测试 | 结果 | 证据 |
-|---|---:|---|
-| 到达事件、真实秒计时、连续权重、暂停／回拖／零时长处理 | 26项通过 | `arrival-policy.json` |
-| 真实WebGL像素：亮显、渐隐两端及中点、轮廓／编号、原状态恢复 | 30项通过，DPI1/2 | `arrival-pixels.json` |
-| 实际RAF播放、真实指针拖动、松手、静止拖动等待、64×、设置 | 10项通过 | `arrival-workbench-final.json` |
-| 上下文半透明及精确恢复 | 24项通过 | `ghost-pixels.json` |
-| 播放／拖动事件生命周期 | 17项通过 | `session-browser.json` |
-| 自由相机 | 39项通过 | `camera-browser.json` |
-| 逐岛接力 | 28项通过 | `relay-browser.json` |
-| 跳过静止区间 | 28项通过 | `motion-browser.json` |
-| 两级选择／工作台 | 39项通过 | `selection-browser.json` |
-| 重叠显示真实像素 | 42项通过 | `overlap-browser.json` |
-| 自动处理流程浏览器 | 16项通过 | `pipeline-browser.json` |
-
-核心21项、铰链17项、选择20项、面积／倍速、接力、静止时间映射、运动检测、流程策略、Git工具均以退出码0结束，详见各同名log/exit。离线包从当前TS代码重新构建。新旧回归未删除恢复、相机或几何端点断言；只有“已完成即淡化”的断言被更新为到达亮显。
-
-像素测试使用实际Chromium软件WebGL和生产渲染器，仅固定显示时钟以精确读取0.8秒前后和渐隐中点；不是模拟GL。工作台测试使用实际墙钟、RAF、CDP鼠标操作，不模拟动画时钟。三角形在真实目标位置上的像素与实体参考一致；中间像素与两端均不同，最终像素与普通半透明背景一致。展示过程中源位置、当前姿态、进度、相机、选择未变化。
-
-### 明确未通过／未执行
-
-`full-build.exit=127`：实际构建停在 `vite: not found`。`full-types.exit=2`：缺少Node类型定义。`npm-registry.exit=1`：实际探测已固定React版本，DNS为`EAI_AGAIN`。
-
-修改的3份TSX语法转译通过，见 `tsx-syntax.json`，但不是全量类型检查。纯TS模块均经过严格smoke编译。未完成完整React主入口联调、Three通用导入、Safari或macOS/Windows实机认证。未重跑正确Corset/FlightHelmet的完整UV求解；它们的夹具仍原样保留，历史证据见下文。不把旧测试当作本轮新通过。
-
-最终ZIP的干净Git、文件逐字节、tag、bundle和解压复跑验证另附交付记录；下列内容为历史版本记录，不替代本节。
-
----
-
-# v0.4.14 实际验证
-
-本版记录在 `validation/v0.4.14/`。在原v0.4.13基础上修改自动执行编排、可视化配置与播放/拖动期间的全局上下文半透明，没有重写UV优化算法。具体操作见 [RELEASE-0.4.14.md](RELEASE-0.4.14.md)。
-
-## 流程与显示测试
-
-| 测试 | 本轮结果 | 证据 |
+| 测试 | 实际结果 | 文件 |
 |---|---|---|
-| 流程配置、条件分支、实际事件、取消 | 20项通过 | `pipeline-policy.json` |
-| 播放突出策略、接力末段、端点/暂停 | 14项通过 | `emphasis-policy.json` |
-| 真实浏览器配置面板和UV Worker | 16项通过 | `pipeline-browser.json` |
-| 真正WebGL像素、全局透明、原状态恢复 | 24项通过，DPR1/2 | `ghost-pixels.json` |
-| 真正播放与鼠标/键盘进度条生命周期 | 17项通过 | `session-browser.json` |
-| 原框选/面积排序/倍速 | 32项通过 | `workflow-0414.json` |
-| 自由相机 | 39项通过 | `camera-browser.json` |
-| 逐岛接力 | 28项通过 | `relay-browser.json` |
-| 静止区间跳过 | 28项通过 | `motion-browser.json` |
-| 两级选择与工作台布局 | 39项通过 | `selection-browser.json` |
-| 旧局部散点（显式备选）与早期叠层 | 18项通过 | `legacy-bubble-browser.json` |
-| 核心21、原UV Worker4、客户端11、调度22、铰链17、运动13 | 全部通过 | `core-regressions.log` |
-| Git工具自身 | 22项通过 | `extra-regressions.log` |
+| 结构模板核心 | 17 项通过：圆柱/正负锥度、单/双片、椭圆、旋转、非均匀角采样、错误轴、保护/取消及正确人台底圈 | `validation/v0.4.17/templates/report.json` |
+| 模板流程与拓扑 | 12 项通过：两条无分支边路径、端点对应上下环、选区重展、保护锁、元数据不修改旧快照、载入清理选区 | `integration/report.json` |
+| 真实离线工作台 | 10 项通过：正确人台生产 Worker、224面底圈两片→一片→两片、只重排保留结构、最终UV姿态、齿轮 | `browser/report.json` |
+| 统一动画秒 / 倍速、倒放、暂停的 WebGL 像素测试 | 28 项通过 | `arrival-browser.json` |
+| 手动相机真实浏览器操作 | 39 项通过，DPR1/2 | `camera-browser.json` |
+| 其他核心回归 | 15 个脚本均退出0：核心、参数化、铰链、到达采样、方向、队列、静止、选择、框选、载入流程、缝合、源岛修复、源atlas、精排、细交叠 | `regressions/summary.json` 与逐项日志 |
+| 正确原始模型生产 UV Worker | Corset 18,324面/97岛；FlightHelmet 94,722面/179岛。全部面保留、原输入不变、全图验证及OBJ重读通过 | `real/` |
+| 独立导出几何验证 | 两份完整OBJ的正面积交叠均为0、绕序正、顶点与面顺序未变 | `independent-geometry.json`；Shapely只作额外QA，不是运行依赖 |
 
-浏览器为Chromium软件WebGL，加载完整离线工作台与生产算法/Worker/拾取/渲染模块。鼠标按下/拖动/释放和键盘导航使用CDP实际输入；罕见pointercancel/lostcapture/blur分支注入对应DOM事件。像素测试读取真实RGBA并验证恢复后一致，不只是检查界面标签。
+所有相对路径都在 `validation/v0.4.17/` 下。浏览器在Linux Chromium软件WebGL中执行，截图是实际产物，没有将设计图或合成片称作完整真实资产。人台底圈几何来自同一正确夹具的源#12；生产算法不读取模型名称/编号进行分类。
 
-流程浏览器测试覆盖：修改草稿不运行、填空关闭真实跳过、开启后只执行一次、实际配置回传、运行中修改草稿不改变当前计划、取消保留旧结果、旧线程不覆盖新任务、缺UV的自动生成分支、原样检查缺UV显式拒绝。初始化前取消也保留一份未执行的步骤计划并标取消，不伪造已开始的步骤。
+本轮普通整理：人台约3.57秒，头盔约61.0秒；是本环境单次记录，不是用户机器性能承诺。未执行额外多轮填空，不能将普通排布占用率与旧精排数字混比。
 
-## 正确人台/头盔四条生产流程
+## 没有通过的检查
 
-唯一输入为仓库内的正确哈希夹具，不下载替代物、不读取早期错误ZIP。每次核对四文件哈希；身份、阶段事件、实际参数、导出SHA256在 `real/`。
+- `npm install --no-audit --no-fund` 在30秒上限终止，退出124，没有得到可用依赖；独立DNS检查为 `registry.npmjs.org → EAI_AGAIN`。
+- **完整 `npm run build` 退出127，`vite: not found`。**
+- **全量 `npm run typecheck` 退出2，缺少Node类型。**
+- 修改的TSX做过TypeScript语法转译，无语法错误；不代表依赖解析、完整类型检查或React运行验证通过。
+- FBX/通用glTF的Three导入器、完整React主入口、macOS/Windows/Safari实机未认证。固定真实夹具解码器不是GLTFLoader模拟替代品。
 
-| 资产 | 三角面 | 标准整理UV岛 | 自动填空UV岛 | 源网格不变 / 全图UV有效 / OBJ岛数重读 |
-|---|---:|---:|---:|---|
-| Corset | 18,324 | 79 | 79 | 均通过 |
-| FlightHelmet | 94,722 | 130 | 130 | 均通过 |
+因此可确认生产UV、对应几何和共享离线渲染路径；不能宣称所有前端入口通过端到端测试。完整命令/退出码及环境见 `build.txt`、`typecheck.txt`、`npm-install.status`、`environment.json`。
 
-配置是3秒搜索、最多3轮、210秒总任务预算。用于证明“实际执行了配置的步骤且不破坏结果”，不是求最佳占用率的基准；软件环境的时间预算会影响接受搜索的次数。标准流程的填空步骤标跳过，无精排报告；填空流程恰好进入一次fill、恰好一次correspondence，最终面积不低于本次标准结果。验证了全部面覆盖、三角UV有效、有限动画目标、原数据不变、导出重读后79/130岛。
+## 发布
 
-本轮没有将Python/Shapely独立求交当作新执行过的测试；全图检查使用生产UV检查器。先前独立几何测试记录仍在历史目录。固定静态glTF解码器只接受这两个哈希夹具，后续是生产装配/拓扑/UV；不是通用Three.GLTFLoader导入入口认证。
-
-## 截图与未验证边界
-
-`previews/pipeline.png`、`previews/playback.png` 来自真实人台，离线生产Worker自动整理＋3秒填空后截图；浏览器界面显示的是79岛，不用合成网格冒充。第二张在实际播放，其他岛半透明；截图脚本显式点击一次等价的“适配当前面片”取景，不代表相机自动跟随。`previews/capture.json` 记录实际状态。
-
-截图脚本首次因CDP两段顶层`const e`重名失败；已将评估片段限制在IIFE作用域，重新生成成功。应用不受此测试脚本绑定问题影响，原错误记录保留在`initial/preview-eval-binding.log`。
-
-**完整React/Vite主入口构建未通过。** 本次再次执行npm build退出127（`vite: not found`），全量类型检查退出2（缺少Node类型）。npm安装未取得可用依赖，独立registry请求明确退出6（DNS无法解析）。12个TSX语法转译无错误不等于全量类型检查；纯TypeScript生产模块严格编译已通过。见`full-build.log`、`full-types.log`、`registry-check.log`、`tsx-syntax.json`。
-
-没有认证macOS/Windows/Safari实机、硬件GPU帧率、FBX/通用GLTF完整入口。半透明是检查示意，不是物理透明排序；生成新UV仍需贴图烘焙。
-
-最终ZIP干净HEAD、tag、文件逐字节与重新解压测试另见外部交付验证报告；不把工作目录测试冒充最终ZIP复跑。
+基于v0.4.16真实历史小步提交，新增独立附注v0.4.17，旧tag对象与指向保留。发布前从干净HEAD构建ZIP，包含.git和恢复bundle；最终ZIP会单独重新解压检查Git、跟踪文件内容及专项回归。不要将源码测试日志等同于包装验证。
 
 ---
 
-# v0.4.13 实际验证
+# 历史验证记录（不计入本次测试）
 
-当前报告：`../validation/v0.4.13/`；新行为和预算见 [RELEASE-0.4.13.md](RELEASE-0.4.13.md)。
-
-已执行：18项面积/倍速、12项框选纯逻辑、11项焦点策略、18项自适应精排、10项受约束大块切缝、32项实际框选与倍速浏览器、18项真实GPU像素避遮挡/早期叠层检查。正确人台和头盔完整生产Worker及导出OBJ独立几何检查通过；旧相机39、接力28、静止跳过28、选择39、GPU叠层42、铰链工作台17及填空浏览器17项已复跑。
-
-默认UI是8轮/15秒搜索；真实填空性能记录为10轮/1500次/90秒，非默认性能承诺。两真实资产的大块旧接缝试验各1候选，因收益不足均回退；本轮没有真实新切缝接受样本。
-
-全量主Studio构建实际退出127（Vite缺失），类型检查退出2（Node类型缺失），registry请求退出6（DNS解析失败）。11个TSX仅语法检查无错误；这不替代完整React/Three入口测试。真实浏览器用Chromium软件WebGL与离线UI；实机硬件帧率、Safari、Windows/macOS未认证。
-
-历史回归的选择顺序断言已经按用户要求改为面积顺序，其他几何、时钟、相机断言保留；首次旧断言失败也在本版报告中记录。最终发布包复验另附外部交付报告，不能用开发工作区的结果冒充。
-
----
-
-# Validation — v0.4.12
-
-日期：2026-09-16。上一版验证原样保存在 `VALIDATION-0.4.11.md`。本文件区分真实模型、生产Worker、离线WebGL、语法检查和完整React构建，不把一个范围的成功替代另一个。
-
-## 正确模型、设置与对照
-
-沿用唯一正确上传 `meshtailor-test-models(1).zip`，SHA256 `284decae81fda986f3c291bf4bebee473221b4eabe7078c65ed44adaf9ffb563`；四份glTF/bin已在 `examples/verified-models`，每次执行哈希检查。不读取旧错误压缩包，不下载替代模型。
-
-运行：
-
-```bash
-npm run test:fill:real -- --out validation/local-fill-real
-```
-
-包装器调用原生产Worker回归：512格、4轮、8%面积步长、1.6倍面积上限、最多128次试装、90秒搜索预算，整体预算240秒，导出并重读所有面/UV。90秒是本轮测试预算，不是界面默认15秒。实际两者都在尝试预算停止，而不是用完90秒；不宣称全局最优。
-
-| 项目 | Corset | FlightHelmet |
-|---|---:|---:|
-| 面数，全部保留 | 18,324 | 94,722 |
-| UV岛：精排前→后→导出再读 | 79→79→79 | 130→130→130 |
-| 有效几何面积占用：前→后 | 66.9154%→78.5223% | 62.4867%→71.6196% |
-| 最大/最小平均面积密度比 | 1.1664 | 1.08 |
-| 全图翻面/退化/正面积重叠 | 0/0/0 | 0/0/0 |
-| 128次试装中接受 | 124 | 93 |
-| 其中共同放大预试装 | 1 | 1 |
-| 实际开始的逐岛轮数 | 2 | 1 |
-| 精排及最终验证耗时 | 21.26秒 | 38.18秒 |
-| 整条Worker流程耗时 | 25.79秒 | 80.78秒 |
-
-证据在 `validation/v0.4.12/real-refined/*-source-atlas.json`。后续补充“有效配置”报告字段没有改变几何算法；最终ZIP复验单独记录。耗时可能受同机其他任务影响，不是独占机器或特定GPU基准。回归使用真实固定格式解码器 + 生产assembleMeshParts，不等于Three.GLTFLoader入口的完整认证。
-
-## 独立导出检查
-
-`independent-geometry.json` 使用独立Shapely2.1.2/GEOS，不调用本工程UV检查器：STRtree筛选所有三角面候选对，再计算真实多边形交集。Corset 117,370对、Helmet 653,573对，最大交集面积均0；`1e-14 UV²`容差下正面积重叠对0。所有面UV正向，0.003页边距满足；顶点、面、顺序与导入后的源OBJ逐元素一致。报告绑定实际导出OBJ的SHA256。
-
-源JSON报告随工程；OBJ另在结果ZIP中，防止重复将大几何写进Git历史。可通过上面的命令重新导出，再用可选QA脚本：
-
-```bash
-python validation/v0.4.12/independent-geometry-check.py --root validation/local-fill-real
-```
-
-此独立QA需自行提供NumPy/Shapely，不是JS工程运行、测试或安装的必须依赖。
-
-## 本轮测试
-
-| 套件 | 结果/说明 | 证据 |
-|---|---|---|
-| 轮廓精排纯几何 | 23项通过；凹口44.68%→71.50%；共同密度、上限、失败回退、取消、边距、源不变 | `fill-unit.json` |
-| 新功能真实浏览器 | 17项；实际按钮、生产Worker、连续两次填空、源不变、导出/动画目标一致、相机保留、全局超时回退 | `browser/fill.json` |
-| 自由相机浏览器 | 39项 | `browser/camera.json` |
-| 逐岛接力浏览器 | 28项 | `browser/relay.json` |
-| 静止跳过浏览器 | 28项 | `browser/motion.json` |
-| 两级选择浏览器 | 39项 | `browser/selection.json` |
-| 原核心/装箱/分页/面积/源UV/合并/客户端/展开/铰链/时间线/选择/Worker | 12个独立脚本退出0 | `core/summary.txt`及各日志 |
-| Git工具自身 | 22项 | `core/git.log` |
-| 修改的TSX语法转译 | 无语法诊断；不是类型检查 | `environment/tsx-syntax-only.json` |
-
-浏览器为真实Chromium软件WebGL，含真实鼠标事件和RAF；使用离线工作台与主工程共用生产模块。截图明确标记“合成验证片”，不是人台或头盔的外观图。
-
-### 发现并修正的测试假设
-
-初轮软件渲染的DPR2曾错过很短的双岛交接采样，使旧测试 `maximum===2` 失败；201点密集几何/调度检查仍明确出现2岛且不超过2。现在真实RAF检查观察到1–2岛，并必须访问全部6岛；完整区间的最大活动数由密集采样验证。播放基准延长后预期时长同步乘以秒数。没有修改播放算法来迎合测试。
-
-选择测试曾假设120毫秒必然有新绘制帧。改为有3秒上限地等待实际进度增加，再继续检查未暂停、队列、面切换。初轮失败日志和一次调整测试时长时的预期乘数错误均保留在 `browser/initial/`，不抹去失败历史。
-
-## 未通过或不在本次范围
-
-- npm安装实际失败：`EAI_AGAIN registry.npmjs.org/@types/node`。`environment/npm-install.log`。
-- 完整 `npm run build` 退出127，`vite: not found`。
-- 完整 `npm run typecheck` 退出2，缺少Node类型定义。语法转译不能替代它。
-- 未完成完整React/Three Studio主页面、GLTFLoader/FBX入口的端到端测试；未进行macOS/Windows/Safari实机认证。
-- 不保证连续旋转全局最优、不保证填到100%、不替代裁切评审；没有实施自动二次切碎、自动贴图烘焙、多页精排或视角/语义重要性分析。
-
-本轮实现的纯JS/TS运行不需要Python。Git版本检查和最终解压逐文件比对见外部最终交付验证报告；只有从最终ZIP实际再次执行的项目才标记为最终包复验。
-
-### 与旧版实际OBJ逐面比较
-
-另对随结果包提供的v0.4.11基线OBJ与新版OBJ逐面比较（`export-before-after.json`）：全部3D顶点、三角面索引/顺序相同；每个三角形UV面积均不缩小，三条边长度变化符合同一个相似变换尺度（最大误差低于1e-6）。不是只检查增益报告数字。本轮截图见 `images/fill-0.4.12.png`，显示首次有效精排后的合成凹口测试片。

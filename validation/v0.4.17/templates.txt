@@ -1,0 +1,17 @@
+PASS Analytic cylinder, 1 panel(s)
+PASS Analytic cylinder, 2 panel(s)
+PASS Analytic cone 0.25, 1 panel(s)
+PASS Analytic cone 0.25, 2 panel(s)
+PASS Analytic cone -0.25, 1 panel(s)
+PASS Analytic cone -0.25, 2 panel(s)
+PASS Natural elliptical band uses deliberate cuts and free boundary solve
+PASS Rigidly rotated tube is recognized without world-Y or model-name assumptions
+PASS Nonuniform angular sampling still yields an ordered strip
+PASS Explicit axis inconsistent with rings is rejected
+PASS Zero-area planar ring is not classified as side wall
+PASS Invalid configuration throws
+PASS Tiny automatic region is skipped rather than split
+PASS User protected transverse edge is not removed
+PASS Cancellation propagates, not a successful fallback
+PASS Verified Corset original #12 1 panel(s)
+PASS Verified Corset original #12 2 panel(s)

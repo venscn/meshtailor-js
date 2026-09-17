@@ -1,0 +1,10 @@
+PASS Removed time is not redistributed to moving spans
+PASS Skipped stage buttons collapse to the same physical instant
+PASS Exact source and target endpoints preserved
+PASS Zero-duration queue terminates even with looping requested
+PASS Very short successor never overtakes a long predecessor
+PASS Variable/zero durations: no dead tail, gaps or >2 active (relay)
+PASS Variable/zero durations: no dead tail, gaps or >2 active (sequential)
+PASS Stage seek and reverse read the same compacted timeline
+PASS Malformed profile fails explicitly
+

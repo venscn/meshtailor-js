@@ -1,0 +1,21 @@
+PASS Default model-load flow explicitly disables fill
+PASS Complete UV chooses source-atlas
+PASS Missing UV chooses generated
+PASS Generated explicit override
+PASS Inspection never hides generated fallback
+PASS Inspection rejects mutating fill
+PASS Multi-page rejects automatic fill before solve
+PASS Disable merge hits both source and generated config
+PASS Disable repair is strict rejection, not hidden repair
+PASS Automatic fill never invokes nested packing fill or recut
+PASS Budget and rounds are actual serialized options
+PASS Corrupt storage recovers versioned defaults
+PASS Denied storage recovers defaults
+PASS Invalid version rejected
+PASS Invalid boolean rejected
+PASS NaN budgets rejected
+PASS Configuration serialized without arbitrary injected fields
+PASS No numerical progress guesses completed steps
+PASS Hard-cancel trace marks pending as not executed
+PASS Completed snapshot immutable from recorder changes
+

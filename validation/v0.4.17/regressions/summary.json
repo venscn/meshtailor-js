@@ -1,0 +1,62 @@
+[
+  {
+    "script": "core-smoke",
+    "exit": 0
+  },
+  {
+    "script": "parameterization-smoke",
+    "exit": 0
+  },
+  {
+    "script": "hinge-smoke",
+    "exit": 0
+  },
+  {
+    "script": "arrival-presentation-smoke",
+    "exit": 0
+  },
+  {
+    "script": "orientation-smoke",
+    "exit": 0
+  },
+  {
+    "script": "schedule-smoke",
+    "exit": 0
+  },
+  {
+    "script": "motion-timing-smoke",
+    "exit": 0
+  },
+  {
+    "script": "selection-smoke",
+    "exit": 0
+  },
+  {
+    "script": "uv-box-smoke",
+    "exit": 0
+  },
+  {
+    "script": "load-pipeline-smoke",
+    "exit": 0
+  },
+  {
+    "script": "chart-merge-smoke",
+    "exit": 0
+  },
+  {
+    "script": "source-repair-smoke",
+    "exit": 0
+  },
+  {
+    "script": "source-atlas-smoke",
+    "exit": 0
+  },
+  {
+    "script": "fill-refinement-smoke",
+    "exit": 0
+  },
+  {
+    "script": "uv-sliver-smoke",
+    "exit": 0
+  }
+]

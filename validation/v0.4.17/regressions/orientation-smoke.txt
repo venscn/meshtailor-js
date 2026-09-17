@@ -1,0 +1,20 @@
+PASS parity 1, atlas rotation 0.00: rigid net faces target side
+PASS parity 1, rotation 0.00: no late-stage zero-area flip
+PASS parity 1, rotation 0.00: endpoint, UV export and reverse scrubbing
+PASS parity 1, atlas rotation 1.57: rigid net faces target side
+PASS parity 1, rotation 1.57: no late-stage zero-area flip
+PASS parity 1, rotation 1.57: endpoint, UV export and reverse scrubbing
+PASS parity 1, atlas rotation 3.14: rigid net faces target side
+PASS parity 1, rotation 3.14: no late-stage zero-area flip
+PASS parity 1, rotation 3.14: endpoint, UV export and reverse scrubbing
+PASS parity -1, atlas rotation 0.00: rigid net faces target side
+PASS parity -1, rotation 0.00: no late-stage zero-area flip
+PASS parity -1, rotation 0.00: endpoint, UV export and reverse scrubbing
+PASS parity -1, atlas rotation 1.57: rigid net faces target side
+PASS parity -1, rotation 1.57: no late-stage zero-area flip
+PASS parity -1, rotation 1.57: endpoint, UV export and reverse scrubbing
+PASS parity -1, atlas rotation 3.14: rigid net faces target side
+PASS parity -1, rotation 3.14: no late-stage zero-area flip
+PASS parity -1, rotation 3.14: endpoint, UV export and reverse scrubbing
+18 orientation regressions passed.
+

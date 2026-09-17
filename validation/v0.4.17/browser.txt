@@ -1,0 +1,10 @@
+PASS Structural template controls are enabled with deliberate double side cuts
+PASS Correct Corset loads through production UV Worker and preserves all faces
+PASS Changing seam controls is a draft and does not move camera/recompute UV
+PASS Selecting a template panel exposes source-region and boundary correspondence without selecting a face
+PASS Explicitly re-unwrapping BOTH selected halves can return one complete band
+PASS Explicit one-band result is reversible into two panels on real edges
+PASS Only repacking preserves template metadata, cuts and chart count
+PASS Animation endpoints exactly match the same final UV
+PASS Gear generation retains two toothed planar faces plus structured side panels
+PASS No uncaught JavaScript or WebGL errors

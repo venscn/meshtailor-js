@@ -1,0 +1,57 @@
+{
+  "passed": 12,
+  "cases": [
+    {
+      "name": "Two side cuts are two non-branching paths connecting the original rims",
+      "passed": true,
+      "detail": {
+        "paths": 2,
+        "edges": 8
+      }
+    },
+    {
+      "name": "Explicitly selecting both existing panels can choose a single seam",
+      "passed": true
+    },
+    {
+      "name": "Incomplete single half is not force-classified as a whole tube",
+      "passed": true
+    },
+    {
+      "name": "Expired selected chart IDs are rejected",
+      "passed": true
+    },
+    {
+      "name": "Side direction changes actual mesh edges, not the camera",
+      "passed": true
+    },
+    {
+      "name": "Topology, validity and template survive arbitrary translation and uniform scaling",
+      "passed": true
+    },
+    {
+      "name": "Generic merge cannot swallow template boundaries",
+      "passed": true
+    },
+    {
+      "name": "Next snapshot carries real template identity through chart renumbering",
+      "passed": true
+    },
+    {
+      "name": "Explicit recut unlocks only selected interior cuts",
+      "passed": true
+    },
+    {
+      "name": "Repack is not a hidden re-template operation",
+      "passed": true
+    },
+    {
+      "name": "Disabling structural mode retains old paint path and does not report false application",
+      "passed": true
+    },
+    {
+      "name": "Load flow clears snapshot-specific selection but retains configured side count",
+      "passed": true
+    }
+  ]
+}
