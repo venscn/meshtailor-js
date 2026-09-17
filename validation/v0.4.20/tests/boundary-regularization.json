@@ -1,0 +1,38 @@
+{
+  "passed": 6,
+  "cases": [
+    {
+      "name": "Graph cut shortens sawtooth boundary without changing geometry",
+      "passed": true,
+      "detail": {
+        "beforeLength": 3.839351584680302,
+        "afterLength": 1,
+        "beforeTeeth": 18,
+        "afterTeeth": 0,
+        "movedFaces": 72,
+        "accepted": true,
+        "reason": "length-crease-mincut"
+      }
+    },
+    {
+      "name": "Every triangle still belongs to exactly one connected group",
+      "passed": true
+    },
+    {
+      "name": "Hard seam locks cannot be moved",
+      "passed": true
+    },
+    {
+      "name": "No coordinate/index properties from source UV are read",
+      "passed": true
+    },
+    {
+      "name": "Cancelled graph cut stops promptly",
+      "passed": true
+    },
+    {
+      "name": "Renaming and uniform scaling do not alter the cut",
+      "passed": true
+    }
+  ]
+}

@@ -18,3 +18,5 @@ export * from './boundary-stitch.js';
 export * from './paint-panels.js';
 
 export * from "./geometry-input.js";
+
+export * from "./boundary-regularization.js";
