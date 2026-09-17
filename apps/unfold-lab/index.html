@@ -105,7 +105,10 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <p id="fill-summary" role="status"></p><small id="fill-shapes"></small>
 </details>
 <details open><summary>面积与空间邻居</summary>
-<label>局部修复无效原 UV<input id="source-repair" type="checkbox" checked></label><small>只重做含内部重叠/混合翻面/退化的原岛；其余形状保留，原输入不变。</small><p id="repair-summary" role="status"></p>
+<label>检查原 UV 主要轮廓与孔洞<input id="source-features" aria-label="Repair source feature conflicts" type="checkbox" checked></label>
+<label>平面特征比例变化阈值<input id="source-feature-tolerance" type="number" min="1.01" max="4" step=".05" value="1.15"></label>
+<small>有效原 UV 也要检查可辨识性；只重展丢失主要平面轮廓/孔洞的原岛。原样检查和只重排不执行此操作。</small><p id="features-summary" role="status" data-testid="source-feature-report"></p>
+<label>局部修复无效原 UV<input id="source-repair" type="checkbox" checked></label><small>只重做含内部重叠/混合翻面/退化的原岛；其余仍须通过轮廓检查，原输入不变。</small><p id="repair-summary" role="status"></p>
 <label>允许保留形状缝合<input id="reuse-uv-shape" type="checkbox" checked></label>
 <label>整理时尝试缝合<input id="source-merge" type="checkbox" checked></label>
 <label>放置顺序<select id="packing-order"><option value="area">3D 面积由大到小</option><option value="legacy">旧长边 / 包围盒策略</option></select></label>

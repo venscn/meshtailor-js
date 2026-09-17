@@ -46,6 +46,7 @@ export function pipelineSteps(target:PipelineTarget,config:Partial<UnwrapOptions
     ['extract','提取原 UV 岛 · 审计原坐标',source,'本次不读取原 UV'],
     ['parameterize',config.initialSegmentation==='hierarchical'?'空间分组 → 组内开缝 → 自由边界剥展':'连通分区 · 参数化与必要补切',target==='generated','沿用现有 UV 岛'],
     ['repair',config.sourceRepairPolicy==='reject'?'检查现有岛（局部修复关闭）':'验证现有岛 · 局部修复无效 UV', ['source-atlas','stitch','repack','templates'].includes(target),'本次不修复原岛'],
+    ['features','原 UV 可辨识性 · 主要轮廓与孔洞检查',target==='source-atlas'&&config.sourceFeaturePolicy!=='preserve'&&(config.uvObjective??'paint')==='paint'&&config.autoCut!==false&&(config.method??'auto')==='auto','保留原形模式 / 本次不是源 UV 整理'],
     ['structure','结构模板 · 先规划侧缝再展平',['source-atlas','stitch','templates'].includes(target)&&config.structureTemplates!==false&&(config.uvObjective??'paint')==='paint'&&config.autoCut!==false&&(config.method??'auto')==='auto','结构模板关闭或本次仅重排/原样检查'],
     ['merge','尝试共享边缝合',target==='stitch'||target==='source-atlas'&&config.sourceAtlasMerge!==false||target==='generated'&&config.postMerge===true,'已禁用或本次不适用'],
     ['pack','按 3D 面积归一 · 大岛优先排布',organized&&target!=='fill','保持当前坐标 / 面积'],

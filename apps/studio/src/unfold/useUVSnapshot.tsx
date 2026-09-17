@@ -29,7 +29,7 @@ export function useUVSnapshot(mesh:MeshData,edges:Set<string>,target:UVTarget,co
     const clock=setInterval(()=>{if(!disposed&&!done)setState(previous=>previous?{...previous,elapsedMs:performance.now()-start}:previous);},500);
     const timer=setTimeout(()=>{
       if(disposed||done)return;
-      job=startUVJob({mesh,edges:[...edges],target,config,seedCharts,seedPeel:seedCharts&&backup?.packed===seedCharts?backup.peel:undefined,seedHuman:seedCharts&&backup?.packed===seedCharts?backup.human:undefined,pipeline},{
+      job=startUVJob({mesh,edges:[...edges],target,config,seedCharts,seedFeatures:seedCharts&&backup?.packed===seedCharts?backup.features:undefined,seedPeel:seedCharts&&backup?.packed===seedCharts?backup.peel:undefined,seedHuman:seedCharts&&backup?.packed===seedCharts?backup.human:undefined,pipeline},{
         createWorker:()=>new Worker(new URL('../workers/uv.worker.ts',import.meta.url),{type:'module'}),
         onProgress:progress=>{if(!disposed&&!done)setState({...identity,snapshot:backup,error:null,phase:'running',progress,elapsedMs:performance.now()-start});}
       });

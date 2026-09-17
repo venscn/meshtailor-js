@@ -14,8 +14,9 @@ import {rawChartsFromPreview,mergeAdjacentCharts,type MergeReport} from './chart
 import {packConnectedAtlas} from './atlas-pages.js';
 import {recommendUnwrap,type UnwrapOptions,type ChartDiagnostic} from './unwrap.js';
 import type {UVWork} from './work.js';
-/** Explicit destructive-to-UV (not source geometry) post-operation on a captured
- * snapshot. This never silently substitutes a fresh baseline segmentation. */
+/** Explicit source organization and post-edit operations. 'source-atlas' may
+ * repair feature conflicts; 'repack' and 'stitch' never silently substitute
+ * that regrouping for the requested operation. Source geometry is immutable. */
 export function postprocessUV(input:MeshData,seed:readonly PackedChart[],seams:ReadonlySet<string>,operation:'stitch'|'repack'|'templates'|'source-atlas',options:Partial<UnwrapOptions>={},work?:UVWork){
   const isSource=operation==='source-atlas';
   if(isSource)operation=options.sourceAtlasMerge===false?(options.structureTemplates===false?'repack':'templates'):'stitch';
@@ -53,10 +54,10 @@ export function postprocessUV(input:MeshData,seed:readonly PackedChart[],seams:R
   remapHumanReport(human,raw);
   if(features)features=carrySourceFeatures(features,raw);
   work?.step?.('pack');
-  const atlas=packConnectedAtlas(mesh,raw,opts,work),warnings=[operation==='templates'?'按结构模板重展当前区域；未匹配区域保留，未运行泛化邻岛缝合。':operation==='stitch'?`后处理：${merge!.before} → ${merge!.after} 个岛；接受 ${merge!.accepted} 次缝合，移除 ${merge!.removedSeams.length} 条接缝。拒绝原因 ${JSON.stringify(merge!.reasons)}。`:'只重排现有岛：岛数量和裁切不变；消除岛与岛之间的叠放，不修复岛内部折叠。','这是新 UV atlas，不保留原贴图布局；跨材质合并/分页后需要重新烘焙贴图。原始网格与源 UV 未被修改。'];
+  const atlas=packConnectedAtlas(mesh,raw,opts,work),warnings=[operation==='templates'?'按结构模板重展当前区域；未匹配区域保留，未运行泛化邻岛缝合。':operation==='stitch'?`后处理：${merge!.before} → ${merge!.after} 个岛；接受 ${merge!.accepted} 次缝合，移除 ${merge!.removedSeams.length} 条接缝。拒绝原因 ${JSON.stringify(merge!.reasons)}。`:isSource?'原 UV 整理的排布阶段：使用已完成有效性 / 轮廓检查的岛，不运行邻岛缝合。':'只重排现有岛：岛数量和裁切不变；消除岛与岛之间的叠放，不修复岛内部折叠。','这是新 UV atlas，不保留原贴图布局；跨材质合并/分页后需要重新烘焙贴图。原始网格与源 UV 未被修改。'];
   if(features)warnings.unshift(`原UV可辨识性检查：${features.detectedPanels} 个主要平面特征；重展 ${features.changedCharts} 个冲突原岛。齿形/凹口/孔洞按实际几何保留，不因原 UV 无重叠而跳过。`);
   if(human)warnings.unshift(`结构模板：识别并应用 ${human.applied} 个区域；${human.before} → ${human.after} 片（缝合前）。侧缝保持，未匹配区域沿用保形结果。`);
-  if(repair?.repaired)warnings.unshift(`从原3D局部修复 ${repair.repaired} 个无效原UV岛（${repair.islands.map(i=>'#'+(i.id+1)).join('、')}）；其余 ${repair.preserved} 岛未重新求解，所有面保留。新UV需要重烘焙。`);
+  if(repair?.repaired)warnings.unshift(`从原3D局部修复 ${repair.repaired} 个无效原UV岛（${repair.islands.map(i=>'#'+(i.id+1)).join('、')}）；其余 ${repair.preserved} 岛先通过有效性检查，后续仍可接受轮廓检查与验证缝合；所有面保留。新UV需要重烘焙。`);
   if(merge?.budgetExhausted)warnings.push('缝合达到尝试预算；剩余岛不代表几何上不可合并。可提高预算或对当前结果再次执行后处理。');
   if(atlas.pageReport?.mode==='single')warnings.push('新 atlas 使用统一单页，不再沿用源材质作为 UV 域；未相连的几何仍是独立岛。原材质对应关系保存在页面诊断中。');
   else if(atlas.pageReport)warnings.push(`按原几何连接关系分配 ${atlas.pageReport.actual} 页；同页共享边长保留 ${(atlas.pageReport.retainedSharedBoundaryRatio*100).toFixed(1)}%。页数是软目标；不跨真实断开的组件分组。`);
