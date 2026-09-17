@@ -1,3 +1,5 @@
+import {simpleUVBoundary} from './boundary-guard.js';
+import {incompleteCholesky} from './sparse-preconditioner.js';
 import {projectionSeeds} from './projection-seeds.js';
 import {planarShapeCandidate,freeBoundaryARAP} from './free-boundary.js';
 import { uvProgress, rethrowUVStop, type UVWork } from './work.js';
@@ -5,7 +7,7 @@ import type { Vec2,Vec3 } from '@meshtailor/mesh-core';
 import type { CutMesh } from './cut-topology.js';
 import { checkUVTriangles, type UVQuality, signedArea2 } from './uv-quality.js';
 export interface SolverOptions { projectionSeed?:boolean; iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte'; uvObjective?:'paint'|'compact'; paintIterations?:number }
-export interface Parameterization { uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'|'projected-free'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
+export interface Parameterization { boundaryValid?:boolean; uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'|'projected-free'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
 export function triangleArea(a:Vec3,b:Vec3,c:Vec3):number{const u=b.map((x,i)=>x-a[i]!),v=c.map((x,i)=>x-a[i]!);return Math.hypot(u[1]!*v[2]!-u[2]!*v[1]!,u[2]!*v[0]!-u[0]!*v[2]!,u[0]!*v[1]!-u[1]!*v[0]!)*.5;}
 type Row={ids:number[];values:number[]};
 /** Matrix-free, diagonally preconditioned conjugate gradients on A^T A.
@@ -34,22 +36,28 @@ function leastSquares(rows:Row[],n:number,fixed:Map<number,number>,opts:SolverOp
       for(let j=start;j<end;j++)out[columns[j]!]+=values[j]!*sum;
     }
   };
-  const result=cg(b,diag,apply,opts,work);
+  // An IC(0) preconditioner reduces false numerical failures on long thin parts.
+  const matrix:Map<number,number>[]=Array.from({length:count},()=>new Map());
+  for(const row of rRows)for(let a=0;a<row.ids.length;a++)for(let b=0;b<row.ids.length;b++){
+    const i=row.ids[a]!,j=row.ids[b]!;matrix[i]!.set(j,(matrix[i]!.get(j)??0)+row.values[a]!*row.values[b]!);
+  }
+  const result=cg(b,diag,apply,opts,work,incompleteCholesky(matrix));
   const full=Float64Array.from({length:n},(_,i)=>fixed.get(i)??result.x[free[i]!]!);
   return {...result,x:full};
 }
-function cg(b:Float64Array,diag:Float64Array,apply:(x:Float64Array,out:Float64Array)=>void,opts:SolverOptions,work?:UVWork){
+function cg(b:Float64Array,diag:Float64Array,apply:(x:Float64Array,out:Float64Array)=>void,opts:SolverOptions,work?:UVWork,precondition?: (r:Float64Array,z:Float64Array)=>void){
   const n=b.length,x=new Float64Array(n),r=b.slice(),z=new Float64Array(n),p=new Float64Array(n),ap=new Float64Array(n);
   const dot=(a:Float64Array,b:Float64Array)=>{let s=0;for(let i=0;i<n;i++)s+=a[i]!*b[i]!;return s;};
   const bnorm=Math.sqrt(dot(b,b));if(bnorm===0)return{x,iterations:0,residual:0};
-  for(let i=0;i<n;i++){z[i]=r[i]!/Math.max(diag[i]!,1e-30);p[i]=z[i]!;}
+  const pre=()=>{if(precondition)precondition(r,z);else for(let i=0;i<n;i++)z[i]=r[i]!/Math.max(diag[i]!,1e-30);};
+  pre();p.set(z);
   let rz=dot(r,z),residual=1,iterations=0;
   for(;iterations<opts.iterations;iterations++){
     if(iterations%64===0)uvProgress(work,{stage:'parameterize',detail:'迭代求解线性系统',current:iterations,total:opts.iterations,unit:'迭代上限'});
     apply(p,ap);const den=dot(p,ap);if(!(den>0)||!Number.isFinite(den))break;
     const alpha=rz/den;for(let i=0;i<n;i++){x[i]+=alpha*p[i]!;r[i]-=alpha*ap[i]!;}
     residual=Math.sqrt(dot(r,r))/bnorm;if(residual<opts.tolerance){iterations++;break;}
-    for(let i=0;i<n;i++)z[i]=r[i]!/Math.max(diag[i]!,1e-30);
+    pre();
     const next=dot(r,z),beta=next/rz;for(let i=0;i<n;i++)p[i]=z[i]!+beta*p[i]!;rz=next;
   }
   return{x,iterations,residual};
@@ -100,7 +108,9 @@ export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={}
     if(signs<0)r.uv.forEach(p=>p[1]*=-1);
     uvProgress(work,{stage:'quality',detail:'检查翻面、退化与正面积重叠'});
     const quality=checkUVTriangles(mesh.triangles.map(t=>t.map(v=>r.uv[v]!) as [Vec2,Vec2,Vec2]),100,work);
-    return {...r,method,quality,...(reason?{fallbackReason:reason}:{})};
+    const boundaryValid=simpleUVBoundary(r.uv,mesh.boundaries,work);
+    quality.valid=quality.valid&&boundaryValid;
+    return {...r,method,quality,boundaryValid,...(reason?{fallbackReason:reason}:{})};
   };
   if(!['paint','compact'].includes(opts.uvObjective!))throw Error('Invalid UV objective.');
   if(!Number.isInteger(opts.paintIterations)||opts.paintIterations!<1||opts.paintIterations!>100)throw Error('Paint iterations must be 1..100.');
@@ -121,7 +131,10 @@ export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={}
       }catch(e){rethrowUVStop(e);}
     }
   }
-  if(!mesh.disk)throw new Error(`UV chart is not a disk: Euler=${mesh.euler}, boundaries=${mesh.boundaryLoops}`);
+  // LSCM equations do not require an outer circle or a topological disk.
+  // A genus-zero manifold with holes may have a valid multiply-connected map.
+  if(!mesh.manifold||mesh.boundaryLoops<1||mesh.euler!==2-mesh.boundaryLoops)
+    throw new Error(`UV topology requires a cut: Euler=${mesh.euler}, boundaries=${mesh.boundaryLoops}`);
   if(opts.method!=='tutte'){
     try{const r=finish(lscm(mesh,opts,work),'lscm');if(r.quality.valid&&r.residual<1e-6){
       if(!opts.projectionSeed||areaNotCollapsed(mesh,r.uv))return r;
@@ -134,6 +147,7 @@ export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={}
     catch(e){rethrowUVStop(e);reason=String(e);}
     if(opts.method==='lscm')throw new Error(reason);
   }
+  if(!mesh.disk)throw Error('Multi-boundary candidate rejected; try a deliberate connecting slit. '+reason);
   const seed=finish(tutte(mesh,opts,work),'tutte');
   if(!seed.quality.valid||seed.residual>1e-6)throw new Error(`Tutte seed invalid; ${reason}; residual=${seed.residual}`);
   // Circular embedding is only a numerical initialization in paint mode.

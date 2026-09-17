@@ -8,6 +8,7 @@ export interface CutMesh {
   boundary: number[];
   boundaries: number[][];
   disk: boolean;
+  manifold: boolean;
   euler: number;
   boundaryLoops: number;
 }
@@ -59,5 +60,5 @@ export function cutLocalMesh(mesh: MeshData, faces: readonly number[], seams: Re
     for(let h=0;h<queue.length;h++){const fi=queue[h]!;if(reached.has(fi))continue;reached.add(fi);for(const a of triangles[fi]!)if(a!==v)for(const f of neighbors.get(a)??[])if(!reached.has(f))queue.push(f);}
     if(reached.size!==fan.length)valid=false;
   }
-  return {positions,triangles,sourceFaces:[...faces],sourceVertices,boundary:loops[0]??[],boundaries:loops,disk:valid&&euler===1&&loops.length===1,boundaryLoops:loops.length,euler};
+  return {positions,triangles,sourceFaces:[...faces],sourceVertices,boundary:loops[0]??[],boundaries:loops,manifold:valid,disk:valid&&euler===1&&loops.length===1,boundaryLoops:loops.length,euler};
 }

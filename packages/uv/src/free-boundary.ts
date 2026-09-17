@@ -33,6 +33,7 @@ type Element={t:[number,number,number];gx:number[];gy:number[];area:number};
  * global triangle overlaps are independently checked by parameterizeChart.
  * This is an independent TS implementation, not libigl bindings. */
 export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,linearIterations:number,work?:UVWork){
+  if(!simpleUVBoundary(seed,mesh.boundaries,work))throw Error('ARAP seed violates cut-boundary contract.');
   const n=mesh.positions.length,ps=mesh.positions,min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
   for(const p of ps)for(let k=0;k<3;k++){min[k]=Math.min(min[k]!,p[k]!);max[k]=Math.max(max[k]!,p[k]!);}
   const span=Math.max(...max.map((x,i)=>x-min[i]!)),elements:Element[]=[];let totalArea=0,uvArea=0;
