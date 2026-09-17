@@ -1,3 +1,37 @@
+# v0.4.19 · 本轮实际验证范围
+
+本节只计入本次执行。历史记录在后面，不能当作本次通过。最终 ZIP 的解压验收另附下载校验报告。
+
+| 检查 | 结果 | 当前记录 |
+|---|---|---|
+| 严格核心/Worker TypeScript 编译 | 通过；不包含完整 React TSX 依赖树 | 新/旧 smoke 每次实际编译 |
+| 新 source-atlas 特征回归 | 20项通过；Low/Medium/High齿轮、任意改名/旋转/缩放、非齿轮、独立孔板、正确矩形、默认/Extract/手动重排区别、全覆盖、OBJ重读 | `validation/v0.4.19/source-features/report.json` |
+| 实际默认流程的浏览器测试 | 11项通过；生产Worker、默认载入source-atlas、原样检查、Extract、保留组边界的缝合/重排/填空、选择和相机 | `validation/v0.4.19/browser/report.json` |
+| 旧算法/行为回归 | 23个专项命令全部退出0；包括通用分组、结构模板、源修复、保形、面积保护、选择、框选、队列/倍速、到达状态 | `validation/v0.4.19/regressions/index.json`及各stdout |
+| 上项内的真实浏览器回归 | 流程16项、手动相机39项、动画时间轴像素28项、先岛后面与交互39项通过；不是另外重复累计的测试 | 对应`*-browser.txt` |
+| 正确Corset/FlightHelmet | source-atlas开启/关闭本检查各运行一次；两个模型全部源面保留、有效性和导出重读通过，输出逐字节相同 | `validation/v0.4.19/real/summary.json` |
+| 独立GEOS/Shapely检查实际OBJ | 低齿轮、人台、头盔的正面积重叠均0；源3D与面序保持 | `source-features/independent-obj.json`、`real/independent-obj.json` |
+| Git维护工具单测 | 22项通过 | `regressions/git-tests.txt` |
+| 全部13个TSX的语法转译 | 通过；不是全量类型检查 | `environment/tsx-syntax.json` |
+
+截图为 v0.4.19 实际离线工作台，使用默认source-atlas而不是生成路径；新默认齿轮6岛，其中两个平面逐边比例不变且保留中心孔。截图不是主React界面或设计稿。
+
+## 两份真实模型的范围
+
+只使用 `examples/verified-models` 中正确哈希锁定的 glTF/bin。此次运行source-atlas（不是通用剥展预设），300秒Worker预算：人台96岛、头盔177岛；主要平面候选3/4个，本检查重展0岛。两种开关的导出文件逐字节一致；不能将此结果混同于之前通用剥展的93/176岛。
+
+独立检查阈值为1e-14 UV²，检查所有实际导出三角形的包围盒相交候选。轮廓回归还逐边验证两个齿面是3D平面的相似映射、孔边界数正确，不仅依赖整体UV有效性分数。Python仅作为额外QA，不是JS工程依赖。
+
+## 明确没有通过/没有认证的项目
+
+- `npm install --ignore-scripts --no-audit --no-fund` 本轮等待超过35秒未得到依赖，被超时终止。未据此宣称已完成安装，也不重复引用旧DNS日志冒充本轮结果。
+- 实际 `npm run build` 退出127：`vite: not found`。日志：`environment/full-build-final.txt`。
+- 实际 `npm run typecheck` 退出2：缺少 `node` 类型定义。日志：`environment/full-typecheck-final.txt`。
+- 完整 React/Vite 主入口、通用 Three glTF/FBX 加载器、macOS/Windows/Safari和硬件GPU未认证。离线真实Worker/WebGL测试不是这些入口的替代认证。
+- 不声称任意曲面均具备人类语义可识别性，不声称填空/岛数同时更优。本次针对默认源UV的主要平面特征被错误保留这一缺口。
+
+## 历史验证记录（不计入本轮）
+
 > **重新打包提示**：下文为原版本记录，原 ZIP 实际在写入中断，不能据此认定原包已经通过最终解压验收。本次校验、精简后的结果路径和 Git 恢复边界以根目录 `REPACK-NOTES.md` 为准。
 
 # v0.4.18 · 实际验证范围
