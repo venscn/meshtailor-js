@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.16",
+  "version": "0.4.17",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -102,7 +102,10 @@
     "test:arrival:workbench": "node scripts/arrival-workbench-smoke.mjs",
     "test:paint-shape": "node scripts/paint-shape-smoke.mjs",
     "test:paint-shape:browser": "node scripts/paint-workbench-smoke.mjs",
-    "test:uv-sliver": "node scripts/uv-sliver-smoke.mjs"
+    "test:uv-sliver": "node scripts/uv-sliver-smoke.mjs",
+    "test:human-uv": "node scripts/human-template-smoke.mjs",
+    "test:human-uv:integration": "node scripts/human-template-integration-smoke.mjs",
+    "test:human-uv:browser": "node scripts/human-template-browser-smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
