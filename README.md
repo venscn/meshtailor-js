@@ -1,3 +1,5 @@
+> **v0.4.18 重打包版**：包完整性、减小体积及 Git 恢复说明见 [REPACK-NOTES.md](REPACK-NOTES.md)。应用入口见 [START_HERE.md](START_HERE.md)。
+
 # MeshTailor-JS 0.4.18
 
 新增 **真正的边铰链展开演示 + 拓扑 UV 参数化 + 面积感知排布**。不再把曲面直接投影并用顶点插值假装折开。原有遍历、复杂网格、FBX / GLB 导入入口继续保留；这是独立 JS / TypeScript 研究工程，不是官方 MeshTailor 软件。

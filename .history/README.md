@@ -1,34 +1,21 @@
-# Git 历史与恢复
+# Git 历史
 
-## v0.4.8 完整仓库包
-
-本包直接包含 `.git/`。解压后在项目根目录运行：
+本次压缩包直接包含 `.git/`，解压后无需 `git init` 或恢复 bundle。
 
 ```bash
 git status
-git log --graph --oneline --decorate --all
-git tag --list 'v*' --sort=version:refname
+git log --graph --decorate --oneline --all
+git tag --list
+npm run git:check
 ```
 
-不要重新 `git init`。`.git` 是隐藏目录，Finder / 文件资源管理器默认可能不显示它。
+本包保留最后完整 v0.4.17 包中的真实历史和全部旧 tag。损坏的 v0.4.18 包未写到 Git 数据，本轮只能恢复其完整源码，不能恢复当时缺失的开发提交；这一区别见根目录 `REPACK-NOTES.md`。当前为 `recovery/v0.4.18-repack` 分支及 `repack-0.4.18-1` 附注 tag。
 
-HEAD 位于 `master`，对应新的独立附注 tag `v0.4.8`。旧版 tag 没有移动；上一次维护交接背景保留在 `docs/GIT_HANDOFF.md`，本版功能见 `docs/RELEASE-0.4.8.md`。
-
-## bundle 备份
-
-`.history/repository.bundle` 含与本包相同 HEAD 的完整可达历史、分支和发布 tag。它是打包时生成的忽略文件，不提交到 Git，避免把历史嵌入历史。
-
-如果 `.git/` 在传输或解压中被丢弃，可以从解压后的项目根目录恢复到一个新目录：
+为避免完整历史重复一遍，本包**不再附 repository.bundle**。需要额外备份时可以自行生成：
 
 ```bash
-git clone .history/repository.bundle ../meshtailor-js-restored
-cd ../meshtailor-js-restored
-git remote remove origin
-git log --graph --oneline --decorate --all
+git bundle create ../meshtailor-js-backup.bundle --all
+git bundle verify ../meshtailor-js-backup.bundle
 ```
 
-这里移除的 `origin` 是刚从本地 bundle 克隆时产生的本地文件路径；不要对已经有用户远端的仓库照搬这条命令。
-
-早期 v0.1.1 / v0.2.0 源码发布 ZIP 只附 bundle，没有直接附 `.git/`，所以需要先恢复。它们的原始内容和 tag 均未改写。
-
-打包仓库没有远端地址、私人签名密钥或凭据，也没有为用户设置个人提交身份。日后提交请使用自己的 Git 身份配置。
+不要用本包覆盖另一个已有用户提交的仓库；不要移动原发布 tag。本包无远端配置，也不包含凭据。

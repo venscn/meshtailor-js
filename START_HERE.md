@@ -1,5 +1,7 @@
 # MeshTailor-JS v0.4.18 · 从这里开始
 
+> 本包为完整性修复交接版 `repack-0.4.18-1`，源码仍为 0.4.18。先看 `REPACK-NOTES.md` 了解清理内容、Git 恢复边界及本轮校验。
+
 ## 使用这次的通用方法
 
 进入 **模型 → 载入模型 · 自动处理流程 → 通用分组剥展**，再加载模型；已加载的模型点击 **按此流程重跑当前模型**。该预设会执行空间分组、组内开缝和自由边界展开，然后填空。分组与 UV 岛分别计数。
@@ -12,9 +14,9 @@
 
 打开根目录 `unfold-lab.html`，或运行 `node scripts/serve-unfold-lab.mjs` 后访问命令输出地址。实验页支持 OBJ；不冒充通用 FBX/glTF 导入器。
 
-- `validation/v0.4.18/real/*-organized.obj`：通用分组剥展结果（人台 93 岛、头盔 176 岛）。
-- `validation/v0.4.18/fill/*-filled.obj`：在上述结果上继续填空后的布局。
-- `validation/v0.4.18/refill/FlightHelmet-filled.obj`：头盔进一步以更细网格搜索的结果，仍是预算停止，不是最优排布。
+- `results/v0.4.18/organized/*-organized.obj`：通用分组剥展结果（人台 93 岛、头盔 176 岛）。
+- `results/v0.4.18/fill/*-filled.obj`：在上述结果上继续填空后的布局。
+- 后续更细网格续排结果不在本恢复包中：原压缩包未写到该位置，不用另一份结果冒充。可按验证脚本从当前结果重新生成。
 - `validation/v0.4.18/browser/gear-groups.png`、`corset-groups.png`：实际运行截图。
 
 导入这些 OBJ 后使用 **原样检查**，避免为了查看交付结果又运行另一轮处理、改变岛编号。原始数据保留在 `examples/verified-models/`；仅使用正确上传模型的哈希锁定夹具。
@@ -32,4 +34,4 @@ npm run dev
 
 这版是通用的“粗分组 → 组内展开 → 验证失败反馈切线”，不是语义识别、自动服装纸样或任意曲面无损压平。保留可读轮廓与高填充率有取舍；填空依然可能预算耗尽。它不会为刷占用率把 UV 弄成重叠、压扁 U/V、删除小面，或把分组数冒充实际岛数。新 UV 需要对应重绘/烘焙纹理，本版没有贴图烘焙。
 
-源码方案、参数、真实对照见 `docs/RELEASE-0.4.18.md`。ZIP 包含 `.git/` 和完整 bundle；全部旧 tag 保留，新附注 tag 为 `v0.4.18`。
+源码方案、参数、真实对照见 `docs/RELEASE-0.4.18.md`。ZIP 保留最后完整 v0.4.17 的 Git 历史，使用明确的恢复提交承接 v0.4.18 源码，新交接 tag 为 `repack-0.4.18-1`；不重复附 bundle，也不伪造缺失的原 v0.4.18 tag。
