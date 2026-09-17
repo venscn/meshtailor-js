@@ -1,0 +1,5 @@
+/** Restore compact reference results without generation or network access. */
+import{readFile,mkdir,writeFile}from'node:fs/promises';import{gunzipSync}from'node:zlib';import{createHash}from'node:crypto';import{fileURLToPath}from'node:url';import{join}from'node:path';
+const root=fileURLToPath(new URL('../',import.meta.url));const source=join(root,'examples/generated-0.4.20'),out=join(root,'results/v0.4.20');const manifest=JSON.parse(await readFile(join(source,'manifest.json'),'utf8'));await mkdir(out,{recursive:true});
+for(const entry of manifest.files){const bytes=gunzipSync(await readFile(join(source,entry.asset+'-geometry-only.obj.gz')));if(createHash('sha256').update(bytes).digest('hex')!==entry.objSHA256)throw Error('Reference output checksum mismatch: '+entry.asset);const p=join(out,entry.asset+'-geometry-only.obj');await writeFile(p,bytes);console.log(p);}
+console.log('These are geometry-generated reference UVs. Importing into Studio intentionally regenerates UV; use an external viewer to inspect the unchanged reference layout.');

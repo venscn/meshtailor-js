@@ -15,3 +15,6 @@ validation/local*/
 
 # Optional exported examples already stored once in the included Git history.
 results/v0.4.18/
+
+# Optional restored v0.4.20 reference OBJ files
+/results/v0.4.20/

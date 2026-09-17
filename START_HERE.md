@@ -45,6 +45,6 @@ npm run git:check -- --release v0.4.20
 
 核心检查需 TypeScript；独立浏览器检查需 Chrome/Chromium/Edge。已有预构建离线 HTML 不需要安装 TypeScript。完整 Studio 验证还需 `npm run build`、`npm run test:browser`，不能用离线验证代替。
 
-生成的参考 OBJ 以 gzip 放在 examples/generated-0.4.20，避免重复大文件；可用 gzip 工具解开后在其他 UV 软件中查看。导入本工具会重新生成，不能借查看参考结果恢复原 UV 使用路径。
+生成的参考 OBJ 以 gzip 放在 examples/generated-0.4.20，避免重复大文件；运行 `node scripts/restore-generated-uv.mjs` 后可在其他 UV 软件中查看，Node 内置解压，无需额外安装。导入本工具会重新生成，不能借查看参考结果恢复原 UV 使用路径。
 
 算法与实测：docs/releases/0.4.20.md；本轮验证：validation/v0.4.20/。旧版本验证文件只作为历史，不等于本轮已重跑。
