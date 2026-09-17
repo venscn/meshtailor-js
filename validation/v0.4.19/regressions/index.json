@@ -1,0 +1,117 @@
+[
+  {
+    "test": "core",
+    "exitCode": 0,
+    "seconds": 9.31
+  },
+  {
+    "test": "peel",
+    "exitCode": 0,
+    "seconds": 5.75
+  },
+  {
+    "test": "paint-shape",
+    "exitCode": 0,
+    "seconds": 5.9
+  },
+  {
+    "test": "human-template",
+    "exitCode": 0,
+    "seconds": 5.08
+  },
+  {
+    "test": "human-template-integration",
+    "exitCode": 0,
+    "seconds": 4.53
+  },
+  {
+    "test": "source-repair",
+    "exitCode": 0,
+    "seconds": 4.06
+  },
+  {
+    "test": "chart-merge",
+    "exitCode": 0,
+    "seconds": 5.47
+  },
+  {
+    "test": "source-atlas",
+    "exitCode": 0,
+    "seconds": 4.93
+  },
+  {
+    "test": "load-pipeline",
+    "exitCode": 0,
+    "seconds": 4.17
+  },
+  {
+    "test": "boundary-guard",
+    "exitCode": 0,
+    "seconds": 4.18
+  },
+  {
+    "test": "area-collapse",
+    "exitCode": 0,
+    "seconds": 4.72
+  },
+  {
+    "test": "contour-raster",
+    "exitCode": 0,
+    "seconds": 5.56
+  },
+  {
+    "test": "camera-policy",
+    "exitCode": 0,
+    "seconds": 4.66
+  },
+  {
+    "test": "arrival-presentation",
+    "exitCode": 0,
+    "seconds": 4.27
+  },
+  {
+    "test": "selection",
+    "exitCode": 0,
+    "seconds": 4.08
+  },
+  {
+    "test": "uv-box",
+    "exitCode": 0,
+    "seconds": 3.91
+  },
+  {
+    "test": "schedule",
+    "exitCode": 0,
+    "seconds": 4.02
+  },
+  {
+    "test": "motion-timing",
+    "exitCode": 0,
+    "seconds": 4.15
+  },
+  {
+    "test": "playback-priority",
+    "exitCode": 0,
+    "seconds": 3.93
+  },
+  {
+    "test": "load-pipeline-browser",
+    "exitCode": 0,
+    "seconds": 6.58
+  },
+  {
+    "test": "camera-browser",
+    "exitCode": 0,
+    "seconds": 70.58
+  },
+  {
+    "test": "arrival-browser",
+    "exitCode": 0,
+    "seconds": 15.18
+  },
+  {
+    "test": "selection-browser",
+    "exitCode": 0,
+    "seconds": 13.66
+  }
+]

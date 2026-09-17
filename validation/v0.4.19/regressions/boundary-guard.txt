@@ -1,0 +1,8 @@
+PASS Simple concave boundary is accepted
+PASS Non-adjacent crossing is rejected before ARAP commits
+PASS Non-adjacent contact is rejected
+PASS Near-edge separated boundaries remain valid
+PASS Crossing multiple loops are rejected
+PASS Scale and translation do not alter verdict
+PASS Non-finite input and zero-length edges rejected
+PASS Cancellation is propagated

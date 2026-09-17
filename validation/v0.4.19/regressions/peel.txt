@@ -1,0 +1,52 @@
+PASS variable saddle uses geometry-only groups and bounded peel feedback {
+  name: 'variable saddle',
+  groups: 1,
+  islands: 1,
+  faces: 280,
+  feedback: 0,
+  occupancy: 0.8410288001588856,
+  elapsedMs: 147.87297000000035
+}
+PASS folded S curtain uses geometry-only groups and bounded peel feedback {
+  name: 'folded S curtain',
+  groups: 12,
+  islands: 12,
+  faces: 280,
+  feedback: 0,
+  occupancy: 0.6689584776306126,
+  elapsedMs: 78.60453099999995
+}
+PASS twisted noncircular ribbon uses geometry-only groups and bounded peel feedback {
+  name: 'twisted noncircular ribbon',
+  groups: 1,
+  islands: 1,
+  faces: 280,
+  feedback: 0,
+  occupancy: 0.20010893720903095,
+  elapsedMs: 67.43457299999955
+}
+PASS asymmetric dome uses geometry-only groups and bounded peel feedback {
+  name: 'asymmetric dome',
+  groups: 1,
+  islands: 1,
+  faces: 280,
+  feedback: 0,
+  occupancy: 0.9346750516837057,
+  elapsedMs: 119.48902399999952
+}
+PASS Beveled gear / 倒角齿轮 uses geometry-only groups and bounded peel feedback {
+  name: 'Beveled gear / 倒角齿轮',
+  groups: 6,
+  islands: 6,
+  faces: 1536,
+  feedback: 0,
+  occupancy: 0.3067246480004769,
+  elapsedMs: 256.2511600000007
+}
+PASS Large opposing surfaces use at most two coarse panels, never per-tooth shards 
+PASS Geometry is independent of model name 
+PASS Gear face silhouette is a similarity of its real planar surface 
+PASS Failure feedback produces two connected regions, not many face-normal bins 
+PASS Small dense disconnected objects stay whole spatial groups 
+PASS Explicit user group seams are preserved by subsequent solving 
+PASS Malformed limits rejected; cancellation propagated 

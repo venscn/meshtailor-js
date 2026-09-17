@@ -1,0 +1,191 @@
+Corset input 18324 75 98 invalid [ 72, 73 ]
+Corset validate 1 Worker 已启动，检查输入
+Corset charts 133 提取原始 UV 岛（不重新参数化或排布）
+Corset validate 314 检查原始 UV 重叠：Corset_O
+Corset charts 541 验证现有岛 · 局部修复无效 UV
+Corset parameterize 1258 迭代求解线性系统
+Corset quality 1366 结构模板 · 先规划侧缝再展平
+Corset parameterize 1384 结构环带 #12：两侧切缝 / 两片，contour-band
+Corset quality 1703 尝试共享边缝合
+Corset charts 1835 邻岛缝合 1/306：168+24 面
+Corset parameterize 1948 迭代求解线性系统
+Corset charts 2474 邻岛缝合 10/306：640+112 面
+Corset parameterize 2611 迭代求解线性系统
+Corset quality 3560 检查翻面、退化与正面积重叠
+Corset charts 3748 邻岛缝合 12/306：55+142 面
+Corset parameterize 3953 迭代求解线性系统
+Corset quality 4095 按 3D 面积归一 · 大岛优先排布
+Corset orient 4967 按表面积统一纹素密度与旋转方向
+Corset pack 5270 MaxRects 排布 · 96 个岛
+Corset correspondence 6248 建立逐面角 3D / UV 对应缓冲
+Corset hinge 6544 建立铰链邻接与展开树
+Corset transfer 7015 传回同一份 3D / UV 与铰链数据
+Corset OK 96
+FlightHelmet input 94722 85 237 invalid [ 6, 12 ]
+FlightHelmet validate 1 Worker 已启动，检查输入
+FlightHelmet charts 619 提取原始 UV 岛（不重新参数化或排布）
+FlightHelmet validate 1804 检查原始 UV 重叠：HoseMat
+FlightHelmet charts 4245 整理原 UV：验证当前岛、面积归一、邻岛缝合与大岛优先排布
+FlightHelmet parameterize 5983 迭代求解线性系统
+FlightHelmet quality 7718 结构模板 · 先规划侧缝再展平
+FlightHelmet parameterize 7894 结构环带 #10：两侧切缝 / 两片，contour-band
+FlightHelmet quality 8430 检查翻面、退化与正面积重叠
+FlightHelmet parameterize 8554 结构环带 #51：两侧切缝 / 两片，contour-band
+FlightHelmet quality 9477 尝试共享边缝合
+FlightHelmet charts 10031 邻岛缝合 1/512：248+120 面
+FlightHelmet parameterize 10137 迭代求解线性系统
+FlightHelmet charts 10265 邻岛缝合 6/512：928+304 面
+FlightHelmet parameterize 10367 迭代求解线性系统
+FlightHelmet charts 10490 邻岛缝合 8/512：140+64 面
+FlightHelmet parameterize 10608 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet charts 10712 邻岛缝合 12/512：512+384 面
+FlightHelmet parameterize 10831 迭代求解线性系统
+FlightHelmet charts 11243 邻岛缝合 24/512：154+34 面
+FlightHelmet parameterize 11344 迭代求解线性系统
+FlightHelmet charts 11554 邻岛缝合 33/512：118+38 面
+FlightHelmet parameterize 11656 迭代求解线性系统
+FlightHelmet topology 11771 连接边界开缝，优先保留整块
+FlightHelmet parameterize 12062 迭代求解线性系统
+FlightHelmet charts 12294 邻岛缝合 40/512：384+188 面
+FlightHelmet topology 12407 连接边界开缝，优先保留整块
+FlightHelmet parameterize 12510 迭代求解线性系统
+FlightHelmet charts 13747 邻岛缝合 44/512：140+32 面
+FlightHelmet parameterize 14739 迭代求解线性系统
+FlightHelmet charts 15258 邻岛缝合 46/512：164+16 面
+FlightHelmet parameterize 16477 迭代求解线性系统
+FlightHelmet charts 16946 邻岛缝合 51/512：158+50 面
+FlightHelmet topology 17171 连接边界开缝，优先保留整块
+FlightHelmet parameterize 17322 迭代求解线性系统
+FlightHelmet charts 17976 邻岛缝合 58/512：448+128 面
+FlightHelmet parameterize 18220 迭代求解线性系统
+FlightHelmet charts 18323 邻岛缝合 59/512：448+128 面
+FlightHelmet parameterize 18697 迭代求解线性系统
+FlightHelmet charts 18807 邻岛缝合 61/512：448+640 面
+FlightHelmet parameterize 18932 迭代求解线性系统
+FlightHelmet charts 19052 邻岛缝合 63/512：448+640 面
+FlightHelmet parameterize 19185 迭代求解线性系统
+FlightHelmet charts 19321 邻岛缝合 64/512：466+234 面
+FlightHelmet parameterize 19424 迭代求解线性系统
+FlightHelmet topology 19526 连接边界开缝，优先保留整块
+FlightHelmet parameterize 19649 迭代求解线性系统
+FlightHelmet topology 19854 连接边界开缝，优先保留整块
+FlightHelmet parameterize 19970 迭代求解线性系统
+FlightHelmet charts 20416 邻岛缝合 74/512：4364+2892 面
+FlightHelmet parameterize 21491 迭代求解线性系统
+FlightHelmet quality 21938 检查翻面、退化与正面积重叠
+FlightHelmet charts 23592 邻岛缝合 75/512：2892+4364 面
+FlightHelmet parameterize 25846 迭代求解线性系统
+FlightHelmet quality 33247 检查翻面、退化与正面积重叠
+FlightHelmet charts 35341 邻岛缝合 77/512：7256+2892 面
+FlightHelmet parameterize 37672 迭代求解线性系统
+FlightHelmet quality 40888 检查翻面、退化与正面积重叠
+FlightHelmet parameterize 41441 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet quality 44552 检查翻面、退化与正面积重叠
+FlightHelmet charts 44851 邻岛缝合 78/512：174+174 面
+FlightHelmet parameterize 45116 迭代求解线性系统
+FlightHelmet charts 45414 邻岛缝合 85/512：18+128 面
+FlightHelmet parameterize 45519 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet charts 45870 邻岛缝合 90/512：7256+4844 面
+FlightHelmet topology 46011 连接边界开缝，优先保留整块
+FlightHelmet parameterize 47943 迭代求解线性系统
+FlightHelmet quality 50300 检查翻面、退化与正面积重叠
+FlightHelmet parameterize 51069 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet quality 54497 检查翻面、退化与正面积重叠
+FlightHelmet charts 54768 邻岛缝合 91/512：304+96 面
+FlightHelmet parameterize 54976 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet charts 55081 邻岛缝合 94/512：400+144 面
+FlightHelmet parameterize 55182 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet charts 55893 邻岛缝合 107/512：7256+7736 面
+FlightHelmet topology 56054 连接边界开缝，优先保留整块
+FlightHelmet parameterize 58006 迭代求解线性系统
+FlightHelmet quality 68625 检查翻面、退化与正面积重叠
+FlightHelmet charts 69034 邻岛缝合 108/512：32+96 面
+FlightHelmet parameterize 69147 迭代求解线性系统
+FlightHelmet charts 69633 邻岛缝合 115/512：448+1088 面
+FlightHelmet parameterize 69800 迭代求解线性系统
+FlightHelmet charts 70156 邻岛缝合 116/512：390+74 面
+FlightHelmet parameterize 70377 迭代求解线性系统
+FlightHelmet topology 70578 连接边界开缝，优先保留整块
+FlightHelmet parameterize 70686 迭代求解线性系统
+FlightHelmet quality 70788 检查翻面、退化与正面积重叠
+FlightHelmet parameterize 70899 迭代求解线性系统
+FlightHelmet charts 71221 邻岛缝合 123/512：656+440 面
+FlightHelmet parameterize 71330 迭代求解线性系统
+FlightHelmet quality 71893 检查翻面、退化与正面积重叠
+FlightHelmet parameterize 72040 迭代求解线性系统
+FlightHelmet topology 72313 连接边界开缝，优先保留整块
+FlightHelmet parameterize 72414 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet charts 72633 邻岛缝合 138/512：186+20 面
+FlightHelmet parameterize 72745 迭代求解线性系统
+FlightHelmet charts 73358 邻岛缝合 160/512：174+32 面
+FlightHelmet parameterize 73564 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet charts 73665 邻岛缝合 170/512：466+16 面
+FlightHelmet parameterize 73767 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 74073 连接边界开缝，优先保留整块
+FlightHelmet parameterize 74176 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 74278 连接边界开缝，优先保留整块
+FlightHelmet parameterize 74379 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet quality 74596 检查翻面、退化与正面积重叠
+FlightHelmet parameterize 74711 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 74813 连接边界开缝，优先保留整块
+FlightHelmet parameterize 74914 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet charts 75335 邻岛缝合 180/512：234+16 面
+FlightHelmet topology 75543 连接边界开缝，优先保留整块
+FlightHelmet parameterize 75646 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 75854 连接边界开缝，优先保留整块
+FlightHelmet charts 75955 邻岛缝合 185/512：234+16 面
+FlightHelmet parameterize 76159 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 76469 连接边界开缝，优先保留整块
+FlightHelmet parameterize 76612 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 76729 连接边界开缝，优先保留整块
+FlightHelmet charts 76838 邻岛缝合 191/512：466+16 面
+FlightHelmet parameterize 76944 迭代求解线性系统
+FlightHelmet charts 77062 邻岛缝合 192/512：234+16 面
+FlightHelmet parameterize 77165 迭代求解线性系统
+FlightHelmet topology 77604 连接边界开缝，优先保留整块
+FlightHelmet parameterize 77715 迭代求解线性系统
+FlightHelmet topology 78363 连接边界开缝，优先保留整块
+FlightHelmet parameterize 78568 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 78668 连接边界开缝，优先保留整块
+FlightHelmet parameterize 78772 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 78873 连接边界开缝，优先保留整块
+FlightHelmet parameterize 79055 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet charts 79874 邻岛缝合 201/512：234+16 面
+FlightHelmet topology 79977 连接边界开缝，优先保留整块
+FlightHelmet parameterize 80085 迭代求解线性系统
+FlightHelmet quality 81427 检查翻面、退化与正面积重叠
+FlightHelmet charts 81679 邻岛缝合 202/512：466+16 面
+FlightHelmet topology 81795 连接边界开缝，优先保留整块
+FlightHelmet parameterize 82343 迭代求解线性系统
+FlightHelmet topology 82665 连接边界开缝，优先保留整块
+FlightHelmet parameterize 82885 迭代求解线性系统
+FlightHelmet quality 83848 检查翻面、退化与正面积重叠
+FlightHelmet topology 83961 连接边界开缝，优先保留整块
+FlightHelmet parameterize 84110 迭代求解线性系统
+FlightHelmet quality 84704 检查翻面、退化与正面积重叠
+FlightHelmet topology 84810 连接边界开缝，优先保留整块
+FlightHelmet parameterize 85022 迭代求解线性系统
+FlightHelmet charts 85365 邻岛缝合 206/512：234+16 面
+FlightHelmet parameterize 85513 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 85740 连接边界开缝，优先保留整块
+FlightHelmet parameterize 85852 迭代求解线性系统
+FlightHelmet charts 86068 邻岛缝合 208/512：466+16 面
+FlightHelmet parameterize 86181 迭代求解线性系统
+FlightHelmet topology 86730 连接边界开缝，优先保留整块
+FlightHelmet parameterize 86874 迭代求解线性系统
+FlightHelmet topology 87252 连接边界开缝，优先保留整块
+FlightHelmet parameterize 87353 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 87982 连接边界开缝，优先保留整块
+FlightHelmet parameterize 88084 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet topology 88187 连接边界开缝，优先保留整块
+FlightHelmet parameterize 88299 迭代求解线性系统
+FlightHelmet topology 88505 连接边界开缝，优先保留整块
+FlightHelmet charts 88608 邻岛缝合 216/512：234+16 面
+FlightHelmet parameterize 88710 自由边界保形 ARAP（不固定圆形边界）
+FlightHelmet quality 88867 按 3D 面积归一 · 大岛优先排布
+FlightHelmet orient 90422 按表面积统一纹素密度与旋转方向
+FlightHelmet pack 92377 MaxRects 排布 · 177 个岛
+FlightHelmet correspondence 103538 建立逐面角 3D / UV 对应缓冲
+FlightHelmet hinge 104870 建立铰链邻接与展开树
+FlightHelmet transfer 107279 传回同一份 3D / UV 与铰链数据
+FlightHelmet OK 177

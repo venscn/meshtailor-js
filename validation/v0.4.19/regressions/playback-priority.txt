@@ -1,0 +1,18 @@
+PASS All islands sorted by source triangle area not id
+PASS Multi-select click order cannot override area
+PASS Duplicates/stale indices removed, deterministic area ties
+PASS Single island remains single
+PASS Empty queue
+PASS Area cache is snapshot scoped
+PASS 0.25x clock and ETA
+PASS 0.5x clock and ETA
+PASS 1x clock and ETA
+PASS 2x clock and ETA
+PASS 4x clock and ETA
+PASS 8x clock and ETA
+PASS 16x clock and ETA
+PASS 32x clock and ETA
+PASS 64x clock and ETA
+PASS Rate change preserves pose and integrates remaining elapsed
+PASS High speed reverse wraps loops correctly
+PASS Invalid rate rejected

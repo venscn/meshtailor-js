@@ -1,0 +1,23 @@
+PASS plate 0° conservative coverage
+PASS plate 30° conservative coverage
+PASS plate 45° conservative coverage
+PASS plate 90° conservative coverage
+PASS plate 225° conservative coverage
+PASS annulus 0° conservative coverage
+PASS annulus 30° conservative coverage
+PASS annulus 45° conservative coverage
+PASS annulus 90° conservative coverage
+PASS annulus 225° conservative coverage
+PASS concave 0° conservative coverage
+PASS concave 30° conservative coverage
+PASS concave 45° conservative coverage
+PASS concave 90° conservative coverage
+PASS concave 225° conservative coverage
+PASS slotted 0° conservative coverage
+PASS slotted 30° conservative coverage
+PASS slotted 45° conservative coverage
+PASS slotted 90° conservative coverage
+PASS slotted 225° conservative coverage
+PASS hole remains free, not a bounding box
+PASS ambiguous same-directed/nonmanifold edge rejects acceleration
+PASS cancellation not swallowed

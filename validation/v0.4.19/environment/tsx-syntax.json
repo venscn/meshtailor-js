@@ -1,0 +1,58 @@
+{
+  "scope": "syntax transpilation only, NOT full React/Vite typecheck",
+  "files": [
+    {
+      "path": "apps/studio/src/App.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/MeshViewport.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/UVCanvas.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/main.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/CorrespondenceInspector.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/LoadPipelinePanel.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/UVJobStatus.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/UVSolverControls.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/UnfoldControls.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/UnfoldViewport.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/useUVSnapshot.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/src/unfold/useUnfoldPlayer.tsx",
+      "errors": []
+    },
+    {
+      "path": "apps/studio/tests/selection-hook.tsx",
+      "errors": []
+    }
+  ],
+  "ok": true
+}

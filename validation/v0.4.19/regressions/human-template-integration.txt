@@ -1,0 +1,12 @@
+PASS Two side cuts are two non-branching paths connecting the original rims
+PASS Explicitly selecting both existing panels can choose a single seam
+PASS Incomplete single half is not force-classified as a whole tube
+PASS Expired selected chart IDs are rejected
+PASS Side direction changes actual mesh edges, not the camera
+PASS Topology, validity and template survive arbitrary translation and uniform scaling
+PASS Generic merge cannot swallow template boundaries
+PASS Next snapshot carries real template identity through chart renumbering
+PASS Explicit recut unlocks only selected interior cuts
+PASS Repack is not a hidden re-template operation
+PASS Disabling structural mode retains old paint path and does not report false application
+PASS Load flow clears snapshot-specific selection but retains configured side count

@@ -1,0 +1,66 @@
+{
+  "passed": 11,
+  "softwareWebGL": true,
+  "cases": [
+    {
+      "name": "Default auto workflow repairs source features when loading actual gear",
+      "passed": true,
+      "detail": {
+        "target": "source-atlas",
+        "source": 1,
+        "islands": 6,
+        "changed": 1,
+        "planar": 2,
+        "stage": {
+          "id": "features",
+          "label": "原 UV 可辨识性 · 主要轮廓与孔洞检查",
+          "enabled": true,
+          "state": "completed",
+          "startedMs": 159.69999999995343,
+          "detail": "MaxRects 排布 · 6 个岛",
+          "elapsedMs": 404.20000000018626
+        }
+      }
+    },
+    {
+      "name": "Feature controls and report are visible, not hidden behind a new preset",
+      "passed": true
+    },
+    {
+      "name": "Repack carries feature identities and protected boundary seams",
+      "passed": true
+    },
+    {
+      "name": "Later stitching cannot merge the planar faces back into a wrapping rectangle",
+      "passed": true
+    },
+    {
+      "name": "Inspect deliberately still displays the original one-square UV",
+      "passed": true
+    },
+    {
+      "name": "Extract + organize also performs feature correction",
+      "passed": true
+    },
+    {
+      "name": "Disabling source feature correction is an explicit reversible comparison",
+      "passed": true
+    },
+    {
+      "name": "Continued fill preserves panel geometry and feature references",
+      "passed": true
+    },
+    {
+      "name": "Island selection still does not automatically select a triangle",
+      "passed": true
+    },
+    {
+      "name": "Playback reaches exact target coordinates with manual camera retained",
+      "passed": true
+    },
+    {
+      "name": "No browser JS/WebGL errors",
+      "passed": true
+    }
+  ]
+}
