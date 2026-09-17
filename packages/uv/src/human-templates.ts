@@ -1,5 +1,5 @@
 /** Geometry-driven seam templates. No model-name/ID-specific production branches. */
-import {edgeKey,type MeshData,type Vec2,type Vec3} from '@meshtailor/mesh-core';
+import {buildTopology,edgeKey,type MeshData,type Vec2,type Vec3} from '@meshtailor/mesh-core';
 import {cutLocalMesh} from './cut-topology.js';
 import {parameterizeChart,triangleArea} from './parameterize.js';
 import {shapeQuality} from './chart-quality.js';
@@ -122,11 +122,46 @@ export function applyHumanTemplates(mesh:MeshData,input:RawChart[],inputSeams:Re
  const settings=humanOptions(opts.humanTemplates),report:HumanTemplateReport={version:1,options:settings,before:input.length,after:input.length,applied:0,entries:[],protectedSeams:[],addedSeams:[],removedSeams:[]};
  const total=input.reduce((s,c)=>s+c.area3D,0),out:RawChart[]=[],diagnostics:ChartDiagnostic[]=[],locked=new Set<string>();let seams=new Set(inputSeams),nextId=input.reduce((n,c)=>Math.max(n,c.id+1),0);
  if(settings.selectedCharts?.some(id=>!input.some(c=>c.id===id)))throw Error('Template selection refers to an expired or unknown island.');
- for(const c of input){work?.check();const attempt=unfoldBand(mesh,[...c.faceUVs.keys()],c.id,seams,opts,total,work);
-  if(!('raw'in attempt)){out.push(c);report.entries.push(attempt);continue;}
+ // Explicit multi-selection may include the two sides of a previously cut
+ // band. Regroup ONLY selected charts that actually share source edges. On
+ // rejection restore every original chart, never publish a fictitious merge.
+ const tasks:RawChart[][]=[];
+ if(settings.selectedCharts){
+  const selected=new Set(settings.selectedCharts),parent=new Map(input.map(c=>[c.id,c.id])),owners=new Map<number,number>();
+  const root=(id:number):number=>{while(parent.get(id)!==id)id=parent.get(id)!;return id;};
+  for(const c of input)for(const f of c.faceUVs.keys())owners.set(f,c.id);
+  for(const e of buildTopology(mesh).edges.values())if(e.faces.length===2){const a=owners.get(e.faces[0]!)!,b=owners.get(e.faces[1]!)!;if(selected.has(a)&&selected.has(b)){const A=root(a),B=root(b);if(A!==B)parent.set(Math.max(A,B),Math.min(A,B));}}
+  const grouped=new Map<number,RawChart[]>();for(const c of input){const id=selected.has(c.id)?root(c.id):c.id,list=grouped.get(id)??[];list.push(c);grouped.set(id,list);}tasks.push(...grouped.values());
+ }else tasks.push(...input.map(c=>[c]));
+ for(const parts of tasks){const c:RawChart=parts.length===1?parts[0]!:{id:Math.min(...parts.map(c=>c.id)),area3D:parts.reduce((s,c)=>s+c.area3D,0),faceUVs:new Map(parts.flatMap(c=>[...c.faceUVs]))};work?.check();const attempt=unfoldBand(mesh,[...c.faceUVs.keys()],c.id,seams,opts,total,work);
+  if(!('raw'in attempt)){out.push(...parts);report.entries.push(attempt);continue;}
   seams=attempt.seams;attempt.locked.forEach(e=>{locked.add(e);seams.add(e);});
   attempt.raw.forEach((p,i)=>{p.id=i===0?c.id:nextId++;attempt.diagnostics[i]!.id=p.id;out.push(p);attempt.entry.charts!.push(p.id);});diagnostics.push(...attempt.diagnostics);report.entries.push(attempt.entry);report.applied++;
  }
  report.after=out.length;report.protectedSeams=[...locked];report.addedSeams=[...seams].filter(e=>!inputSeams.has(e));report.removedSeams=[...inputSeams].filter(e=>!seams.has(e));
  return{raw:out,seams,report,diagnostics,protectedSeams:[...new Set([...(opts.mergeOptions?.protectedSeams??[]),...locked])]};
+}
+/** Merging renumbers charts. Resolve report references through immutable face IDs. */
+export function remapHumanReport(report:HumanTemplateReport|undefined,raw:readonly RawChart[]):void{
+ if(!report)return;const owner=new Map<number,number>();for(const p of raw)for(const f of p.faceUVs.keys())owner.set(f,p.id);
+ for(const e of report.entries)if(e.panelFaces)e.charts=e.panelFaces.map(fs=>owner.get(fs[0]!)!).filter(id=>id!==undefined);
+}
+
+/** Preserve template seam constraints across later stitch/repack/fill jobs.
+ * Only an explicit selection-scoped template operation may replace internal
+ * template cuts; interfaces to non-selected geometry remain protected. */
+export function inheritedTemplateSeams(mesh:MeshData,seed:readonly {id:number;faceUVs:Map<number,unknown>}[],report:HumanTemplateReport|undefined,reselected?:readonly number[]):string[]{
+ if(!report)return[];if(!reselected)return[...report.protectedSeams];
+ const ids=new Set(reselected),faces=new Set(seed.filter(c=>ids.has(c.id)).flatMap(c=>[...c.faceUVs.keys()])),topology=buildTopology(mesh);
+ return report.protectedSeams.filter(key=>{const e=topology.edges.get(key);return !e||e.faces.length!==2||!e.faces.every(f=>faces.has(f));});
+}
+export function carryHumanTemplates(previous:HumanTemplateReport|undefined,current:HumanTemplateReport|undefined,packed:readonly {id:number;faceUVs:Map<number,unknown>}[],seams:ReadonlySet<string>):HumanTemplateReport|undefined{
+ if(!previous?.applied)return current;
+ const replaced=new Set(current?.entries.filter(e=>e.status==='applied').flatMap(e=>e.panelFaces?.flat()??[])??[]);
+ const kept=previous.entries.filter(e=>e.status==='applied'&&!e.panelFaces?.flat().some(f=>replaced.has(f)));
+ const entries=[...kept,...(current?.entries??[])];
+ const report:HumanTemplateReport={...(current??previous),entries,applied:entries.filter(e=>e.status==='applied').length,after:packed.length,protectedSeams:[...new Set([...previous.protectedSeams,...(current?.protectedSeams??[])])].filter(e=>seams.has(e))};
+ const owner=new Map<number,number>();for(const p of packed)for(const f of p.faceUVs.keys())owner.set(f,p.id);
+ for(const e of report.entries)if(e.panelFaces)e.charts=e.panelFaces.map(fs=>owner.get(fs[0]!)!).filter(id=>id!==undefined);
+ return report;
 }

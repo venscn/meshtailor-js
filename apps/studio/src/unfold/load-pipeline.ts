@@ -8,7 +8,7 @@ export interface LoadPipelineConfig {
   fillBudgetSeconds:number; fillRounds:number;
 }
 export const DEFAULT_LOAD_PIPELINE:Readonly<LoadPipelineConfig>=Object.freeze({version:1,source:'auto',repairInvalid:true,mergeAdjacent:true,fill:false,fillBudgetSeconds:15,fillRounds:8});
-export type PipelineTarget='generated'|'source'|'source-atlas'|'stitch'|'repack'|'fill';
+export type PipelineTarget='generated'|'source'|'source-atlas'|'stitch'|'repack'|'fill'|'templates';
 export type StepState='pending'|'running'|'completed'|'skipped'|'error'|'cancelled';
 export interface PipelineStep {id:UVOperationStep;label:string;enabled:boolean;reason?:string;state:StepState;startedMs?:number;elapsedMs?:number;detail?:string}
 export interface PipelineTrace {version:1;target:PipelineTarget;origin:'model-load'|'manual';status:'running'|'completed'|'error'|'cancelled'|'timeout';steps:PipelineStep[];elapsedMs:number;config?:LoadPipelineConfig;settings?:Partial<UnwrapOptions>}
@@ -45,7 +45,8 @@ export function pipelineSteps(target:PipelineTarget,config:Partial<UnwrapOptions
     ['input','检查几何与任务配置',true],
     ['extract','提取原 UV 岛 · 审计原坐标',source,'本次不读取原 UV'],
     ['parameterize','连通分区 · 参数化与必要补切',target==='generated','沿用现有 UV 岛'],
-    ['repair',config.sourceRepairPolicy==='reject'?'检查现有岛（局部修复关闭）':'验证现有岛 · 局部修复无效 UV', ['source-atlas','stitch','repack'].includes(target),'本次不修复原岛'],
+    ['repair',config.sourceRepairPolicy==='reject'?'检查现有岛（局部修复关闭）':'验证现有岛 · 局部修复无效 UV', ['source-atlas','stitch','repack','templates'].includes(target),'本次不修复原岛'],
+    ['structure','结构模板 · 先规划侧缝再展平',['source-atlas','stitch','templates'].includes(target)&&config.structureTemplates!==false&&(config.uvObjective??'paint')==='paint'&&config.autoCut!==false&&(config.method??'auto')==='auto','结构模板关闭或本次仅重排/原样检查'],
     ['merge','尝试共享边缝合',target==='stitch'||target==='source-atlas'&&config.sourceAtlasMerge!==false||target==='generated'&&config.postMerge===true,'已禁用或本次不适用'],
     ['pack','按 3D 面积归一 · 大岛优先排布',organized&&target!=='fill','保持当前坐标 / 面积'],
     ['fill','填补空白 · 轮廓精排',target==='fill'||!!plan?.fill,'未启用：不会自动填补空白'],

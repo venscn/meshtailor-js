@@ -1,3 +1,4 @@
+import {applyHumanTemplates,remapHumanReport,type HumanTemplateReport} from './human-templates.js';
 import {tryLargeRecut} from './large-recut.js';
 import {refineAtlas,describeFill} from './fill-refinement.js';
 import {checkUVTriangles} from './uv-quality.js';
@@ -14,30 +15,40 @@ import {recommendUnwrap,type UnwrapOptions,type ChartDiagnostic} from './unwrap.
 import type {UVWork} from './work.js';
 /** Explicit destructive-to-UV (not source geometry) post-operation on a captured
  * snapshot. This never silently substitutes a fresh baseline segmentation. */
-export function postprocessUV(input:MeshData,seed:readonly PackedChart[],seams:ReadonlySet<string>,operation:'stitch'|'repack',options:Partial<UnwrapOptions>={},work?:UVWork){
-  if(operation!=='stitch'&&operation!=='repack')throw new Error('Unknown UV post-operation.');
+export function postprocessUV(input:MeshData,seed:readonly PackedChart[],seams:ReadonlySet<string>,operation:'stitch'|'repack'|'templates',options:Partial<UnwrapOptions>={},work?:UVWork){
+  if(operation!=='stitch'&&operation!=='repack'&&operation!=='templates')throw new Error('Unknown UV post-operation.');
   const mesh=normalizedMesh(input),opts={...recommendUnwrap(input).options,...options};
   if(!Number.isInteger(opts.maxChartFaces)||opts.maxChartFaces<8||opts.maxChartFaces>20000||!Number.isFinite(opts.maxStretch)||opts.maxStretch<1||!Number.isFinite(opts.maxAspect)||opts.maxAspect<1)throw new Error('Invalid postprocess quality settings.');
   if(opts.sourceRepairPolicy!==undefined&&!['repair','reject'].includes(opts.sourceRepairPolicy))throw new Error('Invalid source repair policy.');
   let effective=new Set(seams),repair:SourceRepairReport|undefined;
   work?.step?.('repair');
   let raw;if(opts.sourceRepairPolicy==='repair'){const prepared=repairSourceCharts(mesh,seed,seams,opts,work);raw=prepared.raw;effective=prepared.seams;repair=prepared.report;}else raw=rawChartsFromPreview(mesh,seed,work);
+  let human:HumanTemplateReport|undefined,templateDiagnostics:ChartDiagnostic[]=[];
+  if(opts.structureTemplates!==undefined&&typeof opts.structureTemplates!=='boolean')throw Error('Invalid structural template switch.');
+  if(operation!=='repack'&&opts.structureTemplates!==false&&opts.uvObjective==='paint'&&opts.autoCut&&opts.method==='auto'){
+    work?.step?.('structure');
+    const t=applyHumanTemplates(mesh,raw,effective,opts,work);raw=t.raw;effective=t.seams;human=t.report;templateDiagnostics=t.diagnostics;
+    opts.mergeOptions={...opts.mergeOptions,protectedSeams:t.protectedSeams};
+  }
   let merge:MergeReport|undefined;
   let diagnostics:ChartDiagnostic[]=raw.map(c=>{
     const local=cutLocalMesh(mesh,[...c.faceUVs.keys()],effective),vs:Vec2[]=new Array(local.positions.length);
     local.sourceFaces.forEach((fi,i)=>local.triangles[i]!.forEach((v,k)=>{vs[v]=c.faceUVs.get(fi)![k]!;}));
+    const templated=templateDiagnostics.find(d=>d.id===c.id);if(templated)return templated;
     const repaired=repair?.islands.find(i=>i.id===c.id);
     return {id:c.id,sourceChart:c.id,faces:c.faceUVs.size,method:repaired?.method??'source-shape',iterations:repaired?.iterations??0,residual:repaired?.residual??0,...shapeQuality(local,vs,opts.stretchAreaPercentile??1,opts.maxStretch),...(repaired?.fallbackReason?{fallbackReason:repaired.fallbackReason}:{})};
   });
   if(operation==='stitch'){work?.step?.('merge');const result=mergeAdjacentCharts(mesh,raw,effective,opts,diagnostics,work);raw=result.raw;effective=result.seams;merge=result.report;diagnostics=result.diagnostics;}
+  remapHumanReport(human,raw);
   work?.step?.('pack');
-  const atlas=packConnectedAtlas(mesh,raw,opts,work),warnings=[operation==='stitch'?`后处理：${merge!.before} → ${merge!.after} 个岛；接受 ${merge!.accepted} 次缝合，移除 ${merge!.removedSeams.length} 条接缝。拒绝原因 ${JSON.stringify(merge!.reasons)}。`:'只重排现有岛：岛数量和裁切不变；消除岛与岛之间的叠放，不修复岛内部折叠。','这是新 UV atlas，不保留原贴图布局；跨材质合并/分页后需要重新烘焙贴图。原始网格与源 UV 未被修改。'];
+  const atlas=packConnectedAtlas(mesh,raw,opts,work),warnings=[operation==='templates'?'按结构模板重展当前区域；未匹配区域保留，未运行泛化邻岛缝合。':operation==='stitch'?`后处理：${merge!.before} → ${merge!.after} 个岛；接受 ${merge!.accepted} 次缝合，移除 ${merge!.removedSeams.length} 条接缝。拒绝原因 ${JSON.stringify(merge!.reasons)}。`:'只重排现有岛：岛数量和裁切不变；消除岛与岛之间的叠放，不修复岛内部折叠。','这是新 UV atlas，不保留原贴图布局；跨材质合并/分页后需要重新烘焙贴图。原始网格与源 UV 未被修改。'];
+  if(human)warnings.unshift(`结构模板：识别并应用 ${human.applied} 个区域；${human.before} → ${human.after} 片（缝合前）。侧缝保持，未匹配区域沿用保形结果。`);
   if(repair?.repaired)warnings.unshift(`从原3D局部修复 ${repair.repaired} 个无效原UV岛（${repair.islands.map(i=>'#'+(i.id+1)).join('、')}）；其余 ${repair.preserved} 岛未重新求解，所有面保留。新UV需要重烘焙。`);
   if(merge?.budgetExhausted)warnings.push('缝合达到尝试预算；剩余岛不代表几何上不可合并。可提高预算或对当前结果再次执行后处理。');
   if(atlas.pageReport?.mode==='single')warnings.push('新 atlas 使用统一单页，不再沿用源材质作为 UV 域；未相连的几何仍是独立岛。原材质对应关系保存在页面诊断中。');
   else if(atlas.pageReport)warnings.push(`按原几何连接关系分配 ${atlas.pageReport.actual} 页；同页共享边长保留 ${(atlas.pageReport.retainedSharedBoundaryRatio*100).toFixed(1)}%。页数是软目标；不跨真实断开的组件分组。`);
   if(opts.uvObjective==='paint')warnings.unshift('手绘轮廓优先：不自动交付圆边界 Tutte；优先保留原岛形状缝合，超出原形比例门槛则保留分岛。可辨识性是几何目标，不保证自动识别衣片语义。');
-  return {...atlas,diagnostics,seams:[...effective],addedSeams:[...effective].filter(e=>!seams.has(e)),removedSeams:[...seams].filter(e=>!effective.has(e)),merge,repair,warnings};
+  return {...atlas,human,diagnostics,seams:[...effective],addedSeams:[...effective].filter(e=>!seams.has(e)),removedSeams:[...seams].filter(e=>!effective.has(e)),merge,repair,warnings};
 }
 
 /** Improve the CURRENT complete single-page result, without area-normalizing it

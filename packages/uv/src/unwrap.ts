@@ -1,3 +1,4 @@
+import {unfoldBand,inspectBand,humanOptions,remapHumanReport,type HumanTemplateReport} from './human-templates.js';
 import {planarShapeCandidate} from './free-boundary.js';
 import { packConnectedAtlas, type PageOptions, type PageReport } from './atlas-pages.js';
 import { mergeAdjacentCharts, type MergeOptions, type MergeReport } from './chart-merge.js';
@@ -15,9 +16,9 @@ export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
 }
-export interface UnwrapResult extends AtlasPacking { spatialReport?:import('./spatial-neighbors.js').SpatialReport; pageReport?:PageReport; merge?:MergeReport; fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
+export interface UnwrapResult extends AtlasPacking { human?:HumanTemplateReport; spatialReport?:import('./spatial-neighbors.js').SpatialReport; pageReport?:PageReport; merge?:MergeReport; fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
 export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',uvObjective:'compact',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
-export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,uvObjective:'paint',chartPolicy:'large',stretchAreaPercentile:.99,maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
+export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,structureTemplates:true,uvObjective:'paint',chartPolicy:'large',stretchAreaPercentile:.99,maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
 export function recommendUnwrap(mesh:MeshData,goal:ChartGoal='large'):{options:UnwrapOptions;analysis:MeshAnalysis;regions:RegionOptions;reasons:string[]}{
   const r=recommendRegions(mesh,goal),large=goal==='large';
   return{options:{...DEFAULT_UNWRAP,chartPolicy:goal,stretchAreaPercentile:large?.99:1,regionOptions:{...r.options},maxChartFaces:r.options.maxChartFaces,maxAspect:large?24:10,minFill:0,maxStretch:large?30:16},analysis:r.analysis,regions:r.options,reasons:[
@@ -56,6 +57,8 @@ function splitDisks(local:CutMesh,maxFaces:number,limitNormals:boolean,work?:UVW
 }
 export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Partial<UnwrapOptions>={},work?:UVWork):UnwrapResult{
   const opts={...(options.chartPolicy==='legacy'?LEGACY_UNWRAP:recommendUnwrap(input,options.chartPolicy??'large').options),...options};
+  if(opts.structureTemplates!==undefined&&typeof opts.structureTemplates!=='boolean')throw Error('Invalid structural template switch.');
+  const useTemplates=opts.structureTemplates!==false&&opts.uvObjective==='paint'&&opts.autoCut&&opts.method==='auto';
   if(opts.initialSegmentation!==undefined&&!['regions','connected'].includes(opts.initialSegmentation)||opts.postMerge!==undefined&&typeof opts.postMerge!=='boolean')throw new Error('Invalid pre/post segmentation settings.');
   if(!Number.isFinite(opts.stretchAreaPercentile??1)||(opts.stretchAreaPercentile??1)<.9||(opts.stretchAreaPercentile??1)>1)throw new Error('Stretch area percentile must be 0.9..1.');
   if(!['large','balanced','legacy'].includes(opts.chartPolicy??''))throw new Error('Invalid chart policy.');
@@ -70,7 +73,8 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     const panels=paintPanelSeams(mesh,effective);
     if(panels.panels.length){for(const key of panels.seams)effective.add(key);warnings.push(`保留 ${panels.panels.length} 个主要平面特征面板，优先保持凹口、齿形与孔洞；没有按小平面切碎。`);}
   }
-  if(opts.autoCut&&opts.chartPolicy!=='legacy'&&effective.size===0&&opts.initialSegmentation!=='connected'){
+  const wholeBands=useTemplates&&buildCharts(mesh,effective,topology).some(c=>inspectBand(mesh,c.faces,opts.humanTemplates).ok);
+  if(!wholeBands&&opts.autoCut&&opts.chartPolicy!=='legacy'&&effective.size===0&&opts.initialSegmentation!=='connected'){
     uvProgress(work,{stage:'charts',detail:'自动大块分区：合并相邻小区域'});
     const regionOpts={...recommendRegions(mesh,opts.chartPolicy).options,...opts.regionOptions,maxChartFaces:opts.maxChartFaces};
     const regions=segmentMeshRegions(mesh,regionOpts,effective,undefined,()=>work?.check(),topology);
@@ -83,8 +87,19 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   const record=(reason:string,faces:number,sourceChart:number,depth:number,detail?:string)=>{fragmentation.reasons[reason]=(fragmentation.reasons[reason]??0)+1;if(fragmentation.events.length<1000)fragmentation.events.push({reason,faces,sourceChart,depth,...(detail?{detail}:{})});else fragmentation.omittedEvents++;};
   const charts=buildCharts(mesh,effective,topology),raw:RawChart[]=[],diagnostics:ChartDiagnostic[]=[];let partitions=0,facesDone=0;
   fragmentation.initialCharts=charts.length;
+  const human:HumanTemplateReport|undefined=useTemplates?{version:1,options:humanOptions(opts.humanTemplates),before:charts.length,after:charts.length,applied:0,entries:[],protectedSeams:[],addedSeams:[],removedSeams:[]}:undefined;
+  const totalArea=mesh.faces.reduce((sum,f)=>sum+triangleArea(...f.vertices.map(v=>mesh.positions[v]!) as [Vec3,Vec3,Vec3]),0);
+  const templateLocks=new Set(opts.mergeOptions?.protectedSeams??[]);
   const solve=(faces:number[],sourceChart:number,depth=0)=>{
     uvProgress(work,{stage:'topology',detail:`检查源岛 ${sourceChart+1} 的 ${faces.length} 个面（补切层 ${depth}）`,facesDone,facesTotal:mesh.faces.length,islandsDone:raw.length});
+    if(human){
+      const t=unfoldBand(mesh,faces,sourceChart,effective,opts,totalArea,work);
+      if('raw' in t){
+        t.entry.charts=[];for(let i=0;i<t.raw.length;i++){const p=t.raw[i]!,id=raw.length;p.id=id;raw.push(p);diagnostics.push({...t.diagnostics[i]!,id});t.entry.charts.push(id);}
+        effective.clear();for(const key of t.seams)effective.add(key);for(const key of t.locked){effective.add(key);templateLocks.add(key);}
+        human.applied++;human.entries.push(t.entry);facesDone+=faces.length;return;
+      }else if(depth===0)human.entries.push(t);
+    }
     let local=cutLocalMesh(mesh,faces,effective);
     const planar=opts.uvObjective==='paint'&&opts.method==='auto'&&planarShapeCandidate(local)!==null;
     if(!planar&&opts.autoCut&&opts.chartPolicy!=='legacy'&&!local.disk&&faces.length<=opts.maxChartFaces){
@@ -122,6 +137,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       raw.push({id,faceUVs,area3D});diagnostics.push({id,sourceChart,faces:faces.length,method:p.method,...shape,iterations:p.iterations,residual:p.residual,...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});
   };
   charts.forEach(chart=>solve(chart.faces,chart.id));
+  opts.mergeOptions={...opts.mergeOptions,protectedSeams:[...templateLocks]};
   let merge:MergeReport|undefined;
   if(opts.postMerge){work?.step?.('merge');const m=mergeAdjacentCharts(mesh,raw,effective,opts,diagnostics,work);raw.splice(0,raw.length,...m.raw);diagnostics.splice(0,diagnostics.length,...m.diagnostics);effective.clear();for(const key of m.seams)effective.add(key);merge=m.report;warnings.push(`后处理邻岛缝合：${merge.before} → ${merge.after} 岛；接受 ${merge.accepted} 次，尝试 ${merge.attempts} 次；${merge.budgetExhausted?'达到预算，不代表全局最少岛':'保留未通过拓扑/形变检查的边界'}。`);}
   const faceChart=new Int32Array(mesh.faces.length);raw.forEach(r=>{for(const fi of r.faceUVs.keys())faceChart[fi]=r.id;});
@@ -132,6 +148,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     const direction=(t:readonly number[])=>t.some((v,i)=>v===e.a&&t[(i+1)%3]===e.b);
     if(direction(f)===direction(g))effective.add(key);
   }
+  if(human){human.after=raw.length;human.protectedSeams=[...templateLocks];human.addedSeams=[...effective].filter(e=>!seams.has(e));human.removedSeams=[...seams].filter(e=>!effective.has(e));remapHumanReport(human,raw);warnings.unshift(`结构模板应用 ${human.applied} 个环带；上下边界与侧缝保持。未匹配的一般曲面使用保形求解。`);}
   const addedSeams=[...effective].filter(e=>!seams.has(e));
   if(addedSeams.length)warnings.push(`自动新增 ${addedSeams.length} 条 UV 裁切边（未启用后处理时保留原接缝；后处理移除量另列），用于拓扑修复、控制求解规模或避免无效 UV。新增边已用于动画、2D 与导出。`);
   const fallbacks=diagnostics.filter(d=>d.method==='tutte').length;if(fallbacks)warnings.push(`${fallbacks} 个岛使用凸边界 Tutte；优先有效映射，可能有较大拉伸。`);
@@ -142,5 +159,5 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   work?.step?.('pack');
   const atlas=packConnectedAtlas(mesh,raw,opts,work);
   warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
-  return{...atlas,merge,fragmentation,seams:[...effective],addedSeams,diagnostics,warnings};
+  return{...atlas,human,merge,fragmentation,seams:[...effective],addedSeams,diagnostics,warnings};
 }
