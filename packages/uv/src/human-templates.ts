@@ -159,7 +159,7 @@ export function carryHumanTemplates(previous:HumanTemplateReport|undefined,curre
  if(!previous?.applied)return current;
  const replaced=new Set(current?.entries.filter(e=>e.status==='applied').flatMap(e=>e.panelFaces?.flat()??[])??[]);
  const kept=previous.entries.filter(e=>e.status==='applied'&&!e.panelFaces?.flat().some(f=>replaced.has(f)));
- const entries=[...kept,...(current?.entries??[])];
+ const entries=structuredClone([...kept,...(current?.entries??[])]);
  const report:HumanTemplateReport={...(current??previous),entries,applied:entries.filter(e=>e.status==='applied').length,after:packed.length,protectedSeams:[...new Set([...previous.protectedSeams,...(current?.protectedSeams??[])])].filter(e=>seams.has(e))};
  const owner=new Map<number,number>();for(const p of packed)for(const f of p.faceUVs.keys())owner.set(f,p.id);
  for(const e of report.entries)if(e.panelFaces)e.charts=e.panelFaces.map(fs=>owner.get(fs[0]!)!).filter(id=>id!==undefined);

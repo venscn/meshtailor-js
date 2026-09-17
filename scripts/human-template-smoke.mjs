@@ -22,7 +22,7 @@ try{
  for(const panels of [1,2]){
   const r=uv.unfoldBand(m,bottom.faces,bottom.id,seams,{...uv.DEFAULT_UNWRAP,humanTemplates:{panels}},total);test(`Verified Corset original #12 ${panels} panel(s)`,()=>{assert.ok(r.raw,JSON.stringify(r));assert.equal(r.raw.length,panels);assert.equal(r.raw.reduce((s,p)=>s+p.faceUVs.size,0),224);assert.ok(r.entry.maxAnisotropy<2);return r.entry});
   const atlas=uv.packAtlas(r.raw,{...uv.DEFAULT_UNWRAP,rotate:false}),all=new Map(atlas.packed.flatMap(p=>[...p.faceUVs])),small={...mesh,faces:bottom.faces.map(i=>({...mesh.faces[i],uvs:all.get(i)}))};
-  await writeFile(`${out}/Corset-bottom-${panels}.obj`,core.meshToOBJ(small));results.push({panels,entry:r.entry,diagnostics:r.diagnostics,packed:atlas.packed.map(p=>({...p,faceUVs:[...p.faceUVs]}))});
+  const ids=[...new Set(small.faces.flatMap(f=>f.vertices))],mapping=new Map(ids.map((id,i)=>[id,i]));const compact={...small,positions:ids.map(id=>small.positions[id]),faces:small.faces.map(f=>({...f,vertices:f.vertices.map(v=>mapping.get(v))}))};await writeFile(`${out}/Corset-bottom-${panels}.obj`,core.meshToOBJ(compact));await writeFile(`${out}/Corset-bottom-${panels}-source-map.json`,JSON.stringify({sourceChart:12,sourceFaces:bottom.faces,sourceVertices:ids}));results.push({panels,entry:r.entry,diagnostics:r.diagnostics,packed:atlas.packed.map(p=>({...p,faceUVs:[...p.faceUVs]}))});
  }
  await writeFile(`${out}/report.json`,JSON.stringify({passed:checks.length,checks,identity,results},null,2));
 }finally{await c.cleanup()}
