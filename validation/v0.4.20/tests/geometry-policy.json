@@ -1,5 +1,5 @@
 {
-  "passed": 14,
+  "passed": 15,
   "tests": [
     {
       "name": "Old local-storage source mode cannot re-enable original UV",
@@ -31,6 +31,10 @@
     },
     {
       "name": "Low-poly planar features are not discarded solely because each face has two triangles",
+      "passed": true
+    },
+    {
+      "name": "Open bent ribbons remain three connected sheets, not twelve planar micro-panels",
       "passed": true
     },
     {

@@ -28,9 +28,12 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   const adj:number[][]=Array.from({length:mesh.faces.length},()=>[]);
   for(const [key,e]of topology.edges)if(e.faces.length===2&&!cuts.has(key)){const[a,b]=e.faces;adj[a!]!.push(b!);adj[b!]!.push(a!);}
   for(const comp of components){work?.check();const ca=comp.faces.reduce((s,f)=>s+frames[f]!.area,0);if(ca<total*fraction*2)continue;
+    // Closed polyhedra can have a meaningful face with only two triangles.
+    // Do not turn every two-triangle bend of an open ribbon into a new panel.
+    const minPlanarFaces=comp.faces.every(fi=>adj[fi]!.length===3)?2:4;
     for(const root of comp.faces){if(visited[root])continue;const n=frames[root]!.normal,d=dot(n,frames[root]!.center),q=[root];visited[root]=1;let area=0;
       for(let h=0;h<q.length;h++){const i=q[h]!;area+=frames[i]!.area;if((h&511)===0)work?.check();for(const j of adj[i]!)if(!visited[j]&&dot(n,frames[j]!.normal)>1-1e-8&&mesh.faces[j]!.vertices.every(v=>Math.abs(dot(n,mesh.positions[v]!)-d)<tolerance)){visited[j]=1;q.push(j);}}
-      if(area>=Math.max(total*fraction,ca*.06)&&q.length>=2&&q.length<comp.faces.length){for(const fi of q)planes[fi]=planeCount;planeCount++;}
+      if(area>=Math.max(total*fraction,ca*.06)&&q.length>=minPlanarFaces&&q.length<comp.faces.length){for(const fi of q)planes[fi]=planeCount;planeCount++;}
     }
   }
   const seams=new Set(cuts);
