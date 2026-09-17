@@ -1,0 +1,145 @@
+{
+  "passed": 12,
+  "cases": [
+    {
+      "name": "variable saddle uses geometry-only groups and bounded peel feedback",
+      "passed": true,
+      "detail": {
+        "name": "variable saddle",
+        "groups": 1,
+        "islands": 1,
+        "faces": 280,
+        "feedback": 0,
+        "occupancy": 0.8410288001588856,
+        "elapsedMs": 78.66389600000002
+      }
+    },
+    {
+      "name": "folded S curtain uses geometry-only groups and bounded peel feedback",
+      "passed": true,
+      "detail": {
+        "name": "folded S curtain",
+        "groups": 12,
+        "islands": 12,
+        "faces": 280,
+        "feedback": 0,
+        "occupancy": 0.6689584776306126,
+        "elapsedMs": 44.204509000000144
+      }
+    },
+    {
+      "name": "twisted noncircular ribbon uses geometry-only groups and bounded peel feedback",
+      "passed": true,
+      "detail": {
+        "name": "twisted noncircular ribbon",
+        "groups": 1,
+        "islands": 1,
+        "faces": 280,
+        "feedback": 0,
+        "occupancy": 0.20010893720903095,
+        "elapsedMs": 32.71694499999967
+      }
+    },
+    {
+      "name": "asymmetric dome uses geometry-only groups and bounded peel feedback",
+      "passed": true,
+      "detail": {
+        "name": "asymmetric dome",
+        "groups": 1,
+        "islands": 1,
+        "faces": 280,
+        "feedback": 0,
+        "occupancy": 0.9346750516837057,
+        "elapsedMs": 37.93544100000008
+      }
+    },
+    {
+      "name": "Beveled gear / 倒角齿轮 uses geometry-only groups and bounded peel feedback",
+      "passed": true,
+      "detail": {
+        "name": "Beveled gear / 倒角齿轮",
+        "groups": 6,
+        "islands": 6,
+        "faces": 1536,
+        "feedback": 0,
+        "occupancy": 0.3067246480004769,
+        "elapsedMs": 161.02502000000004
+      }
+    },
+    {
+      "name": "Large opposing surfaces use at most two coarse panels, never per-tooth shards",
+      "passed": true
+    },
+    {
+      "name": "Geometry is independent of model name",
+      "passed": true
+    },
+    {
+      "name": "Gear face silhouette is a similarity of its real planar surface",
+      "passed": true
+    },
+    {
+      "name": "Failure feedback produces two connected regions, not many face-normal bins",
+      "passed": true
+    },
+    {
+      "name": "Small dense disconnected objects stay whole spatial groups",
+      "passed": true
+    },
+    {
+      "name": "Explicit user group seams are preserved by subsequent solving",
+      "passed": true
+    },
+    {
+      "name": "Malformed limits rejected; cancellation propagated",
+      "passed": true
+    }
+  ],
+  "models": [
+    {
+      "name": "variable saddle",
+      "groups": 1,
+      "islands": 1,
+      "faces": 280,
+      "feedback": 0,
+      "occupancy": 0.8410288001588856,
+      "elapsedMs": 78.66389600000002
+    },
+    {
+      "name": "folded S curtain",
+      "groups": 12,
+      "islands": 12,
+      "faces": 280,
+      "feedback": 0,
+      "occupancy": 0.6689584776306126,
+      "elapsedMs": 44.204509000000144
+    },
+    {
+      "name": "twisted noncircular ribbon",
+      "groups": 1,
+      "islands": 1,
+      "faces": 280,
+      "feedback": 0,
+      "occupancy": 0.20010893720903095,
+      "elapsedMs": 32.71694499999967
+    },
+    {
+      "name": "asymmetric dome",
+      "groups": 1,
+      "islands": 1,
+      "faces": 280,
+      "feedback": 0,
+      "occupancy": 0.9346750516837057,
+      "elapsedMs": 37.93544100000008
+    },
+    {
+      "name": "Beveled gear / 倒角齿轮",
+      "groups": 6,
+      "islands": 6,
+      "faces": 1536,
+      "feedback": 0,
+      "occupancy": 0.3067246480004769,
+      "elapsedMs": 161.02502000000004
+    }
+  ]
+}

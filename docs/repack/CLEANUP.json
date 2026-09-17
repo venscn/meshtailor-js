@@ -1,0 +1,223 @@
+{
+  "removedCount": 36,
+  "removedWorktreeBytes": 98450048,
+  "note": "Ordinary working-tree cleanup, not a Git-history rewrite. Previously committed blobs remain reachable via old tags. No apps/, packages/, fixtures or test scripts removed.",
+  "files": [
+    {
+      "path": "validation/v0.4.11/after-FlightHelmet-source-atlas.json",
+      "bytes": 331210,
+      "sha256": "da2a8eb47a586e7dcb927112a7d65653a026fa72bf8691f75802f99a87836764",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.11/corrected-models-browser.json",
+      "bytes": 146867,
+      "sha256": "e96a03d33080c01575add431a98dba6aeed9b5f5cfba723650df8a4a50f12f8a",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.14/previews/playback.png",
+      "bytes": 575805,
+      "sha256": "9d011edc4b51d01c9f52ab2ce6cc649118875947d51a71d95a8cb1ce00436aa2",
+      "reason": "historical screenshot; original tracked copy remains in Git history"
+    },
+    {
+      "path": "validation/v0.4.14/previews/pipeline.png",
+      "bytes": 575827,
+      "sha256": "64a3c9e0e9ca8e57fcd496bdfb1024c9a8cb1203de6b0a79ae62a56b13b09447",
+      "reason": "historical screenshot; original tracked copy remains in Git history"
+    },
+    {
+      "path": "validation/v0.4.16/previews/corset-paint.png",
+      "bytes": 609670,
+      "sha256": "30f2bbd6a5da1824b96570d83f6413d830c89be443750017b22ba825af40c875",
+      "reason": "historical screenshot; original tracked copy remains in Git history"
+    },
+    {
+      "path": "validation/v0.4.16/previews/gear-paint.png",
+      "bytes": 430152,
+      "sha256": "cb905b461877619d2064a598bc2ba11415260a61ef9b65e07dce882a09759950",
+      "reason": "historical screenshot; original tracked copy remains in Git history"
+    },
+    {
+      "path": "validation/v0.4.16/real/Corset-source-atlas.json",
+      "bytes": 217266,
+      "sha256": "a5b411efce4fb79a6607b41ceca9981c931568027011530615db326ea475ef2f",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.16/real/FlightHelmet-compact-before.json",
+      "bytes": 489505,
+      "sha256": "11d28f4a77784140c91b99da3ff90b35316c2307fdfbd8ffcec0f1c5792822c9",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.16/real/Corset-compact-before.json",
+      "bytes": 147748,
+      "sha256": "00c4055a1072ccd5c65f1911bd877ed846899ac1f4c54f2eeb01f87705e9a37c",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.16/real/FlightHelmet-source-atlas.json",
+      "bytes": 680570,
+      "sha256": "5a29bd54ba2777a5e31eed3d5eaf05376fed7f765545dfd3504a954b1fa4b494",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.18/geometry-only/FlightHelmet-generated.json",
+      "bytes": 2639417,
+      "sha256": "64b41b3147560d033fc2b45ad0f2225fef658df12184ecb65b1d763091a04368",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.18/geometry-only/Corset-generated.json",
+      "bytes": 640703,
+      "sha256": "b97b0fa96c887c025ab72a31b5680cb8a6ed6e4938a1694449ca9d793e2b2dc1",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.18/real/Corset-generated.json",
+      "bytes": 649206,
+      "sha256": "3e1f8bfb06f3baced385e3355183db316572619bd5b5811e41d77aaeabb2616d",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.13/real-adaptive/Corset-original.obj",
+      "bytes": 1308083,
+      "sha256": "9c80b1ddf3722a79bf304d92fd9fff85a66f9e9630f04e96d1e29ceb92eec58e",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.13/real-adaptive/Corset-source-atlas.json",
+      "bytes": 215725,
+      "sha256": "469a408cddd14b9df59df6720a0c3832ba337ad0ea193d57a214fdda2f196c2b",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.13/real-adaptive/Corset-organized.obj",
+      "bytes": 1697050,
+      "sha256": "96e39678a32a17da72b9621d7b183530a4474c51807c733e30248749adf9840a",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.13/real-adaptive/FlightHelmet-original.obj",
+      "bytes": 8549169,
+      "sha256": "7c08678d5564ef071c9ed0d03ef939e632ee72053781f0c38cdfb1a88c3efb77",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.13/real-adaptive/FlightHelmet-organized.obj",
+      "bytes": 8622883,
+      "sha256": "d909089f824276bec5f87a165cd8c687f05939202a48b525a6687a1e664f4de0",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.13/real-adaptive/FlightHelmet-source-atlas.json",
+      "bytes": 471839,
+      "sha256": "79e86f2f735b2f59d850235297ee581fe03808eb94d6eec0fbef0a2f10061e75",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.17/browser/gear-structure.png",
+      "bytes": 417595,
+      "sha256": "9f4fbdfdd7cd2bed91ad961feae9e07b333072619488f0ca78bb37a815146ce8",
+      "reason": "historical screenshot; original tracked copy remains in Git history"
+    },
+    {
+      "path": "validation/v0.4.17/browser/corset-two-panels.png",
+      "bytes": 476471,
+      "sha256": "cc848f5a025279960db5a3122e147ce267ca70022815b16e86700b70ba7fdd49",
+      "reason": "historical screenshot; original tracked copy remains in Git history"
+    },
+    {
+      "path": "validation/v0.4.17/browser/corset-side-cuts.png",
+      "bytes": 527087,
+      "sha256": "ac619699131ba470ff09588f6e00641907408917a60a19af219520125758ed15",
+      "reason": "historical screenshot; original tracked copy remains in Git history"
+    },
+    {
+      "path": "validation/v0.4.17/templates/Corset-bottom-2.obj",
+      "bytes": 20344,
+      "sha256": "ae25c15d2fbb8a5900f5fbe2429846629cab8c2e54cd8a95c41a39b320be2463",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.17/templates/Corset-bottom-1.obj",
+      "bytes": 20172,
+      "sha256": "523173a4cfd603b84fe8a1bf0d1fa50988e1a643d2c74bf3f127040218b24ff2",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.17/templates/report.json",
+      "bytes": 216808,
+      "sha256": "d8385a334e54d8e8de66fb2f0996ce79e9623af045d457803054a9c3c673b286",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.17/real/Corset-source-atlas-mesh.json",
+      "bytes": 7458307,
+      "sha256": "93e6680046be8531f2e64709964be3097daedc5b553b0c35389256a4bc49e00b",
+      "reason": "generated full-mesh snapshot; regenerate on demand"
+    },
+    {
+      "path": "validation/v0.4.17/real/Corset-original.obj",
+      "bytes": 1308083,
+      "sha256": "9c80b1ddf3722a79bf304d92fd9fff85a66f9e9630f04e96d1e29ceb92eec58e",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.17/real/FlightHelmet-source-atlas-mesh.json",
+      "bytes": 38260991,
+      "sha256": "730dfc1298d08fdd0b2fcb0422dfa9f64529afff11ea080280efcf084f71fc74",
+      "reason": "generated full-mesh snapshot; regenerate on demand"
+    },
+    {
+      "path": "validation/v0.4.17/real/Corset-source-atlas.json",
+      "bytes": 269040,
+      "sha256": "f3da7c4d77786dbe6e28677d57d6da9e1424b2917d7461990d9e1d65a4d84a35",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.17/real/Corset-organized.obj",
+      "bytes": 1703258,
+      "sha256": "062048f2b11b06ba211066fd499d54e93a63a136583c988f5de90068ca450d45",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.17/real/FlightHelmet-original.obj",
+      "bytes": 8549169,
+      "sha256": "7c08678d5564ef071c9ed0d03ef939e632ee72053781f0c38cdfb1a88c3efb77",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.17/real/FlightHelmet-organized.obj",
+      "bytes": 8699700,
+      "sha256": "eee5feabce2d68ee8dd1b2fdaad138dde1e802849f69abea690e23591b208b18",
+      "reason": "generated OBJ duplicate; source and generation scripts retained"
+    },
+    {
+      "path": "validation/v0.4.17/real/FlightHelmet-source-atlas.json",
+      "bytes": 798039,
+      "sha256": "b99d5da68c0798b199061b752b969f7f3600875aac655aedc66e6a8f66c5f9e8",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.12/real-refined/Corset-source-atlas.json",
+      "bytes": 148040,
+      "sha256": "8fd9cc508760e9b57aa3ebd68510d024bd6e926d12ae9ec8312463fa8a937bc7",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.12/real-refined/FlightHelmet-source-atlas.json",
+      "bytes": 376262,
+      "sha256": "47c642f3e4878eefb104e1a86a0a466e6ce425fcdfcbe16b941ebe748943d7e0",
+      "reason": "large generated report with embedded mesh/chart arrays"
+    },
+    {
+      "path": "validation/v0.4.15/previews/arrival.png",
+      "bytes": 201987,
+      "sha256": "ef0ee389c090dbb8027488134e1b8cc1c0b8381a2467a628bcf45dd5add07a22",
+      "reason": "historical screenshot; original tracked copy remains in Git history"
+    }
+  ]
+}

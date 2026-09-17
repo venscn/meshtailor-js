@@ -6,3 +6,9 @@ coverage
 .history/*.bundle
 apps/studio/public/assets/remote/*
 !apps/studio/public/assets/remote/.gitkeep
+
+# Reproducible QA geometry is regenerated when needed, not duplicated in releases.
+validation/**/*.obj
+validation/**/*-mesh.json
+validation/local*/
+*.zip.partial

@@ -1,0 +1,97 @@
+{
+  "passed": 23,
+  "checks": [
+    {
+      "name": "plate 0° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "plate 30° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "plate 45° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "plate 90° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "plate 225° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "annulus 0° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "annulus 30° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "annulus 45° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "annulus 90° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "annulus 225° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "concave 0° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "concave 30° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "concave 45° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "concave 90° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "concave 225° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "slotted 0° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "slotted 30° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "slotted 45° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "slotted 90° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "slotted 225° conservative coverage",
+      "passed": true
+    },
+    {
+      "name": "hole remains free, not a bounding box",
+      "passed": true
+    },
+    {
+      "name": "ambiguous same-directed/nonmanifold edge rejects acceleration",
+      "passed": true
+    },
+    {
+      "name": "cancellation not swallowed",
+      "passed": true
+    }
+  ]
+}

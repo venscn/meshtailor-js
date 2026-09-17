@@ -1,0 +1,220 @@
+{
+  "passed": 13,
+  "cases": [
+    {
+      "name": "Shared scale can exceed differential importance cap",
+      "passed": true
+    },
+    {
+      "name": "Baseline immutable; all output triangles non-overlapping and inside tile",
+      "passed": true
+    },
+    {
+      "name": "Empty-space report uses reserved cells, not claimed geometric occupancy",
+      "passed": true
+    },
+    {
+      "name": "Proper rotation 0 preserves real silhouette area and edge lengths",
+      "passed": true
+    },
+    {
+      "name": "Proper rotation 15 preserves real silhouette area and edge lengths",
+      "passed": true
+    },
+    {
+      "name": "Proper rotation 30 preserves real silhouette area and edge lengths",
+      "passed": true
+    },
+    {
+      "name": "Proper rotation 45 preserves real silhouette area and edge lengths",
+      "passed": true
+    },
+    {
+      "name": "Proper rotation 90 preserves real silhouette area and edge lengths",
+      "passed": true
+    },
+    {
+      "name": "Proper rotation 135 preserves real silhouette area and edge lengths",
+      "passed": true
+    },
+    {
+      "name": "Proper rotation 210 preserves real silhouette area and edge lengths",
+      "passed": true
+    },
+    {
+      "name": "Proper rotation 315 preserves real silhouette area and edge lengths",
+      "passed": true
+    },
+    {
+      "name": "Partial budget explicitly retains untried islands",
+      "passed": true
+    },
+    {
+      "name": "Malformed shared gain, reflow budget and angular step rejected",
+      "passed": true
+    }
+  ],
+  "example": {
+    "mode": "uniform",
+    "resolution": 256,
+    "settings": {
+      "step": 0.15,
+      "maxAreaGain": 1.1,
+      "maxRounds": 24,
+      "warmupPasses": 0,
+      "timeBudgetMs": 5000,
+      "maxTrials": 256,
+      "rotate": true
+    },
+    "densitySpreadBefore": 1,
+    "densitySpreadAfter": 1,
+    "before": 0.15808575968717575,
+    "after": 0.9817868687934799,
+    "beforeBox": 0.15808575968717575,
+    "afterBox": 0.9817868687934799,
+    "trials": 19,
+    "accepted": 14,
+    "commonAccepted": 0,
+    "rounds": 19,
+    "stop": "converged",
+    "elapsedMs": 52.331756999999925,
+    "order": [
+      8
+    ],
+    "gains": [
+      {
+        "id": 8,
+        "area3D": 1,
+        "areaFactor": 6.2104700052444,
+        "linearFactor": 2.492081460394985
+      }
+    ],
+    "history": [
+      {
+        "round": 1,
+        "id": null,
+        "occupancy": 0.18179862364025218,
+        "areaFactor": 1.15
+      },
+      {
+        "round": 2,
+        "id": null,
+        "occupancy": 0.20906841718628996,
+        "areaFactor": 1.3224999999999998
+      },
+      {
+        "round": 3,
+        "id": null,
+        "occupancy": 0.24042867976423343,
+        "areaFactor": 1.5208749999999995
+      },
+      {
+        "round": 4,
+        "id": null,
+        "occupancy": 0.27649298172886844,
+        "areaFactor": 1.7490062499999994
+      },
+      {
+        "round": 5,
+        "id": null,
+        "occupancy": 0.3179669289881987,
+        "areaFactor": 2.0113571874999994
+      },
+      {
+        "round": 6,
+        "id": null,
+        "occupancy": 0.3656619683364285,
+        "areaFactor": 2.313060765624999
+      },
+      {
+        "round": 7,
+        "id": null,
+        "occupancy": 0.4205112635868927,
+        "areaFactor": 2.6600198804687487
+      },
+      {
+        "round": 8,
+        "id": null,
+        "occupancy": 0.4835879531249266,
+        "areaFactor": 3.0590228625390607
+      },
+      {
+        "round": 9,
+        "id": null,
+        "occupancy": 0.5561261460936655,
+        "areaFactor": 3.5178762919199196
+      },
+      {
+        "round": 10,
+        "id": null,
+        "occupancy": 0.6395450680077154,
+        "areaFactor": 4.0455577357079076
+      },
+      {
+        "round": 11,
+        "id": null,
+        "occupancy": 0.7354768282088726,
+        "areaFactor": 4.652391396064093
+      },
+      {
+        "round": 12,
+        "id": null,
+        "occupancy": 0.8457983524402035,
+        "areaFactor": 5.350250105473707
+      },
+      {
+        "round": 13,
+        "id": null,
+        "occupancy": 0.9726681053062338,
+        "areaFactor": 6.152787621294762
+      },
+      {
+        "round": 18,
+        "id": null,
+        "occupancy": 0.9817868687934798,
+        "areaFactor": 6.2104700052444
+      }
+    ],
+    "shapeWaste": [
+      {
+        "id": 8,
+        "area3D": 1,
+        "boxWaste": 0,
+        "shapeFill": 1
+      }
+    ],
+    "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。",
+    "search": {
+      "commonGainLimit": 8,
+      "commonGain": 6.2104700052444,
+      "rotationStep": 45,
+      "reflowBudget": 4,
+      "reflowTrials": 0,
+      "reflowAccepted": 0,
+      "islandsTried": 1,
+      "untriedIds": [],
+      "completedSweeps": 19,
+      "freeGridFraction": 0,
+      "emptyRegions": []
+    },
+    "adaptive": {
+      "strategy": "adaptive",
+      "seed": "current-layout",
+      "localAccepted": 0,
+      "reflowAccepted": 14,
+      "failedTrials": 5,
+      "smallerAfterFailure": 0,
+      "skippedAtCap": 0,
+      "attempts": [
+        {
+          "id": 8,
+          "tries": 19,
+          "accepted": 14,
+          "failed": 5,
+          "nextStep": 0.005,
+          "minStepFailed": false
+        }
+      ]
+    }
+  }
+}

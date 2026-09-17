@@ -1,0 +1,17 @@
+{
+  "passed": 7,
+  "conformalQuality": {
+    "triangles": 151,
+    "flipped": 0,
+    "degenerate": 0,
+    "overlaps": 0,
+    "area": 0.2817981620261312,
+    "valid": true
+  },
+  "density": {
+    "min": 2.9679306356499894e-8,
+    "max": 30.659641575055346
+  },
+  "guard": "explicit rejection for geometric feedback, no validity tolerance relaxation",
+  "groupCarry": true
+}

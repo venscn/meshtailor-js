@@ -1,0 +1,37 @@
+{
+  "passed": 8,
+  "cases": [
+    {
+      "name": "Simple concave boundary is accepted",
+      "passed": true
+    },
+    {
+      "name": "Non-adjacent crossing is rejected before ARAP commits",
+      "passed": true
+    },
+    {
+      "name": "Non-adjacent contact is rejected",
+      "passed": true
+    },
+    {
+      "name": "Near-edge separated boundaries remain valid",
+      "passed": true
+    },
+    {
+      "name": "Crossing multiple loops are rejected",
+      "passed": true
+    },
+    {
+      "name": "Scale and translation do not alter verdict",
+      "passed": true
+    },
+    {
+      "name": "Non-finite input and zero-length edges rejected",
+      "passed": true
+    },
+    {
+      "name": "Cancellation is propagated",
+      "passed": true
+    }
+  ]
+}
