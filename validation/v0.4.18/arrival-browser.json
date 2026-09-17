@@ -1,0 +1,254 @@
+{
+  "suite": "Timeline-sampled arrival presentation / production WebGL pixels",
+  "cases": [
+    {
+      "name": "DPR1: Landed island stays opaque at exact UV target; successor moves",
+      "passed": true,
+      "details": {
+        "s": [
+          {
+            "id": 0,
+            "phase": "hold",
+            "weight": 1,
+            "opacity": 1,
+            "ageSeconds": 0
+          }
+        ],
+        "motion": [
+          {
+            "id": 1,
+            "progress": 0.15000000000000002
+          }
+        ],
+        "pos": [
+          -4,
+          -0.800000011920929,
+          0,
+          -2,
+          -0.800000011920929,
+          0,
+          -3,
+          1,
+          0
+        ],
+        "target": [
+          -4,
+          -0.800000011920929,
+          0,
+          -2,
+          -0.800000011920929,
+          0,
+          -3,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "name": "DPR1: Hold equals original opaque colour, not a flash",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Stationary animation progress cannot consume hold/fade wall time",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Early fade is continuous at .8 animation seconds",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Middle fade GPU pixel differs from both endpoints",
+      "passed": true,
+      "details": {
+        "held": [
+          94,
+          177,
+          212,
+          255
+        ],
+        "mid": [
+          65,
+          100,
+          119,
+          255
+        ],
+        "ghost": [
+          38,
+          46,
+          52,
+          255
+        ],
+        "state": [
+          {
+            "id": 0,
+            "phase": "fade",
+            "weight": 0.49999999999999967,
+            "opacity": 0.5899999999999997,
+            "ageSeconds": 1.3000000000000003
+          }
+        ]
+      }
+    },
+    {
+      "name": "DPR1: Fade completion equals background pixels",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Scrubbing backwards restores identical colour and fade phase",
+      "passed": true
+    },
+    {
+      "name": "DPR1: 4x increments sample same track in one quarter of time",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Re-evaluating presentation does not change landed pose or camera",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Labels use same continuous animation fade",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Sequential boundary never flashes all waiting islands solid",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Pause and natural finish restore context immediately",
+      "passed": true
+    },
+    {
+      "name": "DPR1: Loop and re-seek are stateless, no stale wall-time events",
+      "passed": true
+    },
+    {
+      "name": "DPR1: No shader, Javascript or WebGL errors",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Landed island stays opaque at exact UV target; successor moves",
+      "passed": true,
+      "details": {
+        "s": [
+          {
+            "id": 0,
+            "phase": "hold",
+            "weight": 1,
+            "opacity": 1,
+            "ageSeconds": 0
+          }
+        ],
+        "motion": [
+          {
+            "id": 1,
+            "progress": 0.15000000000000002
+          }
+        ],
+        "pos": [
+          -4,
+          -0.800000011920929,
+          0,
+          -2,
+          -0.800000011920929,
+          0,
+          -3,
+          1,
+          0
+        ],
+        "target": [
+          -4,
+          -0.800000011920929,
+          0,
+          -2,
+          -0.800000011920929,
+          0,
+          -3,
+          1,
+          0
+        ]
+      }
+    },
+    {
+      "name": "DPR2: Hold equals original opaque colour, not a flash",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Stationary animation progress cannot consume hold/fade wall time",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Early fade is continuous at .8 animation seconds",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Middle fade GPU pixel differs from both endpoints",
+      "passed": true,
+      "details": {
+        "held": [
+          94,
+          177,
+          212,
+          255
+        ],
+        "mid": [
+          65,
+          100,
+          119,
+          255
+        ],
+        "ghost": [
+          38,
+          46,
+          52,
+          255
+        ],
+        "state": [
+          {
+            "id": 0,
+            "phase": "fade",
+            "weight": 0.49999999999999967,
+            "opacity": 0.5899999999999997,
+            "ageSeconds": 1.3000000000000003
+          }
+        ]
+      }
+    },
+    {
+      "name": "DPR2: Fade completion equals background pixels",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Scrubbing backwards restores identical colour and fade phase",
+      "passed": true
+    },
+    {
+      "name": "DPR2: 4x increments sample same track in one quarter of time",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Re-evaluating presentation does not change landed pose or camera",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Labels use same continuous animation fade",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Sequential boundary never flashes all waiting islands solid",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Pause and natural finish restore context immediately",
+      "passed": true
+    },
+    {
+      "name": "DPR2: Loop and re-seek are stateless, no stale wall-time events",
+      "passed": true
+    },
+    {
+      "name": "DPR2: No shader, Javascript or WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 28
+}

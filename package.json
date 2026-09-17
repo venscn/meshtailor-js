@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.17",
+  "version": "0.4.18",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -105,7 +105,15 @@
     "test:uv-sliver": "node scripts/uv-sliver-smoke.mjs",
     "test:human-uv": "node scripts/human-template-smoke.mjs",
     "test:human-uv:integration": "node scripts/human-template-integration-smoke.mjs",
-    "test:human-uv:browser": "node scripts/human-template-browser-smoke.mjs"
+    "test:human-uv:browser": "node scripts/human-template-browser-smoke.mjs",
+    "test:peel": "node scripts/peel-smoke.mjs",
+    "test:peel:real": "node scripts/peel-verified-real.mjs",
+    "test:peel:browser": "node scripts/peel-browser-smoke.mjs",
+    "test:boundary-guard": "node scripts/boundary-guard-smoke.mjs",
+    "test:area-collapse": "node scripts/area-collapse-smoke.mjs",
+    "test:contour-raster": "node scripts/contour-raster-smoke.mjs",
+    "test:fill:search": "node scripts/fill-search-smoke.mjs",
+    "test:peel:fill": "node scripts/peel-fill-real.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

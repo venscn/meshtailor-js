@@ -1,3 +1,40 @@
+# v0.4.18 · 实际验证范围
+
+本节仅记录本轮实际运行；下面旧版本历史不计为本轮通过。
+
+| 项目 | 实测 | 记录路径（validation/v0.4.18/） |
+|---|---|---|
+| 通用剥展 | 12项通过；同时关闭源提示/模板的合成测试、粗分组、显式切线、齿形与孔洞、全覆盖 | tests/peel.json |
+| 自由边界防交叉 | 8项通过 | tests/boundary-guard.json |
+| 实际LSCM面积塌缩反例与组身份 | 7项通过 | tests/area-collapse.json |
+| 保守轮廓栅格 | 23项通过 | tests/contour-raster.json |
+| 新搜索约束、回流与诊断 | 13项通过 | tests/fill-search.json |
+| 原精排与其他算法 | 保留实际命令日志与退出码；未找到的旧猜测脚本名明确标记未运行，不算通过 | regressions/ |
+| 正确两模型，源提示开/关四条生产流程 | 全面数保留、源输入不变、全图UV及OBJ重读通过；81/95空间组，默认93/176岛，无源提示89/251岛 | real/、geometry-only/、summary.json |
+| 真实输入精排及头盔续排 | 未增切线、全部面保留；新占用74.72%/60.40%，续排头盔62.95%，预算/未访问数如实报告 | fill/、refill/ |
+| 独立几何审计 | 7份实际导出OBJ：原3D/面序不变、正UV绕序、边框内、正面积交叠0（阈值1e-14） | qa-peel/geometry-only/fill/refill.json |
+| 新离线工作台浏览器流程 | 10项通过：真实鼠标、生产Worker、人台/齿轮、新预设/来源元数据、动画终点 | browser/report.json |
+| 手动相机浏览器回归 | 39项通过 | camera-browser.json |
+| 同动画秒的到达亮显/渐隐像素回归 | 28项通过 | arrival-browser.json |
+
+Core smoke编译包括核心与生产Worker及共享unfold TS模块，不包括完整React TSX依赖树。真实模型固定夹具使用正确 glTF/bin，不使用早先错误的网页ZIP。源几何、候选UV和实际OBJ均有报告/哈希，岛数不是空间组数。
+
+## 明确未通过/未认证
+
+`npm install`实际遇到 registry.npmjs.org 的 EAI_AGAIN；`npm run build`退出127（vite not found）；完整类型检查退出2（缺少node类型定义）。日志在 environment/。没有进行完整React/Vite主界面、通用Three FBX/glTF导入器、macOS/Windows/Safari实机认证。离线页通过不能冒充主入口通过。
+
+浏览器运行Linux Chromium软件WebGL。大模型新截图关闭重叠诊断，检验分组对应与UI，不认证大模型重叠提示速度。无GPU硬件帧率或生产性能保证。
+
+## 真实改进与限制
+
+新方法分组不依赖模型名，能在源提示关闭时工作；并不保证任意模型都有人工语义可辨识性。源提示关闭的头盔251岛（默认176），仍有取舍。凹孔保留不意味着必须达到旧版扭曲/合并布局的占用率。同输入30秒旧/新填空对照近似持平略低，详见comparison/；不宣称全部空白已最优消除。预算到期会中断扫描，但返回最后有效整图，未尝试岛数明确报告。
+
+所有旧tag保留，独立附注 v0.4.18 从干净HEAD发布；最终ZIP还会重新解压校验并复跑实际模型，打包后日志另附根目录 RELEASE-VERIFICATION.json。Git身份报告不会自我写入其检查的HEAD。
+
+---
+
+# 历史验证记录（不计入本轮）
+
 # v0.4.17 验证范围
 
 本节只统计本轮实际执行；后文旧版本记录不是本轮新认证。

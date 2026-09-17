@@ -13,8 +13,8 @@ export class PipelinePanel {
     this.element.className='pipeline-panel';this.element.dataset.testid='load-pipeline';
     this.element.innerHTML=`<h3>载入模型 · 自动处理流程</h3><div class="pipeline-current" role="status" data-pipeline="current"></div>
       <small data-pipeline="input">读取输入 → 解析网格 → 保留原 UV / 材质 → 拓扑准备</small>
-      <div class="pipeline-presets"><button type="button" data-pipeline="standard">标准整理</button><button type="button" data-pipeline="filled">整理＋填空</button><button type="button" data-pipeline="raw">原样检查</button></div>
-      <label>UV 来源<select aria-label="Load pipeline source" data-pipeline="source"><option value="auto">自动：有原 UV 则整理，否则生成</option><option value="generated">重新分区并生成 UV</option><option value="inspect">原样检查（不修改坐标）</option></select></label>
+      <div class="pipeline-presets"><button type="button" data-pipeline="standard">标准整理</button><button type="button" data-pipeline="filled">整理＋填空</button><button type="button" data-pipeline="peel">通用分组剥展</button><button type="button" data-pipeline="raw">原样检查</button></div>
+      <label>UV 来源<select aria-label="Load pipeline source" data-pipeline="source"><option value="auto">自动：有原 UV 则整理，否则生成</option><option value="peel">通用：空间组 → 组内开缝 → 剥展</option><option value="generated">重新分区并生成 UV</option><option value="inspect">原样检查（不修改坐标）</option></select></label>
       <div class="pipeline-track">
         <label class="pipeline-toggle"><input aria-label="Pipeline repair" data-pipeline="repairInvalid" type="checkbox"><span>检查原岛 · 允许局部修复<small>只修无效原岛；关闭后遇到无效岛会报错</small></span></label>
         <label class="pipeline-toggle"><input aria-label="Pipeline merge" data-pipeline="mergeAdjacent" type="checkbox"><span>共享边验证缝合<small>通过质量检查后才连接，不按空间接近强焊</small></span></label>
@@ -39,6 +39,7 @@ export class PipelinePanel {
     for(const k of ['source','repairInvalid','mergeAdjacent','fill','fillBudgetSeconds','fillRounds'])this.get(k).addEventListener('change',change);
     this.get('standard').onclick=()=>this.onChange({...DEFAULT_LOAD_PIPELINE});
     this.get('filled').onclick=()=>this.onChange({...DEFAULT_LOAD_PIPELINE,fill:true});
+    this.get('peel').onclick=()=>this.onChange({...DEFAULT_LOAD_PIPELINE,source:'peel',mergeAdjacent:false,fill:true});
     this.get('raw').onclick=()=>this.onChange({...DEFAULT_LOAD_PIPELINE,source:'inspect',fill:false});
     this.get('run').onclick=()=>this.onRun();this.get('cancel').onclick=()=>this.onCancel();
     this.get('export').onclick=()=>this.save('meshtailor-load-pipeline.json',this.state?.config);

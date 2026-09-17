@@ -1,0 +1,17 @@
+{
+  "engine": "GEOS/Shapely 2.1.2",
+  "toleranceUVArea": 1e-14,
+  "assets": {
+    "FlightHelmet": {
+      "sha256": "59734dc643ee157d27ca7ed3f6f794257adaf3ac91df685e273e49323461c0ce",
+      "faces": 94722,
+      "candidatePairs": 656777,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "occupancy": 0.6295445142958969,
+      "positiveOrientation": true,
+      "unchanged3D": true,
+      "seconds": 6.674850571999741
+    }
+  }
+}

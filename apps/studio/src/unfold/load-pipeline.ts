@@ -3,7 +3,7 @@ import type {UnwrapOptions} from '@meshtailor/uv';
 import type {UVOperationStep} from '../../../../packages/uv/src/work.js';
 export const PIPELINE_STORAGE_KEY='meshtailor.load-pipeline.v1';
 export interface LoadPipelineConfig {
-  version:1; source:'auto'|'generated'|'inspect';
+  version:1; source:'auto'|'generated'|'peel'|'inspect';
   repairInvalid:boolean; mergeAdjacent:boolean; fill:boolean;
   fillBudgetSeconds:number; fillRounds:number;
 }
@@ -16,7 +16,7 @@ export interface PipelineTrace {version:1;target:PipelineTarget;origin:'model-lo
 export function validateLoadPipeline(value:unknown):LoadPipelineConfig {
   if(!value||typeof value!=='object')throw Error('流程配置必须是 JSON 对象。');
   const s=value as Record<string,unknown>;
-  if(s.version!==1||!['auto','generated','inspect'].includes(s.source as string))throw Error('流程配置版本或 UV 来源无效。');
+  if(s.version!==1||!['auto','generated','peel','inspect'].includes(s.source as string))throw Error('流程配置版本或 UV 来源无效。');
   for(const k of ['repairInvalid','mergeAdjacent','fill'])if(typeof s[k]!=='boolean')throw Error(`流程配置 ${k} 必须为布尔值。`);
   if(typeof s.fillBudgetSeconds!=='number'||!Number.isFinite(s.fillBudgetSeconds)||s.fillBudgetSeconds<1||s.fillBudgetSeconds>120)throw Error('精排搜索预算必须为 1–120 秒。');
   if(typeof s.fillRounds!=='number'||!Number.isInteger(s.fillRounds)||s.fillRounds<1||s.fillRounds>24)throw Error('精排轮数必须为 1–24。');
@@ -34,8 +34,8 @@ export function resolveLoadPipeline(mesh:MeshData,value:LoadPipelineConfig,base:
   if(plan.source==='inspect'&&!hasUV)throw Error('该模型没有完整原 UV，不能原样检查。请选择自动或重新生成。');
   if(plan.source==='inspect'&&plan.fill)throw Error('原样检查不修改 UV，不能同时启用填补空白。请改为自动整理。');
   if(plan.fill&&base.atlasPageMode&&base.atlasPageMode!=='single')throw Error('自动填补空白当前只支持单页；请将 UV 页策略设为单页。');
-  const target:PipelineTarget=plan.source==='inspect'?'source':plan.source==='generated'||!hasUV?'generated':'source-atlas';
-  return {target,config:{...base,humanTemplates:base.humanTemplates?{...base.humanTemplates,selectedCharts:undefined}:undefined,sourceRepairPolicy:plan.repairInvalid?'repair':'reject',sourceAtlasMerge:plan.mergeAdjacent,postMerge:plan.mergeAdjacent,
+  const target:PipelineTarget=plan.source==='inspect'?'source':plan.source==='generated'||plan.source==='peel'||!hasUV?'generated':'source-atlas';
+  return {target,config:{...base,...(plan.source==='peel'?{initialSegmentation:'hierarchical',uvObjective:'paint',method:'auto',autoCut:true}:{}),humanTemplates:base.humanTemplates?{...base.humanTemplates,selectedCharts:undefined}:undefined,sourceRepairPolicy:plan.repairInvalid?'repair':'reject',sourceAtlasMerge:plan.mergeAdjacent,postMerge:plan.mergeAdjacent,
     // No hidden nested refinement in packing. One explicit fill stage follows it.
     fillMode:'off',fillRecutLarge:false,fillTimeBudgetMs:plan.fillBudgetSeconds*1000,fillRounds:plan.fillRounds} as Partial<UnwrapOptions>};
 }
@@ -44,7 +44,7 @@ export function pipelineSteps(target:PipelineTarget,config:Partial<UnwrapOptions
   const rows:[UVOperationStep,string,boolean,string?][]=[
     ['input','检查几何与任务配置',true],
     ['extract','提取原 UV 岛 · 审计原坐标',source,'本次不读取原 UV'],
-    ['parameterize','连通分区 · 参数化与必要补切',target==='generated','沿用现有 UV 岛'],
+    ['parameterize',config.initialSegmentation==='hierarchical'?'空间分组 → 组内开缝 → 自由边界剥展':'连通分区 · 参数化与必要补切',target==='generated','沿用现有 UV 岛'],
     ['repair',config.sourceRepairPolicy==='reject'?'检查现有岛（局部修复关闭）':'验证现有岛 · 局部修复无效 UV', ['source-atlas','stitch','repack','templates'].includes(target),'本次不修复原岛'],
     ['structure','结构模板 · 先规划侧缝再展平',['source-atlas','stitch','templates'].includes(target)&&config.structureTemplates!==false&&(config.uvObjective??'paint')==='paint'&&config.autoCut!==false&&(config.method??'auto')==='auto','结构模板关闭或本次仅重排/原样检查'],
     ['merge','尝试共享边缝合',target==='stitch'||target==='source-atlas'&&config.sourceAtlasMerge!==false||target==='generated'&&config.postMerge===true,'已禁用或本次不适用'],

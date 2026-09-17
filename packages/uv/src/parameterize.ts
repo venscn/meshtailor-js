@@ -1,10 +1,11 @@
+import {projectionSeeds} from './projection-seeds.js';
 import {planarShapeCandidate,freeBoundaryARAP} from './free-boundary.js';
 import { uvProgress, rethrowUVStop, type UVWork } from './work.js';
 import type { Vec2,Vec3 } from '@meshtailor/mesh-core';
 import type { CutMesh } from './cut-topology.js';
 import { checkUVTriangles, type UVQuality, signedArea2 } from './uv-quality.js';
-export interface SolverOptions { iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte'; uvObjective?:'paint'|'compact'; paintIterations?:number }
-export interface Parameterization { uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
+export interface SolverOptions { projectionSeed?:boolean; iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte'; uvObjective?:'paint'|'compact'; paintIterations?:number }
+export interface Parameterization { uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'|'projected-free'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
 export function triangleArea(a:Vec3,b:Vec3,c:Vec3):number{const u=b.map((x,i)=>x-a[i]!),v=c.map((x,i)=>x-a[i]!);return Math.hypot(u[1]!*v[2]!-u[2]!*v[1]!,u[2]!*v[0]!-u[0]!*v[2]!,u[0]!*v[1]!-u[1]!*v[0]!)*.5;}
 type Row={ids:number[];values:number[]};
 /** Matrix-free, diagonally preconditioned conjugate gradients on A^T A.
@@ -82,6 +83,16 @@ function tutte(mesh:CutMesh,opts:SolverOptions,work?:UVWork){
   let iterations=0,residual=0;for(let a=0;a<2;a++){const rhs=Float64Array.from(entries.map(([v])=>[...adj[v]!].reduce((s,b)=>s+(boundary.has(b)?uv[b]![a]!:0),0))),r=cg(rhs,diag,apply,opts,work);iterations=Math.max(iterations,r.iterations);residual=Math.max(residual,r.residual);for(const [v,id]of entries)uv[v]![a]=r.x[id]!;}
   return{uv,iterations,residual};
 }
+/** Average angular distortion can hide an almost collapsed subregion. This
+ * scale-invariant, per-triangle area check is used by the generic peeling path
+ * before atlas scaling, in addition to the final whole-atlas validity check. */
+export function chartAreaDensity(mesh:CutMesh,uv:readonly Vec2[]):{min:number;max:number}{
+  let a=0,b=0;const ratios:number[]=[];
+  for(const t of mesh.triangles){const area=triangleArea(mesh.positions[t[0]]!,mesh.positions[t[1]]!,mesh.positions[t[2]]!),v=Math.abs(signedArea2(uv[t[0]]!,uv[t[1]]!,uv[t[2]]!))/2;
+    if(!(area>0&&v>0))return{min:0,max:Infinity};a+=area;b+=v;ratios.push(v/area);}
+  const mean=b/a;let min=Infinity,max=0;for(const r of ratios){min=Math.min(min,r/mean);max=Math.max(max,r/mean);}return{min,max};
+}
+const areaNotCollapsed=(mesh:CutMesh,uv:readonly Vec2[])=>{const r=chartAreaDensity(mesh,uv);return r.min>=1e-3&&r.max<=200;};
 export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={},work?:UVWork):Parameterization{
   const opts:SolverOptions={iterations:2000,tolerance:1e-9,method:'auto',uvObjective:'paint',paintIterations:24,...options};let reason='';
   const finish=(r:ReturnType<typeof lscm>,method:Parameterization['method']):Parameterization=>{
@@ -97,9 +108,29 @@ export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={}
     const uv=planarShapeCandidate(mesh);
     if(uv){const result=finish({uv,iterations:0,residual:0},'planar-shape');if(result.quality.valid)return result;}
   }
+  if(opts.projectionSeed&&opts.uvObjective==='paint'&&opts.method==='auto'){
+    // Projection is an initialization. Opposite-facing/occluded triangles reject
+    // it BEFORE relaxation. No circular or square boundary is a final target.
+    for(const uv of projectionSeeds(mesh)){
+      const signs=mesh.triangles.map(t=>signedArea2(uv[t[0]]!,uv[t[1]]!,uv[t[2]]!));
+      if(signs.some(x=>x>0)&&signs.some(x=>x<0))continue;
+      const seed=finish({uv,iterations:0,residual:0},'projected-free');
+      if(!seed.quality.valid)continue;
+      try{const free=freeBoundaryARAP(mesh,seed.uv,opts.paintIterations!,Math.min(opts.iterations,600),work);
+        const r=finish(free,'projected-free');if(r.quality.valid&&free.maxAnisotropy<=100&&areaNotCollapsed(mesh,r.uv)){r.fallbackReason='Valid surface projection seed, followed by free-boundary relaxation with global boundary guards.';return r;}
+      }catch(e){rethrowUVStop(e);}
+    }
+  }
   if(!mesh.disk)throw new Error(`UV chart is not a disk: Euler=${mesh.euler}, boundaries=${mesh.boundaryLoops}`);
   if(opts.method!=='tutte'){
-    try{const r=finish(lscm(mesh,opts,work),'lscm');if(r.quality.valid&&r.residual<1e-6)return r;reason=`LSCM rejected: residual=${r.residual.toExponential(2)}, flips=${r.quality.flipped}, degenerates=${r.quality.degenerate}, overlaps>=${r.quality.overlaps}`;}
+    try{const r=finish(lscm(mesh,opts,work),'lscm');if(r.quality.valid&&r.residual<1e-6){
+      if(!opts.projectionSeed||areaNotCollapsed(mesh,r.uv))return r;
+      // Conformal maps may be injective yet collapse a large surface patch to
+      // almost no texels. Relax THAT valid seed before requesting another cut.
+      const free=freeBoundaryARAP(mesh,r.uv,opts.paintIterations!,Math.min(opts.iterations,600),work),relaxed=finish(free,'arap-free');
+      if(relaxed.quality.valid&&free.maxAnisotropy<=100&&areaNotCollapsed(mesh,relaxed.uv)){relaxed.fallbackReason='Area-collapsed conformal seed recovered by guarded free-boundary relaxation.';return relaxed;}
+      reason='Conformal seed collapses a surface region; free relaxation could not recover its area. ';
+    }reason+=`LSCM rejected: residual=${r.residual.toExponential(2)}, flips=${r.quality.flipped}, degenerates=${r.quality.degenerate}, overlaps>=${r.quality.overlaps}`;}
     catch(e){rethrowUVStop(e);reason=String(e);}
     if(opts.method==='lscm')throw new Error(reason);
   }
@@ -110,7 +141,7 @@ export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={}
   if(opts.uvObjective==='paint'&&opts.method!=='tutte'){
     const free=freeBoundaryARAP(mesh,seed.uv,opts.paintIterations!,Math.min(opts.iterations,600),work);
     const r=finish(free,'arap-free');
-    if(!r.quality.valid||!free.accepted||free.maxAnisotropy>100||free.energy>free.initialEnergy+1e-8)
+    if(!r.quality.valid||!free.accepted||free.maxAnisotropy>100||free.energy>free.initialEnergy+1e-8||(opts.projectionSeed&&!areaNotCollapsed(mesh,r.uv)))
       throw Error('Hand-paint shape solve rejected; circular fallback is disabled. Keep the existing separate charts or add a deliberate seam. '+reason);
     r.fallbackReason=(reason?reason+'; ':'')+`Free boundary ARAP energy ${free.initialEnergy.toPrecision(4)} -> ${free.energy.toPrecision(4)} (${free.accepted} accepted steps); no circle boundary is retained.`;
     return r;

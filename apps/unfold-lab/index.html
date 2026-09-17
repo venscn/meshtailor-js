@@ -52,7 +52,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
 @media(max-width:920px){.layout{grid-template-columns:220px minmax(0,1fr);grid-template-rows:minmax(360px,1fr) minmax(210px,.6fr)}.layout>aside{grid-row:1/3}.right{grid-column:2;grid-template-columns:1fr 1fr;grid-template-rows:1fr;border-top:1px solid var(--line)}.right>.uv-panel{border-right:1px solid var(--line)}}
 @media(max-width:620px){body{height:auto;overflow:auto}.layout{display:flex;flex-direction:column}.layout>aside{max-height:360px}.center{height:620px;flex:none}.right{height:390px;flex:none}.topbar{gap:8px}.lab-mode{display:none}}
 </style></head><body>
-<header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">M</span>MeshTailor <span class="version">0.4.17</span></div><div class="document-name">离线展开实验页</div><div class="header-actions"><button id="header-pipeline" onclick="document.querySelector('[data-tool=mesh]').click()">处理流程</button><button id="header-import">导入 OBJ</button><button id="header-export">导出 OBJ + UV</button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">M</span>MeshTailor <span class="version">0.4.18</span></div><div class="document-name">离线展开实验页</div><div class="header-actions"><button id="header-pipeline" onclick="document.querySelector('[data-tool=mesh]').click()">处理流程</button><button id="header-import">导入 OBJ</button><button id="header-export">导出 OBJ + UV</button></div></header>
 <main class="layout"><aside><nav class="tool-tabs" role="tablist" aria-label="工具分类"><button role="tab" data-tool="mesh" aria-controls="lab-tools-mesh" aria-selected="false">模型</button><button role="tab" data-tool="uv" aria-controls="lab-tools-uv" aria-selected="false">UV</button><button role="tab" data-tool="animation" aria-controls="lab-tools-animation" aria-selected="true">动画</button></nav><div class="lab-tool-content">
 <div id="lab-tools-mesh" role="tabpanel" hidden><div id="pipeline-host"></div><h3>本地与内置模型</h3><div class="row"><button id="ribbon" class="primary">三块折角带</button><button id="cube">六岛立方体</button></div>
 <button id="fragment-demo">重叠碎岛测试片（2 个连通片）</button>
@@ -61,6 +61,12 @@ body{display:flex;flex-direction:column;overflow:hidden}
 </div>
 <div id="lab-tools-uv" role="tabpanel" hidden><h3>裁切与展开</h3><div class="row"><button id="auto-large" class="primary">自动参数 · 大块重分割</button><button id="auto-balanced">自动 · 均衡</button><button id="extract-uv">Extract + 整理原 UV</button><button id="inspect-source">原样检查（不修正）</button></div>
 <small>自动重分割替换当前裁切，原始 UV 仍保留。整理生成新 atlas；原样检查才保留原布局。</small><small id="auto-config" role="status"></small>
+<details open id="peel-controls"><summary>通用分组剥展 · 空间组与组内切缝</summary>
+<button id="peel-groups" class="primary" aria-label="Peel spatial groups">空间分组 → 组内开缝 → 剥展</button>
+<label><input id="peel-source" type="checkbox" checked>整组失败时允许有效源 UV 边界提示</label>
+<label class="check"><input id="peel-panels" type="checkbox" checked>大面积环绕曲面先分主要朝向面板</label><label>面板最小总面积 %<input id="peel-panel-area" type="number" min="1" max="50" value="4"></label><label>主要平面特征最小面积 %<input id="peel-feature" type="number" value="1.5" min=".1" max="25" step=".1"></label>
+<small>几何连通组与 UV 岛分开；普通曲面不依赖环带模板，先展开再按失败反馈补切。小附件不按面数切碎。</small><p id="peel-summary" data-testid="peel-report"></p>
+</details>
 <details open class="human-template-controls"><summary>结构模板 · 类手工切缝</summary>
 <label><input id="structure-templates" aria-label="Structural UV templates" type="checkbox" checked>先规划环带侧缝，再展开（默认）</label>
 <label>环带裁片<select id="human-panels" aria-label="Band panels"><option value="2">两侧切缝 · 两片</option><option value="1">单侧切缝 · 整条</option></select></label>
@@ -77,7 +83,7 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <small>缝合会移除接缝并重新求解；重排不减少岛数。新 UV 需要重烘焙；原输入不变，原样检查可恢复原坐标。</small>
 <label>新 UV 页分配<select id="atlas-page-mode"><option value="single">单页</option><option value="adjacency">连接紧密的岛优先同页</option><option value="components">每个几何连通组一页</option><option value="spatial">空间邻近 + 共享边优先同页</option></select></label>
 <label>目标页数（软目标）<input id="atlas-page-count" type="number" min="1" max="64" value="2"></label>
-<label>初始分割<select id="initial-segmentation"><option value="regions">法线区域（原策略）</option><option value="connected">几何连通块优先</option></select></label>
+<label>初始分割<select id="initial-segmentation"><option value="hierarchical">空间分组 / 自由剥展</option><option value="regions">法线区域（原策略）</option><option value="connected">几何连通块优先</option></select></label>
 <label>生成后自动缝合<input id="post-merge" type="checkbox"></label>
 <label>缝合尝试预算<input id="merge-attempts" type="number" min="0" max="2000" placeholder="自动 128–512"></label>
 <label>目标岛数<input id="merge-target" type="number" min="1" value="1"></label>
@@ -88,8 +94,11 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <button id="post-fill" class="primary">填补空白（依当前选项）</button>
 <label>精排模式<select id="fill-mode"><option value="area-priority">从大到小逐岛扩张</option><option value="uniform">全岛共同放大（保持密度比例）</option></select></label>
 <label>每步面积增量 %<input id="fill-step" type="number" min=".5" max="25" step=".5" value="8"></label>
-<label>面积增益 / 密度差上限<input id="fill-cap" type="number" min="1" max="3" step=".1" value="1.6"></label>
-<small>失败大岛不阻塞小岛；逐岛降低步长，四方向轮廓搜索，先局部扩张再重排。</small><label>最小面积步长 %<input id="fill-min-step" type="number" min=".1" max="5" step=".1" value=".5"></label><details><summary>实验：特别大岛恢复旧切缝</summary><label><input id="fill-recut" type="checkbox" aria-label="Try large original recut">允许大岛旧切缝试装</label><small>默认关闭。只处理总3D面积≥12%的前3大岛；只恢复源切缝，两子块各≥25%。至少提升1个百分点才接受，一次最多新增1岛，不切小岛。</small></details><label>最大轮数<input id="fill-rounds" type="number" min="1" max="24" value="8"></label>
+<label>相对密度差上限<input id="fill-cap" type="number" min="1" max="3" step=".1" value="1.6"></label>
+<label>共同面积放大上限<input id="fill-common" aria-label="Fill common gain limit" type="number" min="1" max="16" value="4" step=".5"></label>
+<label>补充旋转步长<select id="fill-angle" aria-label="Fill rotation step"><option value="90">90°</option><option value="45" selected>45°</option><option value="30">30°</option><option value="15">15°</option></select></label>
+<label>前方大岛重排预算<input id="fill-reflow" aria-label="Fill reflow budget" type="number" min="0" max="64" value="4"></label>
+<small>共同放大与密度差分别限制；直角受阻后尝试更多角度。失败大岛不阻塞小岛，预算耗尽不等于无空间。</small><label>最小面积步长 %<input id="fill-min-step" type="number" min=".1" max="5" step=".1" value=".5"></label><details><summary>实验：特别大岛恢复旧切缝</summary><label><input id="fill-recut" type="checkbox" aria-label="Try large original recut">允许大岛旧切缝试装</label><small>默认关闭。只处理总3D面积≥12%的前3大岛；只恢复源切缝，两子块各≥25%。至少提升1个百分点才接受，一次最多新增1岛，不切小岛。</small></details><label>最大轮数<input id="fill-rounds" type="number" min="1" max="24" value="8"></label>
 <label>搜索网格<select id="fill-resolution"><option value="256">256（快速）</option><option value="512" selected>512（默认）</option><option value="1024">1024（更细更慢）</option></select></label>
 <label>搜索预算（秒）<input id="fill-budget" type="number" min="1" max="120" value="15"></label>
 <small>只移动、旋转和有界等比例放大，不改切缝，不缩小其他岛。面积放大 1.6 倍，边长仅 √1.6 倍。仅支持单页；多页请先只重排为单页。原 UV 重叠时须先整理。</small>

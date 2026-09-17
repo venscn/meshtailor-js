@@ -1,3 +1,4 @@
+import {simpleUVBoundary} from './boundary-guard.js';
 import type { Vec2, Vec3 } from '@meshtailor/mesh-core';
 import type { CutMesh } from './cut-topology.js';
 import { uvProgress, type UVWork } from './work.js';
@@ -28,7 +29,8 @@ type Element={t:[number,number,number];gx:number[];gy:number[];area:number};
 /** Free-boundary ARAP, local rotations + a sparse FEM global solve. Only one
  * vertex is pinned for translation; NO circle/square boundary constraints.
  * An injective seed is required. Backtracking prevents local flips and increases
- * in ARAP energy; final global overlaps are checked by parameterizeChart.
+ * in ARAP energy. Every accepted iterate also has a simple boundary; final
+ * global triangle overlaps are independently checked by parameterizeChart.
  * This is an independent TS implementation, not libigl bindings. */
 export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,linearIterations:number,work?:UVWork){
   const n=mesh.positions.length,ps=mesh.positions,min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
@@ -67,7 +69,7 @@ export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,l
   };
   const jac=(vs:Vec2[],e:Element)=>{let a=0,b=0,c=0,d=0;for(let k=0;k<3;k++){const p=vs[e.t[k]!]!;a+=p[0]*e.gx[k]!;b+=p[0]*e.gy[k]!;c+=p[1]*e.gx[k]!;d+=p[1]*e.gy[k]!;}return[a,b,c,d];};
   const energy=(vs:Vec2[])=>{let s=0;for(const e of elements){const [a,b,c,d]=jac(vs,e) as [number,number,number,number];s+=e.area*(a*a+b*b+c*c+d*d+2-2*Math.hypot(a+d,c-b));}return s/totalArea;};
-  const initialEnergy=energy(uv);let previous=initialEnergy,iterations=0,residual=0,accepted=0;
+  const initialEnergy=energy(uv);let previous=initialEnergy,iterations=0,residual=0,accepted=0,boundaryRejected=0;
   for(;iterations<maxIterations;iterations++){
     uvProgress(work,{stage:'parameterize',detail:'自由边界保形 ARAP（不固定圆形边界）',current:iterations,total:maxIterations,unit:'保形迭代'});
     const bx=new Float64Array(n-1),by=new Float64Array(n-1);
@@ -79,7 +81,10 @@ export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,l
     for(let alpha=1;alpha>=1/65536;alpha*=.5){
       const v=uv.map((p,i)=>[p[0]+alpha*(target[i]![0]-p[0]),p[1]+alpha*(target[i]![1]-p[1])] as Vec2);
       if(elements.some(e=>det(v[e.t[0]]!,v[e.t[1]]!,v[e.t[2]]!)<=e.area*1e-10))continue;
-      const en=energy(v);if(Number.isFinite(en)&&en<=previous+1e-12){candidate=v;next=en;break;}
+      const en=energy(v);if(Number.isFinite(en)&&en<=previous+1e-12){
+        if(!simpleUVBoundary(v,mesh.boundaries,work)){boundaryRejected++;continue;}
+        candidate=v;next=en;break;
+      }
     }
     if(!candidate)break;uv=candidate;accepted++;const decrease=previous-next;previous=next;
     if(decrease<Math.max(1e-9,previous*1e-6))break;
@@ -87,5 +92,5 @@ export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,l
   let maxAnisotropy=1;
   for(const e of elements){const [a,b,c,d]=jac(uv,e) as [number,number,number,number],sum=a*a+b*b+c*c+d*d,detJ=a*d-b*c,hi=(sum+Math.sqrt(Math.max(0,sum*sum-4*detJ*detJ)))/2;
     maxAnisotropy=Math.max(maxAnisotropy,hi/Math.max(Math.abs(detJ),1e-30));}
-  return {uv,iterations:iterations+1,residual,initialEnergy,energy:previous,accepted,maxAnisotropy};
+  return {uv,iterations:iterations+1,residual,initialEnergy,energy:previous,accepted,boundaryRejected,maxAnisotropy};
 }

@@ -1,0 +1,53 @@
+{
+  "scope": "Syntax transpilation ONLY. Not complete type checking, dependency resolution or React E2E.",
+  "checks": [
+    {
+      "file": "apps/studio/src/App.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/MeshViewport.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/UVCanvas.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/main.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/unfold/CorrespondenceInspector.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/unfold/LoadPipelinePanel.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/unfold/UVJobStatus.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/unfold/UVSolverControls.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/unfold/UnfoldControls.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/unfold/UnfoldViewport.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/unfold/useUVSnapshot.tsx",
+      "errors": 0
+    },
+    {
+      "file": "apps/studio/src/unfold/useUnfoldPlayer.tsx",
+      "errors": 0
+    }
+  ]
+}

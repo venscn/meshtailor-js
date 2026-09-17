@@ -15,7 +15,7 @@ try{
  test('baseline remains immutable',()=>assert.equal(JSON.stringify(raw,(_,v)=>v instanceof Map?[...v]:v),source));
  test('all original islands preserved',()=>assert.deepEqual(r.packed.map(p=>p.id),raw.map(p=>p.id)));
  test('large source area first, not array/id order',()=>assert.deepEqual(f.order,[3,11,90]));
- test('bounded area gain and no island shrink',()=>assert.ok(f.gains.every(g=>g.areaFactor>=1&&g.areaFactor<=1.6+1e-10)));
+ test('bounded common and differential gains with no island shrink',()=>{assert.ok(f.gains.every(g=>g.areaFactor>=1&&g.areaFactor<=f.settings.maxAreaGain*f.search.commonGainLimit+1e-10));assert.ok(f.densitySpreadAfter<=Math.max(f.densitySpreadBefore,f.settings.maxAreaGain)+1e-8);});
  test('linear factor is square root of area factor',()=>f.gains.forEach(g=>assert.ok(Math.abs(g.linearFactor**2-g.areaFactor)<1e-10)));
  test('accepted states have strictly increasing real occupancy',()=>f.history.forEach((h,i)=>assert.ok(h.occupancy>(i?f.history[i-1].occupancy:f.before))));
  test('all triangle faces retained',()=>assert.deepEqual(r.packed.flatMap(p=>[...p.faceUVs.keys()]),raw.flatMap(p=>[...p.faceUVs.keys()])));

@@ -4,7 +4,7 @@ import type {Vec2} from '@meshtailor/mesh-core';
  * is reserved; a square dilation reserves the requested per-side UV gutter.
  * Masks are only a search accelerator, never the reported geometric area. */
 export interface ShapeMask {width:number;height:number;stride:number;words:Uint32Array;occupied:{row:number;word:number;bits:number}[];pad:number;runs:{row:number;lo:number;hi:number}[];dilated?:Map<number,{row:number;word:number;bits:number}[]>}
-export interface RasterPlacement {mask:ShapeMask;x:number;y:number;turn:boolean;gain:number;rotation?:number}
+export interface RasterPlacement {mask:ShapeMask;x:number;y:number;turn:boolean;gain:number;rotation?:number;angle?:number}
 export class RasterBudget extends Error {constructor(){super('Refinement search budget reached');this.name='RasterBudget';}}
 export interface RasterWork {tick():void}
 const rangeBits=(lo:number,hi:number)=>((0xffffffff<<lo)&(0xffffffff>>>(31-hi)))>>>0;
