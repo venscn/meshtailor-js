@@ -3,7 +3,6 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import * as THREE from 'three';
 import { buildTopology, triangleNormal, writeGLB, type GLTFDocument } from '@meshtailor/mesh-core';
-import { extractSeamEdgesFromUV } from '@meshtailor/chaining-seams';
 import { parseFBX, sceneToMesh, importMeshFiles } from '../importers';
 import { disposeImportedScene } from '../importers/scene-mesh';
 function bytes(path:string):ArrayBuffer{const b=readFileSync(new URL(path,import.meta.url));return b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength) as ArrayBuffer;}
@@ -11,8 +10,9 @@ describe('Three scene topology adapter',()=>{
   it('keeps material groups in index order, including mirrored transforms',()=>{
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0,1,1,0],3));g.setIndex([0,1,2,1,3,2]);g.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,0,1,1,1],2));g.addGroup(0,3,0);g.addGroup(3,3,1);
     const a=new THREE.MeshBasicMaterial(),b=new THREE.MeshBasicMaterial();a.name='Leather';b.name='Metal';const obj=new THREE.Mesh(g,[a,b]);obj.scale.x=-1;
-    try{const {mesh}=sceneToMesh(obj,'groups');expect(mesh.faces.map(f=>f.uvSpaceName)).toEqual(['Leather','Metal']);expect(new Set(mesh.faces.map(f=>f.uvSpace)).size).toBe(2);expect(extractSeamEdgesFromUV(mesh).size).toBe(1);}finally{disposeImportedScene(obj);}
+    try{const {mesh}=sceneToMesh(obj,'groups');expect(mesh.faces.map(f=>f.uvSpaceName)).toEqual(['Leather','Metal']);expect(new Set(mesh.faces.map(f=>f.uvSpace)).size).toBe(2);expect(mesh.faces.every(f=>f.uvs===undefined&&f.uvIndices===undefined)).toBe(true);}finally{disposeImportedScene(obj);}
   });
+  it('never requests texture-coordinate attributes from an imported Three geometry',()=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0],3));const get=g.getAttribute.bind(g);g.getAttribute=((name:string)=>{if(name==='uv'||name.startsWith('uv'))throw Error('Forbidden original UV read');return get(name);}) as typeof g.getAttribute;const object=new THREE.Mesh(g);try{expect(sceneToMesh(object,'no-read').mesh.faces[0]!.uvs).toBeUndefined();}finally{disposeImportedScene(object);}});
   it('stitches unique near-coincident open boundary edges within one source object',()=>{
     const d=2e-7,g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0,1+d,0,0,1,1,0,d,1,0],3));const obj=new THREE.Mesh(g);
     try{const r=sceneToMesh(obj,'near-boundary');expect(r.mesh.faces).toHaveLength(2);expect(r.report.stitchedEdges).toBe(1);expect(r.mesh.positions).toHaveLength(4);}finally{disposeImportedScene(obj);}
@@ -25,9 +25,9 @@ describe('Three scene topology adapter',()=>{
     const root=new THREE.Group();root.position.set(10,20,30);const child=new THREE.Group();child.scale.set(2,3,4);root.add(child);child.add(new THREE.Mesh(new THREE.BoxGeometry().toNonIndexed(),new THREE.MeshBasicMaterial()));
     try{const {mesh}=sceneToMesh(root,'transformed');expect(mesh.positions).toHaveLength(8);expect(Math.min(...mesh.positions.map(p=>p[0]))).toBe(9);expect(Math.max(...mesh.positions.map(p=>p[1]))).toBe(21.5);}finally{disposeImportedScene(root);}
   });
-  it('corrects winding and UV corner order for a mirrored parent',()=>{
+  it('corrects geometric winding and discards UV for a mirrored parent',()=>{
     const g=new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0],3));g.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,0,1],2));const mesh=new THREE.Mesh(g);mesh.scale.x=-1;
-    try{const result=sceneToMesh(mesh,'mirror').mesh,face=result.faces[0]!;expect(triangleNormal(...face.vertices.map(v=>result.positions[v]!) as [THREE.Vector3Tuple,THREE.Vector3Tuple,THREE.Vector3Tuple])[2]).toBeGreaterThan(0);expect(face.uvs).toEqual([[0,0],[0,1],[1,0]]);}finally{disposeImportedScene(mesh);}
+    try{const result=sceneToMesh(mesh,'mirror').mesh,face=result.faces[0]!;expect(triangleNormal(...face.vertices.map(v=>result.positions[v]!) as [THREE.Vector3Tuple,THREE.Vector3Tuple,THREE.Vector3Tuple])[2]).toBeGreaterThan(0);expect(face.uvs).toBeUndefined();expect(face.uvIndices).toBeUndefined();}finally{disposeImportedScene(mesh);}
   });
   it('keeps separate overlapping objects separate',()=>{
     const root=new THREE.Group();root.add(new THREE.Mesh(new THREE.BoxGeometry()),new THREE.Mesh(new THREE.BoxGeometry()));
@@ -50,7 +50,7 @@ describe('Three scene topology adapter',()=>{
 describe('FBXLoader on actual bundled files',()=>{
   for(const format of ['ascii','binary'])it(`parses the ${format} FBX 7.4 garment and recovers usable adjacency`,()=>{
     const result=parseFBX(bytes(`../../public/assets/fixtures/garment-${format}.fbx`),`garment-${format}.fbx`);
-    expect(result.mesh.faces).toHaveLength(3072);expect(result.mesh.positions).toHaveLength(1584);expect(result.report.uvFaces).toBe(3072);expect(buildTopology(result.mesh).boundaryEdges.size).toBe(96);expect(extractSeamEdgesFromUV(result.mesh).size).toBeGreaterThan(0);
+    expect(result.mesh.faces).toHaveLength(3072);expect(result.mesh.positions).toHaveLength(1584);expect(result.report.uvFaces).toBe(0);expect(buildTopology(result.mesh).boundaryEdges.size).toBe(96);expect(result.mesh.faces.every(f=>f.uvs===undefined&&f.uvIndices===undefined)).toBe(true);
   });
   it('shows a readable failure for a corrupt FBX',()=>expect(()=>parseFBX(new ArrayBuffer(16),'corrupt.fbx')).toThrow(/FBX import failed/));
 });
