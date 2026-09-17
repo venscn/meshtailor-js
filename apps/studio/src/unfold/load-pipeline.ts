@@ -35,7 +35,7 @@ export function resolveLoadPipeline(mesh:MeshData,value:LoadPipelineConfig,base:
   if(plan.source==='inspect'&&plan.fill)throw Error('原样检查不修改 UV，不能同时启用填补空白。请改为自动整理。');
   if(plan.fill&&base.atlasPageMode&&base.atlasPageMode!=='single')throw Error('自动填补空白当前只支持单页；请将 UV 页策略设为单页。');
   const target:PipelineTarget=plan.source==='inspect'?'source':plan.source==='generated'||!hasUV?'generated':'source-atlas';
-  return {target,config:{...base,sourceRepairPolicy:plan.repairInvalid?'repair':'reject',sourceAtlasMerge:plan.mergeAdjacent,postMerge:plan.mergeAdjacent,
+  return {target,config:{...base,humanTemplates:base.humanTemplates?{...base.humanTemplates,selectedCharts:undefined}:undefined,sourceRepairPolicy:plan.repairInvalid?'repair':'reject',sourceAtlasMerge:plan.mergeAdjacent,postMerge:plan.mergeAdjacent,
     // No hidden nested refinement in packing. One explicit fill stage follows it.
     fillMode:'off',fillRecutLarge:false,fillTimeBudgetMs:plan.fillBudgetSeconds*1000,fillRounds:plan.fillRounds} as Partial<UnwrapOptions>};
 }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { describeFill, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
+import { describeFill, DEFAULT_HUMAN, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
 import type { UVSnapshot } from '../workers/uv.worker';
 /** Draft settings are applied together: dragging a control never launches dozens of solvers. */
-export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onProcess:(operation:'connected'|'stitch'|'repack'|'fill',config:UnwrapOptions)=>void;onAuto:(goal:'large'|'balanced')=>void;value:UnwrapOptions;onChange:(v:UnwrapOptions)=>void;snapshot:UVSnapshot|null}){
+export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess,selectedCharts=[]}:{onProcess:(operation:'connected'|'stitch'|'repack'|'fill'|'templates',config:UnwrapOptions)=>void;onAuto:(goal:'large'|'balanced')=>void;value:UnwrapOptions;onChange:(v:UnwrapOptions)=>void;snapshot:UVSnapshot|null;selectedCharts?:number[]}){
   const [draft,setDraft]=useState(value),patch=(v:Partial<UnwrapOptions>)=>setDraft(d=>({...d,...v}));
   useEffect(()=>setDraft(value),[value]);
   return <details className="uv-solver-controls" open><summary>UV 求解与排布</summary>
@@ -13,6 +13,17 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess}:{onP
       <label>缝合时原形比例变化上限<input aria-label="Merge shape limit" type="number" min="1" max="4" step=".05" value={draft.mergeOptions?.maxShapeChange??1.5} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,maxShapeChange:+e.target.value}})}/></label>
       <small>去除整体旋转/缩放后，按99%源表面积检查边长比例变化；1表示保留比例。仅控制新缝合，不会把原样检查的源UV偷偷重绘。</small>
     </section>
+    <details open className="human-template-controls"><summary>结构模板 · 人工切缝思路</summary>
+      <label className="check"><input aria-label="Structural UV templates" type="checkbox" checked={draft.structureTemplates!==false} onChange={e=>patch({structureTemplates:e.target.checked})}/>先识别环带，再规划侧缝（默认）</label>
+      <label>环带切法<select aria-label="Band panels" value={draft.humanTemplates?.panels??2} onChange={e=>patch({humanTemplates:{...draft.humanTemplates,panels:+e.target.value as 1|2}})}><option value="2">两侧切缝 · 两片自然轮廓</option><option value="1">单纵缝 · 整圈一片</option></select></label>
+      <label>上下轴<select aria-label="Band axis" value={draft.humanTemplates?.axis??'auto'} onChange={e=>patch({humanTemplates:{...draft.humanTemplates,axis:e.target.value as typeof DEFAULT_HUMAN.axis}})}><option value="auto">自动：上下边界环</option><option value="x">X</option><option value="y">Y</option><option value="z">Z</option></select></label>
+      <label>侧缝方向（度）<input aria-label="Band seam angle" type="number" min="-180" max="180" step="5" value={draft.humanTemplates?.seamAngleDegrees??0} onChange={e=>patch({humanTemplates:{...draft.humanTemplates,seamAngleDegrees:+e.target.value}})}/></label>
+      <label>自动处理最小表面积占比（%）<input aria-label="Band minimum area" type="number" min="0" max="25" step=".1" value={(draft.humanTemplates?.minAreaFraction??.005)*100} onChange={e=>patch({humanTemplates:{...draft.humanTemplates,minAreaFraction:+e.target.value/100}})}/></label>
+      <label>最大三角面形变比<input aria-label="Band maximum stretch" type="number" min="1.1" max="20" step=".1" value={draft.humanTemplates?.maxAnisotropy??4} onChange={e=>patch({humanTemplates:{...draft.humanTemplates,maxAnisotropy:+e.target.value}})}/></label>
+      <button aria-label="Template selected islands" disabled={!snapshot||!selectedCharts.length} onClick={()=>onProcess('templates',{...draft,structureTemplates:true,uvObjective:'paint',method:'auto',autoCut:true,humanTemplates:{...draft.humanTemplates,selectedCharts:[...selectedCharts]}})}>仅按模板重展所选岛</button>
+      <small>只重解显式选中的相连区域，其他岛保留形状并重排。改变已分成两片的环带时请同时选中两片。上下边界/侧缝不被后续缝合抹掉；当前视角不参与求解。修改参数后需执行，原样检查与只重排不会运行模板。</small>
+      {snapshot?.human&&<div data-testid="human-template-report" className="uv-quality-stats"><b>结构模板应用 {snapshot.human.applied} 区域</b>{snapshot.human.entries.filter(e=>e.status!=='skipped').map((e,i)=><span key={i}>源 #{e.sourceChart+1} · {e.status==='applied'?`${e.template} → ${e.charts?.map(id=>'#'+(id+1)).join(' / ')} · 最大形变 ${e.maxAnisotropy?.toFixed(2)}`:e.reason}</span>)}</div>}
+    </details>
     <div className="button-grid two"><button className="primary" aria-label="Auto large charts" onClick={()=>onAuto('large')}>自动参数 · 大块重分割</button><button aria-label="Auto balanced charts" onClick={()=>onAuto('balanced')}>自动参数 · 均衡</button></div>
     <small>分析当前几何并填写参数，替换当前裁切方案、重新生成 UV；原始 UV 仍保留，可通过“原样检查”对比。不是在保持贴图布局的前提下合并。</small>
     <details open><summary>减少碎岛 · 前处理 / 后处理</summary>

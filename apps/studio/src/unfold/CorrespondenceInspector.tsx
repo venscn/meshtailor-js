@@ -7,6 +7,7 @@ export function CorrespondenceInspector({mesh,snapshot,player:p}:{mesh:MeshData;
   const coords=fi===null?null:chart?.faceUVs.get(fi);
   const fmt=(v:readonly number[])=>v.map(x=>Number(x.toPrecision(5))).join(', ');
   const diagnostic=chart?snapshot?.diagnostics?.find(d=>d.id===chart.id):undefined;
+  const template=chart?snapshot?.human?.entries.find(e=>e.status==='applied'&&e.charts?.includes(chart.id)):undefined;
   const area=chart?snapshot?.areaAudit?.islands.find(r=>r.id===chart.id):undefined;
   const neighbors=chart?snapshot?.spatialReport?.links.filter(l=>l.a===chart.id||l.b===chart.id)??[]:[];
   return <div className="panel correspondence-panel">
@@ -20,6 +21,7 @@ export function CorrespondenceInspector({mesh,snapshot,player:p}:{mesh:MeshData;
       <p className="selection-help">{p.selection.length?'在已选岛内点击三角形查看坐标；再次点击该面取消。':'点击任一视图或岛列表选择 UV 岛，再点击岛内三角形。'}</p>
       <div className="button-grid two"><button disabled={fi===null} onClick={p.clearFace}>取消三角形</button><button disabled={!p.selection.length} onClick={p.clear}>清空选择</button></div>
       {chart&&<dl className="property-list"><dt>UV 岛</dt><dd>#{chart.id+1}</dd><dt>三角面</dt><dd>{chart.faceUVs.size.toLocaleString()}</dd><dt>材质空间</dt><dd>{chart.uvSpaceName??chart.uvSpace??'默认'}</dd>{diagnostic&&<><dt>求解方式</dt><dd>{diagnostic.method}</dd><dt>最大形变比</dt><dd>{diagnostic.maxStretch.toFixed(2)}</dd></>}</dl>}
+      {template&&<dl className="property-list" data-testid="template-correspondence"><dt>结构来源</dt><dd>原区域 #{template.sourceChart+1} · {template.template}</dd><dt>上/下边界</dt><dd>{template.upperBoundary?.length} / {template.lowerBoundary?.length} 个源顶点</dd><dt>真实侧缝</dt><dd>{template.seamEdges?.length} 条源网格边 · 不属于动画临时切缝</dd><dt>同组面片</dt><dd>{template.charts?.map(id=>'#'+(id+1)).join(' / ')}</dd></dl>}
       {area&&<dl className="property-list" data-testid="island-area"><dt>3D 表面积占比（同域）</dt><dd>{(area.share3D*100).toFixed(4)}%</dd><dt>UV 面积占比（同域）</dt><dd>{(area.shareUV*100).toFixed(4)}%</dd><dt>相对平均面积密度</dt><dd>{area.densityRatio?.toFixed(3)??'无效'} ×</dd></dl>}
       {chart&&<details open><summary>3D 邻居 · {neighbors.length}</summary>{neighbors.map(l=><p key={`${l.a}:${l.b}`}>#{(l.a===chart.id?l.b:l.a)+1} · {l.stitchable?'共享网格边，可作为缝合候选':'空间接近，仅关联'} · {(l.distance/(snapshot?.spatialReport?.distance||1)*(snapshot?.spatialReport?.distanceRatio??0)*100).toFixed(3)}% 模型边长</p>)}<small>空间关联不改变真实岛数，未列出的关系可能被采样或预算遗漏。</small></details>}
       {face&&coords&&<div className="coordinate-table"><h4>面角坐标</h4>{face.vertices.map((vi,k)=><div className="corner-correspondence" key={k}><b>角 {k+1} <span>顶点 {vi}</span></b><code><i>3D</i>{fmt(mesh.positions[vi]!)}</code><code><i>UV</i>{fmt(coords[k]!)}</code></div>)}</div>}

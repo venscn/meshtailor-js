@@ -145,7 +145,7 @@ export default function App(){
       worker.postMessage({kind,mesh,options:{uvObjective:uvConfig.uvObjective,strategy:uvConfig.chartPolicy==='legacy'?'legacy':'adaptive',goal:uvConfig.chartPolicy==='balanced'?'balanced':'large',regionOptions:{...uvConfig.regionOptions,maxChartFaces:uvConfig.maxChartFaces},curvatureQuantile:curvature,structuralRings:rings,maxEdges}} satisfies SeamJob);
     }catch(error){setBusy(null);setLoadError(String(error));}
   };
-  const processUV=(operation:'connected'|'stitch'|'repack'|'fill',config:UnwrapOptions)=>{
+  const processUV=(operation:'connected'|'stitch'|'repack'|'fill'|'templates',config:UnwrapOptions)=>{
     if(operation!=='connected'&&!snapshot)return;
     setTaskPlan(undefined);
     cancel();setLoadError(null);setViewMode('unfold');setShowAllSeams(true);setPlaying(false);
@@ -154,7 +154,7 @@ export default function App(){
       setNotice('前处理：从连通块开始，仅在必要时补切，再执行验证式邻岛缝合。原 UV 保留在模型中；新 UV 需要重烘焙。');
     }else{
       setUVSeed(snapshot!.packed);setSeamEdges(new Set(snapshot!.seams));setUVConfig({...config});setUVTarget(operation);
-      setNotice(operation==='fill'?'按3D表面积从大到小精排当前UV；保持全部岛与切缝，预算停止后可继续。':operation==='stitch'?'后处理：基于当前岛和共享接缝尝试缝合，不重新运行 baseline。':'只重排当前岛；不改变岛数，不把同页摆放冒充缝合。');
+      setNotice(operation==='templates'?'按明确侧缝重展所选结构；未匹配区域保留，原网格未修改。':operation==='fill'?'按3D表面积从大到小精排当前UV；保持全部岛与切缝，预算停止后可继续。':operation==='stitch'?'后处理：基于当前岛和共享接缝尝试缝合，不重新运行 baseline。':'只重排当前岛；不改变岛数，不把同页摆放冒充缝合。');
     }
   };
   const seek=(next:number)=>{setPlaying(false);setStep(Math.max(0,Math.min(frames.length-1,next)));};
@@ -205,9 +205,9 @@ export default function App(){
           <label>Structural cross-sections <b>{rings}</b><input type="range" min="0" max="5" step="1" value={rings} onChange={e=>setRings(+e.target.value)}/></label>
           <label>Baseline edge budget <input aria-label="Edge budget" type="number" min="50" max="20000" step="50" value={maxEdges} onChange={e=>{const n=Math.floor(+e.target.value);if(n>=50&&n<=20000)setMaxEdges(n);}}/></label><small>仅限制传统 baseline；自动大块模式不截断区域边界，不抽稀网格。</small></details>
         </section>
-            <UVSolverControls value={uvConfig} onChange={v=>{setTaskPlan(undefined);setUVConfig(v);}} snapshot={snapshot} onProcess={processUV} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
+            <UVSolverControls selectedCharts={player.selection} value={uvConfig} onChange={v=>{setTaskPlan(undefined);setUVConfig(v);}} snapshot={snapshot} onProcess={processUV} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
             <UVJobStatus state={uvState} hasSource={hasSourceUV} onUseSource={()=>{setTaskPlan(undefined);setUVTarget('source');setViewMode('unfold');if(snapshotTarget==='source')uvState.retry();}}/>
-            <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.16',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,fragmentation:snapshot?.fragmentation,repair:snapshot?.repair,sourceAudit:snapshot?.sourceAudit,areaAudit:snapshot?.areaAudit,sourceAreaAudit:snapshot?.sourceAreaAudit,spatialReport:snapshot?.spatialReport,packingReport:snapshot?.packingReport,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
+            <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.16',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,human:snapshot?.human,fragmentation:snapshot?.fragmentation,repair:snapshot?.repair,sourceAudit:snapshot?.sourceAudit,areaAudit:snapshot?.areaAudit,sourceAreaAudit:snapshot?.sourceAreaAudit,spatialReport:snapshot?.spatialReport,packingReport:snapshot?.packingReport,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
           </div>
           <div id="tools-animation" role="tabpanel" aria-labelledby="tool-animation" hidden={toolTab!=='animation'}>
             <UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={target=>{setTaskPlan(undefined);setUVTarget(target);}} onExport={exportTargetUV} onDemo={loadUnfoldDemo} onHingeDemo={loadHingeDemo} onOverlapDemo={loadOverlapDemo}/>
