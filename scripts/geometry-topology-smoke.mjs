@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';import{mkdir,writeFile}from'node:fs/promises';import{compileCore}from'./lib/compiled-core.mjs';
+const c=await compileCore(),tests=[];const test=(name,fn)=>{const detail=fn();tests.push({name,passed:true,detail});console.log('PASS',name,detail??'')};
+try{
+ const uv=await c.load('packages/uv/src/index.js'),core=await c.load('packages/mesh-core/src/index.js');
+ function torus(n=18,m=10){const positions=[],faces=[];for(let i=0;i<n;i++)for(let j=0;j<m;j++){const a=2*Math.PI*i/n,b=2*Math.PI*j/m,r=1+.3*Math.cos(b);positions.push([r*Math.cos(a),r*Math.sin(a),.3*Math.sin(b)]);}for(let i=0;i<n;i++)for(let j=0;j<m;j++){const a=i*m+j,b=((i+1)%n)*m+j,d=i*m+(j+1)%m,e=((i+1)%n)*m+(j+1)%m;faces.push({vertices:[a,b,e]},{vertices:[a,e,d]});}return{name:'closed handle',positions,faces};}
+ const mesh=torus(),fs=mesh.faces.map((_,i)=>i),cut=uv.cutLocalMesh(mesh,fs,new Set()),before=JSON.stringify(mesh);let opened;
+ test('Closed genus-one surface opens without fragmenting face set',()=>{assert.equal(cut.euler,0);opened=uv.openChartWithSlits(mesh,fs,new Set(),cut);assert.ok(opened?.local.disk);assert.deepEqual(opened.local.sourceFaces,fs);assert.equal(JSON.stringify(mesh),before);return{faces:fs.length,cutEdges:opened.added.length,boundaries:opened.local.boundaryLoops};});
+ test('Every handle cut is a real original mesh edge',()=>{const t=core.buildTopology(mesh);assert.ok(opened.added.every(e=>t.edges.has(e)));});
+ test('Genus-one with a real boundary opens without capping or deleting geometry',()=>{const faces=fs.slice(2),local=uv.cutLocalMesh(mesh,faces,new Set()),r=uv.openChartWithSlits(mesh,faces,new Set(),local);assert.equal(local.euler,-1);assert.ok(r?.local.disk);assert.deepEqual(r.local.sourceFaces,faces);});
+ test('Feature groups never read UV or triangulation hints',()=>{const gear=core.makeComplexExample('gear','low'),blank=core.geometryOnlyMesh(gear),poison={...blank,faces:blank.faces.map(f=>({...f,get uvs(){throw Error('UV read')},get uvIndices(){throw Error('index read')}}))};const a=uv.planSurfaceGroups(blank,new Set()),b=uv.planSurfaceGroups(poison,new Set());assert.deepEqual(a.report,b.report);assert.equal(a.report.groups.filter(g=>g.kind==='planar-feature').length,2);});
+ test('Cancellation aborts the handle graph search',()=>{assert.throws(()=>uv.openChartWithSlits(mesh,fs,new Set(),cut,{check(){throw Error('cancel')}}),/cancel/);});
+ await mkdir('validation/v0.4.20/tests',{recursive:true});await writeFile('validation/v0.4.20/tests/geometry-topology.json',JSON.stringify({passed:tests.length,tests},null,2));
+}finally{await c.cleanup()}

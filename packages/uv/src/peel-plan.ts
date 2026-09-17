@@ -1,9 +1,9 @@
-import {buildTopology,edgeKey,type MeshData,type Vec3,type MeshTopology} from '@meshtailor/mesh-core';
+import {regularizeBinaryPartition,auditPartitionBoundary,buildTopology,edgeKey,type MeshData,type Vec3,type MeshTopology} from '@meshtailor/mesh-core';
 import {buildCharts} from './charts.js';
 import type {UVWork} from './work.js';
 
-export interface PeelOptions {peelSourceHints?:boolean;peelOrientationPanels?:boolean;peelPanelArea?:number;peelFeatureArea?:number;peelMaxDepth?:number}
-export interface PeelGroup {id:number;faces:number[];area3D:number;kind:'planar-feature'|'surface'|'oriented-panel';charts:number[]}
+export interface PeelOptions {peelSourceHints?:boolean;peelOrientationPanels?:boolean;peelPanelArea?:number;peelFeatureArea?:number;peelMaxDepth?:number;seamBandRings?:number;groupFeatureDegrees?:number}
+export interface PeelGroup {id:number;faces:number[];area3D:number;kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region';charts:number[]}
 export interface PeelReport {version:1;groups:PeelGroup[];groupSeams:string[];events:{group:number;faces:number;depth:number;action:string;detail:string}[];sourceHintCharts:number;feedbackSplits:number;totalIslands:number;note:string}
 const sub=(a:Vec3,b:Vec3):Vec3=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
 const dot=(a:Vec3,b:Vec3)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
@@ -11,11 +11,12 @@ const cross=(a:Vec3,b:Vec3):Vec3=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*
 export function faceFrame(mesh:MeshData,fi:number){const f=mesh.faces[fi]!,[a,b,c]=f.vertices.map(v=>mesh.positions[v]!) as [Vec3,Vec3,Vec3],n=cross(sub(b,a),sub(c,a)),l=Math.hypot(...n);return{normal:n.map(x=>x/Math.max(l,1e-30)) as Vec3,area:l/2,center:a.map((x,k)=>(x+b[k]!+c[k]!)/3) as Vec3};}
 
 /** Coarse spatial groups precede any UV solving. Connected geometry is the
- * starting point; substantial continuous planar features and balanced opposing
- * panels of LARGE wrapping surfaces are separated.
+ * starting point; substantial planar features and coherent crease regions
+ * are separated. Opposing normals alone are not a grouping criterion.
  * Small components are NOT divided according to triangle count or local normals.
  * This is geometric grouping, not a semantic body-part classifier. */
 export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options:PeelOptions={},work?:UVWork):{report:PeelReport;seams:Set<string>;topology:MeshTopology}{
+  if(options.seamBandRings!==undefined&&(!Number.isInteger(options.seamBandRings)||options.seamBandRings<1||options.seamBandRings>12))throw Error('seamBandRings must be an integer 1..12');
   const fraction=options.peelFeatureArea??.015,panelFraction=options.peelPanelArea??.04;
   if(!Number.isFinite(panelFraction)||panelFraction<.01||panelFraction>.5)throw Error('peelPanelArea must be 0.01..0.5');
   if(options.peelOrientationPanels!==undefined&&typeof options.peelOrientationPanels!=='boolean')throw Error('peelOrientationPanels must be boolean');
@@ -34,34 +35,54 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   }
   const seams=new Set(cuts);
   for(const [key,e]of topology.edges)if(e.faces.length===2&&planes[e.faces[0]!]!==planes[e.faces[1]!]&&(planes[e.faces[0]!]!>=0||planes[e.faces[1]!]!>=0))seams.add(key);
-  // Coarse opposing-view panels on LARGE wrapping surfaces. One balanced
-  // bisection per region, never recursive normal cones on tiny accessories.
+  // A wrapping surface is not automatically two opposing panels. Use coherent
+  // crease-bounded regions as structural evidence; keep weak/isolated local
+  // angles inside their parent instead of tracing every noisy normal cone.
   const oriented=new Uint8Array(mesh.faces.length);
-  if(options.peelOrientationPanels!==false)for(const group of buildCharts(mesh,seams,topology)){
-    const area=group.faces.reduce((s,f)=>s+frames[f]!.area,0);
-    if(area<total*panelFraction||group.faces.length<32||group.faces.every(f=>planes[f]!>=0))continue;
-    const matrix=Array.from({length:3},()=>[0,0,0]);
-    for(const f of group.faces){const n=frames[f]!.normal;for(let a=0;a<3;a++)for(let b=0;b<3;b++)matrix[a]![b]!+=n[a]!*n[b]!*frames[f]!.area/area;}
-    let axis:Vec3=[1,0,0],best=-1;
-    for(let seed=0;seed<3;seed++){let n=[0,0,0] as Vec3;n[seed]=1;for(let k=0;k<32;k++){const x=matrix.map(r=>dot(r as Vec3,n)) as Vec3,l=Math.hypot(...x);if(l<1e-12)break;n=x.map(v=>v/l) as Vec3;}
-      const score=dot(n,matrix.map(r=>dot(r as Vec3,n)) as Vec3);if(score>best){best=score;axis=n;}}
-    let pos=0,neg=0,a=group.faces[0]!,b=a,hi=-Infinity,lo=Infinity;
-    for(const f of group.faces){const q=dot(frames[f]!.normal,axis);if(q>.25)pos+=frames[f]!.area;if(q<-.25)neg+=frames[f]!.area;if(q>hi){hi=q;a=f;}if(q<lo){lo=q;b=f;}}
-    if(pos<area*.25||neg<area*.25||a===b)continue;
-    const parts=bisectSurface(mesh,group.faces,seams,topology,work,[a,b]);
-    if(parts.length!==2||parts.some(p=>p.length<16||p.reduce((s,f)=>s+frames[f]!.area,0)<area*.25))continue;
-    const side=new Map(parts.flatMap((fs,i)=>fs.map(f=>[f,i] as [number,number])));
-    for(const f of group.faces){oriented[f]=1;for(const g of adj[f]!)if(side.has(g)&&side.get(g)!==side.get(f)){const va=mesh.faces[f]!.vertices.filter(v=>mesh.faces[g]!.vertices.includes(v));if(va.length===2)seams.add(edgeKey(va[0]!,va[1]!));}}
+  const degrees=options.groupFeatureDegrees??48;
+  if(!Number.isFinite(degrees)||degrees<20||degrees>100)throw Error('groupFeatureDegrees must be 20..100');
+  const creaseCos=Math.cos(degrees*Math.PI/180);
+  for(const group of buildCharts(mesh,seams,topology)){
+    const groupArea=group.faces.reduce((a,f)=>a+frames[f]!.area,0);
+    if(groupArea<total*.015||group.faces.length<24||group.faces.every(f=>planes[f]!>=0))continue;
+    const members=new Set(group.faces),barriers=new Set(seams);
+    for(const[key,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>members.has(f))&&dot(frames[e.faces[0]!]!.normal,frames[e.faces[1]!]!.normal)<creaseCos)barriers.add(key);
+    const pieces:number[][]=[],seen=new Set<number>();
+    for(const root of group.faces)if(!seen.has(root)){
+      const q=[root];seen.add(root);
+      for(let h=0;h<q.length;h++){const f=mesh.faces[q[h]!]!;for(let k=0;k<3;k++){const key=edgeKey(f.vertices[k]!,f.vertices[(k+1)%3]!);if(barriers.has(key))continue;for(const j of topology.edges.get(key)?.faces??[])if(members.has(j)&&!seen.has(j)){seen.add(j);q.push(j);}}}
+      pieces.push(q);
+    }
+    const large=pieces.filter(p=>p.length>=4&&p.reduce((a,f)=>a+frames[f]!.area,0)>=groupArea*.06);
+    if(large.length<2||large.length>12)continue;
+    // Attach small transition strips to their strongest edge-connected neighbor.
+    const label=new Map<number,number>();large.forEach((p,i)=>p.forEach(f=>label.set(f,i)));
+    let pending=group.faces.filter(f=>!label.has(f));
+    for(let pass=0;pending.length&&pass<group.faces.length;pass++){
+      const next:number[]=[];let changed=false;
+      for(const f of pending){const votes=new Map<number,number>();const t=mesh.faces[f]!.vertices;for(let k=0;k<3;k++){
+        const key=edgeKey(t[k]!,t[(k+1)%3]!),e=topology.edges.get(key);if(seams.has(key)||!e)continue;
+        for(const j of e.faces){const l=label.get(j);if(l!==undefined)votes.set(l,(votes.get(l)??0)+Math.hypot(...sub(mesh.positions[e.a]!,mesh.positions[e.b]!))*(.1+Math.max(0,dot(frames[f]!.normal,frames[j]!.normal))));}
+      }
+      if(votes.size){const l=[...votes].sort((a,b)=>b[1]-a[1]||a[0]-b[0])[0]![0];label.set(f,l);changed=true;}else next.push(f);}
+      if(!changed)break;pending=next;
+    }
+    if(pending.length)continue;
+    let grouped=large.map((_,i)=>group.faces.filter(f=>label.get(f)===i));
+    if(grouped.length===2)grouped=regularizeBinaryPartition(mesh,grouped,seams,topology,()=>work?.check(),options.seamBandRings??5).parts;
+    label.clear();grouped.forEach((p,i)=>p.forEach(f=>label.set(f,i)));
+    for(const[key,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>members.has(f))&&label.get(e.faces[0]!)!==label.get(e.faces[1]!))seams.add(key);
+    for(const f of group.faces)oriented[f]=1;
   }
-  const groups=buildCharts(mesh,seams,topology).map(c=>({id:c.id,faces:c.faces,area3D:c.faces.reduce((s,f)=>s+frames[f]!.area,0),kind:(c.faces.every(f=>planes[f]===planes[c.faces[0]!]&&planes[f]!>=0)?'planar-feature':c.faces.every(f=>oriented[f])?'oriented-panel':'surface') as PeelGroup['kind'],charts:[]}));
-  const report:PeelReport={version:1,groups,groupSeams:[...seams],events:[],sourceHintCharts:0,feedbackSplits:0,totalIslands:0,note:'空间组与UV岛分别计数。先保留完整几何组/主要平面特征，大型环绕曲面至多分成两个相向面板，再在组内开缝、尝试投影种子和自由边界剥展；只有真实求解或形变失败才反馈细分。没有按模型名称选择算法。'};
+  const groups=buildCharts(mesh,seams,topology).map(c=>({id:c.id,faces:c.faces,area3D:c.faces.reduce((s,f)=>s+frames[f]!.area,0),kind:(c.faces.every(f=>planes[f]===planes[c.faces[0]!]&&planes[f]!>=0)?'planar-feature':c.faces.every(f=>oriented[f])?'crease-region':'surface') as PeelGroup['kind'],charts:[]}));
+  const report:PeelReport={version:1,groups,groupSeams:[...seams],events:[],sourceHintCharts:0,feedbackSplits:0,totalIslands:0,note:'纯几何：连通结构与完整平面特征优先，成组折角边界提供分组依据。不按相向法线强制二分。组内先尝试保孔求解、规则开缝，失败反馈使用长度/折角图割约束的连通分割；原 UV 从未进入生成。没有人工语义标签或模型名称特例。'};
   return{report,seams,topology};
 }
 class MinHeap{a:[number,number,number][]=[];push(v:number,d:number,l:number){const a=this.a;let i=a.length;a.push([v,d,l]);while(i){const p=(i-1)>>1;if(a[p]![1]<=d)break;a[i]=a[p]!;i=p;}a[i]=[v,d,l];}pop(){const a=this.a,r=a[0]!,x=a.pop()!;if(a.length){let i=0;while(2*i+1<a.length){let j=2*i+1;if(j+1<a.length&&a[j+1]![1]<a[j]![1])j++;if(a[j]![1]>=x[1])break;a[i]=a[j]!;i=j;}a[i]=x;}return r;}}
 /** Two connected geodesic catchments, NOT dozens of normal-cone regions.
  * Folded surfaces remain contiguous; high-curvature adjacencies cost more.
  * Existing cuts and group boundaries cannot be crossed. */
-export function bisectSurface(mesh:MeshData,faces:readonly number[],cuts:ReadonlySet<string>,topology:MeshTopology,work?:UVWork,seedFaces?:readonly [number,number]):number[][]{
+export function bisectSurface(mesh:MeshData,faces:readonly number[],cuts:ReadonlySet<string>,topology:MeshTopology,work?:UVWork,seedFaces?:readonly [number,number],band=5):number[][]{
   if(faces.length<2)return[[...faces]];
   const ids=new Map(faces.map((f,i)=>[f,i])),frames=faces.map(f=>faceFrame(mesh,f)),adj:{j:number;cost:number}[][]=faces.map(()=>[]);
   for(let i=0;i<faces.length;i++){
@@ -76,7 +97,10 @@ export function bisectSurface(mesh:MeshData,faces:readonly number[],cuts:Readonl
     while(heap.a.length){const[v,d,l]=heap.pop();if(d!==distance[v]||l!==label[v])continue;last=v;if((v&255)===0)work?.check();for(const e of adj[v]!)if(d+e.cost<distance[e.j]!){distance[e.j]=d+e.cost;label[e.j]=l;heap.push(e.j,d+e.cost,l);}}
     return{last,label};};
   const a=seedFaces?ids.get(seedFaces[0])!:wave([0]).last,b=seedFaces?ids.get(seedFaces[1])!:wave([a]).last,{label}=wave([a,b]);const out:number[][]=[[],[]];for(let i=0;i<faces.length;i++)out[label[i]!]!.push(faces[i]!);
-  return out.filter(c=>c.length);
+  const original=out.filter(c=>c.length);
+  if(original.length!==2)return original;
+  const regular=regularizeBinaryPartition(mesh,original,cuts,topology,()=>work?.check(),band);
+  return regular.parts;
 }
 
 /** Repacking/filling changes UV placement, not the geometric group identity. */

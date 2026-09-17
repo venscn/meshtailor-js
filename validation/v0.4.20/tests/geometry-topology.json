@@ -1,0 +1,30 @@
+{
+  "passed": 5,
+  "tests": [
+    {
+      "name": "Closed genus-one surface opens without fragmenting face set",
+      "passed": true,
+      "detail": {
+        "faces": 360,
+        "cutEdges": 31,
+        "boundaries": 1
+      }
+    },
+    {
+      "name": "Every handle cut is a real original mesh edge",
+      "passed": true
+    },
+    {
+      "name": "Genus-one with a real boundary opens without capping or deleting geometry",
+      "passed": true
+    },
+    {
+      "name": "Feature groups never read UV or triangulation hints",
+      "passed": true
+    },
+    {
+      "name": "Cancellation aborts the handle graph search",
+      "passed": true
+    }
+  ]
+}

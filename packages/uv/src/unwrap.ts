@@ -127,7 +127,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       if(opened){local=opened.local;pendingSlits=opened.added;if(!hierarchical)for(const key of opened.added)effective.add(key);}
     }
     const partition=(maxFaces:number,normalLimit:boolean)=>{
-      if(peel){peel.feedbackSplits++;event('feedback-cut','Validated solve/shape/topology requires an additional connected bisection, not normal-cone fragmentation.');return bisectSurface(mesh,faces,effective,topology,work);}
+      if(peel){peel.feedbackSplits++;event('feedback-cut','Validated solve/shape/topology requires an additional connected bisection, not normal-cone fragmentation.');return bisectSurface(mesh,faces,effective,topology,work,undefined,opts.seamBandRings??5);}
       if(opts.chartPolicy==='legacy')return splitDisks(local,maxFaces,normalLimit,work);
       const r=segmentMeshRegions(mesh,{normalConeDegrees:normalLimit?70:170,maxChartFaces:maxFaces,minRegionFaces:Math.min(64,Math.max(8,Math.floor(faces.length*.01))),minRegionAreaRatio:.01},effective,faces,()=>work?.check(),topology);
       // Recursive children inherit region boundaries through their face subsets;
@@ -151,7 +151,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),true))solve(fs,sourceChart,depth+1);return;
     }
       const shape=shapeQuality(local,p.uv,opts.stretchAreaPercentile??1,opts.maxStretch);
-      if(opts.autoCut&&faces.length>16&&(shape.aspect>opts.maxAspect||shape.fill<opts.minFill||shape.areaStretch>opts.maxStretch)){record(shape.areaStretch>opts.maxStretch?'stretch':shape.aspect>opts.maxAspect?'aspect':'fill',faces.length,sourceChart,depth,`area stretch ${shape.areaStretch}; maximum ${shape.maxStretch}`);partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),shape.areaStretch>opts.maxStretch))solve(fs,sourceChart,depth+1);return;}
+      if(opts.autoCut&&faces.length>16&&((opts.uvObjective==='compact'&&shape.aspect>opts.maxAspect)||shape.fill<opts.minFill||shape.areaStretch>opts.maxStretch)){record(shape.areaStretch>opts.maxStretch?'stretch':shape.aspect>opts.maxAspect?'aspect':'fill',faces.length,sourceChart,depth,`area stretch ${shape.areaStretch}; maximum ${shape.maxStretch}`);partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),shape.areaStretch>opts.maxStretch))solve(fs,sourceChart,depth+1);return;}
       for(const key of pendingSlits)effective.add(key);
       event('unfold',`${p.method}; ${pendingSlits.length} internal slit edges; aspect ${shape.aspect.toFixed(2)}`);
       const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();
