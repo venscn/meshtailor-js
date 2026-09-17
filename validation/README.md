@@ -2,7 +2,7 @@
 
 本次重新打包保留小型验证报告；重复的历史 OBJ、完整几何 JSON 和历史截图不再直接携带在工作目录中。之前已经提交的文件仍可通过原 Git tag 获取，没有重写历史。大文件清单见 `docs/repack/CLEANUP.json`。
 
-最新可直接查看的结果在 `results/v0.4.18/`，原始正确模型在 `examples/verified-models/`。这些删减不影响 Studio 或离线工作台运行。
+最新可查看结果可用 `node scripts/restore-result-examples.mjs` 离线恢复到 `results/v0.4.18/`，原始正确模型在 `examples/verified-models/`。这些删减不影响 Studio 或离线工作台运行。
 
 部分专项 QA 脚本需要先生成中间快照，它们不是应用运行依赖。不要把历史路径缺少中间产物解释为模型缺失。在运行有关脚本前执行：
 

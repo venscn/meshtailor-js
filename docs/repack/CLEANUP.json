@@ -1,6 +1,6 @@
 {
-  "removedCount": 36,
-  "removedWorktreeBytes": 98450048,
+  "removedCount": 40,
+  "removedWorktreeBytes": 119081111,
   "note": "Ordinary working-tree cleanup, not a Git-history rewrite. Previously committed blobs remain reachable via old tags. No apps/, packages/, fixtures or test scripts removed.",
   "files": [
     {
@@ -218,6 +218,30 @@
       "bytes": 201987,
       "sha256": "ef0ee389c090dbb8027488134e1b8cc1c0b8381a2467a628bcf45dd5add07a22",
       "reason": "historical screenshot; original tracked copy remains in Git history"
+    },
+    {
+      "path": "results/v0.4.18/organized/Corset-organized.obj",
+      "bytes": 1694942,
+      "sha256": "31efd2f92cbd4d91a887e91c86ce0ccb1089e9da8eeb82238701d3f8bc4bb4f2",
+      "reason": "computed OBJ already available inside repack-0.4.18-1 Git objects; restore-result-examples.mjs restores without network or computation"
+    },
+    {
+      "path": "results/v0.4.18/organized/FlightHelmet-organized.obj",
+      "bytes": 8613438,
+      "sha256": "e424e262549f4154fb486100fcb8f4c84016437e90fe0ed5f068de268df9e2b0",
+      "reason": "computed OBJ already available inside repack-0.4.18-1 Git objects; restore-result-examples.mjs restores without network or computation"
+    },
+    {
+      "path": "results/v0.4.18/fill/Corset-filled.obj",
+      "bytes": 1702492,
+      "sha256": "e9d51a1a8fa9b087245a5910378790484f02b41976b38aae2cb622e4a2177aa0",
+      "reason": "computed OBJ already available inside repack-0.4.18-1 Git objects; restore-result-examples.mjs restores without network or computation"
+    },
+    {
+      "path": "results/v0.4.18/fill/FlightHelmet-filled.obj",
+      "bytes": 8620191,
+      "sha256": "13f106c2e606fa6ec555a678e438eaae1c41af0e325e52ea68b810e0c2f5fa36",
+      "reason": "computed OBJ already available inside repack-0.4.18-1 Git objects; restore-result-examples.mjs restores without network or computation"
     }
   ]
 }
