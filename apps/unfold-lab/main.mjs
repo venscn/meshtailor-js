@@ -62,6 +62,8 @@ function selectionStatus(){
   $('selection-neighbors').textContent=selected===undefined?'':`3D 邻居：${neighbors.map(l=>'#'+((l.a===selected?l.b:l.a)+1)+(l.stitchable?' 共享边':' 空间关联')).join(' · ')||'采样范围内未找到'}。关联不改变真实岛数。`;
   const human=snapshot?.human?.entries.find(e=>e.status==='applied'&&e.charts?.includes(selected));
   $('selection-template').textContent=human?`结构：${human.template} · 原区域 #${human.sourceChart+1} → ${human.charts.map(i=>'#'+(i+1)).join(' / ')}。上下边界：${human.lowerBoundary.length} / ${human.upperBoundary.length} 顶点 · ${human.seamEdges.length} 条真实侧缝边。` : '';
+  const feature=snapshot?.diagnostics?.find(d=>d.id===selected)?.feature;
+  $('selection-feature').textContent=feature?`几何特征保护：透孔主面 · 保留 ${feature.holes} 个孔。边界最大变化 ${(100*feature.boundaryMax).toFixed(2)}% 参考轮廓直径；孔面积比例 ${feature.holeAreaRatios.map(x=>x.toFixed(3)+'×').join(' / ')}。相对源几何投影，不使用原 UV，也不是人工语义评分。`:'';
   const coordinates=$('selection-coordinates');
   if(coordinates){
     const fi=options.focusFace,chart=fi===null?null:snapshot?.packed.find(c=>c.faceUVs.has(fi));
