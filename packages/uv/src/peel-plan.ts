@@ -82,13 +82,13 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   // Identify readable multi-boundary sheets before opening closed handles.
   // Only fully checked projected regions become shape references. Other faces
   // remain in the model and are solved as return walls/back/transition groups.
-  const featureByFace=new Map<number,{frame:ProjectionFrame;boundaryLoops:number}>();
+  const featureByFace=new Map<number,import('./sheet-features.js').SheetFeature>();
   for(const group of buildCharts(mesh,seams,topology)){
     if(group.faces.every(f=>planes[f]!>=0))continue;
     const ar=group.faces.reduce((s,f)=>s+frames[f]!.area,0);if(ar<total*.001)continue;
     const found=findSheetFeatures(mesh,group.faces,seams,topology,work);
     if(!found.length)continue;
-    const labels=new Map<number,number>();found.forEach((c,i)=>c.faces.forEach(f=>{labels.set(f,i);featureByFace.set(f,{frame:c.frame,boundaryLoops:c.boundaryLoops});}));
+    const labels=new Map<number,number>();found.forEach((c,i)=>c.faces.forEach(f=>{labels.set(f,i);featureByFace.set(f,c);}));
     const members=new Set(group.faces);
     for(const[key,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>members.has(f))&&(labels.get(e.faces[0]!)??-1)!==(labels.get(e.faces[1]!)??-1))seams.add(key);
   }
