@@ -18,3 +18,6 @@ results/v0.4.18/
 
 # Optional restored v0.4.20 reference OBJ files
 /results/v0.4.20/
+
+# Optional generated reference outputs restored locally
+/results/v0.4.21/

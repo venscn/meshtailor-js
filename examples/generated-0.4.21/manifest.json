@@ -1,0 +1,15 @@
+{
+  "scope": "Geometry-only v0.4.21 reference outputs; source UV was excluded",
+  "files": [
+    {
+      "asset": "FlightHelmet",
+      "path": "examples/generated-0.4.21/FlightHelmet-geometry-only.obj.gz",
+      "objSHA256": "3015c8cc3bc718e1318b836290ce70d46dccbac6fb64a493b24761f93a2e71ae"
+    },
+    {
+      "asset": "Corset",
+      "path": "examples/generated-0.4.20/Corset-geometry-only.obj.gz",
+      "objSHA256": "0946c8476b435f7346abddccdb482cf51f69bb11d913e2db0d3325e47e527c28"
+    }
+  ]
+}
