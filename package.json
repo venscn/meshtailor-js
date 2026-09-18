@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.20",
+  "version": "0.4.21",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -124,7 +124,9 @@
     "test:geometry-policy": "node scripts/geometry-policy-smoke.mjs",
     "test:geometry:real": "node scripts/geometry-real-smoke.mjs",
     "test:geometry:browser": "node scripts/geometry-browser-smoke.mjs",
-    "check:geometry": "npm run test:geometry-input && npm run test:geometry-boundaries && npm run test:geometry-candidates && npm run test:geometry-topology && npm run test:geometry-policy && npm run test:core"
+    "check:geometry": "npm run test:geometry-input && npm run test:geometry-boundaries && npm run test:geometry-candidates && npm run test:geometry-topology && npm run test:geometry-policy && npm run test:core",
+    "test:feature-sheets": "node scripts/feature-sheets-smoke.mjs",
+    "test:feature-sheets:browser": "node scripts/feature-sheets-browser.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
