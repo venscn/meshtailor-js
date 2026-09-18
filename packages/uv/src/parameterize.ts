@@ -1,13 +1,14 @@
+import {featureContract,type FeatureContractReport} from './feature-contract.js';
 import {simpleUVBoundary} from './boundary-guard.js';
 import {incompleteCholesky} from './sparse-preconditioner.js';
-import {projectionSeeds} from './projection-seeds.js';
+import {projectionSeeds,projectFrame,type ProjectionFrame} from './projection-seeds.js';
 import {planarShapeCandidate,freeBoundaryARAP} from './free-boundary.js';
 import { uvProgress, rethrowUVStop, type UVWork } from './work.js';
 import type { Vec2,Vec3 } from '@meshtailor/mesh-core';
 import type { CutMesh } from './cut-topology.js';
 import { checkUVTriangles, type UVQuality, signedArea2 } from './uv-quality.js';
-export interface SolverOptions { projectionSeed?:boolean; iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte'; uvObjective?:'paint'|'compact'; paintIterations?:number }
-export interface Parameterization { boundaryValid?:boolean; uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'|'projected-free'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
+export interface SolverOptions { featureFrame?:ProjectionFrame; projectionSeed?:boolean; iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte'; uvObjective?:'paint'|'compact'; paintIterations?:number }
+export interface Parameterization { feature?:FeatureContractReport; boundaryValid?:boolean; uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'|'projected-free'|'feature-constrained'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
 export function triangleArea(a:Vec3,b:Vec3,c:Vec3):number{const u=b.map((x,i)=>x-a[i]!),v=c.map((x,i)=>x-a[i]!);return Math.hypot(u[1]!*v[2]!-u[2]!*v[1]!,u[2]!*v[0]!-u[0]!*v[2]!,u[0]!*v[1]!-u[1]!*v[0]!)*.5;}
 type Row={ids:number[];values:number[]};
 /** Matrix-free, diagonally preconditioned conjugate gradients on A^T A.
@@ -117,6 +118,15 @@ export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={}
   if(opts.uvObjective==='paint'&&opts.method==='auto'){
     const uv=planarShapeCandidate(mesh);
     if(uv){const result=finish({uv,iterations:0,residual:0},'planar-shape');if(result.quality.valid)return result;}
+  }
+  if(opts.featureFrame&&opts.uvObjective==='paint'&&opts.method==='auto'){
+    const seed=finish({uv:projectFrame(mesh.positions,opts.featureFrame),iterations:0,residual:0},'feature-constrained');
+    if(!seed.quality.valid)throw Error('Geometric feature reference is not injective; do not erase its boundary.');
+    const free=freeBoundaryARAP(mesh,seed.uv,opts.paintIterations!,Math.min(opts.iterations,600),work,{boundaryStiffness:30,interiorStiffness:2});
+    const r=finish(free,'feature-constrained');r.feature=featureContract(seed.uv,r.uv,mesh.boundaries);
+    if(!r.feature.valid||!r.quality.valid||free.maxAnisotropy>100||!areaNotCollapsed(mesh,r.uv))throw Error('Constrained geometric feature solve rejected.');
+    r.fallbackReason=`Geometric sheet: ${mesh.boundaryLoops} boundary loops retained; boundary/position anchors constrain the projection-derived shape during relaxation.`;
+    return r;
   }
   if(opts.projectionSeed&&opts.uvObjective==='paint'&&opts.method==='auto'){
     // Projection is an initialization. Opposite-facing/occluded triangles reject

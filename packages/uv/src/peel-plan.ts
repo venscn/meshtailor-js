@@ -1,9 +1,11 @@
+import {findSheetFeatures} from './sheet-features.js';
+import type {ProjectionFrame} from './projection-seeds.js';
 import {regularizeBinaryPartition,auditPartitionBoundary,buildTopology,edgeKey,type MeshData,type Vec3,type MeshTopology} from '@meshtailor/mesh-core';
 import {buildCharts} from './charts.js';
 import type {UVWork} from './work.js';
 
 export interface PeelOptions {peelSourceHints?:boolean;peelOrientationPanels?:boolean;peelPanelArea?:number;peelFeatureArea?:number;peelMaxDepth?:number;seamBandRings?:number;groupFeatureDegrees?:number}
-export interface PeelGroup {id:number;faces:number[];area3D:number;kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region';charts:number[]}
+export interface PeelGroup {id:number;faces:number[];area3D:number;kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region'|'feature-sheet';featureFrame?:ProjectionFrame;boundaryLoops?:number;boundaryRegularization?:import('@meshtailor/mesh-core').BoundaryRegularizationReport;charts:number[]}
 export interface PeelReport {version:1;groups:PeelGroup[];groupSeams:string[];events:{group:number;faces:number;depth:number;action:string;detail:string}[];sourceHintCharts:number;feedbackSplits:number;totalIslands:number;note:string}
 const sub=(a:Vec3,b:Vec3):Vec3=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
 const dot=(a:Vec3,b:Vec3)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
@@ -77,7 +79,20 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
     for(const[key,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>members.has(f))&&label.get(e.faces[0]!)!==label.get(e.faces[1]!))seams.add(key);
     for(const f of group.faces)oriented[f]=1;
   }
-  const groups=buildCharts(mesh,seams,topology).map(c=>({id:c.id,faces:c.faces,area3D:c.faces.reduce((s,f)=>s+frames[f]!.area,0),kind:(c.faces.every(f=>planes[f]===planes[c.faces[0]!]&&planes[f]!>=0)?'planar-feature':c.faces.every(f=>oriented[f])?'crease-region':'surface') as PeelGroup['kind'],charts:[]}));
+  // Identify readable multi-boundary sheets before opening closed handles.
+  // Only fully checked projected regions become shape references. Other faces
+  // remain in the model and are solved as return walls/back/transition groups.
+  const featureByFace=new Map<number,{frame:ProjectionFrame;boundaryLoops:number}>();
+  for(const group of buildCharts(mesh,seams,topology)){
+    if(group.faces.every(f=>planes[f]!>=0))continue;
+    const ar=group.faces.reduce((s,f)=>s+frames[f]!.area,0);if(ar<total*.001)continue;
+    const found=findSheetFeatures(mesh,group.faces,seams,topology,work);
+    if(!found.length)continue;
+    const labels=new Map<number,number>();found.forEach((c,i)=>c.faces.forEach(f=>{labels.set(f,i);featureByFace.set(f,{frame:c.frame,boundaryLoops:c.boundaryLoops});}));
+    const members=new Set(group.faces);
+    for(const[key,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>members.has(f))&&(labels.get(e.faces[0]!)??-1)!==(labels.get(e.faces[1]!)??-1))seams.add(key);
+  }
+  const groups=buildCharts(mesh,seams,topology).map(c=>({id:c.id,faces:c.faces,area3D:c.faces.reduce((s,f)=>s+frames[f]!.area,0),...(featureByFace.has(c.faces[0]!)?{featureFrame:featureByFace.get(c.faces[0]!)!.frame,boundaryLoops:featureByFace.get(c.faces[0]!)!.boundaryLoops,boundaryRegularization:featureByFace.get(c.faces[0]!)!.regularization}:{}),kind:(featureByFace.has(c.faces[0]!)?'feature-sheet':c.faces.every(f=>planes[f]===planes[c.faces[0]!]&&planes[f]!>=0)?'planar-feature':c.faces.every(f=>oriented[f])?'crease-region':'surface') as PeelGroup['kind'],charts:[]}));
   const report:PeelReport={version:1,groups,groupSeams:[...seams],events:[],sourceHintCharts:0,feedbackSplits:0,totalIslands:0,note:'纯几何：连通结构与完整平面特征优先，成组折角边界提供分组依据。不按相向法线强制二分。组内先尝试保孔求解、规则开缝，失败反馈使用长度/折角图割约束的连通分割；原 UV 从未进入生成。没有人工语义标签或模型名称特例。'};
   return{report,seams,topology};
 }

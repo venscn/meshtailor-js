@@ -14,7 +14,7 @@ import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
 export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions,PeelOptions { sourceFeaturePolicy?:'repair'|'preserve'; sourceFeatureTolerance?:number; structureTemplates?:boolean; humanTemplates?:Partial<import('./human-templates.js').HumanTemplateOptions>; sourceRepairPolicy?:'repair'|'reject'; sourceAtlasMerge?:boolean; initialSegmentation?:'regions'|'connected'|'hierarchical'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
-export interface ChartDiagnostic {areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
+export interface ChartDiagnostic {feature?:import('./feature-contract.js').FeatureContractReport;areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
@@ -105,7 +105,9 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   const solve=(faces:number[],sourceChart:number,depth=0)=>{
     const event=(action:string,detail:string)=>{if(peel&&peel.events.length<2000)peel.events.push({group:sourceChart,faces:faces.length,depth,action,detail});};
     uvProgress(work,{stage:'topology',detail:`检查几何组 ${sourceChart+1} 的 ${faces.length} 个面（补切层 ${depth}）`,facesDone,facesTotal:mesh.faces.length,islandsDone:raw.length});
-    if(human){
+    const featureFrame=depth===0?peel?.groups[sourceChart]?.featureFrame:undefined;
+    const solveOptions={...opts,featureFrame};
+    if(human&&!featureFrame){
       const t=unfoldBand(mesh,faces,sourceChart,effective,opts,totalArea,work);
       if('raw' in t){
         event('analytic-seed','Validated generic ring geometry candidate; actual side cuts preserved.');
@@ -119,7 +121,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     let p:Parameterization|undefined;
     // A hole is not, by itself, a reason to cut a visible panel into strips.
     if(!local.disk&&local.manifold&&local.boundaryLoops>1&&local.euler===2-local.boundaryLoops&&faces.length<=opts.maxChartFaces){
-      try{p=parameterizeChart(local,{...opts,projectionSeed:true},work);event('multi-boundary','Kept all boundary loops without adding a solver-only slit.');}
+      try{p=parameterizeChart(local,{...solveOptions,projectionSeed:true},work);event('multi-boundary','Kept all boundary loops without adding a solver-only slit.');}
       catch(error){rethrowUVStop(error);event('multi-boundary-rejected',String(error));}
     }
     if(!p&&!planar&&opts.autoCut&&opts.chartPolicy!=='legacy'&&!local.disk&&faces.length<=opts.maxChartFaces){
@@ -143,7 +145,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     }
     // Catch this chart's numerical failure only. Never catch a child recursion
     // after it has appended solved siblings (that could duplicate source faces).
-    try{p??=parameterizeChart(local,opts,work);}catch(error){
+    try{p??=parameterizeChart(local,solveOptions,work);}catch(error){
       rethrowUVStop(error);
       if(!opts.autoCut||faces.length<2||depth>(opts.peelMaxDepth??20))throw error;
       
@@ -158,7 +160,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...p.uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
       const area3D=local.triangles.reduce((s,t)=>s+triangleArea(local.positions[t[0]]!,local.positions[t[1]]!,local.positions[t[2]]!),0),id=raw.length;
       facesDone+=faces.length;uvProgress(work,{stage:'parameterize',detail:'已接受有效 UV 岛',facesDone,facesTotal:mesh.faces.length,islandsDone:raw.length+1});
-      raw.push({id,faceUVs,area3D});diagnostics.push({id,sourceChart,faces:faces.length,method:p.method,...shape,iterations:p.iterations,residual:p.residual,...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});
+      raw.push({id,faceUVs,area3D});diagnostics.push({id,sourceChart,faces:faces.length,method:p.method,...shape,iterations:p.iterations,residual:p.residual,...(p.feature?{feature:p.feature}:{}),...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});
   };
   charts.forEach(chart=>solve(chart.faces,chart.id));
   for(const key of peel?.groupSeams??[])templateLocks.add(key);

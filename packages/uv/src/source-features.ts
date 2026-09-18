@@ -15,7 +15,7 @@ import type {UVWork} from './work.js';
 
 export interface SourceFeatureRegion {
   sourceChart:number; faces:number[]; charts:number[];
-  kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region';
+  kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region'|'feature-sheet';
 }
 export interface SourceFeatureReport {
   version:1; inspected:number; detectedPanels:number; changedCharts:number;

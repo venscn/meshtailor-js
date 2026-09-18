@@ -32,7 +32,8 @@ type Element={t:[number,number,number];gx:number[];gy:number[];area:number};
  * in ARAP energy. Every accepted iterate also has a simple boundary; final
  * global triangle overlaps are independently checked by parameterizeChart.
  * This is an independent TS implementation, not libigl bindings. */
-export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,linearIterations:number,work?:UVWork){
+export interface ShapeAnchors {boundaryStiffness?:number;interiorStiffness?:number}
+export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,linearIterations:number,work?:UVWork,anchors:ShapeAnchors={}){
   if(!simpleUVBoundary(seed,mesh.boundaries,work))throw Error('ARAP seed violates cut-boundary contract.');
   const n=mesh.positions.length,ps=mesh.positions,min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
   for(const p of ps)for(let k=0;k<3;k++){min[k]=Math.min(min[k]!,p[k]!);max[k]=Math.max(max[k]!,p[k]!);}
@@ -44,6 +45,13 @@ export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,l
   if(!(uvArea>0))throw Error('ARAP requires consistently oriented initial UV.');
   const scale=Math.sqrt(totalArea/uvArea),origin=seed[0]!;
   let uv=seed.map(p=>[(p[0]-origin[0])*scale,(p[1]-origin[1])*scale] as Vec2);
+  // Anchors refer ONLY to the validated geometry-derived seed, never model UV.
+  // Their scale uses surface area, avoiding sensitivity to mesh units/density.
+  const reference=uv.map(p=>[...p] as Vec2),boundaryIds=new Set(mesh.boundaries.flat()),anchorWeights=new Float64Array(n);
+  const boundaryWeight=anchors.boundaryStiffness??0,interiorWeight=anchors.interiorStiffness??0;
+  if(![boundaryWeight,interiorWeight].every(x=>Number.isFinite(x)&&x>=0&&x<=1000))throw Error('Invalid shape anchor strength');
+  for(const e of elements)for(const i of e.t)anchorWeights[i]+=interiorWeight*e.area/3;
+  for(const i of boundaryIds)anchorWeights[i]+=boundaryWeight*totalArea/Math.max(1,boundaryIds.size);
   // Translation is eliminated exactly. FEM stiffness is SPD on this free set,
   // even for obtuse source triangles (no arbitrary positive cotangent clamping).
   const rows:Map<number,number>[]=Array.from({length:n-1},()=>new Map());
@@ -51,6 +59,7 @@ export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,l
     const i=e.t[a]!-1,j=e.t[b]!-1;if(i<0||j<0)continue;
     rows[i]!.set(j,(rows[i]!.get(j)??0)+e.area*(e.gx[a]!*e.gx[b]!+e.gy[a]!*e.gy[b]!));
   }
+  for(let i=1;i<n;i++)rows[i-1]!.set(i-1,(rows[i-1]!.get(i-1)??0)+anchorWeights[i]!);
   const offsets=new Uint32Array(n);for(let i=0;i<n-1;i++)offsets[i+1]=offsets[i]!+rows[i]!.size;
   const columns=new Uint32Array(offsets[n-1]!),values=new Float64Array(columns.length),diag=new Float64Array(n-1);
   for(let i=0;i<n-1;i++){let k=offsets[i]!;for(const [j,value] of rows[i]!){columns[k]=j;values[k++]=value;}diag[i]=rows[i]!.get(i)??0;}
@@ -69,7 +78,7 @@ export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,l
     return{x,iterations,residual};
   };
   const jac=(vs:Vec2[],e:Element)=>{let a=0,b=0,c=0,d=0;for(let k=0;k<3;k++){const p=vs[e.t[k]!]!;a+=p[0]*e.gx[k]!;b+=p[0]*e.gy[k]!;c+=p[1]*e.gx[k]!;d+=p[1]*e.gy[k]!;}return[a,b,c,d];};
-  const energy=(vs:Vec2[])=>{let s=0;for(const e of elements){const [a,b,c,d]=jac(vs,e) as [number,number,number,number];s+=e.area*(a*a+b*b+c*c+d*d+2-2*Math.hypot(a+d,c-b));}return s/totalArea;};
+  const energy=(vs:Vec2[])=>{let s=0;for(const e of elements){const [a,b,c,d]=jac(vs,e) as [number,number,number,number];s+=e.area*(a*a+b*b+c*c+d*d+2-2*Math.hypot(a+d,c-b));}for(let i=0;i<n;i++)s+=anchorWeights[i]!*((vs[i]![0]-reference[i]![0])**2+(vs[i]![1]-reference[i]![1])**2);return s/totalArea;};
   const initialEnergy=energy(uv);let previous=initialEnergy,iterations=0,residual=0,accepted=0,boundaryRejected=0;
   for(;iterations<maxIterations;iterations++){
     uvProgress(work,{stage:'parameterize',detail:'自由边界保形 ARAP（不固定圆形边界）',current:iterations,total:maxIterations,unit:'保形迭代'});
@@ -77,6 +86,7 @@ export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,l
     for(const e of elements){const [a,b,c,d]=jac(uv,e) as [number,number,number,number],den=Math.hypot(a+d,c-b),co=den>1e-15?(a+d)/den:1,si=den>1e-15?(c-b)/den:0;
       for(let k=0;k<3;k++){const i=e.t[k]!-1;if(i<0)continue;bx[i]+=e.area*(co*e.gx[k]!-si*e.gy[k]!);by[i]+=e.area*(si*e.gx[k]!+co*e.gy[k]!);}
     }
+    for(let i=1;i<n;i++){bx[i-1]+=anchorWeights[i]!*reference[i]![0];by[i-1]+=anchorWeights[i]!*reference[i]![1];}
     const x=solve(bx,0),y=solve(by,1);residual=Math.max(x.residual,y.residual);
     const target:Vec2[]=[[0,0],...Array.from({length:n-1},(_,i)=>[x.x[i]!,y.x[i]!] as Vec2)];let candidate:Vec2[]|null=null,next=previous;
     for(let alpha=1;alpha>=1/65536;alpha*=.5){
