@@ -1,0 +1,61 @@
+{
+  "scope": "Actual offline workbench with bundled UV-free FlightHelmet geometry",
+  "tests": [
+    {
+      "name": "New build is actually mounted",
+      "passed": true
+    },
+    {
+      "name": "Actual helmet button uses pure geometry and completes production Worker",
+      "passed": true
+    },
+    {
+      "name": "Whole-model generation retains two holes in a geometric feature sheet",
+      "passed": true,
+      "detail": {
+        "valid": true,
+        "boundaryLoops": 3,
+        "holes": 2,
+        "boundaryRMS": 0.012499314125752241,
+        "boundaryMax": 0.021577184238121595,
+        "holeAreaRatios": [
+          1.0010020290452206,
+          1.021053177479256
+        ],
+        "holeCenterDrift": [
+          0.00963593531314515,
+          0.009622802763620224
+        ]
+      }
+    },
+    {
+      "name": "Selecting the protected sheet does not implicitly select a triangle",
+      "passed": true
+    },
+    {
+      "name": "Inspector shows measured hole contract, not a semantic score",
+      "passed": true
+    },
+    {
+      "name": "Selected sheet retains two holes at exact animation endpoint",
+      "passed": true
+    },
+    {
+      "name": "Playback with hidden background and no wireframe preserves user camera state",
+      "passed": true
+    },
+    {
+      "name": "Repacking cannot erase the protected boundary loops",
+      "passed": true
+    },
+    {
+      "name": "Fill validates the resulting feature shape, not only its initial seed",
+      "passed": true
+    },
+    {
+      "name": "No JavaScript/WebGL failures were hidden",
+      "passed": true
+    }
+  ],
+  "passed": 10
+}
