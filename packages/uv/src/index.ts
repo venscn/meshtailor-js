@@ -47,3 +47,5 @@ export * from './peel-plan.js';
 export * from './source-features.js';
 
 export * from "./generation-policy.js";
+
+export {validateFeatureOutput} from './feature-output.js';

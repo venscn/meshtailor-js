@@ -1,6 +1,6 @@
 import {PipelineRecorder,resolveLoadPipeline,type LoadPipelineConfig,type PipelineTrace} from '../unfold/load-pipeline.js';
 import {geometryOnlyMesh,GEOMETRY_INPUT_POLICY,type GeometryInputPolicy,type MeshData} from '@meshtailor/mesh-core';
-import {geometryGenerationOptions,carryPeelReport, inheritedTemplateSeams,carryHumanTemplates, checkUVTriangles,fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildUnfoldGeometry, unwrapMesh, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
+import {validateFeatureOutput,geometryGenerationOptions,carryPeelReport, inheritedTemplateSeams,carryHumanTemplates, checkUVTriangles,fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildUnfoldGeometry, unwrapMesh, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
 export type UVTarget = 'generated' | 'source' | 'stitch' | 'repack' | 'source-atlas' | 'fill' | 'templates';
 export interface UVSnapshot {
   inputPolicy:GeometryInputPolicy;
@@ -98,6 +98,17 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     if(seedCharts&&seedHuman&&['stitch','repack','fill','templates'].includes(target))snapshot.human=carryHumanTemplates(seedHuman,snapshot.human,snapshot.packed,seams);
     if(seedPeel&&seedCharts&&['stitch','repack','fill'].includes(target))snapshot.peel=carryPeelReport(seedPeel,snapshot.packed);
     
+    const featureChecks=validateFeatureOutput(mesh,snapshot.packed,seams,snapshot.peel,work);
+    if(featureChecks.size){
+      snapshot.diagnostics??=[];
+      for(const [id,checked]of featureChecks){
+        const {feature,shape}=checked;
+        const existing=snapshot.diagnostics.find(d=>d.id===id);
+        if(existing)existing.feature=feature;
+        else snapshot.diagnostics.push({id,sourceChart:-1,faces:snapshot.packed.find(c=>c.id===id)!.faceUVs.size,method:'feature-preserved-postprocess',iterations:0,residual:0,...shape,feature});
+      }
+      snapshot.warnings.push(`已按实际最终 UV 验证 ${featureChecks.size} 个透孔主面的孔和边界关系。其余一般曲面仅通过几何有效性检查，不代表已识别人工版型。`);
+    }
     work.step?.('correspondence');
     snapshot.geometry=buildUnfoldGeometry(mesh,snapshot.packed,seams,work);
     work.step?.('audit');
