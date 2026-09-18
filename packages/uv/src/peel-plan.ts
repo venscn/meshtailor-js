@@ -4,7 +4,7 @@ import {regularizeBinaryPartition,auditPartitionBoundary,buildTopology,edgeKey,t
 import {buildCharts} from './charts.js';
 import type {UVWork} from './work.js';
 
-export interface PeelOptions {peelSourceHints?:boolean;peelOrientationPanels?:boolean;peelPanelArea?:number;peelFeatureArea?:number;peelMaxDepth?:number;seamBandRings?:number;groupFeatureDegrees?:number}
+export interface PeelOptions {featureSheets?:boolean;peelSourceHints?:boolean;peelOrientationPanels?:boolean;peelPanelArea?:number;peelFeatureArea?:number;peelMaxDepth?:number;seamBandRings?:number;groupFeatureDegrees?:number}
 export interface PeelGroup {id:number;faces:number[];area3D:number;kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region'|'feature-sheet';featureFrame?:ProjectionFrame;boundaryLoops?:number;boundaryRegularization?:import('@meshtailor/mesh-core').BoundaryRegularizationReport;charts:number[]}
 export interface PeelReport {version:1;groups:PeelGroup[];groupSeams:string[];events:{group:number;faces:number;depth:number;action:string;detail:string}[];sourceHintCharts:number;feedbackSplits:number;totalIslands:number;note:string}
 const sub=(a:Vec3,b:Vec3):Vec3=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
@@ -83,7 +83,7 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   // Only fully checked projected regions become shape references. Other faces
   // remain in the model and are solved as return walls/back/transition groups.
   const featureByFace=new Map<number,import('./sheet-features.js').SheetFeature>();
-  for(const group of buildCharts(mesh,seams,topology)){
+  for(const group of options.featureSheets===false?[]:buildCharts(mesh,seams,topology)){
     if(group.faces.every(f=>planes[f]!>=0))continue;
     const ar=group.faces.reduce((s,f)=>s+frames[f]!.area,0);if(ar<total*.001)continue;
     const found=findSheetFeatures(mesh,group.faces,seams,topology,work);
