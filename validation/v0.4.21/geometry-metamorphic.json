@@ -1,0 +1,510 @@
+{
+  "scope": "Actual hash-pinned models, production geometry-only Worker, no provided seams or hints. Full React/Three importer is a separate check.",
+  "models": [
+    {
+      "name": "Corset",
+      "identity": {
+        "archiveSHA256": "284decae81fda986f3c291bf4bebee473221b4eabe7078c65ed44adaf9ffb563",
+        "jsonSHA256": "1aaa7fa54731ca833c3a0f919ba82c1af2a69cc7f8de36ba76bfb5038de8bd38",
+        "binarySHA256": "de7730fb4201466603410dc1a7128bc1339e945a945dbb852f6dc39f3c53ec22",
+        "binaryBytes": 662184,
+        "decoder": "exact static fixture decoder + production assembleMeshParts; not GLTFLoader E2E"
+      },
+      "vertices": 9774,
+      "faces": 18324,
+      "variants": [
+        {
+          "kind": "original",
+          "islands": 95,
+          "groups": 84,
+          "signature": "9bbf1a4f97200a6f34cbc9c2c7c970d6a28ce2b6929022cbb2d5b4bd81c8178f",
+          "objHash": "0946c8476b435f7346abddccdb482cf51f69bb11d913e2db0d3325e47e527c28",
+          "quality": {
+            "triangles": 18324,
+            "flipped": 0,
+            "degenerate": 0,
+            "overlaps": 0,
+            "area": 0.5092340187218383,
+            "valid": true
+          },
+          "boundary": {
+            "length": 0.7899532085640985,
+            "edges": 319,
+            "teeth": 6
+          },
+          "elapsedMs": 4783.7884890000005,
+          "reasons": {
+            "solver-invalid": 6,
+            "stretch": 1
+          },
+          "methods": {
+            "lscm": 63,
+            "human-contour-band": 8,
+            "planar-shape": 3,
+            "projected-free": 11,
+            "arap-free": 10
+          },
+          "sourceUVUse": 0,
+          "coverage": 18324,
+          "exportIslands": 95,
+          "pipeline": [
+            {
+              "id": "input",
+              "state": "completed",
+              "elapsedMs": 73.60779900000034
+            },
+            {
+              "id": "parameterize",
+              "state": "completed",
+              "elapsedMs": 3097.8201979999994
+            },
+            {
+              "id": "repair",
+              "state": "skipped"
+            },
+            {
+              "id": "structure",
+              "state": "skipped"
+            },
+            {
+              "id": "merge",
+              "state": "skipped"
+            },
+            {
+              "id": "pack",
+              "state": "completed",
+              "elapsedMs": 920.7409100000004
+            },
+            {
+              "id": "fill",
+              "state": "skipped"
+            },
+            {
+              "id": "correspondence",
+              "state": "completed",
+              "elapsedMs": 433.6709749999991
+            },
+            {
+              "id": "audit",
+              "state": "completed",
+              "elapsedMs": 23.385267000001477
+            }
+          ]
+        },
+        {
+          "kind": "absent",
+          "islands": 95,
+          "groups": 84,
+          "signature": "9bbf1a4f97200a6f34cbc9c2c7c970d6a28ce2b6929022cbb2d5b4bd81c8178f",
+          "objHash": "0946c8476b435f7346abddccdb482cf51f69bb11d913e2db0d3325e47e527c28",
+          "quality": {
+            "triangles": 18324,
+            "flipped": 0,
+            "degenerate": 0,
+            "overlaps": 0,
+            "area": 0.5092340187218383,
+            "valid": true
+          },
+          "boundary": {
+            "length": 0.7899532085640985,
+            "edges": 319,
+            "teeth": 6
+          },
+          "elapsedMs": 5744.164962000001,
+          "reasons": {
+            "solver-invalid": 6,
+            "stretch": 1
+          },
+          "methods": {
+            "lscm": 63,
+            "human-contour-band": 8,
+            "planar-shape": 3,
+            "projected-free": 11,
+            "arap-free": 10
+          },
+          "sourceUVUse": 0,
+          "coverage": 18324,
+          "exportIslands": 95,
+          "pipeline": [
+            {
+              "id": "input",
+              "state": "completed",
+              "elapsedMs": 150.26720700000078
+            },
+            {
+              "id": "parameterize",
+              "state": "completed",
+              "elapsedMs": 3524.6323949999987
+            },
+            {
+              "id": "repair",
+              "state": "skipped"
+            },
+            {
+              "id": "structure",
+              "state": "skipped"
+            },
+            {
+              "id": "merge",
+              "state": "skipped"
+            },
+            {
+              "id": "pack",
+              "state": "completed",
+              "elapsedMs": 1079.6724560000002
+            },
+            {
+              "id": "fill",
+              "state": "skipped"
+            },
+            {
+              "id": "correspondence",
+              "state": "completed",
+              "elapsedMs": 545.4994190000016
+            },
+            {
+              "id": "audit",
+              "state": "completed",
+              "elapsedMs": 36.97803399999975
+            }
+          ]
+        },
+        {
+          "kind": "random",
+          "islands": 95,
+          "groups": 84,
+          "signature": "9bbf1a4f97200a6f34cbc9c2c7c970d6a28ce2b6929022cbb2d5b4bd81c8178f",
+          "objHash": "0946c8476b435f7346abddccdb482cf51f69bb11d913e2db0d3325e47e527c28",
+          "quality": {
+            "triangles": 18324,
+            "flipped": 0,
+            "degenerate": 0,
+            "overlaps": 0,
+            "area": 0.5092340187218383,
+            "valid": true
+          },
+          "boundary": {
+            "length": 0.7899532085640985,
+            "edges": 319,
+            "teeth": 6
+          },
+          "elapsedMs": 4508.318434000001,
+          "reasons": {
+            "solver-invalid": 6,
+            "stretch": 1
+          },
+          "methods": {
+            "lscm": 63,
+            "human-contour-band": 8,
+            "planar-shape": 3,
+            "projected-free": 11,
+            "arap-free": 10
+          },
+          "sourceUVUse": 0,
+          "coverage": 18324,
+          "exportIslands": 95,
+          "pipeline": [
+            {
+              "id": "input",
+              "state": "completed",
+              "elapsedMs": 59.43128600000273
+            },
+            {
+              "id": "parameterize",
+              "state": "completed",
+              "elapsedMs": 2813.812265999997
+            },
+            {
+              "id": "repair",
+              "state": "skipped"
+            },
+            {
+              "id": "structure",
+              "state": "skipped"
+            },
+            {
+              "id": "merge",
+              "state": "skipped"
+            },
+            {
+              "id": "pack",
+              "state": "completed",
+              "elapsedMs": 965.8143960000016
+            },
+            {
+              "id": "fill",
+              "state": "skipped"
+            },
+            {
+              "id": "correspondence",
+              "state": "completed",
+              "elapsedMs": 405.5162410000012
+            },
+            {
+              "id": "audit",
+              "state": "completed",
+              "elapsedMs": 23.04287999999724
+            }
+          ]
+        }
+      ],
+      "originalAbsentRandomIdentical": true
+    },
+    {
+      "name": "FlightHelmet",
+      "identity": {
+        "archiveSHA256": "284decae81fda986f3c291bf4bebee473221b4eabe7078c65ed44adaf9ffb563",
+        "jsonSHA256": "c94a08a28305fb49a612cf273330a04e3dfc084306257d52dc00b4447eeb1091",
+        "binarySHA256": "9e623a27f837e1cc995d1380da5fd3becf4d29586fefba882fc0ba76b49f94bf",
+        "binaryBytes": 3227148,
+        "decoder": "exact static fixture decoder + production assembleMeshParts; not GLTFLoader E2E"
+      },
+      "vertices": 47561,
+      "faces": 94722,
+      "variants": [
+        {
+          "kind": "original",
+          "islands": 193,
+          "groups": 100,
+          "signature": "8ee25fab6723346b90ab24e9bfd2fce44d8db84246b727b16f529a9f2d0607e9",
+          "objHash": "3015c8cc3bc718e1318b836290ce70d46dccbac6fb64a493b24761f93a2e71ae",
+          "quality": {
+            "triangles": 94722,
+            "flipped": 0,
+            "degenerate": 0,
+            "overlaps": 0,
+            "area": 0.554335316835504,
+            "valid": true
+          },
+          "boundary": {
+            "length": 15.27419893777467,
+            "edges": 1582,
+            "teeth": 25
+          },
+          "elapsedMs": 54176.395233999996,
+          "reasons": {
+            "solver-invalid": 71,
+            "stretch": 1,
+            "topology": 20
+          },
+          "methods": {
+            "lscm": 127,
+            "arap-free": 29,
+            "projected-free": 29,
+            "planar-shape": 5,
+            "feature-constrained": 1,
+            "human-contour-band": 2
+          },
+          "sourceUVUse": 0,
+          "coverage": 94722,
+          "exportIslands": 193,
+          "pipeline": [
+            {
+              "id": "input",
+              "state": "completed",
+              "elapsedMs": 386.24653500000204
+            },
+            {
+              "id": "parameterize",
+              "state": "completed",
+              "elapsedMs": 44844.766118
+            },
+            {
+              "id": "repair",
+              "state": "skipped"
+            },
+            {
+              "id": "structure",
+              "state": "skipped"
+            },
+            {
+              "id": "merge",
+              "state": "skipped"
+            },
+            {
+              "id": "pack",
+              "state": "completed",
+              "elapsedMs": 5975.275024000002
+            },
+            {
+              "id": "fill",
+              "state": "skipped"
+            },
+            {
+              "id": "correspondence",
+              "state": "completed",
+              "elapsedMs": 1834.345850999991
+            },
+            {
+              "id": "audit",
+              "state": "completed",
+              "elapsedMs": 118.43350400000054
+            }
+          ]
+        },
+        {
+          "kind": "absent",
+          "islands": 193,
+          "groups": 100,
+          "signature": "8ee25fab6723346b90ab24e9bfd2fce44d8db84246b727b16f529a9f2d0607e9",
+          "objHash": "3015c8cc3bc718e1318b836290ce70d46dccbac6fb64a493b24761f93a2e71ae",
+          "quality": {
+            "triangles": 94722,
+            "flipped": 0,
+            "degenerate": 0,
+            "overlaps": 0,
+            "area": 0.554335316835504,
+            "valid": true
+          },
+          "boundary": {
+            "length": 15.27419893777467,
+            "edges": 1582,
+            "teeth": 25
+          },
+          "elapsedMs": 52339.04101600002,
+          "reasons": {
+            "solver-invalid": 71,
+            "stretch": 1,
+            "topology": 20
+          },
+          "methods": {
+            "lscm": 127,
+            "arap-free": 29,
+            "projected-free": 29,
+            "planar-shape": 5,
+            "feature-constrained": 1,
+            "human-contour-band": 2
+          },
+          "sourceUVUse": 0,
+          "coverage": 94722,
+          "exportIslands": 193,
+          "pipeline": [
+            {
+              "id": "input",
+              "state": "completed",
+              "elapsedMs": 569.9750880000065
+            },
+            {
+              "id": "parameterize",
+              "state": "completed",
+              "elapsedMs": 43755.224616999985
+            },
+            {
+              "id": "repair",
+              "state": "skipped"
+            },
+            {
+              "id": "structure",
+              "state": "skipped"
+            },
+            {
+              "id": "merge",
+              "state": "skipped"
+            },
+            {
+              "id": "pack",
+              "state": "completed",
+              "elapsedMs": 5357.075846000022
+            },
+            {
+              "id": "fill",
+              "state": "skipped"
+            },
+            {
+              "id": "correspondence",
+              "state": "completed",
+              "elapsedMs": 1607.093606999988
+            },
+            {
+              "id": "audit",
+              "state": "completed",
+              "elapsedMs": 96.65501300001051
+            }
+          ]
+        },
+        {
+          "kind": "random",
+          "islands": 193,
+          "groups": 100,
+          "signature": "8ee25fab6723346b90ab24e9bfd2fce44d8db84246b727b16f529a9f2d0607e9",
+          "objHash": "3015c8cc3bc718e1318b836290ce70d46dccbac6fb64a493b24761f93a2e71ae",
+          "quality": {
+            "triangles": 94722,
+            "flipped": 0,
+            "degenerate": 0,
+            "overlaps": 0,
+            "area": 0.554335316835504,
+            "valid": true
+          },
+          "boundary": {
+            "length": 15.27419893777467,
+            "edges": 1582,
+            "teeth": 25
+          },
+          "elapsedMs": 68145.05011900002,
+          "reasons": {
+            "solver-invalid": 71,
+            "stretch": 1,
+            "topology": 20
+          },
+          "methods": {
+            "lscm": 127,
+            "arap-free": 29,
+            "projected-free": 29,
+            "planar-shape": 5,
+            "feature-constrained": 1,
+            "human-contour-band": 2
+          },
+          "sourceUVUse": 0,
+          "coverage": 94722,
+          "exportIslands": 193,
+          "pipeline": [
+            {
+              "id": "input",
+              "state": "completed",
+              "elapsedMs": 400.9399299999932
+            },
+            {
+              "id": "parameterize",
+              "state": "completed",
+              "elapsedMs": 56323.482600999996
+            },
+            {
+              "id": "repair",
+              "state": "skipped"
+            },
+            {
+              "id": "structure",
+              "state": "skipped"
+            },
+            {
+              "id": "merge",
+              "state": "skipped"
+            },
+            {
+              "id": "pack",
+              "state": "completed",
+              "elapsedMs": 7605.883302000002
+            },
+            {
+              "id": "fill",
+              "state": "skipped"
+            },
+            {
+              "id": "correspondence",
+              "state": "completed",
+              "elapsedMs": 2675.414997999993
+            },
+            {
+              "id": "audit",
+              "state": "completed",
+              "elapsedMs": 79.2861720000219
+            }
+          ]
+        }
+      ],
+      "originalAbsentRandomIdentical": true
+    }
+  ],
+  "passed": true
+}

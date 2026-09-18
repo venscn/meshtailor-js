@@ -1,0 +1,134 @@
+{
+  "passed": 21,
+  "tests": [
+    {
+      "name": "Feature contract removes only global similarity, not hole meaning",
+      "passed": true
+    },
+    {
+      "name": "Collapsed hole cannot pass landmark contract despite preserved vertex count",
+      "passed": true
+    },
+    {
+      "name": "Translated eye hole cannot pass by a global fit",
+      "passed": true
+    },
+    {
+      "name": "Reflection is not an accepted similarity",
+      "passed": true
+    },
+    {
+      "name": "Malformed/nonfinite landmark inputs fail closed",
+      "passed": true
+    },
+    {
+      "name": "Unseen warped 2-hole shell uses the same geometric rule",
+      "passed": true,
+      "detail": {
+        "islands": 8,
+        "featureSheets": 2
+      }
+    },
+    {
+      "name": "Unseen warped 3-hole shell uses the same geometric rule",
+      "passed": true,
+      "detail": {
+        "islands": 10,
+        "featureSheets": 2
+      }
+    },
+    {
+      "name": "Actual highlighted solid is genus two, not an already open two-hole sheet",
+      "passed": true
+    },
+    {
+      "name": "Finds a geometrically valid readable sheet before opening handle cuts",
+      "passed": true,
+      "detail": {
+        "faces": 835,
+        "holes": 2,
+        "regularization": {
+          "beforeLength": 1.2830392387380662,
+          "afterLength": 1.0763689661400617,
+          "beforeTeeth": 7,
+          "afterTeeth": 0,
+          "movedFaces": 193,
+          "accepted": true,
+          "reason": "length-crease-mincut"
+        }
+      }
+    },
+    {
+      "name": "Complete solid unwrap preserves both eye holes in primary sheet and ALL return-wall faces",
+      "passed": true,
+      "detail": {
+        "islands": 2,
+        "feature": {
+          "valid": true,
+          "boundaryLoops": 3,
+          "holes": 2,
+          "boundaryRMS": 0.012499314125752232,
+          "boundaryMax": 0.021577184238120994,
+          "holeAreaRatios": [
+            1.0010020290452284,
+            1.0210531774792577
+          ],
+          "holeCenterDrift": [
+            0.009635935313144686,
+            0.009622802763620372
+          ]
+        }
+      }
+    },
+    {
+      "name": "Actual packed output independently retains feature holes after transforms",
+      "passed": true
+    },
+    {
+      "name": "Dropping a protected group face fails final output validation",
+      "passed": true
+    },
+    {
+      "name": "Original UV getters cannot be read in grouping or generation",
+      "passed": true
+    },
+    {
+      "name": "Renaming cannot change output",
+      "passed": true
+    },
+    {
+      "name": "Rotated and scaled real geometry keeps a two-hole feature, scale 0.001",
+      "passed": true,
+      "detail": {
+        "islands": 2
+      }
+    },
+    {
+      "name": "Rotated and scaled real geometry keeps a two-hole feature, scale 100",
+      "passed": true,
+      "detail": {
+        "islands": 2
+      }
+    },
+    {
+      "name": "Single-handle rings are not automatically divided into tiny front/return slivers",
+      "passed": true
+    },
+    {
+      "name": "Explicit hard seams remain in the generated output",
+      "passed": true
+    },
+    {
+      "name": "Cancellation propagates, never substituting source coordinates",
+      "passed": true
+    },
+    {
+      "name": "Gear planar silhouettes and holes survive: low",
+      "passed": true
+    },
+    {
+      "name": "Gear planar silhouettes and holes survive: medium",
+      "passed": true
+    }
+  ]
+}

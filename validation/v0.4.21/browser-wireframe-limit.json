@@ -1,0 +1,50 @@
+{
+  "scope": "Actual offline workbench with bundled UV-free FlightHelmet geometry",
+  "tests": [
+    {
+      "name": "New build is actually mounted",
+      "passed": true
+    },
+    {
+      "name": "Actual helmet button uses pure geometry and completes production Worker",
+      "passed": true
+    },
+    {
+      "name": "Whole-model generation retains two holes in a geometric feature sheet",
+      "passed": true,
+      "detail": {
+        "valid": true,
+        "boundaryLoops": 3,
+        "holes": 2,
+        "boundaryRMS": 0.012499314125752241,
+        "boundaryMax": 0.021577184238121595,
+        "holeAreaRatios": [
+          1.0010020290452206,
+          1.021053177479256
+        ],
+        "holeCenterDrift": [
+          0.00963593531314515,
+          0.009622802763620224
+        ]
+      }
+    },
+    {
+      "name": "Selecting the protected sheet does not implicitly select a triangle",
+      "passed": true
+    },
+    {
+      "name": "Inspector shows measured hole contract, not a semantic score",
+      "passed": true
+    },
+    {
+      "name": "Selected sheet retains two holes at exact animation endpoint",
+      "passed": true
+    }
+  ],
+  "error": "Error: Timeout lab.options.progress>.12\n    at wait (file:///mnt/data/work0421/meshtailor-js/scripts/feature-sheets-browser.mjs:11:152)\n    at async file:///mnt/data/work0421/meshtailor-js/scripts/feature-sheets-browser.mjs:28:296\n    at async check (file:///mnt/data/work0421/meshtailor-js/scripts/feature-sheets-browser.mjs:7:43)\n    at async file:///mnt/data/work0421/meshtailor-js/scripts/feature-sheets-browser.mjs:28:2",
+  "dom": {
+    "ready": true,
+    "error": "",
+    "status": "生成 UV：翻面 / 退化 / 正面积重叠检查通过\n有效面积占用 55.4% · 包围盒面积总和（可覆盖） 83.4%\nmaxrects 排布 · 新增 4312 条 UV 补切\nWorker 完成 · 75.31 秒\n结构模板应用 1 个环带；上下边界与侧缝保持。未匹配的一般曲面使用保形求解。\n通用剥展：先建立 100 个空间组，组内再开缝和展平；组数不是 UV 岛数。\n自动新增 4312 条 UV 裁切边（未启用后处理时保留原接缝；后处理移除量另列），用于拓扑修复、控制求解规模或避免无效 UV。新增边已用于动画、2D 与导出。\n碎片诊断：输入 85 个几何连通分量 → 100 个初始区域 → 193 个最终岛（10 个小于16面）。补切原因：{\"solver-invalid\":71,\"stretch\":1,\"topology\":20}。详细事件可导出诊断。\n2 个岛含超过软形变阈值的微小细节；采用 99.0% 源表面积分位数避免整块反复切碎。最坏值仍报告；不豁免翻面、退化或交叠。\n占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 MaxRects 启发式，不宣称全局最优。\n通用剥展完成：100 个空间组 → 193 个有效岛；92 次反馈细分，0 个有效源形状回退。空间组边界与组内 UV 缝分别记录。\n已按实际最终 UV 验证 1 个透孔主面的孔和边界关系。其余一般曲面仅通过几何有效性检查，不代表已识别人工版型。\n空间邻居采样达到比较预算；报告不完整，未发现邻居不等于没有邻居。\n当前 193 个真实岛，21 个空间关联组。邻近分组和同页摆放不等于拓扑缝合。\nUV 形变对存在翻转风险的岛采用逐三角形旋转/正定伸缩插值；过程可能出现紫色临时断边，最终精确回到原目标 UV。这不是连续网格或物理布料模拟。\n铰链教学动画有 116045 条临时断边（紫色），用于解除曲面闭环；这些不是 UV 裁切，不写入导出。80–92% 单独显示向 UV 的非刚性形变。\n分割诊断：85 个源分量 → 100 个初始区域 → 193 岛；小于16面的岛 10\n补切原因：{\"solver-invalid\":71,\"stretch\":1,\"topology\":20}"
+  }
+}
