@@ -49,3 +49,5 @@ export * from './source-features.js';
 export * from "./generation-policy.js";
 
 export {validateFeatureOutput} from './feature-output.js';
+
+export {validateStructureOutput} from './structure-output.js';

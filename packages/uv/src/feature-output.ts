@@ -1,3 +1,4 @@
+import {validateStructureOutput} from './structure-output.js';
 import {shapeQuality} from './chart-quality.js';
 import type {MeshData,Vec2} from '@meshtailor/mesh-core';
 import {cutLocalMesh} from './cut-topology.js';
@@ -10,6 +11,7 @@ import type {UVWork} from './work.js';
  * Frame directions are intrinsic geometric evidence; projection's translation
  * and uniform scale cancel in the contract. No source texture fields are used. */
 export function validateFeatureOutput(mesh:MeshData,charts:readonly PackedChart[],seams:ReadonlySet<string>,peel:PeelReport|undefined,work?:UVWork):Map<number,{feature:FeatureContractReport;shape:ReturnType<typeof shapeQuality>}>{
+ validateStructureOutput(mesh,charts,seams,peel,work);
  const result=new Map<number,{feature:FeatureContractReport;shape:ReturnType<typeof shapeQuality>}>();if(!peel)return result;
  for(const group of peel.groups){
   if(group.kind!=='feature-sheet'||!group.featureFrame)continue;work?.check();

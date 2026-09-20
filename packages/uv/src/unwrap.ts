@@ -1,3 +1,4 @@
+import {validateStructureOutput} from './structure-output.js';
 import {planSurfaceGroups,bisectSurface,type PeelOptions,type PeelReport} from './peel-plan.js';
 import {geometryOnlyMesh} from '@meshtailor/mesh-core';
 import {checkUVTriangles,signedArea2} from './uv-quality.js';
@@ -107,7 +108,8 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     uvProgress(work,{stage:'topology',detail:`检查几何组 ${sourceChart+1} 的 ${faces.length} 个面（补切层 ${depth}）`,facesDone,facesTotal:mesh.faces.length,islandsDone:raw.length});
     const featureFrame=depth===0?peel?.groups[sourceChart]?.featureFrame:undefined;
     const solveOptions={...opts,featureFrame};
-    if(human&&!featureFrame){
+    const structure=depth===0?peel?.groups[sourceChart]:undefined;
+    if(human&&!featureFrame&&structure?.kind!=='closed-shell'){
       const t=unfoldBand(mesh,faces,sourceChart,effective,opts,totalArea,work);
       if('raw' in t){
         event('analytic-seed','Validated generic ring geometry candidate; actual side cuts preserved.');
@@ -116,7 +118,9 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
         human.applied++;human.entries.push(t.entry);facesDone+=faces.length;return;
       }else if(depth===0)human.entries.push(t);
     }
-    let local=cutLocalMesh(mesh,faces,effective),pendingSlits:string[]=[];
+    let pendingSlits:string[]=structure?.openingEdges??[];
+    let local=cutLocalMesh(mesh,faces,new Set([...effective,...pendingSlits]));
+    if(pendingSlits.length){if(!local.disk)throw Error('Planned shell opening no longer defines a disk.');event('structured-opening',structure?.pairedOpening?'Geometric reflection-guided opening validated on real target edges.':'Single continuous opening of a return-wall annulus.');}
     const planar=opts.uvObjective==='paint'&&opts.method==='auto'&&planarShapeCandidate(local)!==null;
     let p:Parameterization|undefined;
     // A hole is not, by itself, a reason to cut a visible panel into strips.
@@ -187,5 +191,6 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   const atlas=packConnectedAtlas(mesh,raw,opts,work);
   warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
   if(peel){peel.totalIslands=raw.length;for(const group of peel.groups){const fs=new Set(group.faces);group.charts=raw.filter(c=>[...c.faceUVs.keys()].some(f=>fs.has(f))).map(c=>c.id);}warnings.push(`通用剥展完成：${peel.groups.length} 个空间组 → ${raw.length} 个有效岛；${peel.feedbackSplits} 次反馈细分，${peel.sourceHintCharts} 个有效源形状回退。空间组边界与组内 UV 缝分别记录。`);}
+  validateStructureOutput(mesh,atlas.packed,effective,peel,work);
   return{...atlas,peel,human,merge,fragmentation,seams:[...effective],addedSeams,diagnostics,warnings};
 }
