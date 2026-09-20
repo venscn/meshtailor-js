@@ -112,6 +112,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     const featureFrame=depth===0?peel?.groups[sourceChart]?.featureFrame:undefined;
     const solveOptions={...opts,featureFrame};
     const structure=depth===0?peel?.groups[sourceChart]:undefined;
+    if(structure?.kind==='closed-shell'&&faces.length>opts.maxChartFaces)throw Error(`Complete shell needs a per-chart face budget of at least ${faces.length}; current ${opts.maxChartFaces}. Do not split a protected skin merely to satisfy the solver budget.`);
     if(human&&!featureFrame&&structure?.kind!=='closed-shell'){
       const t=unfoldBand(mesh,faces,sourceChart,effective,opts,totalArea,work);
       if('raw' in t){
@@ -154,6 +155,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     // after it has appended solved siblings (that could duplicate source faces).
     try{p??=parameterizeChart(local,solveOptions,work);}catch(error){
       rethrowUVStop(error);
+      if(structure?.kind==='closed-shell')throw Error('Complete skin/wall solve rejected; protected holes will not be opened into the outside boundary. '+String(error));
       if(!opts.autoCut||faces.length<2||depth>(opts.peelMaxDepth??20))throw error;
       
       record('solver-invalid',faces.length,sourceChart,depth,String(error));
