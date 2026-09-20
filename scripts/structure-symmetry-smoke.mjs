@@ -1,0 +1,12 @@
+import assert from'node:assert/strict';import{compileCore}from'./lib/compiled-core.mjs';import{loadVerifiedFixture}from'./lib/verified-model-fixtures.mjs';
+const c=await compileCore();let checks=0;const ok=(x,m)=>{assert.ok(x,m);checks++;};
+try{const core=await c.load('packages/mesh-core/src/index.js'),uv=await c.load('packages/uv/src/index.js'),s=await c.load('packages/uv/src/symmetry-boundaries.js'),p=await c.load('packages/uv/src/structure-partitions.js');
+ const positions=[],faces=[];for(let j=0;j<5;j++)for(let i=0;i<9;i++)positions.push([(i-4)*.25,j*.3,0]);for(let j=0;j<4;j++)for(let i=0;i<8;i++){const a=j*9+i,b=a+1,d=a+9,e=d+1;for(const t of[[a,b,e],[a,e,d]])faces.push({vertices:t});}const m={positions,faces,name:'symmetric opposite diagonal'},ids=faces.map((_,i)=>i);
+ const maps=s.findReflections(m,ids),r=maps.find(r=>Math.abs(r.normal[0])>.99);ok(r&&r.faceCoverage===1,'paired quad coverage');ok(r.diagonalCells>0,'opposite diagonals not ignored');ok(!maps.some(r=>Math.abs(r.normal[2])>.99),'reject identity plane');
+ for(const f of faces)Object.defineProperty(f,'uvs',{get(){throw Error('FORBIDDEN UV READ');}});ok(s.findReflections(m,ids).length>0,'no UV getter read');
+ const parts=[ids.filter(i=>faces[i].vertices.reduce((v,j)=>v+positions[j][0],0)<0),ids.filter(i=>faces[i].vertices.reduce((v,j)=>v+positions[j][0],0)>0)];ok(s.auditReflection(parts,r).consistent,'paired label permutation');
+ const angle=.63,a=Math.cos(angle),b=Math.sin(angle),rot={...m,positions:positions.map(([x,y,z])=>[a*x-b*y+2,b*x+a*y-3,z+4])};ok(s.findReflections(rot,ids).some(r=>r.faceCoverage===1),'rigid invariance');
+ const{mesh}=await loadVerifiedFixture(core,'examples/verified-models','Corset',{geometryOnly:true}),component=uv.buildCharts(mesh,new Set()).find(g=>g.faces.length===1392),top=core.buildTopology(mesh),before=JSON.stringify(mesh),result=p.partitionConnector(mesh,component.faces,new Set(),top);ok(result,'geometric connector');assert.deepEqual(result.parts.map(f=>f.length),[640,640,112]);checks++;ok(result.symmetry.consistent,'full matched-cell group symmetry');ok(result.symmetry.diagonalCells>0,'real opposite-diagonal pairing');ok(JSON.stringify(mesh)===before,'input unchanged');
+ const plan=uv.planSurfaceGroups(mesh,new Set());ok(plan.report.groups.filter(g=>g.kind==='bilateral-connector').length===3,'production planner integrated');
+ console.log(JSON.stringify({passed:checks,connector:result.parts.map(p=>p.length),symmetry:result.symmetry}));
+}finally{await c.cleanup()}
