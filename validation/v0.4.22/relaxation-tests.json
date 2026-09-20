@@ -1,0 +1,25 @@
+{
+  "passed": 8,
+  "faces": [
+    640,
+    640,
+    112
+  ],
+  "relaxation": [
+    {
+      "initialEnergy": 0.1616522334035347,
+      "finalEnergy": 0.025674495196673926,
+      "acceptedIterations": 46
+    },
+    {
+      "initialEnergy": 0.16796666488791073,
+      "finalEnergy": 0.025604466140871994,
+      "acceptedIterations": 41
+    },
+    {
+      "initialEnergy": 0.001890239197612991,
+      "finalEnergy": 0.0005084261942769931,
+      "acceptedIterations": 34
+    }
+  ]
+}

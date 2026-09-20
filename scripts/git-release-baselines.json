@@ -180,5 +180,12 @@
     "commit": "66831fceb8d60e9ec3bd5bd1d3e13e76da1b795d",
     "tagType": "tag",
     "commitsSincePrevious": 16
+  },
+  {
+    "tag": "v0.4.21",
+    "refObject": "d23741ebba01cb66444a26cd98342144c1c00def",
+    "commit": "b8e8857ca09d2b221681c5d7e538d51a06f4bbbd",
+    "tagType": "tag",
+    "commitsSincePrevious": 12
   }
 ]

@@ -1,3 +1,5 @@
+> **当前交付 0.4.22**：请先阅读 [START_HERE.md](START_HERE.md) 和 [完整部件／对称改动](docs/releases/0.4.22.md)。原 UV 不参与生成。以下早期说明保留项目历史语境，以当前入口和版本说明为准。
+
 # MeshTailor-JS · 0.4.21
 
 TypeScript/JavaScript 自动展 UV 工程。**当前生产路径只使用几何，不使用模型原有 UV、原切缝或原岛提示。** 默认加载、Generate baseline、Runtime 默认生成及 CLI 共用几何生成策略。

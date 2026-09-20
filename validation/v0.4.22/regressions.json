@@ -1,0 +1,86 @@
+[
+  {
+    "command": "npm run check:geometry",
+    "exitCode": 0,
+    "seconds": 26.102,
+    "log": "check-geometry.log"
+  },
+  {
+    "command": "npm run test:structure-symmetry",
+    "exitCode": 0,
+    "seconds": 4.325,
+    "log": "test-structure-symmetry.log"
+  },
+  {
+    "command": "npm run test:feature-sheets",
+    "exitCode": 0,
+    "seconds": 13.77,
+    "log": "test-feature-sheets.log"
+  },
+  {
+    "command": "npm run test:arrival",
+    "exitCode": 0,
+    "seconds": 3.304,
+    "log": "test-arrival.log"
+  },
+  {
+    "command": "npm run test:camera",
+    "exitCode": 0,
+    "seconds": 3.047,
+    "log": "test-camera.log"
+  },
+  {
+    "command": "npm run test:relay",
+    "exitCode": 0,
+    "seconds": 2.991,
+    "log": "test-relay.log"
+  },
+  {
+    "command": "npm run test:motion-time",
+    "exitCode": 0,
+    "seconds": 3.386,
+    "log": "test-motion-time.log"
+  },
+  {
+    "command": "npm run test:selection",
+    "exitCode": 0,
+    "seconds": 3.266,
+    "log": "test-selection.log"
+  },
+  {
+    "command": "npm run test:uv-box",
+    "exitCode": 0,
+    "seconds": 3.292,
+    "log": "test-uv-box.log"
+  },
+  {
+    "command": "npm run test:fill:adaptive",
+    "exitCode": 0,
+    "seconds": 3.508,
+    "log": "test-fill-adaptive.log"
+  },
+  {
+    "command": "npm run test:contour-raster",
+    "exitCode": 0,
+    "seconds": 3.908,
+    "log": "test-contour-raster.log"
+  },
+  {
+    "command": "npm run test:boundary-guard",
+    "exitCode": 0,
+    "seconds": 3.379,
+    "log": "test-boundary-guard.log"
+  },
+  {
+    "command": "npm run test:hinge",
+    "exitCode": 0,
+    "seconds": 3.792,
+    "log": "test-hinge.log"
+  },
+  {
+    "command": "npm run test:git",
+    "exitCode": 0,
+    "seconds": 3.806,
+    "log": "test-git.log"
+  }
+]

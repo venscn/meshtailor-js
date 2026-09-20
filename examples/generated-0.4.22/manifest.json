@@ -1,0 +1,18 @@
+{
+  "version": "0.4.22",
+  "scope": "Final geometry-only generated coordinates, not source UV",
+  "files": [
+    {
+      "asset": "Corset",
+      "path": "examples/generated-0.4.22/Corset-geometry-only.obj.gz",
+      "objSHA256": "9228ad42453d0bca451c0b041ee51395ac9db440f40a3e1310c764246933f40b",
+      "bytes": 1698213
+    },
+    {
+      "asset": "FlightHelmet",
+      "path": "examples/generated-0.4.22/FlightHelmet-geometry-only.obj.gz",
+      "objSHA256": "78626c5536311d86ec2b4a7ca2289b6cecdfac72cc9d4fd35fc341f4e189b00b",
+      "bytes": 8588617
+    }
+  ]
+}

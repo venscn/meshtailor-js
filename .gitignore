@@ -21,3 +21,6 @@ results/v0.4.18/
 
 # Optional generated reference outputs restored locally
 /results/v0.4.21/
+
+# Optional current reference outputs, restored from compressed verified artifacts.
+/results/v0.4.22/

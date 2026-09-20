@@ -1,0 +1,60 @@
+{
+  "scope": "Actual offline workbench, bundled UV-free whole helmet, production Worker and render modules. Software GPU if explicitly configured.",
+  "tests": [
+    {
+      "name": "Current release is mounted",
+      "passed": true
+    },
+    {
+      "name": "Whole structure rule enabled by default, no hidden preset",
+      "passed": true
+    },
+    {
+      "name": "Whole corrected helmet completes pure geometry Worker",
+      "passed": true
+    },
+    {
+      "name": "Two skins and two complete return walls survive whole-model generation",
+      "passed": true
+    },
+    {
+      "name": "Island selection does not implicitly select a triangle",
+      "passed": true
+    },
+    {
+      "name": "Inspector reports retained holes AND incomplete symmetry coverage",
+      "passed": true,
+      "detail": "透孔主片 · 保留 2 个孔。本结构镜像对应覆盖 82.5%；已对应 2456 面，分组冲突 0 面，异对角线单元 389 组。未匹配区域不宣称对称。纯几何生成，原 UV 不参与。"
+    },
+    {
+      "name": "Return wall inspector exposes measured paired seam, not perfect-symmetry claim",
+      "passed": true,
+      "detail": "回折孔壁 · 连续开缝。本结构镜像对应覆盖 82.5%；已对应 2456 面，分组冲突 0 面，异对角线单元 389 组。未匹配区域不宣称对称。对应侧缝 12/12 条真实网格边；镜像曲线最大距离 3.98% 原侧缝长度。纯几何生成，原 UV 不参与。"
+    },
+    {
+      "name": "Complete component can be inspected together at UV endpoint",
+      "passed": true
+    },
+    {
+      "name": "Playback retains manually positioned camera",
+      "passed": true
+    },
+    {
+      "name": "Repack keeps all four structural groups and paired cut metadata",
+      "passed": true
+    },
+    {
+      "name": "Fill uses final structure guard and keeps original group faces",
+      "passed": true
+    },
+    {
+      "name": "Actual Corset default includes both panels and connector metric relaxation",
+      "passed": true
+    },
+    {
+      "name": "No hidden browser/WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 13
+}
