@@ -1,3 +1,5 @@
+import {cutLocalMesh} from './cut-topology.js';
+import {partitionClosedShell} from './shell-partitions.js';
 import {partitionConnector,type StructurePartition} from './structure-partitions.js';
 import {findReflections,coupleReflection,type SymmetryAudit} from './symmetry-boundaries.js';
 import {findSheetFeatures} from './sheet-features.js';
@@ -7,7 +9,7 @@ import {buildCharts} from './charts.js';
 import type {UVWork} from './work.js';
 
 export interface PeelOptions {structureGroups?:boolean;symmetryBoundaries?:boolean;featureSheets?:boolean;peelSourceHints?:boolean;peelOrientationPanels?:boolean;peelPanelArea?:number;peelFeatureArea?:number;peelMaxDepth?:number;seamBandRings?:number;groupFeatureDegrees?:number}
-export interface PeelGroup {id:number;faces:number[];area3D:number;kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region'|'feature-sheet'|'bilateral-connector'|'closed-shell';structureReason?:string;symmetry?:SymmetryAudit;featureFrame?:ProjectionFrame;boundaryLoops?:number;boundaryRegularization?:import('@meshtailor/mesh-core').BoundaryRegularizationReport;charts:number[]}
+export interface PeelGroup {id:number;faces:number[];area3D:number;kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region'|'feature-sheet'|'bilateral-connector'|'closed-shell';structureReason?:string;structureBoundaryLoops?:number;openingEdges?:string[];pairedOpening?:import('./paired-openings.js').PairedOpening;symmetry?:SymmetryAudit;featureFrame?:ProjectionFrame;boundaryLoops?:number;boundaryRegularization?:import('@meshtailor/mesh-core').BoundaryRegularizationReport;charts:number[]}
 export interface PeelReport {version:1;groups:PeelGroup[];groupSeams:string[];events:{group:number;faces:number;depth:number;action:string;detail:string}[];sourceHintCharts:number;feedbackSplits:number;totalIslands:number;note:string}
 const sub=(a:Vec3,b:Vec3):Vec3=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
 const dot=(a:Vec3,b:Vec3)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
@@ -30,7 +32,7 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   const structureSeams=new Set(cuts);
   if(options.structureGroups!==false)for(const comp of components){
     if(comp.faces.reduce((s,f)=>s+frames[f]!.area,0)<total*.02)continue;
-    const found=partitionConnector(mesh,comp.faces,cuts,topology,work);if(!found)continue;
+    const found=partitionClosedShell(mesh,comp.faces,cuts,topology,work)??partitionConnector(mesh,comp.faces,cuts,topology,work);if(!found)continue;
     const labels=new Map<number,number>();found.parts.forEach((p,i)=>p.forEach(f=>{labels.set(f,i);structural.set(f,found);}));
     for(const[k,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>labels.has(f))&&labels.get(e.faces[0]!)!==labels.get(e.faces[1]!))structureSeams.add(k);
   }
@@ -104,7 +106,7 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
     const members=new Set(group.faces);
     for(const[key,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>members.has(f))&&(labels.get(e.faces[0]!)??-1)!==(labels.get(e.faces[1]!)??-1))seams.add(key);
   }
-  const groups=buildCharts(mesh,seams,topology).map(c=>({id:c.id,faces:c.faces,area3D:c.faces.reduce((s,f)=>s+frames[f]!.area,0),...(featureByFace.has(c.faces[0]!)?{featureFrame:featureByFace.get(c.faces[0]!)!.frame,boundaryLoops:featureByFace.get(c.faces[0]!)!.boundaryLoops,boundaryRegularization:featureByFace.get(c.faces[0]!)!.regularization}:{}),...(structural.has(c.faces[0]!)?{structureReason:structural.get(c.faces[0]!)!.reason,symmetry:structural.get(c.faces[0]!)!.symmetry}:{}),kind:(structural.has(c.faces[0]!)?structural.get(c.faces[0]!)!.kind:featureByFace.has(c.faces[0]!)?'feature-sheet':c.faces.every(f=>planes[f]===planes[c.faces[0]!]&&planes[f]!>=0)?'planar-feature':c.faces.every(f=>oriented[f])?'crease-region':'surface') as PeelGroup['kind'],charts:[]}));
+  const groups=buildCharts(mesh,seams,topology).map(c=>({id:c.id,faces:c.faces,area3D:c.faces.reduce((s,f)=>s+frames[f]!.area,0),...(featureByFace.has(c.faces[0]!)?{featureFrame:featureByFace.get(c.faces[0]!)!.frame,boundaryLoops:featureByFace.get(c.faces[0]!)!.boundaryLoops,boundaryRegularization:featureByFace.get(c.faces[0]!)!.regularization}:{}),...(structural.has(c.faces[0]!)?{structureReason:structural.get(c.faces[0]!)!.reason,structureBoundaryLoops:cutLocalMesh(mesh,c.faces,seams).boundaryLoops,openingEdges:structural.get(c.faces[0]!)!.openings?.find(o=>o.faces.includes(c.faces[0]!))?.edges,pairedOpening:structural.get(c.faces[0]!)!.openings?.find(o=>o.faces.includes(c.faces[0]!))?.paired,symmetry:structural.get(c.faces[0]!)!.symmetry}:{}),kind:(structural.has(c.faces[0]!)?structural.get(c.faces[0]!)!.kind:featureByFace.has(c.faces[0]!)?'feature-sheet':c.faces.every(f=>planes[f]===planes[c.faces[0]!]&&planes[f]!>=0)?'planar-feature':c.faces.every(f=>oriented[f])?'crease-region':'surface') as PeelGroup['kind'],charts:[]}));
   const report:PeelReport={version:1,groups,groupSeams:[...seams],events:[],sourceHintCharts:0,feedbackSplits:0,totalIslands:0,note:'纯几何：连通结构与完整平面特征优先，成组折角边界提供分组依据。不按相向法线强制二分。组内先尝试保孔求解、规则开缝，失败反馈使用长度/折角图割约束的连通分割；原 UV 从未进入生成。没有人工语义标签或模型名称特例。'};
   return{report,seams,topology};
 }
