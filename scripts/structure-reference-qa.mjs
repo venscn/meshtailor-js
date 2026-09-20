@@ -1,0 +1,14 @@
+/** OFFLINE QA ONLY. Original UV is read here as a reference AFTER generation.
+ * This file is not imported by any app, Worker, generator or runtime package.
+ */
+import{mkdir,readFile,writeFile}from'node:fs/promises';import{createHash}from'node:crypto';import assert from'node:assert/strict';import{join}from'node:path';import{compileCore}from'./lib/compiled-core.mjs';import{loadVerifiedFixture}from'./lib/verified-model-fixtures.mjs';
+const get=(k,d)=>{const i=process.argv.indexOf(k);return i<0?d:process.argv[i+1]},root=get('--generated-root','validation/local-geometry-real'),out=get('--out','validation/local-structure-reference'),c=await compileCore();await mkdir(out,{recursive:true});
+try{const core=await c.load('packages/mesh-core/src/index.js'),uv=await c.load('packages/uv/src/index.js'),chain=await c.load('packages/chaining-seams/src/index.js'),sym=await c.load('packages/uv/src/symmetry-boundaries.js');const report={scope:'Fixed corrected assets. Authored UV read in QA only, never fed back to generation. Counts are regression cases, not production branches.',assets:[]};
+ for(const[name,count]of[['Corset',1392],['FlightHelmet',2976]]){const{mesh,identity}=await loadVerifiedFixture(core,'examples/verified-models',name),geometry=core.geometryOnlyMesh(mesh),src=core.meshToOBJ(mesh);await writeFile(join(out,name+'-original.obj'),src);const text=await readFile(join(root,name+'-generated.obj'),'utf8'),generated=core.parseOBJ(text);assert.deepEqual(generated.positions,geometry.positions);assert.deepEqual(generated.faces.map(f=>f.vertices),geometry.faces.map(f=>f.vertices));
+  const comp=uv.buildCharts(geometry,new Set()).find(g=>g.faces.length===count);assert.ok(comp);const member=new Set(comp.faces),refs=uv.buildCharts(mesh,chain.extractSeamEdgesFromUV(mesh)).filter(g=>g.faces.some(f=>member.has(f))),ours=uv.buildCharts(generated,chain.extractSeamEdgesFromUV(generated)).filter(g=>g.faces.some(f=>member.has(f)));
+  for(const g of [...refs,...ours])assert.ok(g.faces.every(f=>member.has(f)),'Cross-component face coverage');const r=sym.findReflections(geometry,comp.faces)[0];
+  const item={name,identity,componentFaces:count,referenceFaces:refs.map(g=>g.faces.length),generatedFaces:ours.map(g=>g.faces.length),symmetry:r?sym.auditReflection(ours.map(g=>g.faces),r):null,sha256:createHash('sha256').update(text).digest('hex')};report.assets.push(item);
+  await writeFile(join(out,name+'-comparison.json'),JSON.stringify({...item,original:refs.map(g=>({faces:g.faces.length,uv:g.faces.map(f=>mesh.faces[f].uvs),height:g.faces.map(f=>mesh.faces[f].vertices.map(v=>mesh.positions[v][1]))})),generated:ours.map(g=>({faces:g.faces.length,uv:g.faces.map(f=>generated.faces[f].uvs),height:g.faces.map(f=>generated.faces[f].vertices.map(v=>generated.positions[v][1]))}))}));
+ }
+ await writeFile(join(out,'report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
+}finally{await c.cleanup()}
