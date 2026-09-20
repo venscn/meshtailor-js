@@ -8,13 +8,14 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess,selec
   return <details className="uv-solver-controls" open><summary>UV 求解与排布</summary>
     <section className="paint-shape-controls">
       <label>UV 目标<select aria-label="UV objective" value={draft.uvObjective??'paint'} onChange={e=>patch({uvObjective:e.target.value as UnwrapOptions['uvObjective']})}><option value="paint">手绘轮廓优先（默认）</option><option value="compact">少岛稳健 · 旧圆边界回退</option></select></label>
-      <small>手绘模式保留主要平面凹口、齿形和孔洞；曲面使用自由边界。缝合优先保留原岛轮廓，宁可留下合理的分片，不把有效形状强制挤成圆。不会自动识别衣片名称。</small>
+      <small>手绘模式保留主要平面凹口、齿形和孔洞；曲面使用自由边界。缝合优先保留当前生成岛轮廓，宁可留下合理的分片，不把有效形状强制挤成圆。不会自动识别衣片名称。</small>
       <label>保形迭代预算<input aria-label="Paint iterations" type="number" min="1" max="100" value={draft.paintIterations??24} onChange={e=>patch({paintIterations:+e.target.value})}/></label>
       <label>缝合时原形比例变化上限<input aria-label="Merge shape limit" type="number" min="1" max="4" step=".05" value={draft.mergeOptions?.maxShapeChange??1.5} onChange={e=>patch({mergeOptions:{...draft.mergeOptions,maxShapeChange:+e.target.value}})}/></label>
       <small>去除整体旋转/缩放后，按99%源表面积检查边长比例变化；1表示保留比例。仅控制当前生成岛的缝合，不使用模型原 UV。</small>
     </section>
     <details open className="peel-controls"><summary>通用分组剥展 · 空间组与切缝分离</summary>
       <button className="primary" aria-label="Peel spatial groups" onClick={()=>onProcess('connected',{...draft,initialSegmentation:'hierarchical',uvObjective:'paint',method:'auto',autoCut:true,postMerge:false})}>空间分组 → 组内开缝 → 剥展</button>
+      <label className="check"><input aria-label="Complete structural groups" type="checkbox" checked={draft.structureGroups!==false} onChange={e=>patch({structureGroups:e.target.checked})}/>完整主片／回折壁与双侧结构优先（默认）</label><small>可靠镜像单元联合划线；未匹配部分不强制复制。原 UV 不参与生成。</small>
       <label>主要平面特征最小总面积 %<input aria-label="Peel feature area" type="number" min=".1" max="25" step=".1" value={(draft.peelFeatureArea??.015)*100} onChange={e=>patch({peelFeatureArea:+e.target.value/100})}/></label>
       <label>几何折角阈值（度）<input aria-label="Group feature degrees" type="number" min="20" max="100" value={draft.groupFeatureDegrees??48} onChange={e=>patch({groupFeatureDegrees:+e.target.value})}/></label>
       <label>切缝图割搜索环数<input aria-label="Seam band rings" type="number" min="1" max="12" value={draft.seamBandRings??5} onChange={e=>patch({seamBandRings:+e.target.value})}/></label>

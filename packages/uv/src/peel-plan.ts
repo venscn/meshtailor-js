@@ -22,6 +22,8 @@ export function faceFrame(mesh:MeshData,fi:number){const f=mesh.faces[fi]!,[a,b,
  * Small components are NOT divided according to triangle count or local normals.
  * This is geometric grouping, not a semantic body-part classifier. */
 export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options:PeelOptions={},work?:UVWork):{report:PeelReport;seams:Set<string>;topology:MeshTopology}{
+  if(options.structureGroups!==undefined&&typeof options.structureGroups!=='boolean')throw Error('structureGroups must be boolean');
+  if(options.symmetryBoundaries!==undefined&&typeof options.symmetryBoundaries!=='boolean')throw Error('symmetryBoundaries must be boolean');
   if(options.seamBandRings!==undefined&&(!Number.isInteger(options.seamBandRings)||options.seamBandRings<1||options.seamBandRings>12))throw Error('seamBandRings must be an integer 1..12');
   const fraction=options.peelFeatureArea??.015,panelFraction=options.peelPanelArea??.04;
   if(!Number.isFinite(panelFraction)||panelFraction<.01||panelFraction>.5)throw Error('peelPanelArea must be 0.01..0.5');
