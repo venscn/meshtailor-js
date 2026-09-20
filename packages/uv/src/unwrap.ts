@@ -159,6 +159,19 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       record('solver-invalid',faces.length,sourceChart,depth,String(error));
       partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),true))solve(fs,sourceChart,depth+1);return;
     }
+      let structuralRelaxation:ChartDiagnostic['structuralRelaxation'];
+      // Conformal validity alone does not preserve the relative size of a
+      // shoulder versus its waist. Balance the intrinsic 3D metric of verified
+      // bilateral panels, without consulting any authored UV coordinates.
+      if(structure?.kind==='bilateral-connector'&&opts.method==='auto'&&opts.uvObjective==='paint'&&(opts.structuralRelaxIterations??60)>0){
+        try{const r=freeBoundaryARAP(local,p.uv,opts.structuralRelaxIterations??60,Math.min(opts.iterations,600),work);
+          const quality=checkUVTriangles(local.triangles.map(t=>t.map(v=>r.uv[v]!) as [Vec2,Vec2,Vec2]),100,work);
+          if(r.accepted&&r.energy<r.initialEnergy&&r.maxAnisotropy<=100&&quality.valid&&simpleUVBoundary(r.uv,local.boundaries,work)){
+            structuralRelaxation={initialEnergy:r.initialEnergy,finalEnergy:r.energy,acceptedIterations:r.accepted};
+            p={uv:r.uv,method:'arap-free',quality,iterations:r.iterations,residual:r.residual,boundaryValid:true,fallbackReason:'Intrinsic length relaxation of a geometry-derived bilateral panel; no source UV.'};
+          }
+        }catch(error){rethrowUVStop(error);event('structure-relax-rejected',String(error));}
+      }
       const shape=shapeQuality(local,p.uv,opts.stretchAreaPercentile??1,opts.maxStretch);
       if(opts.autoCut&&faces.length>16&&((opts.uvObjective==='compact'&&shape.aspect>opts.maxAspect)||shape.fill<opts.minFill||shape.areaStretch>opts.maxStretch)){record(shape.areaStretch>opts.maxStretch?'stretch':shape.aspect>opts.maxAspect?'aspect':'fill',faces.length,sourceChart,depth,`area stretch ${shape.areaStretch}; maximum ${shape.maxStretch}`);partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),shape.areaStretch>opts.maxStretch))solve(fs,sourceChart,depth+1);return;}
       for(const key of pendingSlits)effective.add(key);
@@ -167,7 +180,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...p.uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
       const area3D=local.triangles.reduce((s,t)=>s+triangleArea(local.positions[t[0]]!,local.positions[t[1]]!,local.positions[t[2]]!),0),id=raw.length;
       facesDone+=faces.length;uvProgress(work,{stage:'parameterize',detail:'已接受有效 UV 岛',facesDone,facesTotal:mesh.faces.length,islandsDone:raw.length+1});
-      raw.push({id,faceUVs,area3D});diagnostics.push({id,sourceChart,faces:faces.length,method:p.method,...shape,iterations:p.iterations,residual:p.residual,...(p.feature?{feature:p.feature}:{}),...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});
+      raw.push({id,faceUVs,area3D});diagnostics.push({id,sourceChart,faces:faces.length,structuralRelaxation,method:p.method,...shape,iterations:p.iterations,residual:p.residual,...(p.feature?{feature:p.feature}:{}),...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});
   };
   charts.forEach(chart=>solve(chart.faces,chart.id));
   for(const key of peel?.groupSeams??[])templateLocks.add(key);
