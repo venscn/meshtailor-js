@@ -16,6 +16,7 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess,selec
     <details open className="peel-controls"><summary>通用分组剥展 · 空间组与切缝分离</summary>
       <button className="primary" aria-label="Peel spatial groups" onClick={()=>onProcess('connected',{...draft,initialSegmentation:'hierarchical',uvObjective:'paint',method:'auto',autoCut:true,postMerge:false})}>空间分组 → 组内开缝 → 剥展</button>
       <label className="check"><input aria-label="Complete structural groups" type="checkbox" checked={draft.structureGroups!==false} onChange={e=>patch({structureGroups:e.target.checked})}/>完整主片／回折壁与双侧结构优先（默认）</label><small>可靠镜像单元联合划线；未匹配部分不强制复制。原 UV 不参与生成。</small>
+      <label>结构片内在尺寸松弛迭代<input aria-label="Structural relaxation iterations" type="number" min="0" max="100" value={draft.structuralRelaxIterations??60} onChange={e=>patch({structuralRelaxIterations:+e.target.value})}/></label><small>根据三维边长展开肩部／腰部，不让数值有效的共形种子提前结束；0 可对照关闭。</small>
       <label>主要平面特征最小总面积 %<input aria-label="Peel feature area" type="number" min=".1" max="25" step=".1" value={(draft.peelFeatureArea??.015)*100} onChange={e=>patch({peelFeatureArea:+e.target.value/100})}/></label>
       <label>几何折角阈值（度）<input aria-label="Group feature degrees" type="number" min="20" max="100" value={draft.groupFeatureDegrees??48} onChange={e=>patch({groupFeatureDegrees:+e.target.value})}/></label>
       <label>切缝图割搜索环数<input aria-label="Seam band rings" type="number" min="1" max="12" value={draft.seamBandRings??5} onChange={e=>patch({seamBandRings:+e.target.value})}/></label>

@@ -1,3 +1,5 @@
+import {simpleUVBoundary} from './boundary-guard.js';
+import {freeBoundaryARAP} from './free-boundary.js';
 import {validateStructureOutput} from './structure-output.js';
 import {planSurfaceGroups,bisectSurface,type PeelOptions,type PeelReport} from './peel-plan.js';
 import {geometryOnlyMesh} from '@meshtailor/mesh-core';
@@ -14,8 +16,8 @@ import { openChartWithSlits } from './topology-slits.js';
 import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
-export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions,PeelOptions { sourceFeaturePolicy?:'repair'|'preserve'; sourceFeatureTolerance?:number; structureTemplates?:boolean; humanTemplates?:Partial<import('./human-templates.js').HumanTemplateOptions>; sourceRepairPolicy?:'repair'|'reject'; sourceAtlasMerge?:boolean; initialSegmentation?:'regions'|'connected'|'hierarchical'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
-export interface ChartDiagnostic {feature?:import('./feature-contract.js').FeatureContractReport;areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
+export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions,PeelOptions { structuralRelaxIterations?:number; sourceFeaturePolicy?:'repair'|'preserve'; sourceFeatureTolerance?:number; structureTemplates?:boolean; humanTemplates?:Partial<import('./human-templates.js').HumanTemplateOptions>; sourceRepairPolicy?:'repair'|'reject'; sourceAtlasMerge?:boolean; initialSegmentation?:'regions'|'connected'|'hierarchical'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
+export interface ChartDiagnostic {structuralRelaxation?:{initialEnergy:number;finalEnergy:number;acceptedIterations:number};feature?:import('./feature-contract.js').FeatureContractReport;areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
@@ -65,6 +67,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   if(options.peelSourceHints===true)throw Error('原 UV 提示已禁用：自动生成只使用几何。');
   const opts={...(options.chartPolicy==='legacy'?LEGACY_UNWRAP:recommendUnwrap(input,options.chartPolicy??'large').options),...options};
   if(opts.structureTemplates!==undefined&&typeof opts.structureTemplates!=='boolean')throw Error('Invalid structural template switch.');
+  if(opts.structuralRelaxIterations!==undefined&&(!Number.isInteger(opts.structuralRelaxIterations)||opts.structuralRelaxIterations<0||opts.structuralRelaxIterations>100))throw Error('structuralRelaxIterations must be 0..100');
   const hierarchical=opts.initialSegmentation==='hierarchical';
   if(opts.peelSourceHints!==undefined&&typeof opts.peelSourceHints!=='boolean')throw Error('Invalid source-hint flag.');
   if(opts.peelMaxDepth!==undefined&&(!Number.isInteger(opts.peelMaxDepth)||opts.peelMaxDepth<1||opts.peelMaxDepth>20))throw Error('peelMaxDepth must be 1..20');
