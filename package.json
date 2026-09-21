@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.22",
+  "version": "0.4.23",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -131,7 +131,13 @@
     "test:complete-structure": "node scripts/complete-structure-smoke.mjs",
     "test:complete-structure:browser": "node scripts/complete-structure-browser.mjs",
     "test:structure-relax": "node scripts/structure-relax-smoke.mjs",
-    "results:restore": "node scripts/restore-structure-results.mjs"
+    "results:restore": "node scripts/restore-cavity-results.mjs",
+    "test:longitudinal-budget": "node scripts/longitudinal-budget-smoke.mjs --include-high",
+    "test:raster-window": "node scripts/raster-window-smoke.mjs",
+    "test:cavity-fill": "node scripts/cavity-fill-smoke.mjs",
+    "test:cavity-fill:browser": "node scripts/cavity-workbench-smoke.mjs",
+    "test:seams-fill:real": "node scripts/seam-fill-models-smoke.mjs",
+    "test:cavity-load": "node scripts/cavity-load-pipeline-smoke.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
