@@ -1,0 +1,84 @@
+{
+  "version": "0.4.23",
+  "source": "Pure geometry production Worker; source UV never participates. Before is newly generated UV before fill, not author UV.",
+  "settings": {
+    "fillMode": "area-priority",
+    "fillTimeBudgetMs": 30000,
+    "fillRounds": 8,
+    "timeBudgetMs": 300000
+  },
+  "files": [
+    {
+      "file": "garment-before-fill.obj",
+      "bytes": 1019869,
+      "sha256": "4b76a0814e5fcaa653c2ed240e06c0da0a1a91030277bab5a6571a0364d81516",
+      "model": "garment",
+      "faces": 12288,
+      "islands": 2,
+      "phase": "before-fill"
+    },
+    {
+      "file": "garment-generated.obj",
+      "bytes": 1018741,
+      "sha256": "fbb3ce976baf3ae03225f22c9cdee1a7147ddbb8a71be4acb3f6d5e1cd08372c",
+      "model": "garment",
+      "faces": 12288,
+      "islands": 2,
+      "phase": "filled"
+    },
+    {
+      "file": "gear-before-fill.obj",
+      "bytes": 487228,
+      "sha256": "a68dfee5960e46da1969a1d3844c61cd0708175474923c107c5d996fead6fdce",
+      "model": "gear",
+      "faces": 6144,
+      "islands": 6,
+      "phase": "before-fill"
+    },
+    {
+      "file": "gear-generated.obj",
+      "bytes": 487145,
+      "sha256": "3ba42798bc0f4752df30d6c884d1b8e30092f3770bd984716fd58e41f9b975f8",
+      "model": "gear",
+      "faces": 6144,
+      "islands": 6,
+      "phase": "filled"
+    },
+    {
+      "file": "Corset-before-fill.obj",
+      "bytes": 1698181,
+      "sha256": "2f1f5dabefa57d9849baa8d2a204646b8acb13742619ab5481618e0bab2f2ce2",
+      "model": "Corset",
+      "faces": 18324,
+      "islands": 87,
+      "phase": "before-fill"
+    },
+    {
+      "file": "Corset-generated.obj",
+      "bytes": 1701351,
+      "sha256": "a472ce02f70a972ef9781165aa8c6f6b254f8543c1e342e3f0798f80be274781",
+      "model": "Corset",
+      "faces": 18324,
+      "islands": 87,
+      "phase": "filled"
+    },
+    {
+      "file": "FlightHelmet-before-fill.obj",
+      "bytes": 8588617,
+      "sha256": "78626c5536311d86ec2b4a7ca2289b6cecdfac72cc9d4fd35fc341f4e189b00b",
+      "model": "FlightHelmet",
+      "faces": 94722,
+      "islands": 187,
+      "phase": "before-fill"
+    },
+    {
+      "file": "FlightHelmet-generated.obj",
+      "bytes": 8581331,
+      "sha256": "12648c1680b48b3ce7830cbdffa9f5833810e905463690613688820f04653005",
+      "model": "FlightHelmet",
+      "faces": 94722,
+      "islands": 187,
+      "phase": "filled"
+    }
+  ]
+}
