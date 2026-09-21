@@ -17,5 +17,12 @@ try{
  }
  const mesh=core.geometryOnlyMesh(core.makePleatedGarment('low')),opt=uv.geometryGenerationOptions(mesh),ang=.619;
  test('Rigid rotation and uniform scale retain continuous two-panel plan',()=>{const m={...mesh,positions:mesh.positions.map(([x,y,z])=>[3*(x*Math.cos(ang)-y*Math.sin(ang))+4,3*(x*Math.sin(ang)+y*Math.cos(ang))-2,3*z+1])};const r=uv.unwrapMesh(m,new Set(),opt);assert.equal(r.human.applied,1);assert.equal(r.packed.length,2);assert.equal(r.peel.feedbackSplits,0);assert.ok(uv.checkUVTriangles(r.packed.flatMap(c=>[...c.faceUVs.values()])).valid);});
+ test('Opposite quad diagonals do not turn longitudinal cuts into a zipper',()=>{
+  const m={...mesh,faces:[]};for(let i=0;i<mesh.faces.length;i+=2){const[a,b,e]=mesh.faces[i].vertices,d=mesh.faces[i+1].vertices[2];m.faces.push({vertices:[a,b,d]},{vertices:[b,e,d]});}
+  const r=uv.unwrapMesh(m,new Set(),opt);assert.equal(r.human.applied,1);assert.equal(r.packed.length,2);
+  for(const key of r.human.entries[0].seamEdges)for(const v of key.split(':').map(Number))assert.ok(Math.abs(m.positions[v][2])<1e-8);
+  assert.ok(uv.checkUVTriangles(r.packed.flatMap(c=>[...c.faceUVs.values()])).valid);
+ });
+ if(process.argv.includes('--include-high'))test('High density respects the same direction with explicit per-panel budgets',()=>{const m=core.geometryOnlyMesh(core.makePleatedGarment('high')),o=uv.geometryGenerationOptions(m),r=uv.unwrapMesh(m,new Set(),o);assert.equal(r.human.applied,1);assert.equal(r.peel.feedbackSplits,0);assert.ok(r.diagnostics.every(d=>d.faces<=o.maxChartFaces));assert.ok(uv.checkUVTriangles(r.packed.flatMap(c=>[...c.faceUVs.values()])).valid);return{faces:m.faces.length,panels:r.packed.length,budget:o.maxChartFaces};});
  const get=n=>{const i=process.argv.indexOf(n);return i<0?null:process.argv[i+1]};if(get('--report'))await writeFile(get('--report'),JSON.stringify({passed:tests.length,tests},null,2));
 }finally{await c.cleanup()}
