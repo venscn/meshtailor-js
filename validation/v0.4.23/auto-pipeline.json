@@ -1,0 +1,7081 @@
+{
+  "scope": "Actual automatic geometry + post-merge + fill pipeline, 3s/2 rounds diagnostic budget, not maximum packing search.",
+  "passed": 4,
+  "records": [
+    {
+      "name": "garment",
+      "passed": true,
+      "faces": 12288,
+      "islands": 2,
+      "stages": [
+        "input",
+        "parameterize",
+        "merge",
+        "pack",
+        "fill",
+        "correspondence",
+        "audit"
+      ],
+      "fill": {
+        "mode": "area-priority",
+        "resolution": 512,
+        "settings": {
+          "step": 0.08,
+          "maxAreaGain": 1.6,
+          "maxRounds": 2,
+          "warmupPasses": 3,
+          "timeBudgetMs": 3000,
+          "maxTrials": 256,
+          "rotate": true
+        },
+        "densitySpreadBefore": 1.0000000000000004,
+        "densitySpreadAfter": 1.0384615384615379,
+        "before": 0.4545442342332405,
+        "after": 0.5619912184982276,
+        "beforeBox": 0.7221161411326736,
+        "afterBox": 0.9221089587343136,
+        "trials": 9,
+        "accepted": 5,
+        "commonAccepted": 1,
+        "rounds": 2,
+        "stop": "round-limit",
+        "elapsedMs": 539.946664,
+        "order": [
+          1,
+          0
+        ],
+        "gains": [
+          {
+            "id": 1,
+            "area3D": 1.0660159629559143,
+            "areaFactor": 1.2597120000000002,
+            "linearFactor": 1.1223689233046326
+          },
+          {
+            "id": 0,
+            "area3D": 1.0660159629559125,
+            "areaFactor": 1.2130560000000001,
+            "linearFactor": 1.1013882149360417
+          }
+        ],
+        "history": [
+          {
+            "round": 0,
+            "id": null,
+            "occupancy": 0.49090777297189886,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 1,
+            "occupancy": 0.5105440838907749,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 1,
+            "occupancy": 0.5317512996831608,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 1,
+            "id": 0,
+            "occupancy": 0.5513876106020368,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 2,
+            "id": 0,
+            "occupancy": 0.5619912184982299,
+            "areaFactor": 1.2130560000000001
+          }
+        ],
+        "shapeWaste": [
+          {
+            "id": 0,
+            "area3D": 1.0660159629559125,
+            "boxWaste": 0.13429802183920392,
+            "shapeFill": 0.6285699305063123
+          },
+          {
+            "id": 1,
+            "area3D": 1.0660159629559143,
+            "boxWaste": 0.13327388506023005,
+            "shapeFill": 0.6303553936097774
+          }
+        ],
+        "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。",
+        "search": {
+          "commonGainLimit": 4,
+          "commonGain": 1.08,
+          "rotationStep": 45,
+          "reflowBudget": 4,
+          "reflowTrials": 2,
+          "reflowAccepted": 0,
+          "islandsTried": 2,
+          "untriedIds": [],
+          "completedSweeps": 2,
+          "freeGridFraction": 0.37994384765625,
+          "emptyRegions": [
+            {
+              "cells": 51095,
+              "bounds": [
+                0.003,
+                0.23346875,
+                0.997140625,
+                0.997140625
+              ]
+            },
+            {
+              "cells": 42892,
+              "bounds": [
+                0.235421875,
+                0.003,
+                0.997140625,
+                0.753
+              ]
+            },
+            {
+              "cells": 5613,
+              "bounds": [
+                0.003,
+                0.003,
+                0.1905,
+                0.1905
+              ]
+            }
+          ]
+        },
+        "cavities": {
+          "enabled": true,
+          "growthSteps": 2,
+          "windowTrials": 0,
+          "windowAccepted": 0,
+          "relocationTrials": 0,
+          "relocations": 0,
+          "relocatedIds": [],
+          "largestBefore": 0.25241851806640625,
+          "largestAfter": 0.0910491943359375,
+          "positionOnly": false
+        },
+        "adaptive": {
+          "strategy": "adaptive",
+          "seed": "contour-reflow",
+          "localAccepted": 4,
+          "reflowAccepted": 0,
+          "failedTrials": 3,
+          "smallerAfterFailure": 2,
+          "skippedAtCap": 0,
+          "attempts": [
+            {
+              "id": 1,
+              "tries": 3,
+              "accepted": 2,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 0,
+              "tries": 4,
+              "accepted": 2,
+              "failed": 2,
+              "nextStep": 0.02,
+              "minStepFailed": false
+            }
+          ]
+        }
+      },
+      "pipeline": {
+        "version": 1,
+        "target": "generated",
+        "origin": "model-load",
+        "status": "completed",
+        "settings": {
+          "chartPolicy": "large",
+          "uvObjective": "paint",
+          "method": "auto",
+          "iterations": 2000,
+          "tolerance": 1e-9,
+          "padding": 0.003,
+          "rotate": true,
+          "rotationSteps": 12,
+          "autoCut": true,
+          "maxChartFaces": 10752,
+          "maxAspect": 24,
+          "minFill": 0,
+          "maxStretch": 30,
+          "initialSegmentation": "hierarchical",
+          "peelSourceHints": false,
+          "postMerge": true,
+          "structureTemplates": true,
+          "stretchAreaPercentile": 0.99,
+          "regionOptions": {
+            "normalConeDegrees": 81.70916299927603,
+            "maxChartFaces": 10752,
+            "minRegionFaces": 56,
+            "minRegionAreaRatio": 0.01
+          },
+          "timeBudgetMs": 300000,
+          "fillCavitySearch": true,
+          "fillGrowthSteps": 2,
+          "projectionSeed": true,
+          "sourceRepairPolicy": "reject",
+          "sourceFeaturePolicy": "preserve",
+          "sourceAtlasMerge": false,
+          "fillMode": "off",
+          "fillRecutLarge": false,
+          "fillTimeBudgetMs": 3000,
+          "fillRounds": 2
+        },
+        "steps": [
+          {
+            "id": "input",
+            "label": "几何输入白名单 · 丢弃原 UV / 索引 / 提示",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 118.78880299999992,
+            "detail": "Worker 已启动，检查输入",
+            "elapsedMs": 41.99328199999991
+          },
+          {
+            "id": "parameterize",
+            "label": "结构分组 → 规则开缝 → 自由边界剥展",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 160.78208499999982,
+            "detail": "检查翻面、退化与正面积重叠",
+            "elapsedMs": 1984.239782
+          },
+          {
+            "id": "repair",
+            "label": "验证当前生成岛",
+            "enabled": false,
+            "state": "skipped",
+            "reason": "不读取或修复模型原 UV"
+          },
+          {
+            "id": "structure",
+            "label": "几何结构约束 · 保留主要轮廓",
+            "enabled": false,
+            "state": "skipped",
+            "reason": "结构分析在生成阶段完成"
+          },
+          {
+            "id": "merge",
+            "label": "验证式缝合（仅当前生成岛）",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 2145.021867,
+            "elapsedMs": 96.9606990000002
+          },
+          {
+            "id": "pack",
+            "label": "按 3D 面积归一 · 大岛优先排布",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 2241.982566,
+            "detail": "MaxRects 排布 · 2 个岛",
+            "elapsedMs": 118.28075900000022
+          },
+          {
+            "id": "fill",
+            "label": "填补空白 · 多轮轮廓精排",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 2360.2633250000003,
+            "detail": "精排后检查全部 UV 三角形：翻面、退化、交叠及边距",
+            "elapsedMs": 892.3546399999996
+          },
+          {
+            "id": "correspondence",
+            "label": "建立 3D / UV 对应 · 铰链准备",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 3252.617965,
+            "detail": "构建刚性平面网和临时断边",
+            "elapsedMs": 230.6165490000003
+          },
+          {
+            "id": "audit",
+            "label": "面积 / 边界诊断 · 返回纯几何结果",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 3483.234514,
+            "detail": "传回同一份 3D / UV 与铰链数据",
+            "elapsedMs": 14.19347099999959
+          }
+        ],
+        "elapsedMs": 3497.427985,
+        "config": {
+          "version": 2,
+          "source": "geometry",
+          "repairInvalid": false,
+          "mergeAdjacent": true,
+          "fill": true,
+          "fillBudgetSeconds": 3,
+          "fillRounds": 2
+        }
+      }
+    },
+    {
+      "name": "gear",
+      "passed": true,
+      "faces": 6144,
+      "islands": 6,
+      "stages": [
+        "input",
+        "parameterize",
+        "merge",
+        "pack",
+        "fill",
+        "correspondence",
+        "audit"
+      ],
+      "fill": {
+        "mode": "area-priority",
+        "resolution": 512,
+        "settings": {
+          "step": 0.08,
+          "maxAreaGain": 1.6,
+          "maxRounds": 2,
+          "warmupPasses": 3,
+          "timeBudgetMs": 3000,
+          "maxTrials": 256,
+          "rotate": true
+        },
+        "densitySpreadBefore": 1.0000000000000069,
+        "densitySpreadAfter": 1.308162461538464,
+        "before": 0.2648012083203256,
+        "after": 0.41861694505197844,
+        "beforeBox": 0.517269843873946,
+        "afterBox": 0.8003114487280778,
+        "trials": 27,
+        "accepted": 21,
+        "commonAccepted": 3,
+        "rounds": 2,
+        "stop": "round-limit",
+        "elapsedMs": 761.6421570000002,
+        "order": [
+          5,
+          2,
+          3,
+          4,
+          0,
+          1
+        ],
+        "gains": [
+          {
+            "id": 5,
+            "area3D": 0.4948582366091717,
+            "areaFactor": 1.7138242687795207,
+            "linearFactor": 1.3091311121425235
+          },
+          {
+            "id": 2,
+            "area3D": 0.49485823660917155,
+            "areaFactor": 1.7138242687795207,
+            "linearFactor": 1.3091311121425235
+          },
+          {
+            "id": 3,
+            "area3D": 0.27149999763054583,
+            "areaFactor": 1.3101004800000002,
+            "linearFactor": 1.144596208276089
+          },
+          {
+            "id": 4,
+            "area3D": 0.2714999976305453,
+            "areaFactor": 1.3101004800000002,
+            "linearFactor": 1.144596208276089
+          },
+          {
+            "id": 0,
+            "area3D": 0.05808358327730174,
+            "areaFactor": 1.7138242687795207,
+            "linearFactor": 1.3091311121425235
+          },
+          {
+            "id": 1,
+            "area3D": 0.05808358327730167,
+            "areaFactor": 1.7138242687795207,
+            "linearFactor": 1.3091311121425235
+          }
+        ],
+        "history": [
+          {
+            "round": 0,
+            "id": null,
+            "occupancy": 0.2859853049859533,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 0,
+            "id": null,
+            "occupancy": 0.3088641293848296,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 0,
+            "id": null,
+            "occupancy": 0.33357325973561597,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 1,
+            "id": 5,
+            "occupancy": 0.34158214388416086,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 1,
+            "id": 5,
+            "occupancy": 0.35023173876458935,
+            "areaFactor": 1.4693280768000003
+          },
+          {
+            "round": 1,
+            "id": 2,
+            "occupancy": 0.35824062291313424,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 1,
+            "id": 2,
+            "occupancy": 0.36689021779356273,
+            "areaFactor": 1.4693280768000003
+          },
+          {
+            "round": 1,
+            "id": 0,
+            "occupancy": 0.36783025406048997,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 1,
+            "id": 0,
+            "occupancy": 0.36884549322877136,
+            "areaFactor": 1.4693280768000003
+          },
+          {
+            "round": 1,
+            "id": 1,
+            "occupancy": 0.3697855294956986,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 1,
+            "id": 1,
+            "occupancy": 0.37080076866398,
+            "areaFactor": 1.4693280768000003
+          },
+          {
+            "round": 2,
+            "id": 5,
+            "occupancy": 0.38014233113484275,
+            "areaFactor": 1.5868743229440005
+          },
+          {
+            "round": 2,
+            "id": 5,
+            "occupancy": 0.39023121860337456,
+            "areaFactor": 1.7138242687795207
+          },
+          {
+            "round": 2,
+            "id": 2,
+            "occupancy": 0.3995727810742373,
+            "areaFactor": 1.5868743229440005
+          },
+          {
+            "round": 2,
+            "id": 2,
+            "occupancy": 0.4096616685427691,
+            "areaFactor": 1.7138242687795207
+          },
+          {
+            "round": 2,
+            "id": 3,
+            "occupancy": 0.41185867352974537,
+            "areaFactor": 1.3101004800000002
+          },
+          {
+            "round": 2,
+            "id": 4,
+            "occupancy": 0.41405567851672165,
+            "areaFactor": 1.3101004800000002
+          },
+          {
+            "round": 2,
+            "id": 0,
+            "occupancy": 0.4151521368184656,
+            "areaFactor": 1.5868743229440005
+          },
+          {
+            "round": 2,
+            "id": 0,
+            "occupancy": 0.416336311784349,
+            "areaFactor": 1.7138242687795207
+          },
+          {
+            "round": 2,
+            "id": 1,
+            "occupancy": 0.41743277008609286,
+            "areaFactor": 1.5868743229440005
+          },
+          {
+            "round": 2,
+            "id": 1,
+            "occupancy": 0.4186169450519763,
+            "areaFactor": 1.7138242687795207
+          }
+        ],
+        "shapeWaste": [
+          {
+            "id": 4,
+            "area3D": 0.2714999976305453,
+            "boxWaste": 0.06346607007312828,
+            "shapeFill": 0.4072325733192282
+          },
+          {
+            "id": 5,
+            "area3D": 0.4948582366091717,
+            "boxWaste": 0.0632641893446754,
+            "shapeFill": 0.5567734843624446
+          },
+          {
+            "id": 3,
+            "area3D": 0.27149999763054583,
+            "boxWaste": 0.06283902380180878,
+            "shapeFill": 0.4096316038184986
+          },
+          {
+            "id": 2,
+            "area3D": 0.49485823660917155,
+            "boxWaste": 0.06263639561482838,
+            "shapeFill": 0.5592331590658561
+          },
+          {
+            "id": 1,
+            "area3D": 0.05808358327730167,
+            "boxWaste": 0.0001314783630237317,
+            "shapeFill": 0.9861007230107857
+          },
+          {
+            "id": 0,
+            "area3D": 0.05808358327730174,
+            "boxWaste": 0.00013147835615436726,
+            "shapeFill": 0.9861007237268892
+          }
+        ],
+        "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。",
+        "search": {
+          "commonGainLimit": 4,
+          "commonGain": 1.2597120000000002,
+          "rotationStep": 45,
+          "reflowBudget": 4,
+          "reflowTrials": 4,
+          "reflowAccepted": 0,
+          "islandsTried": 6,
+          "untriedIds": [],
+          "completedSweeps": 2,
+          "freeGridFraction": 0.45151519775390625,
+          "emptyRegions": [
+            {
+              "cells": 39688,
+              "bounds": [
+                0.003,
+                0.299875,
+                0.997140625,
+                0.6514375
+              ]
+            },
+            {
+              "cells": 26246,
+              "bounds": [
+                0.003,
+                0.85846875,
+                0.997140625,
+                0.997140625
+              ]
+            },
+            {
+              "cells": 20414,
+              "bounds": [
+                0.003,
+                0.692453125,
+                0.997140625,
+                0.81940625
+              ]
+            },
+            {
+              "cells": 13959,
+              "bounds": [
+                0.297921875,
+                0.003,
+                0.997140625,
+                0.223703125
+              ]
+            },
+            {
+              "cells": 4841,
+              "bounds": [
+                0.669015625,
+                0.188546875,
+                0.82721875,
+                0.34675
+              ]
+            }
+          ]
+        },
+        "cavities": {
+          "enabled": true,
+          "growthSteps": 2,
+          "windowTrials": 30,
+          "windowAccepted": 4,
+          "relocationTrials": 2,
+          "relocations": 2,
+          "relocatedIds": [
+            3,
+            0
+          ],
+          "largestBefore": 0.36893463134765625,
+          "largestAfter": 0.07114410400390625,
+          "positionOnly": false
+        },
+        "adaptive": {
+          "strategy": "adaptive",
+          "seed": "contour-reflow",
+          "localAccepted": 15,
+          "reflowAccepted": 3,
+          "failedTrials": 4,
+          "smallerAfterFailure": 11,
+          "skippedAtCap": 0,
+          "attempts": [
+            {
+              "id": 5,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 2,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 3,
+              "tries": 3,
+              "accepted": 1,
+              "failed": 2,
+              "nextStep": 0.02,
+              "minStepFailed": false
+            },
+            {
+              "id": 4,
+              "tries": 3,
+              "accepted": 1,
+              "failed": 2,
+              "nextStep": 0.02,
+              "minStepFailed": false
+            },
+            {
+              "id": 0,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 1,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            }
+          ]
+        }
+      },
+      "pipeline": {
+        "version": 1,
+        "target": "generated",
+        "origin": "model-load",
+        "status": "completed",
+        "settings": {
+          "chartPolicy": "large",
+          "uvObjective": "paint",
+          "method": "auto",
+          "iterations": 2000,
+          "tolerance": 1e-9,
+          "padding": 0.003,
+          "rotate": true,
+          "rotationSteps": 12,
+          "autoCut": true,
+          "maxChartFaces": 7552,
+          "maxAspect": 24,
+          "minFill": 0,
+          "maxStretch": 30,
+          "initialSegmentation": "hierarchical",
+          "peelSourceHints": false,
+          "postMerge": true,
+          "structureTemplates": true,
+          "stretchAreaPercentile": 0.99,
+          "regionOptions": {
+            "normalConeDegrees": 80.28125000000004,
+            "maxChartFaces": 7552,
+            "minRegionFaces": 40,
+            "minRegionAreaRatio": 0.01
+          },
+          "timeBudgetMs": 300000,
+          "fillCavitySearch": true,
+          "fillGrowthSteps": 2,
+          "projectionSeed": true,
+          "sourceRepairPolicy": "reject",
+          "sourceFeaturePolicy": "preserve",
+          "sourceAtlasMerge": false,
+          "fillMode": "off",
+          "fillRecutLarge": false,
+          "fillTimeBudgetMs": 3000,
+          "fillRounds": 2
+        },
+        "steps": [
+          {
+            "id": "input",
+            "label": "几何输入白名单 · 丢弃原 UV / 索引 / 提示",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 66.15649699999994,
+            "detail": "Worker 已启动，检查输入",
+            "elapsedMs": 20.925091000000066
+          },
+          {
+            "id": "parameterize",
+            "label": "结构分组 → 规则开缝 → 自由边界剥展",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 87.08158800000001,
+            "detail": "已接受有效 UV 岛",
+            "elapsedMs": 926.2445069999994
+          },
+          {
+            "id": "repair",
+            "label": "验证当前生成岛",
+            "enabled": false,
+            "state": "skipped",
+            "reason": "不读取或修复模型原 UV"
+          },
+          {
+            "id": "structure",
+            "label": "几何结构约束 · 保留主要轮廓",
+            "enabled": false,
+            "state": "skipped",
+            "reason": "结构分析在生成阶段完成"
+          },
+          {
+            "id": "merge",
+            "label": "验证式缝合（仅当前生成岛）",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 1013.3260949999994,
+            "elapsedMs": 39.40945700000066
+          },
+          {
+            "id": "pack",
+            "label": "按 3D 面积归一 · 大岛优先排布",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 1052.735552,
+            "detail": "MaxRects 排布 · 6 个岛",
+            "elapsedMs": 55.31987299999946
+          },
+          {
+            "id": "fill",
+            "label": "填补空白 · 多轮轮廓精排",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 1108.0554249999996,
+            "detail": "精排后检查全部 UV 三角形：翻面、退化、交叠及边距",
+            "elapsedMs": 968.4404649999997
+          },
+          {
+            "id": "correspondence",
+            "label": "建立 3D / UV 对应 · 铰链准备",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 2076.4958899999992,
+            "detail": "构建刚性平面网和临时断边",
+            "elapsedMs": 122.6878400000005
+          },
+          {
+            "id": "audit",
+            "label": "面积 / 边界诊断 · 返回纯几何结果",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 2199.1837299999997,
+            "detail": "传回同一份 3D / UV 与铰链数据",
+            "elapsedMs": 6.741254000000481
+          }
+        ],
+        "elapsedMs": 2205.924984,
+        "config": {
+          "version": 2,
+          "source": "geometry",
+          "repairInvalid": false,
+          "mergeAdjacent": true,
+          "fill": true,
+          "fillBudgetSeconds": 3,
+          "fillRounds": 2
+        }
+      }
+    },
+    {
+      "name": "Corset",
+      "passed": true,
+      "faces": 18324,
+      "islands": 86,
+      "stages": [
+        "input",
+        "parameterize",
+        "merge",
+        "pack",
+        "fill",
+        "correspondence",
+        "audit"
+      ],
+      "fill": {
+        "mode": "area-priority",
+        "resolution": 512,
+        "settings": {
+          "step": 0.08,
+          "maxAreaGain": 1.6,
+          "maxRounds": 2,
+          "warmupPasses": 3,
+          "timeBudgetMs": 3000,
+          "maxTrials": 532,
+          "rotate": true
+        },
+        "densitySpreadBefore": 1.0000000000000107,
+        "densitySpreadAfter": 1.360488960000011,
+        "before": 0.5118625805998356,
+        "after": 0.591718090586549,
+        "beforeBox": 0.7993188383301587,
+        "afterBox": 0.9666509786478444,
+        "trials": 336,
+        "accepted": 320,
+        "commonAccepted": 0,
+        "rounds": 2,
+        "stop": "round-limit",
+        "elapsedMs": 2111.997037000001,
+        "order": [
+          14,
+          19,
+          20,
+          21,
+          17,
+          11,
+          12,
+          18,
+          13,
+          22,
+          15,
+          16,
+          64,
+          57,
+          26,
+          29,
+          25,
+          28,
+          32,
+          31,
+          4,
+          9,
+          0,
+          5,
+          8,
+          3,
+          6,
+          1,
+          7,
+          2,
+          45,
+          67,
+          77,
+          71,
+          81,
+          73,
+          83,
+          80,
+          70,
+          85,
+          75,
+          72,
+          82,
+          69,
+          79,
+          66,
+          76,
+          84,
+          74,
+          78,
+          68,
+          41,
+          38,
+          35,
+          44,
+          59,
+          60,
+          42,
+          39,
+          33,
+          36,
+          37,
+          43,
+          34,
+          40,
+          48,
+          23,
+          46,
+          47,
+          49,
+          10,
+          63,
+          56,
+          58,
+          65,
+          27,
+          30,
+          24,
+          50,
+          52,
+          53,
+          51,
+          61,
+          54,
+          55,
+          62
+        ],
+        "gains": [
+          {
+            "id": 14,
+            "area3D": 0.35415426146889967,
+            "areaFactor": 1.08,
+            "linearFactor": 1.0392304845413265
+          },
+          {
+            "id": 19,
+            "area3D": 0.3278069143743917,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 20,
+            "area3D": 0.32690504893723465,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 21,
+            "area3D": 0.3268539088257714,
+            "areaFactor": 1,
+            "linearFactor": 1
+          },
+          {
+            "id": 17,
+            "area3D": 0.2372335083898163,
+            "areaFactor": 1.08,
+            "linearFactor": 1.0392304845413265
+          },
+          {
+            "id": 11,
+            "area3D": 0.13266408807311067,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 12,
+            "area3D": 0.11998891546916494,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 18,
+            "area3D": 0.11970856628744105,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 13,
+            "area3D": 0.06551121220152197,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 22,
+            "area3D": 0.06500757090613105,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 15,
+            "area3D": 0.02459741680362726,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 16,
+            "area3D": 0.019008810170098717,
+            "areaFactor": 1,
+            "linearFactor": 1
+          },
+          {
+            "id": 64,
+            "area3D": 0.008374405587346093,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 57,
+            "area3D": 0.00837440514144283,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 26,
+            "area3D": 0.007818987003999781,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 29,
+            "area3D": 0.007818986634264826,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 25,
+            "area3D": 0.007818984582824514,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 28,
+            "area3D": 0.007818983253386811,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 32,
+            "area3D": 0.007587807806170855,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 31,
+            "area3D": 0.0075878077542152755,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 4,
+            "area3D": 0.005855871784080469,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 9,
+            "area3D": 0.005855870784719615,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 0,
+            "area3D": 0.005801700388152603,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 5,
+            "area3D": 0.005801700061763843,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 8,
+            "area3D": 0.005530033942365512,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 3,
+            "area3D": 0.005530033729350717,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 6,
+            "area3D": 0.005394407935982941,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 1,
+            "area3D": 0.005394407866136598,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 7,
+            "area3D": 0.005253213324155972,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 2,
+            "area3D": 0.005234287342113922,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 45,
+            "area3D": 0.0032819645252303385,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 67,
+            "area3D": 0.0018637974141944406,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 77,
+            "area3D": 0.0018637972845086189,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 71,
+            "area3D": 0.0018637972675478378,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 81,
+            "area3D": 0.0018637971963680045,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 73,
+            "area3D": 0.0018637966849261176,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 83,
+            "area3D": 0.0018637965797239147,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 80,
+            "area3D": 0.0018637965734261245,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 70,
+            "area3D": 0.0018637965032714302,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 85,
+            "area3D": 0.001863796460985524,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 75,
+            "area3D": 0.0018637964357420067,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 72,
+            "area3D": 0.0018637962363385458,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 82,
+            "area3D": 0.001863796196925602,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 69,
+            "area3D": 0.0018637961107236115,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 79,
+            "area3D": 0.0018637959731717573,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 66,
+            "area3D": 0.0018637959217953932,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 76,
+            "area3D": 0.0018637958809501886,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 84,
+            "area3D": 0.001863795759027978,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 74,
+            "area3D": 0.0018637957382882137,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 78,
+            "area3D": 0.0018637957210282927,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 68,
+            "area3D": 0.0018637956466708652,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 41,
+            "area3D": 0.0012521485122778716,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 38,
+            "area3D": 0.0012521478618200143,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 35,
+            "area3D": 0.0012521471011635815,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 44,
+            "area3D": 0.0012521469219613497,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 59,
+            "area3D": 0.001150520177221592,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 60,
+            "area3D": 0.0010997477605668737,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 42,
+            "area3D": 0.001061284096600987,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 39,
+            "area3D": 0.001061282986138876,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 33,
+            "area3D": 0.0010612826455987981,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 36,
+            "area3D": 0.0010612822916722328,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 37,
+            "area3D": 0.0008962979611255351,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 43,
+            "area3D": 0.0008962975851424367,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 34,
+            "area3D": 0.0008962970401932453,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 40,
+            "area3D": 0.0008962968685669315,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 48,
+            "area3D": 0.0007614376951365415,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 23,
+            "area3D": 0.0007614362804467615,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 46,
+            "area3D": 0.0007614358620188146,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 47,
+            "area3D": 0.0007614358557796356,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 49,
+            "area3D": 0.000691622253817353,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 10,
+            "area3D": 0.0006614526401156797,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 63,
+            "area3D": 0.0006557723226791832,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 56,
+            "area3D": 0.0006557722117099168,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 58,
+            "area3D": 0.0006554902527205385,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 65,
+            "area3D": 0.0006554901984491602,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 27,
+            "area3D": 0.0006475181324566252,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 30,
+            "area3D": 0.0006475179055292085,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 24,
+            "area3D": 0.0006475175957438769,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 50,
+            "area3D": 0.000564089201204047,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 52,
+            "area3D": 0.0004276013156733627,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 53,
+            "area3D": 0.0002830043404963081,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 51,
+            "area3D": 0.0002546670971057229,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 61,
+            "area3D": 0.00022636815523143037,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 54,
+            "area3D": 0.0002263681476567955,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 55,
+            "area3D": 0.0002086586940555943,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 62,
+            "area3D": 0.00020865868658508324,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          }
+        ],
+        "history": [
+          {
+            "round": 1,
+            "id": 14,
+            "occupancy": 0.5181534101607537,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 19,
+            "occupancy": 0.5239762327315344,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 19,
+            "occupancy": 0.5302648811079779,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 20,
+            "occupancy": 0.536071683875048,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 20,
+            "occupancy": 0.5423430308634837,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 17,
+            "occupancy": 0.5465570012424613,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 11,
+            "occupancy": 0.5489135087244295,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 11,
+            "occupancy": 0.5514585368049553,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 12,
+            "occupancy": 0.5535898956463963,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 12,
+            "occupancy": 0.5558917631951527,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 18,
+            "occupancy": 0.5580181422040414,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 18,
+            "occupancy": 0.5603146315336415,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 13,
+            "occupancy": 0.5614783048679097,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 13,
+            "occupancy": 0.5627350720689195,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 22,
+            "occupancy": 0.5638897992407556,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 22,
+            "occupancy": 0.5651369045863385,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 15,
+            "occupancy": 0.5655738276269046,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 15,
+            "occupancy": 0.566045704510716,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 64,
+            "occupancy": 0.5661944587795633,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 64,
+            "occupancy": 0.5663551133899185,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 57,
+            "occupancy": 0.5665038676508454,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 57,
+            "occupancy": 0.5666645222526463,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 26,
+            "occupancy": 0.5668034106409355,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 26,
+            "occupancy": 0.566953410100288,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 29,
+            "occupancy": 0.5670922984820097,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 29,
+            "occupancy": 0.5672422979342691,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 25,
+            "occupancy": 0.567381186279551,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 25,
+            "occupancy": 0.5675311856924556,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 28,
+            "occupancy": 0.567670074014123,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 28,
+            "occupancy": 0.5678200734015235,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 32,
+            "occupancy": 0.5679548553619371,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 32,
+            "occupancy": 0.5681004198791838,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 31,
+            "occupancy": 0.5682352018386745,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 31,
+            "occupancy": 0.5683807663549245,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 4,
+            "occupancy": 0.5684847839973254,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 4,
+            "occupancy": 0.5685971230511184,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 9,
+            "occupancy": 0.5687011406757677,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 9,
+            "occupancy": 0.568813479710389,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 0,
+            "occupancy": 0.568916535108209,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 0,
+            "occupancy": 0.5690278349378548,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 5,
+            "occupancy": 0.5691308903298773,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 5,
+            "occupancy": 0.5692421901532616,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 8,
+            "occupancy": 0.5693404199496594,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 8,
+            "occupancy": 0.569446508129769,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 3,
+            "occupancy": 0.5695447379223831,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 3,
+            "occupancy": 0.5696508260984062,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 6,
+            "occupancy": 0.5697466467748724,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 6,
+            "occupancy": 0.5698501331054558,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 1,
+            "occupancy": 0.5699459537806814,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 1,
+            "occupancy": 0.5700494401099249,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 7,
+            "occupancy": 0.5701427527515187,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 7,
+            "occupancy": 0.5702435304044402,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 2,
+            "occupancy": 0.5703365068644877,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 2,
+            "occupancy": 0.570436921441339,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 45,
+            "occupancy": 0.5704952188605696,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 45,
+            "occupancy": 0.5705581800733388,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 67,
+            "occupancy": 0.5705912866405736,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 67,
+            "occupancy": 0.570627041733187,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 77,
+            "occupancy": 0.5706601482981181,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 77,
+            "occupancy": 0.5706959033882436,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 71,
+            "occupancy": 0.5707290099528735,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 71,
+            "occupancy": 0.5707647650426737,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 81,
+            "occupancy": 0.5707978716060392,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 81,
+            "occupancy": 0.5708336266944739,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 73,
+            "occupancy": 0.5708667332487547,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 73,
+            "occupancy": 0.5709024883273779,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 83,
+            "occupancy": 0.57093559487979,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 83,
+            "occupancy": 0.5709713499563949,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 80,
+            "occupancy": 0.571004456508695,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 80,
+            "occupancy": 0.5710402115851791,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 70,
+            "occupancy": 0.5710733181362332,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 70,
+            "occupancy": 0.5711090732113715,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 85,
+            "occupancy": 0.5711421797616745,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 85,
+            "occupancy": 0.5711779348360015,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 75,
+            "occupancy": 0.571211041385856,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 75,
+            "occupancy": 0.5712467964596989,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 72,
+            "occupancy": 0.5712799030060114,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 72,
+            "occupancy": 0.5713156580760288,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 82,
+            "occupancy": 0.5713487646216412,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 82,
+            "occupancy": 0.5713845196909025,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 69,
+            "occupancy": 0.5714176262349838,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 69,
+            "occupancy": 0.5714533813025915,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 79,
+            "occupancy": 0.5714864878442294,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 79,
+            "occupancy": 0.5715222429091983,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 66,
+            "occupancy": 0.5715553494499235,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 66,
+            "occupancy": 0.5715911045139068,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 76,
+            "occupancy": 0.5716242110539066,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 76,
+            "occupancy": 0.5716599661171063,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 84,
+            "occupancy": 0.5716930726549404,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 84,
+            "occupancy": 0.5717288277158011,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 74,
+            "occupancy": 0.5717619342532667,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 74,
+            "occupancy": 0.5717976893137297,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 78,
+            "occupancy": 0.5718307958508887,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 78,
+            "occupancy": 0.5718665509110205,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 68,
+            "occupancy": 0.5718996574468588,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 68,
+            "occupancy": 0.571935412505564,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 41,
+            "occupancy": 0.57195765437509,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 41,
+            "occupancy": 0.5719816755941782,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 38,
+            "occupancy": 0.5720039174521503,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 38,
+            "occupancy": 0.57202793865876,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 35,
+            "occupancy": 0.5720501805032205,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 35,
+            "occupancy": 0.5720742016952378,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 44,
+            "occupancy": 0.5720964435365151,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 44,
+            "occupancy": 0.5721204647250947,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 59,
+            "occupancy": 0.5721409013741168,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 59,
+            "occupancy": 0.5721629729550606,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 60,
+            "occupancy": 0.5721825077354499,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 60,
+            "occupancy": 0.5722036052982703,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 42,
+            "occupancy": 0.5722224568499634,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 42,
+            "occupancy": 0.572242816525792,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 39,
+            "occupancy": 0.5722616680577601,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 39,
+            "occupancy": 0.5722820277122855,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 33,
+            "occupancy": 0.5723008792382046,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 33,
+            "occupancy": 0.5723212388861971,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 36,
+            "occupancy": 0.5723400904058294,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 36,
+            "occupancy": 0.5723604500470323,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 37,
+            "occupancy": 0.572376370955864,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 37,
+            "occupancy": 0.5723935655374024,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 43,
+            "occupancy": 0.5724094864395556,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 43,
+            "occupancy": 0.5724266810138811,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 34,
+            "occupancy": 0.5724426019063543,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 34,
+            "occupancy": 0.5724597964702255,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 40,
+            "occupancy": 0.5724757173596502,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 40,
+            "occupancy": 0.5724929119202289,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 48,
+            "occupancy": 0.5725064373109485,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 48,
+            "occupancy": 0.5725210447329256,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 23,
+            "occupancy": 0.5725345700985162,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 23,
+            "occupancy": 0.5725491774933538,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 46,
+            "occupancy": 0.5725627028515117,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 46,
+            "occupancy": 0.5725773102383223,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 47,
+            "occupancy": 0.5725908355963694,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 47,
+            "occupancy": 0.5726054429830603,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 49,
+            "occupancy": 0.5726177282445767,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 49,
+            "occupancy": 0.5726309963270144,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 10,
+            "occupancy": 0.5726427456867548,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 10,
+            "occupancy": 0.5726554349952744,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 63,
+            "occupancy": 0.572667083455738,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 63,
+            "occupancy": 0.5726796637930387,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 56,
+            "occupancy": 0.5726913122515312,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 56,
+            "occupancy": 0.5727038925867031,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 58,
+            "occupancy": 0.5727155360367681,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 58,
+            "occupancy": 0.5727281109628382,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 65,
+            "occupancy": 0.572739754411939,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 65,
+            "occupancy": 0.5727523293369681,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 27,
+            "occupancy": 0.5727638311785441,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 27,
+            "occupancy": 0.5727762531674462,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 30,
+            "occupancy": 0.5727877550049912,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 30,
+            "occupancy": 0.57280017698954,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 24,
+            "occupancy": 0.5728116788215825,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 24,
+            "occupancy": 0.5728241008001882,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 50,
+            "occupancy": 0.5728341206966231,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 50,
+            "occupancy": 0.5728449421847729,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 52,
+            "occupancy": 0.5728525376517476,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 52,
+            "occupancy": 0.5728607407560803,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 53,
+            "occupancy": 0.5728657677521234,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 53,
+            "occupancy": 0.5728711969078499,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 51,
+            "occupancy": 0.5728757205504458,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 51,
+            "occupancy": 0.5728806060844492,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 61,
+            "occupancy": 0.5728846270539462,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 61,
+            "occupancy": 0.5728889697010029,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 54,
+            "occupancy": 0.5728929906703653,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 54,
+            "occupancy": 0.5728973333172767,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 55,
+            "occupancy": 0.5729010397142441,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 55,
+            "occupancy": 0.5729050426229689,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 62,
+            "occupancy": 0.5729087490198037,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 62,
+            "occupancy": 0.5729127519283852,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 2,
+            "id": 12,
+            "occupancy": 0.5753987688810421,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 12,
+            "occupancy": 0.5780836671899114,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 13,
+            "occupancy": 0.5794409757670019,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 13,
+            "occupancy": 0.5809068690302597,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 22,
+            "occupancy": 0.5822537428034893,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 22,
+            "occupancy": 0.5837083664785773,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 64,
+            "occupancy": 0.5838818734577608,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 64,
+            "occupancy": 0.584069260995279,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 57,
+            "occupancy": 0.584242767965224,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 57,
+            "occupancy": 0.5844301554927647,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 26,
+            "occupancy": 0.5845921549088652,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 26,
+            "occupancy": 0.5847671142782539,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 29,
+            "occupancy": 0.5849291136866941,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 29,
+            "occupancy": 0.5851040730478094,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 25,
+            "occupancy": 0.5852660724137464,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 25,
+            "occupancy": 0.5854410317289582,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 28,
+            "occupancy": 0.5856030310673509,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 28,
+            "occupancy": 0.585777990352815,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 32,
+            "occupancy": 0.5859352000314414,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 32,
+            "occupancy": 0.5861049864843579,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 31,
+            "occupancy": 0.5862621961619079,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 31,
+            "occupancy": 0.5864319826136619,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 4,
+            "occupancy": 0.5865533087917583,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 4,
+            "occupancy": 0.5866843410641025,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 9,
+            "occupancy": 0.5868056672214934,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 9,
+            "occupancy": 0.5869366994714756,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 0,
+            "occupancy": 0.587056903287493,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 0,
+            "occupancy": 0.5871867234087919,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 5,
+            "occupancy": 0.5873069272180469,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 5,
+            "occupancy": 0.5874367473320424,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 8,
+            "occupancy": 0.5875513225665608,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 8,
+            "occupancy": 0.5876750638198407,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 3,
+            "occupancy": 0.5877896390499457,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 3,
+            "occupancy": 0.5879133802984592,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 6,
+            "occupancy": 0.5880251455354893,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 6,
+            "occupancy": 0.588145851991482,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 1,
+            "occupancy": 0.588257617227065,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 1,
+            "occupancy": 0.5883783236814947,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 7,
+            "occupancy": 0.5884871635466498,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 7,
+            "occupancy": 0.5886047106010174,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 2,
+            "occupancy": 0.5887131583440167,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 2,
+            "occupancy": 0.588830281906456,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 45,
+            "occupancy": 0.5888982800162468,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 45,
+            "occupancy": 0.5889717179748207,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 67,
+            "occupancy": 0.5890103334748433,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 67,
+            "occupancy": 0.5890520382148676,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 77,
+            "occupancy": 0.5890906537122033,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 77,
+            "occupancy": 0.5891323584493258,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 71,
+            "occupancy": 0.5891709739463099,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 71,
+            "occupancy": 0.5892126786830529,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 81,
+            "occupancy": 0.5892512941785624,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 81,
+            "occupancy": 0.5892929989137126,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 73,
+            "occupancy": 0.5893316143986256,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 73,
+            "occupancy": 0.5893733191223317,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 83,
+            "occupancy": 0.5894119346050651,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 83,
+            "occupancy": 0.5894536393264173,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 80,
+            "occupancy": 0.5894922548090202,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 80,
+            "occupancy": 0.5895339595302314,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 70,
+            "occupancy": 0.5895725750113807,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 70,
+            "occupancy": 0.5896142797310221,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 85,
+            "occupancy": 0.5896528952112954,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 85,
+            "occupancy": 0.5896945999299905,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 75,
+            "occupancy": 0.5897332154097408,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 75,
+            "occupancy": 0.589774920127871,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 72,
+            "occupancy": 0.5898135356034899,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 72,
+            "occupancy": 0.5898552403171583,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 82,
+            "occupancy": 0.5898938557919606,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 82,
+            "occupancy": 0.589935560504747,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 69,
+            "occupancy": 0.5899741759777634,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 69,
+            "occupancy": 0.5900158806886209,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 79,
+            "occupancy": 0.5900544961587872,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 79,
+            "occupancy": 0.590096200866567,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 66,
+            "occupancy": 0.590134816335669,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 66,
+            "occupancy": 0.590176521042299,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 76,
+            "occupancy": 0.5902151365105547,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 76,
+            "occupancy": 0.5902568412162708,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 84,
+            "occupancy": 0.5902954566820003,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 84,
+            "occupancy": 0.5903371613849884,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 74,
+            "occupancy": 0.5903757768502883,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 74,
+            "occupancy": 0.5904174815528122,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 78,
+            "occupancy": 0.5904560970177545,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 78,
+            "occupancy": 0.5904978017198922,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 68,
+            "occupancy": 0.590536417183294,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 68,
+            "occupancy": 0.5905781218837678,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 41,
+            "occupancy": 0.590604064800383,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 41,
+            "occupancy": 0.5906320831503274,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 38,
+            "occupancy": 0.5906580260534661,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 38,
+            "occupancy": 0.5906860443888557,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 35,
+            "occupancy": 0.5907119872762345,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 35,
+            "occupancy": 0.5907400055946036,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 44,
+            "occupancy": 0.5907659484782695,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 44,
+            "occupancy": 0.5907939667926286,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 59,
+            "occupancy": 0.5908178041000479,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 59,
+            "occupancy": 0.5908435483920608,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 60,
+            "occupancy": 0.5908663337599068,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 60,
+            "occupancy": 0.5908909419571806,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 42,
+            "occupancy": 0.5909129304070755,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 42,
+            "occupancy": 0.590936677932962,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 39,
+            "occupancy": 0.5909586663598496,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 39,
+            "occupancy": 0.5909824138608881,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 33,
+            "occupancy": 0.5910044022807202,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 33,
+            "occupancy": 0.5910281497741386,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 36,
+            "occupancy": 0.5910501381866377,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 36,
+            "occupancy": 0.5910738856721367,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 37,
+            "occupancy": 0.5910924558201981,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 37,
+            "occupancy": 0.5911125115801045,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 43,
+            "occupancy": 0.591131081720376,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 43,
+            "occupancy": 0.5911511374718693,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 34,
+            "occupancy": 0.5911697076008502,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 34,
+            "occupancy": 0.5911897633401495,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 40,
+            "occupancy": 0.5912083334655744,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 40,
+            "occupancy": 0.5912283892010335,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 48,
+            "occupancy": 0.5912441652167687,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 48,
+            "occupancy": 0.5912612033137629,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 23,
+            "occupancy": 0.5912769793001876,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 23,
+            "occupancy": 0.5912940173655263,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 46,
+            "occupancy": 0.5913097933432817,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 46,
+            "occupancy": 0.5913268313992576,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 47,
+            "occupancy": 0.5913426073768837,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 47,
+            "occupancy": 0.5913596454327199,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 49,
+            "occupancy": 0.5913739749617527,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 49,
+            "occupancy": 0.5913894508531081,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 10,
+            "occupancy": 0.5914031553063094,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 10,
+            "occupancy": 0.5914179561157666,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 63,
+            "occupancy": 0.5914315428800515,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 63,
+            "occupancy": 0.591446216585479,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 56,
+            "occupancy": 0.5914598033474646,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 56,
+            "occupancy": 0.5914744770504091,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 58,
+            "occupancy": 0.5914880579705649,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 58,
+            "occupancy": 0.5915027253643331,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 65,
+            "occupancy": 0.5915163062833645,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 65,
+            "occupancy": 0.5915309736759183,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 27,
+            "occupancy": 0.5915443894239326,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 27,
+            "occupancy": 0.591558878431788,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 30,
+            "occupancy": 0.5915722941751006,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 30,
+            "occupancy": 0.5915867831778783,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 24,
+            "occupancy": 0.5916001989147726,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 24,
+            "occupancy": 0.5916146879106183,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 50,
+            "occupancy": 0.5916263751178201,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 50,
+            "occupancy": 0.5916389973015981,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 52,
+            "occupancy": 0.5916478566542773,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 52,
+            "occupancy": 0.5916574247551709,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 53,
+            "occupancy": 0.5916632882433557,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 53,
+            "occupancy": 0.5916696208105952,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 51,
+            "occupancy": 0.5916748971873189,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 51,
+            "occupancy": 0.5916805956741805,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 61,
+            "occupancy": 0.5916852857330017,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 61,
+            "occupancy": 0.5916903509965287,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 54,
+            "occupancy": 0.591695041055193,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 54,
+            "occupancy": 0.5917001063185504,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 55,
+            "occupancy": 0.5917044294599731,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 55,
+            "occupancy": 0.5917090984527098,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 2,
+            "id": 62,
+            "occupancy": 0.5917134215939778,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 2,
+            "id": 62,
+            "occupancy": 0.5917180905865473,
+            "areaFactor": 1.3604889600000003
+          }
+        ],
+        "shapeWaste": [
+          {
+            "id": 15,
+            "area3D": 0.02459741680362726,
+            "boxWaste": 0.09427188926267038,
+            "shapeFill": 0.05476135892036572
+          },
+          {
+            "id": 17,
+            "area3D": 0.2372335083898163,
+            "boxWaste": 0.047331588800916966,
+            "shapeFill": 0.526713543489629
+          },
+          {
+            "id": 20,
+            "area3D": 0.32690504893723465,
+            "boxWaste": 0.02676181581245511,
+            "shapeFill": 0.7306224031815816
+          },
+          {
+            "id": 21,
+            "area3D": 0.3268539088257714,
+            "boxWaste": 0.026576268409907178,
+            "shapeFill": 0.7319588265411027
+          },
+          {
+            "id": 14,
+            "area3D": 0.35415426146889967,
+            "boxWaste": 0.019494734581968404,
+            "shapeFill": 0.8013378793177697
+          },
+          {
+            "id": 19,
+            "area3D": 0.3278069143743917,
+            "boxWaste": 0.01935793168579278,
+            "shapeFill": 0.7899147329124873
+          },
+          {
+            "id": 16,
+            "area3D": 0.019008810170098717,
+            "boxWaste": 0.008441289644143812,
+            "shapeFill": 0.3333341453271159
+          },
+          {
+            "id": 12,
+            "area3D": 0.11998891546916494,
+            "boxWaste": 0.007317217789901624,
+            "shapeFill": 0.7845291680268537
+          },
+          {
+            "id": 18,
+            "area3D": 0.11970856628744105,
+            "boxWaste": 0.007069097209106302,
+            "shapeFill": 0.7899155424882925
+          },
+          {
+            "id": 22,
+            "area3D": 0.06500757090613105,
+            "boxWaste": 0.005103684602240446,
+            "shapeFill": 0.7387786071798633
+          }
+        ],
+        "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。",
+        "search": {
+          "commonGainLimit": 4,
+          "commonGain": 1,
+          "rotationStep": 45,
+          "reflowBudget": 4,
+          "reflowTrials": 4,
+          "reflowAccepted": 1,
+          "islandsTried": 86,
+          "untriedIds": [],
+          "completedSweeps": 2,
+          "freeGridFraction": 0.17174911499023438,
+          "emptyRegions": [
+            {
+              "cells": 11839,
+              "bounds": [
+                0.309640625,
+                0.6201875,
+                0.653390625,
+                0.9795625
+              ]
+            },
+            {
+              "cells": 9124,
+              "bounds": [
+                0.003,
+                0.731515625,
+                0.305734375,
+                0.977609375
+              ]
+            },
+            {
+              "cells": 2853,
+              "bounds": [
+                0.003,
+                0.512765625,
+                0.25690625,
+                0.59284375
+              ]
+            },
+            {
+              "cells": 2325,
+              "bounds": [
+                0.92878125,
+                0.003,
+                0.997140625,
+                0.20221875
+              ]
+            },
+            {
+              "cells": 1677,
+              "bounds": [
+                0.786203125,
+                0.88971875,
+                0.954171875,
+                0.98346875
+              ]
+            }
+          ]
+        },
+        "cavities": {
+          "enabled": true,
+          "growthSteps": 2,
+          "windowTrials": 6264,
+          "windowAccepted": 101,
+          "relocationTrials": 2,
+          "relocations": 2,
+          "relocatedIds": [
+            11,
+            12
+          ],
+          "largestBefore": 0.07930755615234375,
+          "largestAfter": 0.02205657958984375,
+          "positionOnly": false
+        },
+        "adaptive": {
+          "strategy": "adaptive",
+          "seed": "contour-reflow",
+          "localAccepted": 311,
+          "reflowAccepted": 9,
+          "failedTrials": 13,
+          "smallerAfterFailure": 330,
+          "skippedAtCap": 0,
+          "attempts": [
+            {
+              "id": 14,
+              "tries": 3,
+              "accepted": 1,
+              "failed": 2,
+              "nextStep": 0.02,
+              "minStepFailed": false
+            },
+            {
+              "id": 19,
+              "tries": 3,
+              "accepted": 2,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 20,
+              "tries": 3,
+              "accepted": 2,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 21,
+              "tries": 2,
+              "accepted": 0,
+              "failed": 2,
+              "nextStep": 0.02,
+              "minStepFailed": false
+            },
+            {
+              "id": 17,
+              "tries": 3,
+              "accepted": 1,
+              "failed": 2,
+              "nextStep": 0.02,
+              "minStepFailed": false
+            },
+            {
+              "id": 11,
+              "tries": 3,
+              "accepted": 2,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 12,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 18,
+              "tries": 3,
+              "accepted": 2,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 13,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 22,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 15,
+              "tries": 3,
+              "accepted": 2,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 16,
+              "tries": 2,
+              "accepted": 0,
+              "failed": 2,
+              "nextStep": 0.02,
+              "minStepFailed": false
+            },
+            {
+              "id": 64,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 57,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 26,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 29,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 25,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 28,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 32,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 31,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 4,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 9,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 0,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 5,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 8,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 3,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 6,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 1,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 7,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 2,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 45,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 67,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 77,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 71,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 81,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 73,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 83,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 80,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 70,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 85,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 75,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 72,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 82,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 69,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 79,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 66,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 76,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 84,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 74,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 78,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 68,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 41,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 38,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 35,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 44,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 59,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 60,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 42,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 39,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 33,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 36,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 37,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 43,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 34,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 40,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 48,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 23,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 46,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 47,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 49,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 10,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 63,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 56,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 58,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 65,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 27,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 30,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 24,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 50,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 52,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 53,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 51,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 61,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 54,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 55,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 62,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            }
+          ]
+        }
+      },
+      "pipeline": {
+        "version": 1,
+        "target": "generated",
+        "origin": "model-load",
+        "status": "completed",
+        "settings": {
+          "chartPolicy": "large",
+          "uvObjective": "paint",
+          "method": "auto",
+          "iterations": 2000,
+          "tolerance": 1e-9,
+          "padding": 0.003,
+          "rotate": true,
+          "rotationSteps": 12,
+          "autoCut": true,
+          "maxChartFaces": 13056,
+          "maxAspect": 24,
+          "minFill": 0,
+          "maxStretch": 30,
+          "initialSegmentation": "hierarchical",
+          "peelSourceHints": false,
+          "postMerge": true,
+          "structureTemplates": true,
+          "stretchAreaPercentile": 0.99,
+          "regionOptions": {
+            "normalConeDegrees": 86.6328985177959,
+            "maxChartFaces": 13056,
+            "minRegionFaces": 68,
+            "minRegionAreaRatio": 0.01
+          },
+          "timeBudgetMs": 300000,
+          "fillCavitySearch": true,
+          "fillGrowthSteps": 2,
+          "projectionSeed": true,
+          "sourceRepairPolicy": "reject",
+          "sourceFeaturePolicy": "preserve",
+          "sourceAtlasMerge": false,
+          "fillMode": "off",
+          "fillRecutLarge": false,
+          "fillTimeBudgetMs": 3000,
+          "fillRounds": 2
+        },
+        "steps": [
+          {
+            "id": "input",
+            "label": "几何输入白名单 · 丢弃原 UV / 索引 / 提示",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 161.42511899999954,
+            "detail": "Worker 已启动，检查输入",
+            "elapsedMs": 58.37754099999984
+          },
+          {
+            "id": "parameterize",
+            "label": "结构分组 → 规则开缝 → 自由边界剥展",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 219.80265999999938,
+            "detail": "已接受有效 UV 岛",
+            "elapsedMs": 2514.639418999999
+          },
+          {
+            "id": "repair",
+            "label": "验证当前生成岛",
+            "enabled": false,
+            "state": "skipped",
+            "reason": "不读取或修复模型原 UV"
+          },
+          {
+            "id": "structure",
+            "label": "几何结构约束 · 保留主要轮廓",
+            "enabled": false,
+            "state": "skipped",
+            "reason": "结构分析在生成阶段完成"
+          },
+          {
+            "id": "merge",
+            "label": "验证式缝合（仅当前生成岛）",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 2734.4420789999986,
+            "detail": "连接边界开缝，优先保留整块",
+            "elapsedMs": 137.962802
+          },
+          {
+            "id": "pack",
+            "label": "按 3D 面积归一 · 大岛优先排布",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 2872.4048809999986,
+            "detail": "MaxRects 排布 · 86 个岛",
+            "elapsedMs": 385.11171000000104
+          },
+          {
+            "id": "fill",
+            "label": "填补空白 · 多轮轮廓精排",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 3257.5165909999996,
+            "detail": "精排后检查全部 UV 三角形：翻面、退化、交叠及边距",
+            "elapsedMs": 2936.7316869999995
+          },
+          {
+            "id": "correspondence",
+            "label": "建立 3D / UV 对应 · 铰链准备",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 6194.248277999999,
+            "detail": "构建刚性平面网和临时断边",
+            "elapsedMs": 320.3970700000009
+          },
+          {
+            "id": "audit",
+            "label": "面积 / 边界诊断 · 返回纯几何结果",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 6514.645348,
+            "detail": "传回同一份 3D / UV 与铰链数据",
+            "elapsedMs": 23.13963100000001
+          }
+        ],
+        "elapsedMs": 6537.784979,
+        "config": {
+          "version": 2,
+          "source": "geometry",
+          "repairInvalid": false,
+          "mergeAdjacent": true,
+          "fill": true,
+          "fillBudgetSeconds": 3,
+          "fillRounds": 2
+        }
+      }
+    },
+    {
+      "name": "FlightHelmet",
+      "passed": true,
+      "faces": 94722,
+      "islands": 148,
+      "stages": [
+        "input",
+        "parameterize",
+        "merge",
+        "pack",
+        "fill",
+        "correspondence",
+        "audit"
+      ],
+      "fill": {
+        "mode": "area-priority",
+        "resolution": 512,
+        "settings": {
+          "step": 0.08,
+          "maxAreaGain": 1.6,
+          "maxRounds": 2,
+          "warmupPasses": 3,
+          "timeBudgetMs": 3000,
+          "maxTrials": 904,
+          "rotate": true
+        },
+        "densitySpreadBefore": 1.000000000000023,
+        "densitySpreadAfter": 1.0800000000000145,
+        "before": 0.5697246769386007,
+        "after": 0.6676203384224785,
+        "beforeBox": 0.8651772941306602,
+        "afterBox": 1.0203352246549378,
+        "trials": 8,
+        "accepted": 3,
+        "commonAccepted": 2,
+        "rounds": 1,
+        "stop": "time-budget",
+        "elapsedMs": 5958.829992999992,
+        "order": [
+          117,
+          5,
+          21,
+          22,
+          0,
+          18,
+          20,
+          16,
+          23,
+          29,
+          31,
+          28,
+          17,
+          26,
+          1,
+          25,
+          27,
+          7,
+          2,
+          34,
+          15,
+          33,
+          24,
+          19,
+          116,
+          6,
+          4,
+          128,
+          3,
+          88,
+          89,
+          9,
+          10,
+          146,
+          147,
+          92,
+          13,
+          126,
+          12,
+          125,
+          127,
+          124,
+          40,
+          39,
+          38,
+          36,
+          35,
+          118,
+          95,
+          57,
+          30,
+          32,
+          122,
+          120,
+          41,
+          8,
+          93,
+          11,
+          37,
+          55,
+          91,
+          121,
+          54,
+          50,
+          119,
+          94,
+          52,
+          56,
+          97,
+          53,
+          51,
+          98,
+          44,
+          45,
+          14,
+          140,
+          83,
+          78,
+          82,
+          79,
+          81,
+          80,
+          131,
+          115,
+          133,
+          132,
+          90,
+          123,
+          96,
+          46,
+          48,
+          144,
+          134,
+          76,
+          77,
+          129,
+          113,
+          66,
+          69,
+          87,
+          85,
+          84,
+          86,
+          130,
+          114,
+          100,
+          107,
+          49,
+          47,
+          65,
+          68,
+          71,
+          143,
+          70,
+          109,
+          104,
+          67,
+          64,
+          145,
+          99,
+          139,
+          112,
+          138,
+          103,
+          142,
+          141,
+          137,
+          136,
+          135,
+          105,
+          75,
+          72,
+          74,
+          73,
+          110,
+          102,
+          111,
+          106,
+          43,
+          42,
+          62,
+          63,
+          101,
+          59,
+          108,
+          60,
+          58,
+          61
+        ],
+        "gains": [
+          {
+            "id": 117,
+            "area3D": 0.7375133120166033,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 5,
+            "area3D": 0.2694512430216875,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 21,
+            "area3D": 0.1991246965405753,
+            "areaFactor": 1.2597120000000002,
+            "linearFactor": 1.1223689233046326
+          },
+          {
+            "id": 22,
+            "area3D": 0.1804741126571462,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 0,
+            "area3D": 0.1796682317915018,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 18,
+            "area3D": 0.17256843238212932,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 20,
+            "area3D": 0.10497415573843723,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 16,
+            "area3D": 0.09519965619875832,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 23,
+            "area3D": 0.08610259366248384,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 29,
+            "area3D": 0.08385720186152351,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 31,
+            "area3D": 0.0835415223671515,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 28,
+            "area3D": 0.05851841767302088,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 17,
+            "area3D": 0.05836615750285982,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 26,
+            "area3D": 0.05834939196995836,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 1,
+            "area3D": 0.05424618213113279,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 25,
+            "area3D": 0.051177895989364695,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 27,
+            "area3D": 0.04996374143087536,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 7,
+            "area3D": 0.04093235101589925,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 2,
+            "area3D": 0.03910405745193765,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 34,
+            "area3D": 0.036285416099226545,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 15,
+            "area3D": 0.034496171262118486,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 33,
+            "area3D": 0.03253458312451367,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 24,
+            "area3D": 0.031154149755611944,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 19,
+            "area3D": 0.02751800483339244,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 116,
+            "area3D": 0.027085535818077135,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 6,
+            "area3D": 0.024766464693003053,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 4,
+            "area3D": 0.024519820148454108,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 128,
+            "area3D": 0.02351650334136006,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 3,
+            "area3D": 0.023477609034316036,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 88,
+            "area3D": 0.023080117307772968,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 89,
+            "area3D": 0.023080110391569864,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 9,
+            "area3D": 0.020956356385971823,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 10,
+            "area3D": 0.02088066096359791,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 146,
+            "area3D": 0.02056157225674601,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 147,
+            "area3D": 0.020561074519551203,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 92,
+            "area3D": 0.01939375300898102,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 13,
+            "area3D": 0.018796516910749943,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 126,
+            "area3D": 0.017928761762247548,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 12,
+            "area3D": 0.01774384645970546,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 125,
+            "area3D": 0.017675629180051045,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 127,
+            "area3D": 0.01672539494272636,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 124,
+            "area3D": 0.016725391703215322,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 40,
+            "area3D": 0.016295043185483162,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 39,
+            "area3D": 0.014980032402351504,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 38,
+            "area3D": 0.01497850725149546,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 36,
+            "area3D": 0.012716145604374325,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 35,
+            "area3D": 0.012567800989610791,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 118,
+            "area3D": 0.012217712886521924,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 95,
+            "area3D": 0.011741116810971036,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 57,
+            "area3D": 0.010644917274794786,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 30,
+            "area3D": 0.009734275634006898,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 32,
+            "area3D": 0.009734270435741923,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 122,
+            "area3D": 0.009133015046458035,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 120,
+            "area3D": 0.008167426479085244,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 41,
+            "area3D": 0.006411159049159809,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 8,
+            "area3D": 0.006027646939499434,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 93,
+            "area3D": 0.005985573900535163,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 11,
+            "area3D": 0.00593449064919481,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 37,
+            "area3D": 0.00478003428663857,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 55,
+            "area3D": 0.004573915059871052,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 91,
+            "area3D": 0.003995023484070271,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 121,
+            "area3D": 0.0038725705411779636,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 54,
+            "area3D": 0.0031828572172515487,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 50,
+            "area3D": 0.0031828565192823202,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 119,
+            "area3D": 0.0029893425483070815,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 94,
+            "area3D": 0.0029528783499482426,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 52,
+            "area3D": 0.002927821739909693,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 56,
+            "area3D": 0.0029278192350020104,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 97,
+            "area3D": 0.002678085059526397,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 53,
+            "area3D": 0.0025399630326384992,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 51,
+            "area3D": 0.0025399627583885713,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 98,
+            "area3D": 0.0023795236949194546,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 44,
+            "area3D": 0.00234236049804745,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 45,
+            "area3D": 0.0023423604980474496,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 14,
+            "area3D": 0.002220073816787806,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 140,
+            "area3D": 0.002143966999196235,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 83,
+            "area3D": 0.002022356606783957,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 78,
+            "area3D": 0.002022353133363683,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 82,
+            "area3D": 0.0020223450896308974,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 79,
+            "area3D": 0.0020223408166955186,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 81,
+            "area3D": 0.002022330121297689,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 80,
+            "area3D": 0.002022329721675409,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 131,
+            "area3D": 0.002022184447283364,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 115,
+            "area3D": 0.002006828756982611,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 133,
+            "area3D": 0.0019093552706597099,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 132,
+            "area3D": 0.0018171136230330403,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 90,
+            "area3D": 0.0017418700694351744,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 123,
+            "area3D": 0.0016301432164134535,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 96,
+            "area3D": 0.0016208810279245305,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 46,
+            "area3D": 0.0015868015581967316,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 48,
+            "area3D": 0.0015867912371641283,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 144,
+            "area3D": 0.00130109931894589,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 134,
+            "area3D": 0.0012818335977428069,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 76,
+            "area3D": 0.0009722016080635793,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 77,
+            "area3D": 0.0009722003066581826,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 129,
+            "area3D": 0.0009719909860147117,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 113,
+            "area3D": 0.0009719646679636314,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 66,
+            "area3D": 0.0009354100218359441,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 69,
+            "area3D": 0.0009354074604778966,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 87,
+            "area3D": 0.0008902710808521195,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 85,
+            "area3D": 0.0008902707690135219,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 84,
+            "area3D": 0.0008902693083545839,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 86,
+            "area3D": 0.0008902585840382492,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 130,
+            "area3D": 0.0008039417235815076,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 114,
+            "area3D": 0.000803243856499514,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 100,
+            "area3D": 0.0007884166162512488,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 107,
+            "area3D": 0.0007164743096275271,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 49,
+            "area3D": 0.0007105859836562678,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 47,
+            "area3D": 0.0007105383206741147,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 65,
+            "area3D": 0.0006618066441165123,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 68,
+            "area3D": 0.0006618066441165109,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 71,
+            "area3D": 0.0006056203049559891,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 143,
+            "area3D": 0.0005995242956301461,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 70,
+            "area3D": 0.0005735846726930376,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 109,
+            "area3D": 0.0005259439643070375,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 104,
+            "area3D": 0.00047389221551391987,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 67,
+            "area3D": 0.00044784483903953244,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 64,
+            "area3D": 0.00044784379184915077,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 145,
+            "area3D": 0.00044692647453423975,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 99,
+            "area3D": 0.0003895096348225529,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 139,
+            "area3D": 0.0003812108286628274,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 112,
+            "area3D": 0.00038072499499643337,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 138,
+            "area3D": 0.00037698568164245774,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 103,
+            "area3D": 0.00037265365383913986,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 142,
+            "area3D": 0.0003493650097489727,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 141,
+            "area3D": 0.0003479284486645793,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 137,
+            "area3D": 0.000346282327168256,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 136,
+            "area3D": 0.0003455257973578739,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 135,
+            "area3D": 0.00034326336019943306,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 105,
+            "area3D": 0.0003334861891180279,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 75,
+            "area3D": 0.00032879740479194267,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 72,
+            "area3D": 0.0003287971105214651,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 74,
+            "area3D": 0.00032879711052146484,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 73,
+            "area3D": 0.00032879518004868023,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 110,
+            "area3D": 0.0003063567418980461,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 102,
+            "area3D": 0.00030231251752137444,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 111,
+            "area3D": 0.00030154007154954655,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 106,
+            "area3D": 0.00022706089206770585,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 43,
+            "area3D": 0.00016059344905936556,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 42,
+            "area3D": 0.00016059189569236882,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 62,
+            "area3D": 0.00014847374225516677,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 63,
+            "area3D": 0.00014847154347515524,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 101,
+            "area3D": 0.00012712111494218457,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 59,
+            "area3D": 0.00011670650994975929,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 108,
+            "area3D": 0.00011570397656745331,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 60,
+            "area3D": 0.00010785692712701587,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 58,
+            "area3D": 0.00006436779252359829,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          },
+          {
+            "id": 61,
+            "area3D": 0.00006410292887986805,
+            "areaFactor": 1.1664,
+            "linearFactor": 1.08
+          }
+        ],
+        "history": [
+          {
+            "round": 0,
+            "id": null,
+            "occupancy": 0.6153026510936911,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 0,
+            "id": null,
+            "occupancy": 0.6645268631811854,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 21,
+            "occupancy": 0.6676203384224726,
+            "areaFactor": 1.2597120000000002
+          }
+        ],
+        "shapeWaste": [
+          {
+            "id": 23,
+            "area3D": 0.08610259366248384,
+            "boxWaste": 0.03926201888645267,
+            "shapeFill": 0.26746005848868254
+          },
+          {
+            "id": 117,
+            "area3D": 0.7375133120166033,
+            "boxWaste": 0.03411104106226405,
+            "shapeFill": 0.7825916183647431
+          },
+          {
+            "id": 24,
+            "area3D": 0.031154149755611944,
+            "boxWaste": 0.03348352526654823,
+            "shapeFill": 0.13412880066269126
+          },
+          {
+            "id": 9,
+            "area3D": 0.020956356385971823,
+            "boxWaste": 0.024001122862425204,
+            "shapeFill": 0.12691801270409878
+          },
+          {
+            "id": 10,
+            "area3D": 0.02088066096359791,
+            "boxWaste": 0.019226347501712895,
+            "shapeFill": 0.15312639881829154
+          },
+          {
+            "id": 18,
+            "area3D": 0.17256843238212932,
+            "boxWaste": 0.018604504508345304,
+            "shapeFill": 0.606962167333821
+          },
+          {
+            "id": 5,
+            "area3D": 0.2694512430216875,
+            "boxWaste": 0.013425046190221654,
+            "shapeFill": 0.7696677021971355
+          },
+          {
+            "id": 15,
+            "area3D": 0.034496171262118486,
+            "boxWaste": 0.007270084617916345,
+            "shapeFill": 0.44133417261118585
+          },
+          {
+            "id": 16,
+            "area3D": 0.09519965619875832,
+            "boxWaste": 0.005524595582636169,
+            "shapeFill": 0.7415301432590952
+          },
+          {
+            "id": 34,
+            "area3D": 0.036285416099226545,
+            "boxWaste": 0.004898615060317254,
+            "shapeFill": 0.5522173662466052
+          }
+        ],
+        "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。",
+        "search": {
+          "commonGainLimit": 4,
+          "commonGain": 1.1664,
+          "rotationStep": 45,
+          "reflowBudget": 4,
+          "reflowTrials": 3,
+          "reflowAccepted": 0,
+          "islandsTried": 4,
+          "untriedIds": [
+            0,
+            18,
+            20,
+            16,
+            23,
+            29,
+            31,
+            28,
+            17,
+            26,
+            1,
+            25,
+            27,
+            7,
+            2,
+            34,
+            15,
+            33,
+            24,
+            19,
+            116,
+            6,
+            4,
+            128,
+            3,
+            88,
+            89,
+            9,
+            10,
+            146,
+            147,
+            92,
+            13,
+            126,
+            12,
+            125,
+            127,
+            124,
+            40,
+            39,
+            38,
+            36,
+            35,
+            118,
+            95,
+            57,
+            30,
+            32,
+            122,
+            120,
+            41,
+            8,
+            93,
+            11,
+            37,
+            55,
+            91,
+            121,
+            54,
+            50,
+            119,
+            94,
+            52,
+            56,
+            97,
+            53,
+            51,
+            98,
+            44,
+            45,
+            14,
+            140,
+            83,
+            78,
+            82,
+            79,
+            81,
+            80,
+            131,
+            115,
+            133,
+            132,
+            90,
+            123,
+            96,
+            46,
+            48,
+            144,
+            134,
+            76,
+            77,
+            129,
+            113,
+            66,
+            69,
+            87,
+            85,
+            84,
+            86,
+            130,
+            114,
+            100,
+            107,
+            49,
+            47,
+            65,
+            68,
+            71,
+            143,
+            70,
+            109,
+            104,
+            67,
+            64,
+            145,
+            99,
+            139,
+            112,
+            138,
+            103,
+            142,
+            141,
+            137,
+            136,
+            135,
+            105,
+            75,
+            72,
+            74,
+            73,
+            110,
+            102,
+            111,
+            106,
+            43,
+            42,
+            62,
+            63,
+            101,
+            59,
+            108,
+            60,
+            58,
+            61
+          ],
+          "completedSweeps": 0,
+          "freeGridFraction": 0.039524078369140625,
+          "emptyRegions": [
+            {
+              "cells": 2002,
+              "bounds": [
+                0.719796875,
+                0.9326875,
+                0.997140625,
+                0.997140625
+              ]
+            },
+            {
+              "cells": 1136,
+              "bounds": [
+                0.003,
+                0.958078125,
+                0.174875,
+                0.997140625
+              ]
+            },
+            {
+              "cells": 659,
+              "bounds": [
+                0.1983125,
+                0.954171875,
+                0.362375,
+                0.97565625
+              ]
+            },
+            {
+              "cells": 550,
+              "bounds": [
+                0.56940625,
+                0.94440625,
+                0.649484375,
+                0.997140625
+              ]
+            },
+            {
+              "cells": 528,
+              "bounds": [
+                0.981515625,
+                0.518625,
+                0.997140625,
+                0.7295625
+              ]
+            }
+          ]
+        },
+        "cavities": {
+          "enabled": true,
+          "growthSteps": 2,
+          "windowTrials": 0,
+          "windowAccepted": 0,
+          "relocationTrials": 0,
+          "relocations": 0,
+          "relocatedIds": [],
+          "largestBefore": 0.0270233154296875,
+          "largestAfter": 0.0037841796875,
+          "positionOnly": false
+        },
+        "adaptive": {
+          "strategy": "adaptive",
+          "seed": "contour-reflow",
+          "localAccepted": 0,
+          "reflowAccepted": 1,
+          "failedTrials": 3,
+          "smallerAfterFailure": 4,
+          "skippedAtCap": 0,
+          "attempts": [
+            {
+              "id": 117,
+              "tries": 1,
+              "accepted": 0,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 5,
+              "tries": 1,
+              "accepted": 0,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 21,
+              "tries": 2,
+              "accepted": 1,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 22,
+              "tries": 1,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 0,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 18,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 20,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 16,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 23,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 29,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 31,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 28,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 17,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 26,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 1,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 25,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 27,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 7,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 2,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 34,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 15,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 33,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 24,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 19,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 116,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 6,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 4,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 128,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 3,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 88,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 89,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 9,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 10,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 146,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 147,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 92,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 13,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 126,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 12,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 125,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 127,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 124,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 40,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 39,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 38,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 36,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 35,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 118,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 95,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 57,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 30,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 32,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 122,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 120,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 41,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 8,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 93,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 11,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 37,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 55,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 91,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 121,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 54,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 50,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 119,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 94,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 52,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 56,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 97,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 53,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 51,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 98,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 44,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 45,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 14,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 140,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 83,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 78,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 82,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 79,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 81,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 80,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 131,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 115,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 133,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 132,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 90,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 123,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 96,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 46,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 48,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 144,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 134,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 76,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 77,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 129,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 113,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 66,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 69,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 87,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 85,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 84,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 86,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 130,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 114,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 100,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 107,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 49,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 47,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 65,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 68,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 71,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 143,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 70,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 109,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 104,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 67,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 64,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 145,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 99,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 139,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 112,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 138,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 103,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 142,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 141,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 137,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 136,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 135,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 105,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 75,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 72,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 74,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 73,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 110,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 102,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 111,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 106,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 43,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 42,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 62,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 63,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 101,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 59,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 108,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 60,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 58,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 61,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            }
+          ]
+        }
+      },
+      "pipeline": {
+        "version": 1,
+        "target": "generated",
+        "origin": "model-load",
+        "status": "completed",
+        "settings": {
+          "chartPolicy": "large",
+          "uvObjective": "paint",
+          "method": "auto",
+          "iterations": 2000,
+          "tolerance": 1e-9,
+          "padding": 0.003,
+          "rotate": true,
+          "rotationSteps": 12,
+          "autoCut": true,
+          "maxChartFaces": 20000,
+          "maxAspect": 24,
+          "minFill": 0,
+          "maxStretch": 30,
+          "initialSegmentation": "hierarchical",
+          "peelSourceHints": false,
+          "postMerge": true,
+          "structureTemplates": true,
+          "stretchAreaPercentile": 0.99,
+          "regionOptions": {
+            "normalConeDegrees": 84.1705013489881,
+            "maxChartFaces": 20000,
+            "minRegionFaces": 96,
+            "minRegionAreaRatio": 0.01
+          },
+          "timeBudgetMs": 300000,
+          "fillCavitySearch": true,
+          "fillGrowthSteps": 2,
+          "projectionSeed": true,
+          "sourceRepairPolicy": "reject",
+          "sourceFeaturePolicy": "preserve",
+          "sourceAtlasMerge": false,
+          "fillMode": "off",
+          "fillRecutLarge": false,
+          "fillTimeBudgetMs": 3000,
+          "fillRounds": 2
+        },
+        "steps": [
+          {
+            "id": "input",
+            "label": "几何输入白名单 · 丢弃原 UV / 索引 / 提示",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 745.7192899999973,
+            "detail": "Worker 已启动，检查输入",
+            "elapsedMs": 333.8023490000014
+          },
+          {
+            "id": "parameterize",
+            "label": "结构分组 → 规则开缝 → 自由边界剥展",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 1079.5216389999987,
+            "detail": "已接受有效 UV 岛",
+            "elapsedMs": 46302.41506299999
+          },
+          {
+            "id": "repair",
+            "label": "验证当前生成岛",
+            "enabled": false,
+            "state": "skipped",
+            "reason": "不读取或修复模型原 UV"
+          },
+          {
+            "id": "structure",
+            "label": "几何结构约束 · 保留主要轮廓",
+            "enabled": false,
+            "state": "skipped",
+            "reason": "结构分析在生成阶段完成"
+          },
+          {
+            "id": "merge",
+            "label": "验证式缝合（仅当前生成岛）",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 47381.93670199999,
+            "detail": "检查翻面、退化与正面积重叠",
+            "elapsedMs": 3556.353233000016
+          },
+          {
+            "id": "pack",
+            "label": "按 3D 面积归一 · 大岛优先排布",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 50938.28993500001,
+            "detail": "MaxRects 排布 · 148 个岛",
+            "elapsedMs": 1920.8861909999978
+          },
+          {
+            "id": "fill",
+            "label": "填补空白 · 多轮轮廓精排",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 52859.176126000006,
+            "detail": "精排后检查全部 UV 三角形：翻面、退化、交叠及边距",
+            "elapsedMs": 13817.74638299999
+          },
+          {
+            "id": "correspondence",
+            "label": "建立 3D / UV 对应 · 铰链准备",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 66676.922509,
+            "detail": "构建刚性平面网和临时断边",
+            "elapsedMs": 1545.1808610000007
+          },
+          {
+            "id": "audit",
+            "label": "面积 / 边界诊断 · 返回纯几何结果",
+            "enabled": true,
+            "state": "completed",
+            "startedMs": 68222.10337,
+            "detail": "传回同一份 3D / UV 与铰链数据",
+            "elapsedMs": 91.95441700000083
+          }
+        ],
+        "elapsedMs": 68314.057787,
+        "config": {
+          "version": 2,
+          "source": "geometry",
+          "repairInvalid": false,
+          "mergeAdjacent": true,
+          "fill": true,
+          "fillBudgetSeconds": 3,
+          "fillRounds": 2
+        }
+      }
+    }
+  ]
+}

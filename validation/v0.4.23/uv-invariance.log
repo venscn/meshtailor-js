@@ -1,0 +1,12 @@
+START Corset original
+PASS Corset original islands 87 teeth 0 occupancy 0.5118625788778141 hash 2f1f5dabefa57d9849baa8d2a204646b8acb13742619ab5481618e0bab2f2ce2
+START Corset absent
+PASS Corset absent islands 87 teeth 0 occupancy 0.5118625788778141 hash 2f1f5dabefa57d9849baa8d2a204646b8acb13742619ab5481618e0bab2f2ce2
+START Corset random
+PASS Corset random islands 87 teeth 0 occupancy 0.5118625788778141 hash 2f1f5dabefa57d9849baa8d2a204646b8acb13742619ab5481618e0bab2f2ce2
+START FlightHelmet original
+PASS FlightHelmet original islands 187 teeth 21 occupancy 0.5733150092670349 hash 78626c5536311d86ec2b4a7ca2289b6cecdfac72cc9d4fd35fc341f4e189b00b
+START FlightHelmet absent
+PASS FlightHelmet absent islands 187 teeth 21 occupancy 0.5733150092670349 hash 78626c5536311d86ec2b4a7ca2289b6cecdfac72cc9d4fd35fc341f4e189b00b
+START FlightHelmet random
+PASS FlightHelmet random islands 187 teeth 21 occupancy 0.5733150092670349 hash 78626c5536311d86ec2b4a7ca2289b6cecdfac72cc9d4fd35fc341f4e189b00b

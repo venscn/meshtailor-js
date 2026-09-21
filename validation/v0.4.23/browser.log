@@ -1,0 +1,13 @@
+PASS Cavity search is on by default with four growth steps
+PASS Actual medium garment loads as structured panels before budget feedback
+PASS Actual 3D seams follow longitudinal plane, not old zigzag partition
+PASS Source UV is not present in runtime input
+PASS Actual fill button transmits cavity settings to production Worker
+PASS Filling preserves islands, seam edges and valid actual triangles
+PASS UI reports real stopping reason, gap metric and geometric occupancy separately
+PASS UV fill does not change user camera
+PASS Largest empty window decreases without shrinking input charts
+PASS Animation endpoint equals the repacked target
+PASS Picking still selects the island before any triangle
+PASS Controls do not silently rerun generation
+PASS No JS or WebGL errors

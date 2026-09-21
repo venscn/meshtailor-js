@@ -1,0 +1,72 @@
+{
+  "passed": 13,
+  "tests": [
+    {
+      "name": "low: structured meridians are used before solver-budget partition",
+      "passed": true,
+      "detail": {
+        "faces": 3072,
+        "budget": 5376,
+        "panels": 2
+      }
+    },
+    {
+      "name": "low: real seam edges keep a constant longitudinal plane",
+      "passed": true
+    },
+    {
+      "name": "low: all faces, holes and input geometry retained",
+      "passed": true
+    },
+    {
+      "name": "low: per-panel limit adds only ordered meridians",
+      "passed": true
+    },
+    {
+      "name": "low: model labels and poisoned UV cannot affect the result",
+      "passed": true
+    },
+    {
+      "name": "medium: structured meridians are used before solver-budget partition",
+      "passed": true,
+      "detail": {
+        "faces": 12288,
+        "budget": 10752,
+        "panels": 2
+      }
+    },
+    {
+      "name": "medium: real seam edges keep a constant longitudinal plane",
+      "passed": true
+    },
+    {
+      "name": "medium: all faces, holes and input geometry retained",
+      "passed": true
+    },
+    {
+      "name": "medium: per-panel limit adds only ordered meridians",
+      "passed": true
+    },
+    {
+      "name": "medium: model labels and poisoned UV cannot affect the result",
+      "passed": true
+    },
+    {
+      "name": "Rigid rotation and uniform scale retain continuous two-panel plan",
+      "passed": true
+    },
+    {
+      "name": "Opposite quad diagonals do not turn longitudinal cuts into a zipper",
+      "passed": true
+    },
+    {
+      "name": "High density respects the same direction with explicit per-panel budgets",
+      "passed": true,
+      "detail": {
+        "faces": 49152,
+        "panels": 4,
+        "budget": 20000
+      }
+    }
+  ]
+}

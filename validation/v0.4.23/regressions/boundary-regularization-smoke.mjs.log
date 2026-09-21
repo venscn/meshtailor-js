@@ -1,0 +1,14 @@
+Graph cut shortens sawtooth boundary without changing geometry {
+  beforeLength: 3.839351584680302,
+  afterLength: 1,
+  beforeTeeth: 18,
+  afterTeeth: 0,
+  movedFaces: 72,
+  accepted: true,
+  reason: 'length-crease-mincut'
+}
+Every triangle still belongs to exactly one connected group 
+Hard seam locks cannot be moved 
+No coordinate/index properties from source UV are read 
+Cancelled graph cut stops promptly 
+Renaming and uniform scaling do not alter the cut 

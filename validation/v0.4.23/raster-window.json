@@ -1,0 +1,4 @@
+{
+  "passed": 400,
+  "description": "Bitset run skipping compared with original fits() at every integer placement; no sampling."
+}

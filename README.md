@@ -1,22 +1,34 @@
-> **当前交付 0.4.22**：请先阅读 [START_HERE.md](START_HERE.md) 和 [完整部件／对称改动](docs/releases/0.4.22.md)。原 UV 不参与生成。以下早期说明保留项目历史语境，以当前入口和版本说明为准。
+# MeshTailor-JS · 0.4.23
 
-# MeshTailor-JS · 0.4.21
+TypeScript / JavaScript 自动展 UV 工程。先读 [START_HERE.md](START_HERE.md)，本轮改动与实际结果见 [v0.4.23 发布说明](docs/releases/0.4.23.md)。
 
-TypeScript/JavaScript 自动展 UV 工程。**当前生产路径只使用几何，不使用模型原有 UV、原切缝或原岛提示。** 默认加载、Generate baseline、Runtime 默认生成及 CLI 共用几何生成策略。
+**生产生成只使用几何，不读取模型原 UV、原切线、原岛划分或恢复提示。** 默认载入和 Generate baseline 使用同一流程。已有原始夹具只供 UV 隔离与参考审计，不是生成回退。
 
-先读 [START_HERE.md](START_HERE.md)。直接打开 `unfold-lab.html` 可运行已有离线工作台；它内置无 UV 的正确服装人台和飞行头盔，不需要 npm 或网络下载。完整 React + Three.js Studio 用 `npm install`、`npm run dev` 启动；本轮主入口构建的限制请读发布说明，离线通过不等于全入口认证。
+```bash
+# 离线工作台，无需下载前端依赖
+node scripts/serve-unfold-lab.mjs
+# 或直接打开 unfold-lab.html
 
-流程是空间结构分组、实际网格边上的开缝、保孔／自由边界参数化、全图验证、面积感知排布与可选轮廓填空。提供3D到UV铰链演示、面积顺序接力、倍速、统一动画时间的落位渐隐、自由相机、两级选择和框选、遮挡显示、实际任务进度与取消。
+# 完整 Studio（需要安装真实依赖）
+npm install
+npm run dev
+```
 
-新修复在 [docs/releases/0.4.21.md](docs/releases/0.4.21.md)。本版先保留多孔闭合结构的可识别主面，再展开厚度与回折面，并对实际最终UV检查孔与边界。实际护目镜主面保留双孔；人台输出本轮不变，不宣称全部曲面已适合手绘。可复现测试和剩余限制在 `validation/v0.4.21/`。
+空间分组、真实网格边开缝、保孔与自由边界展开、面积感知排布、可选多轮空洞精排。保留面积优先的逐岛接力、倍速、随动画时间的落位亮显/渐隐、自由相机、框选、先岛后面的两级选择及重叠显示。
 
 ```bash
 npm run check:geometry
-npm run test:geometry:real
+npm run test:longitudinal-budget
+npm run test:raster-window
+npm run test:cavity-fill
+npm run test:cavity-load
+npm run test:seams-fill:real
 npm run lab:build
-npm run test:feature-sheets
-npm run test:feature-sheets:browser
-npm run git:check -- --release v0.4.21
+npm run test:cavity-fill:browser
+npm run results:restore
+npm run git:check -- --release v0.4.23
 ```
 
-无官方MeshTailor学习模型/权重，当前为独立几何算法；不承诺所有自由曲面得到人工语义最优裁片。UV改变后通常需重绘或烘焙贴图，本工程不做自动烘焙。历史文档和source-UV审计工具保留用于溯源，不再代表生产默认流程；不要运行旧源提示测试来替代新纯几何生成验收。
+实际执行记录在 `validation/v0.4.23/`。核心 TypeScript、生产 Worker、正确模型及离线 WebGL 已执行；完整 React/Vite 主入口在制作环境未构建成功，不能将离线测试当作完整入口认证。旧 source-UV 测试是历史审计，不应作为当前生产路径的验收命令。
+
+没有官方 MeshTailor 学习权重。几何方法不保证任意曲面的语义最优版型或全局最密排布。新 UV 需要相应重绘/烘焙贴图；本项目不自动烘焙。完整 Git 历史和旧 tag 保留，恢复历史的边界仍见 `REPACK-NOTES.md`。

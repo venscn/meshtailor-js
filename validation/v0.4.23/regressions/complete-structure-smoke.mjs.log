@@ -1,0 +1,40 @@
+PASS All skins and return walls planned together from geometry {
+  faces: [ 1008, 1008, 480, 480 ],
+  symmetry: {
+    coverage: 0.8252688172043011,
+    diagonalCells: 389,
+    matchedFaces: 2456,
+    mismatchedFaces: 0,
+    splitCells: 0,
+    permutation: [ 0, 1, 3, 2 ],
+    consistent: true
+  }
+}
+PASS Both skins retain two holes, both wall groups are complete annuli 
+PASS Reliable reflected cells have consistent labels despite opposite diagonals 
+PASS Paired openings follow the same reflected 3D corridor on actual target edges {
+  edges: [
+    '25633:25635', '25628:25633',
+    '25628:25629', '25629:25789',
+    '25789:25791', '25791:25967',
+    '25965:25967', '25960:25965',
+    '25960:25961', '25961:25968',
+    '25795:25968', '25792:25795'
+  ],
+  maxDeviation: 0.0010015682405392066,
+  relativeDeviation: 0.03984881960532332,
+  sourceEdges: 12,
+  targetEdges: 12
+}
+PASS Complete direct generation returns four valid islands, not one front plus bad remainder 
+PASS Actual final UVs retain skin holes and open return walls 
+PASS Dropping even a back/wall face fails the whole component contract 
+PASS Erasing a return-wall opening is explicitly rejected 
+PASS Invalid source curve cannot manufacture a mirror edge 
+PASS Low solver budget cannot silently shred a protected skin 
+PASS Poisoned original UV properties are never read 
+PASS Rigid pose and scale preserve complete topology 0.01 
+PASS Rigid pose and scale preserve complete topology 10 
+PASS Explicit preexisting cuts prevent the closed-shell assumption 
+PASS Same-island repacking cannot merge structural group identities 
+PASSED 15

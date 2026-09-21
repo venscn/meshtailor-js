@@ -1,0 +1,18 @@
+PASS An enclosed hole stays an available rectangle, independent of chart AABBs 
+PASS Maximum empty rectangle agrees with exhaustive small-board enumeration { cases: 35 }
+PASS Equal-area relocation can be accepted without pretending UV area increased {
+  enabled: true,
+  growthSteps: 4,
+  windowTrials: 0,
+  windowAccepted: 0,
+  relocationTrials: 13,
+  relocations: 1,
+  relocatedIds: [ 0 ],
+  largestBefore: 0.5914306640625,
+  largestAfter: 0.433349609375,
+  positionOnly: true
+}
+PASS The accepted moved layout preserves all faces and valid actual triangles 
+PASS Disabling relocation preserves the original no-area-gain contract 
+PASS Invalid new options are rejected 
+PASS Cancellation in empty-space enumeration is propagated 

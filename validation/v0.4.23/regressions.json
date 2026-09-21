@@ -1,0 +1,92 @@
+[
+  {
+    "script": "geometry-input-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.35
+  },
+  {
+    "script": "boundary-regularization-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.007
+  },
+  {
+    "script": "candidate-contract-smoke.mjs",
+    "exit": 0,
+    "seconds": 2.91
+  },
+  {
+    "script": "geometry-topology-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.126
+  },
+  {
+    "script": "geometry-policy-smoke.mjs",
+    "exit": 0,
+    "seconds": 4.871
+  },
+  {
+    "script": "core-smoke.mjs",
+    "exit": 0,
+    "seconds": 4.448
+  },
+  {
+    "script": "structure-symmetry-smoke.mjs",
+    "exit": 0,
+    "seconds": 4.032
+  },
+  {
+    "script": "complete-structure-smoke.mjs",
+    "exit": 0,
+    "seconds": 57.176
+  },
+  {
+    "script": "structure-relax-smoke.mjs",
+    "exit": 0,
+    "seconds": 4.364
+  },
+  {
+    "script": "slits-smoke.mjs",
+    "exit": 0,
+    "seconds": 4.087
+  },
+  {
+    "script": "human-template-smoke.mjs",
+    "exit": 0,
+    "seconds": 4.294
+  },
+  {
+    "script": "fill-refinement-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.723
+  },
+  {
+    "script": "fill-adaptive-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.708
+  },
+  {
+    "script": "contour-raster-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.305
+  },
+  {
+    "script": "uv-box-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.608
+  },
+  {
+    "script": "arrival-presentation-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.984
+  },
+  {
+    "script": "camera-policy-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.298
+  },
+  {
+    "script": "selection-smoke.mjs",
+    "exit": 0,
+    "seconds": 3.254
+  }
+]
