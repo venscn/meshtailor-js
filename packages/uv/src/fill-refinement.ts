@@ -1,3 +1,4 @@
+import {emptyWindows,type EmptyWindow} from './cavity-search.js';
 import {contourEdges,rasterContour,type ContourEdges} from './contour-raster.js';
 import {shapePose,type ShapePose} from './raster-pose.js';
 import type {LargeRecutOptions,LargeRecutReport} from './large-recut.js';
@@ -8,6 +9,7 @@ import {checkUVTriangles} from './uv-quality.js';
 import {uvProgress,type UVWork} from './work.js';
 import {RasterBoard,RasterBudget,rasterShape,quarterTurnPoint,type ShapeMask,type RasterPlacement} from './shape-raster.js';
 export interface FillOptions extends LargeRecutOptions {
+  fillCavitySearch?:boolean;fillGrowthSteps?:number;
   /** Separate shared density from bounded per-island importance. */
   fillCommonGainLimit?:number;fillRotationStep?:15|30|45|90;fillReflowBudget?:number;
   fillStrategy?:'adaptive'|'legacy';fillMinStep?:number;fillQuarterTurns?:2|4;
@@ -16,6 +18,7 @@ export interface FillOptions extends LargeRecutOptions {
   fillWarmupPasses?:number;fillStep?:number;fillMaxAreaGain?:number;fillTimeBudgetMs?:number;fillMaxTrials?:number;
 }
 export interface FillReport {
+  cavities?:{enabled:boolean;growthSteps:number;windowTrials:number;windowAccepted:number;relocationTrials:number;relocations:number;relocatedIds:number[];largestBefore:number;largestAfter:number;positionOnly:boolean};
   recut?:LargeRecutReport;
   search?:{commonGainLimit:number;commonGain:number;rotationStep:number;reflowBudget:number;reflowTrials:number;reflowAccepted:number;islandsTried:number;untriedIds:number[];completedSweeps:number;freeGridFraction?:number;emptyRegions?:{cells:number;bounds:number[]}[]};
   mode:'uniform'|'area-priority';resolution:number;before:number;after:number;beforeBox:number;afterBox:number;
@@ -30,6 +33,8 @@ export interface FillReport {
 interface Island {chart:PackedChart;area3D:number;areaUV:number;w:number;h:number;triangles:[Vec2,Vec2,Vec2][];cache:Map<string,ShapeMask|null>;poses:Map<number,ShapePose>;contour:ContourEdges|null}
 function area(c:PackedChart){let sum=0;for(const [a,b,d]of c.faceUVs.values())sum+=Math.abs((b[0]-a[0])*(d[1]-a[1])-(b[1]-a[1])*(d[0]-a[0]))*.5;return sum;}
 export function validateFillOptions(o:FillOptions):void {
+  if(o.fillCavitySearch!==undefined&&typeof o.fillCavitySearch!=='boolean')throw Error('Invalid cavity-search flag.');
+  if(o.fillGrowthSteps!==undefined&&(!Number.isInteger(o.fillGrowthSteps)||o.fillGrowthSteps<1||o.fillGrowthSteps>16))throw Error('fillGrowthSteps must be 1..16');
   if(o.fillRotationStep!==undefined&&![15,30,45,90].includes(o.fillRotationStep))throw Error('Fill rotation step must be 15, 30, 45 or 90 degrees.');
   if(o.fillRecutLarge!==undefined&&typeof o.fillRecutLarge!=='boolean')throw Error('Invalid recut flag.');
   if(o.fillStrategy!==undefined&&!['adaptive','legacy'].includes(o.fillStrategy))throw Error('Unknown fill strategy.');
@@ -55,21 +60,35 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
   if(items.some(i=>!(i.area3D>0&&i.areaUV>0)))throw Error('Fill requires valid positive-area charts.');
   const densities=items.map(i=>i.areaUV/i.area3D),minDensity=Math.min(...densities),spread=Math.max(...densities)/minDensity;
   const commonLimit=options.fillCommonGainLimit??4,rotationStep=options.fillRotationStep??45,reflowBudget=options.fillReflowBudget??4;
+  const cavitiesEnabled=options.fillCavitySearch!==false,growthSteps=options.fillGrowthSteps??4;
   let commonGain=1;
   const report:FillReport={mode,resolution:R,settings:{step,maxAreaGain:cap,maxRounds:roundLimit,warmupPasses:mode==='area-priority'?(options.fillWarmupPasses??3):0,timeBudgetMs:budget,maxTrials,rotate:options.rotate!==false},densitySpreadBefore:spread,densitySpreadAfter:spread,before:base.occupancy,after:base.occupancy,beforeBox:base.boxOccupancy,afterBox:base.boxOccupancy,trials:0,accepted:0,commonAccepted:0,rounds:0,stop:'converged',elapsedMs:0,order:items.map(i=>i.chart.id),gains:[],history:[],shapeWaste:items.map(i=>({id:i.chart.id,area3D:i.area3D,boxWaste:Math.max(0,i.w*i.h-i.areaUV),shapeFill:i.areaUV/(i.w*i.h)})).sort((a,b)=>b.boxWaste-a.boxWaste).slice(0,10),note:'轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。'};
   report.search={commonGainLimit:commonLimit,commonGain,rotationStep,reflowBudget,reflowTrials:0,reflowAccepted:0,islandsTried:0,untriedIds:items.map(c=>c.chart.id),completedSweeps:0};
+  report.cavities={enabled:cavitiesEnabled,growthSteps,windowTrials:0,windowAccepted:0,relocationTrials:0,relocations:0,relocatedIds:[],largestBefore:0,largestAfter:0,positionOnly:false};
   const adaptive=options.fillStrategy!=='legacy',minStep=Math.min(step,options.fillMinStep??.005);
   const attempts=items.map(it=>({id:it.chart.id,tries:0,accepted:0,failed:0,nextStep:step,minStepFailed:false}));
   report.adaptive={strategy:adaptive?'adaptive':'legacy',seed:'none',localAccepted:0,reflowAccepted:0,failedTrials:0,smallerAfterFailure:0,skippedAtCap:0,attempts};
   let checks=0;const local={tick:()=>{if((++checks&31)===0){work?.check();if(performance.now()-start>budget)throw new RasterBudget();}}};
   const poseOf=(it:Island,angle:number)=>{if(!it.poses.has(angle))it.poses.set(angle,shapePose(it.triangles,it.w,it.h,angle));return it.poses.get(angle)!;};
   const getMask=(it:Island,gain:number,angle:number)=>{const key=`${gain.toPrecision(12)}:${angle}`;if(!it.cache.has(key)){const pose=poseOf(it,angle);it.cache.set(key,it.contour?rasterContour(it.contour.map(e=>e.map(pose.point) as [Vec2,Vec2]),pose.width,pose.height,gain,R,local):rasterShape(pose.triangles,pose.width,pose.height,gain,0,R,base.padding,local));if(it.cache.size>48)it.cache.delete(it.cache.keys().next().value!);}return it.cache.get(key)!;};
-  const bestPlace=(board:RasterBoard,it:Island,gain:number,preferred?:RasterPlacement):RasterPlacement|null=>{
+  const bestPlace=(board:RasterBoard,it:Island,gain:number,preferred?:RasterPlacement,cavityFirst=false):RasterPlacement|null=>{
     let best:RasterPlacement|null=null;
     const quarters=(options.fillQuarterTurns??(adaptive?4:2))===4?[0,90,180,270]:[0,90];
     const angles=options.rotate===false?[0]:[...new Set([...quarters,...(adaptive?Array.from({length:360/rotationStep},(_,i)=>i*rotationStep):[])])];
     if(preferred){const angle=preferred.angle??(preferred.rotation??(preferred.turn?1:0))*90,pose=poseOf(it,angle),mask=getMask(it,gain,angle);if(mask&&board.fits(mask,preferred.x,preferred.y)&&preferred.x/R+pose.width*Math.sqrt(gain)<=1-2*base.padding+1e-10&&preferred.y/R+pose.height*Math.sqrt(gain)<=1-2*base.padding+1e-10)return{...preferred,mask,gain,angle};}
-    for(const [angleIndex,angle] of angles.entries()){if(angleIndex===quarters.length&&best)break;const pose=poseOf(it,angle),mask=getMask(it,gain,angle);if(!mask)continue;
+    if(cavityFirst&&cavitiesEnabled){
+      const windows=emptyWindows(board,18,local);let score=Infinity;
+      for(const angle of angles){const pose=poseOf(it,angle),mask=getMask(it,gain,angle);if(!mask)continue;
+        const maxX=Math.floor((1-2*base.padding-pose.width*Math.sqrt(gain))*R+1e-8),maxY=Math.floor((1-2*base.padding-pose.height*Math.sqrt(gain))*R+1e-8);
+        for(const w of windows){if(mask.width>w.width||mask.height>w.height)continue;report.cavities!.windowTrials++;
+          const p=board.findWindow(mask,w.x,w.y,Math.min(w.x+w.width-mask.width,maxX),Math.min(w.y+w.height-mask.height,maxY),local);
+          if(!p)continue;const cost=(w.cells-mask.width*mask.height)+(w.x===0||w.y===0||w.x+w.width>=boardSize||w.y+w.height>=boardSize?boardSize*.02:0);
+          if(cost<score){score=cost;best={...p,mask,turn:angle%180===90,gain,rotation:angle%90===0?angle/90:0,angle};}
+        }
+      }
+      if(best){report.cavities!.windowAccepted++;return best;}
+    }
+    for(const angle of angles){const pose=poseOf(it,angle),mask=getMask(it,gain,angle);if(!mask)continue;
       const p=board.find(mask,local,Math.floor((1-2*base.padding-pose.width*Math.sqrt(gain))*R+1e-8),Math.floor((1-2*base.padding-pose.height*Math.sqrt(gain))*R+1e-8));
       if(p&&(!best||p.y+mask.height<best.y+best.mask.height||p.y+mask.height===best.y+best.mask.height&&p.x<best.x))best={...p,mask,turn:angle%180===90,gain,rotation:angle%90===0?angle/90:0,angle};
     }return best;
@@ -91,8 +110,34 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
   };
   const localArrange=(next:number[],previous:RasterPlacement[],index:number):RasterPlacement[]|null=>{
     const board=new RasterBoard(boardSize,gutter);for(let j=0;j<previous.length;j++)if(j!==index){const p=previous[j]!;board.put(p.mask,p.x,p.y);}
-    const p=bestPlace(board,items[index]!,next[index]!,previous[index]);if(!p)return null;
+    const p=bestPlace(board,items[index]!,next[index]!,previous[index],true);if(!p)return null;
     const result=previous.slice();result[index]=p;return result;
+  };
+  const boardFor=(ps:RasterPlacement[],skip=-1)=>{const b=new RasterBoard(boardSize,gutter);ps.forEach((p,i)=>{if(i!==skip)b.put(p.mask,p.x,p.y);});return b;};
+  const biggest=(ps:RasterPlacement[])=>emptyWindows(boardFor(ps),1,local)[0]?.cells??0;
+  /** A neutral relocation is allowed only when the largest reserved-cell gap
+   * measurably decreases, with every chart still present at its current size.
+   * This unlocks growth; it is never reported as an increase in UV area. */
+  const relocateIntoCavity=(ps:RasterPlacement[],gs:number[]):RasterPlacement[]|null=>{
+    if(!cavitiesEnabled||report.cavities!.relocations>=Math.min(items.length,12)||report.trials>=maxTrials)return null;
+    const windows=emptyWindows(boardFor(ps),12,local),old=windows[0]?.cells??0;if(old<boardSize*boardSize*.004)return null;
+    for(const w of windows.slice(0,5)){
+      for(let i=0;i<items.length;i++){
+        if(report.cavities!.relocatedIds.includes(items[i]!.chart.id)||report.trials>=maxTrials)continue;
+        const current=ps[i]!,it=items[i]!;if(current.mask.width*current.mask.height>w.cells*1.7)continue;
+        // Do not spend the whole budget on unusable rotations of one huge part.
+        const board=boardFor(ps,i),angles=options.rotate===false?[current.angle??0]:[...new Set([current.angle??0,0,90,180,270])];
+        for(const angle of angles){const mask=getMask(it,gs[i]!,angle);if(!mask||mask.width>w.width||mask.height>w.height)continue;
+          report.trials++;report.cavities!.relocationTrials++;
+          const p=board.findWindow(mask,w.x,w.y,w.x+w.width-mask.width,w.y+w.height-mask.height,local);if(!p)continue;
+          const proposal=ps.slice();proposal[i]={...p,mask,gain:gs[i]!,turn:angle%180===90,rotation:angle%90===0?angle/90:0,angle};
+          if(biggest(proposal)<old-Math.max(4,boardSize*boardSize*.001)){
+            report.cavities!.relocations++;report.cavities!.relocatedIds.push(it.chart.id);return proposal;
+          }
+          if(report.trials>=maxTrials)return null;
+        }
+      }
+    }return null;
   };
   let stepNow=step;
   let gains=items.map(()=>1),placements:RasterPlacement[]|null=null;
@@ -103,6 +148,7 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
   try {
     uvProgress(work,{stage:'pack',detail:'轮廓精排：建立保守占用网格与留白',current:0,total:items.length,unit:'岛'});
     if(adaptive)placements=preserveSeed();
+    if(cavitiesEnabled){const referenceBoard=new RasterBoard(boardSize,gutter);for(const it of items){const m=getMask(it,1,0);if(m)referenceBoard.put(m,Math.round((it.chart.bounds[0]-base.padding)*R),Math.round((it.chart.bounds[1]-base.padding)*R));}report.cavities!.largestBefore=(emptyWindows(referenceBoard,1,local)[0]?.cells??0)/(R*R);}
     if(placements)report.adaptive!.seed='current-layout';else{placements=arrange(gains);report.adaptive!.seed=placements?'contour-reflow':'no-fit';}
     // Cheap equal-density tightening first. It avoids spending an entire costly
     // coordinate-descent sweep discovering the SAME feasible gain for all islands.
@@ -116,11 +162,13 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
     if(!placements)report.stop='raster-no-fit';
     else for(let round=0;round<roundLimit;round++){
       report.rounds=round+1;let changed=0,failedLarger=false;
+      if(cavitiesEnabled){uvProgress(work,{stage:'pack',detail:`空洞扫描 ${round+1}/${roundLimit} 轮：实际轮廓、孔内与边角空白（不预留实心包围框）`});const moved=relocateIntoCavity(placements!,gains);if(moved){placements=moved;changed++;attempts.forEach(a=>a.minStepFailed=false);}}
       const count=mode==='uniform'?1:items.length;
       for(let i=0;i<count;i++){
+       for(let growth=0;growth<(adaptive&&mode==='area-priority'?growthSteps:1);growth++){
         work?.check();if(report.trials>=maxTrials){report.stop='trial-budget';break;}
         const next=gains.map((g,j)=>mode==='uniform'||j===i?Math.max(g,Math.min(mode==='uniform'?g*commonLimit/commonGain:limitFor(j),g*(1+(adaptive&&mode==='area-priority'?attempts[i]!.nextStep:stepNow)))):g);
-        if(next.every((g,j)=>g<=gains[j]!+1e-10)){report.adaptive!.skippedAtCap++;continue;}
+        if(next.every((g,j)=>g<=gains[j]!+1e-10)){report.adaptive!.skippedAtCap++;break;}
         report.trials++;
         uvProgress(work,{stage:'pack',detail:`空白精排 ${round+1}/${roundLimit} 轮 · ${mode==='uniform'?'共同密度':`大岛优先 #${items[i]!.chart.id+1}`} · 占用 ${(report.after*100).toFixed(2)}%`,current:i+1,total:count,unit:'岛'});
         if(failedLarger)report.adaptive!.smallerAfterFailure++;
@@ -136,6 +184,9 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
         if(!proposal){failedLarger=true;stat.failed++;report.adaptive!.failedTrials++;stat.minStepFailed=stat.nextStep<=minStep+1e-12;if(adaptive)stat.nextStep=Math.max(minStep,stat.nextStep/2);}
         else{stat.accepted++;stat.minStepFailed=false;if(localAccepted)report.adaptive!.localAccepted++;else report.adaptive!.reflowAccepted++;}
         if(proposal){if(mode==='uniform')commonGain*=next[0]!/gains[0]!;placements=proposal;gains=next;changed++;report.accepted++;report.after=items.reduce((s,it,k)=>s+it.areaUV*gains[k]!,0);report.history.push({round:round+1,id:mode==='uniform'?null:items[i]!.chart.id,occupancy:report.after,areaFactor:next[i]!});}
+        if(!proposal)break;
+       }
+       if(report.stop==='trial-budget')break;
       }
       if(report.stop==='trial-budget')break;
       report.search!.completedSweeps++;
@@ -144,7 +195,7 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
     }
   }catch(error){if(error instanceof RasterBudget)report.stop='time-budget';else throw error;}
   let result=base;
-  if(placements&&report.after>base.occupancy+1e-10){
+  if(placements&&(report.after>base.occupancy+1e-10||report.cavities!.relocations>0)){
     const byId=new Map(items.map((it,i)=>[it.chart.id,{it,p:placements![i]!,g:gains[i]!}]));
     const packed=base.packed.map(ch=>{
       const {it,p,g}=byId.get(ch.id)!,scale=Math.sqrt(g),x=base.padding+p.x/R,y=base.padding+p.y/R;
@@ -158,15 +209,16 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
     // geometric guard also catches transformation and implementation mistakes.
     const q=checkUVTriangles(packed.flatMap(c=>[...c.faceUVs.values()]),100,work);
     const inside=packed.every(c=>c.bounds.every(Number.isFinite)&&c.bounds[0]>=base.padding-1e-9&&c.bounds[1]>=base.padding-1e-9&&c.bounds[2]<=1-base.padding+1e-9&&c.bounds[3]<=1-base.padding+1e-9);
-    work?.check();if(q.valid&&inside){report.after=q.area;report.afterBox=packed.reduce((s,c)=>s+(c.bounds[2]-c.bounds[0])*(c.bounds[3]-c.bounds[1]),0);result={...base,packed,occupancy:q.area,boxOccupancy:report.afterBox,packingMethod:'contour'};}
+    work?.check();if(q.valid&&inside){report.cavities!.positionOnly=q.area<=base.occupancy+1e-10;report.after=q.area;report.afterBox=packed.reduce((s,c)=>s+(c.bounds[2]-c.bounds[0])*(c.bounds[3]-c.bounds[1]),0);result={...base,packed,occupancy:q.area,boxOccupancy:report.afterBox,packingMethod:'contour'};}
     else {report.stop='validation-rejected';report.note+=' 最终精排几何检查失败，回滚到完整基线。';}
   }
-  if(result===base){report.after=base.occupancy;report.afterBox=base.boxOccupancy;gains=items.map(()=>1);}
+  if(result===base){report.cavities!.largestAfter=report.cavities!.largestBefore;report.after=base.occupancy;report.afterBox=base.boxOccupancy;gains=items.map(()=>1);}
   report.search!.commonGain=result===base?1:commonGain;
   report.search!.islandsTried=attempts.filter(a=>a.tries>0).length;
   report.search!.untriedIds=mode==='uniform'?[]:attempts.filter(a=>a.tries===0).map(a=>a.id);
   if(placements&&result!==base){
     const board=new RasterBoard(boardSize,gutter);for(const p of placements)board.put(p.mask,p.x,p.y);
+    report.cavities!.largestAfter=(emptyWindows(board,1,{tick:()=>work?.check()})[0]?.cells??0)/(R*R);
     const seen=new Uint8Array(boardSize*boardSize),regions:{cells:number;bounds:number[]}[]=[];let empty=0;
     const free=(i:number)=>{const y=Math.floor(i/boardSize),x=i%boardSize;return (board.words[y*board.stride+(x>>>5)]!&(1<<(x&31)))===0;};
     for(let i=0;i<seen.length;i++)if(!seen[i]&&free(i)){work?.check();const queue=[i];seen[i]=1;let x0=boardSize,y0=boardSize,x1=0,y1=0;
@@ -182,5 +234,5 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
 
 export function describeFill(report:FillReport):string {
   const stop={converged:'本次方向/分辨率/最小步长下无可接受改进（不是全局最优证明）','round-limit':'达到轮数上限','trial-budget':'达到尝试预算','time-budget':'达到搜索时间预算','raster-no-fit':'当前分辨率未找到不缩小的完整布局','validation-rejected':'最终验证不通过，已回退'}[report.stop];
-  return `空白精排：${(report.before*100).toFixed(2)}% → ${(report.after*100).toFixed(2)}%，增加 ${((report.after-report.before)*100).toFixed(2)} 个百分点；尝试 ${report.trials} 次，接受 ${report.accepted} 次。${report.adaptive?`失败大岛之后继续尝试较小岛 ${report.adaptive.smallerAfterFailure} 次；局部扩张 ${report.adaptive.localAccepted} 次。`:""}${report.search?`整轮完成 ${report.search.completedSweeps} 次；未尝试 ${report.search.untriedIds.length} 岛；大岛整体重排 ${report.search.reflowAccepted}/${report.search.reflowTrials} 次。`:''}${stop}。最大/最小平均面积密度 ${report.densitySpreadAfter.toFixed(3)} 倍。`;
+  return `空白精排：${(report.before*100).toFixed(2)}% → ${(report.after*100).toFixed(2)}%，增加 ${((report.after-report.before)*100).toFixed(2)} 个百分点；尝试 ${report.trials} 次，接受 ${report.accepted} 次。${report.adaptive?`失败大岛之后继续尝试较小岛 ${report.adaptive.smallerAfterFailure} 次；局部扩张 ${report.adaptive.localAccepted} 次。`:""}${report.search?`整轮完成 ${report.search.completedSweeps} 次；未尝试 ${report.search.untriedIds.length} 岛；大岛整体重排 ${report.search.reflowAccepted}/${report.search.reflowTrials} 次。`:''}${report.cavities?.enabled?`空洞定向放置 ${report.cavities.windowAccepted} 次，等面积搬移 ${report.cavities.relocations} 次；最大空白矩形 ${(report.cavities.largestBefore*100).toFixed(2)}% → ${(report.cavities.largestAfter*100).toFixed(2)}%（保守栅格，非纹理占用率）。`:''}${stop}。最大/最小平均面积密度 ${report.densitySpreadAfter.toFixed(3)} 倍。`;
 }
