@@ -117,13 +117,15 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
   const biggest=(ps:RasterPlacement[])=>emptyWindows(boardFor(ps),1,local)[0]?.cells??0;
   /** A neutral relocation is allowed only when the largest reserved-cell gap
    * measurably decreases, with every chart still present at its current size.
-   * This unlocks growth; it is never reported as an increase in UV area. */
+   * This unlocks growth; it is never reported as an increase in UV area.
+   * A later growth sweep may move this chart again. Permit one bounded revisit
+   * instead of permanently locking it because an earlier relocation succeeded. */
   const relocateIntoCavity=(ps:RasterPlacement[],gs:number[]):RasterPlacement[]|null=>{
-    if(!cavitiesEnabled||report.cavities!.relocations>=Math.min(items.length,12)||report.trials>=maxTrials)return null;
+    if(!cavitiesEnabled||report.cavities!.relocations>=Math.min(items.length*2,24)||report.trials>=maxTrials)return null;
     const windows=emptyWindows(boardFor(ps),12,local),old=windows[0]?.cells??0;if(old<boardSize*boardSize*.004)return null;
     for(const w of windows.slice(0,5)){
       for(let i=0;i<items.length;i++){
-        if(report.cavities!.relocatedIds.includes(items[i]!.chart.id)||report.trials>=maxTrials)continue;
+        if(report.cavities!.relocatedIds.filter(id=>id===items[i]!.chart.id).length>=2||report.trials>=maxTrials)continue;
         const current=ps[i]!,it=items[i]!;if(current.mask.width*current.mask.height>w.cells*1.7)continue;
         // Do not spend the whole budget on unusable rotations of one huge part.
         const board=boardFor(ps,i),angles=options.rotate===false?[current.angle??0]:[...new Set([current.angle??0,0,90,180,270])];
