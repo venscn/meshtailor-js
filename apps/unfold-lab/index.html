@@ -96,6 +96,8 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <label>精排模式<select id="fill-mode"><option value="area-priority">从大到小逐岛扩张</option><option value="uniform">全岛共同放大（保持密度比例）</option></select></label>
 <label>每步面积增量 %<input id="fill-step" type="number" min=".5" max="25" step=".5" value="8"></label>
 <label>相对密度差上限<input id="fill-cap" type="number" min="1" max="3" step=".1" value="1.6"></label>
+<label class="check"><input id="fill-cavities" type="checkbox" checked>扫描真实空洞，允许等面积搬移后继续扩张</label>
+<label>每岛每轮连续增长步数<input id="fill-growth" type="number" min="1" max="16" value="4"></label>
 <label>共同面积放大上限<input id="fill-common" aria-label="Fill common gain limit" type="number" min="1" max="16" value="4" step=".5"></label>
 <label>补充旋转步长<select id="fill-angle" aria-label="Fill rotation step"><option value="90">90°</option><option value="45" selected>45°</option><option value="30">30°</option><option value="15">15°</option></select></label>
 <label>前方大岛重排预算<input id="fill-reflow" aria-label="Fill reflow budget" type="number" min="0" max="64" value="4"></label>
