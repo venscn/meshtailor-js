@@ -3,7 +3,7 @@ import type {Vec2} from '@meshtailor/mesh-core';
 /** Conservative, closed-cell triangle raster. Every cell touched by a triangle
  * is reserved; a square dilation reserves the requested per-side UV gutter.
  * Masks are only a search accelerator, never the reported geometric area. */
-export interface ShapeMask {width:number;height:number;stride:number;words:Uint32Array;occupied:{row:number;word:number;bits:number}[];pad:number;runs:{row:number;lo:number;hi:number}[];dilated?:Map<number,{row:number;word:number;bits:number}[]>}
+export interface ShapeMask {width:number;height:number;stride:number;words:Uint32Array;occupied:{row:number;word:number;bits:number}[];pad:number;rowRuns?:{lo:number;hi:number}[][];runs:{row:number;lo:number;hi:number}[];dilated?:Map<number,{row:number;word:number;bits:number}[]>}
 export interface RasterPlacement {mask:ShapeMask;x:number;y:number;turn:boolean;gain:number;rotation?:number;angle?:number}
 export class RasterBudget extends Error {constructor(){super('Refinement search budget reached');this.name='RasterBudget';}}
 export interface RasterWork {tick():void}
@@ -63,12 +63,38 @@ export class RasterBoard {
       if(shift&&col+1>=0&&col+1<this.stride)this.words[index+1]!|=s.bits>>>(32-shift);
     }
   }
-  /** Bottom-left exhaustive integer translation search. A free shape can occupy
-   * another chart's concavity, unlike free-rectangle allocation. */
+  /** Exact right-hand extent of a blocked run in one row (exclusive). */
+  private blockedEnd(row:number,x:number):number {
+    while(x<this.size){const col=x>>>5,off=x&31,word=this.words[row*this.stride+col]!;
+      const free=(~word)>>>off;
+      if(free)return Math.min(this.size,x+(31-Math.clz32((free&-free)>>>0)));
+      x=(col+1)*32;
+    }return this.size;
+  }
+  /** Exact collision interval skipping, NOT coarse sampling. All skipped x
+   * translations collide with the same occupied board run and mask run. */
+  private collisionEnd(mask:ShapeMask,x:number,y:number):number {
+    const shift=x&31,offset=x>>>5;
+    for(const s of mask.occupied){const index=(s.row+y)*this.stride+offset+s.word;
+      let bits=(this.words[index]!&(s.bits<<shift))>>>0,word=offset+s.word;
+      if(!bits&&shift){bits=((s.bits>>>(32-shift))&(this.words[index+1]??0))>>>0;word++;}
+      if(!bits)continue;
+      const col=word*32+(31-Math.clz32((bits&-bits)>>>0)),local=col-x;
+      if(!mask.rowRuns){mask.rowRuns=Array.from({length:mask.height},()=>[]);for(const r of mask.runs)mask.rowRuns[r.row]!.push({lo:r.lo,hi:r.hi});}
+      const run=mask.rowRuns[s.row]!.find(r=>r.lo<=local&&local<=r.hi);
+      if(!run)return x+1;
+      return Math.max(x+1,this.blockedEnd(s.row+y,col)-run.lo);
+    }return x;
+  }
+  /** Exhaustive integer translation in a window. The result is identical to
+   * cell-by-cell bottom-left search, but whole impossible intervals are skipped. */
+  findWindow(mask:ShapeMask,minX:number,minY:number,maxX:number,maxY:number,work?:RasterWork):{x:number;y:number}|null {
+    const X=Math.min(this.size-mask.width,Math.floor(maxX)),Y=Math.min(this.size-mask.height,Math.floor(maxY));
+    const lo=Math.max(0,Math.ceil(minX)),bottom=Math.max(0,Math.ceil(minY));if(X<lo||Y<bottom)return null;
+    for(let y=bottom;y<=Y;y++){work?.tick();for(let x=lo;x<=X;){const next=this.collisionEnd(mask,x,y);if(next===x)return{x,y};x=next;}}return null;
+  }
   find(mask:ShapeMask,work?:RasterWork,maxX=this.size-mask.width,maxY=this.size-mask.height):{x:number;y:number}|null {
-    const X=Math.min(this.size-mask.width,maxX),Y=Math.min(this.size-mask.height,maxY);
-    if(X<0||Y<0)return null;
-    for(let y=0;y<=Y;y++){work?.tick();for(let x=0;x<=X;x++)if(this.fits(mask,x,y))return{x,y};}return null;
+    return this.findWindow(mask,0,0,maxX,maxY,work);
   }
 }
 
