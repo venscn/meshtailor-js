@@ -1,4 +1,5 @@
 /** Geometry-driven seam templates. No model-name/ID-specific production branches. */
+import {simpleUVBoundary} from './boundary-guard.js';
 import {buildTopology,edgeKey,type MeshData,type Vec2,type Vec3} from '@meshtailor/mesh-core';
 import {cutLocalMesh} from './cut-topology.js';
 import {parameterizeChart,triangleArea} from './parameterize.js';
@@ -12,7 +13,7 @@ export const DEFAULT_HUMAN:HumanTemplateOptions={panels:2,axis:'auto',seamAngleD
 export interface HumanTemplateEntry {
  sourceChart:number;faces:number;sourceAreaFraction:number;status:'applied'|'skipped'|'rejected';reason:string;
  template?:'cylinder-strip'|'cone-sector'|'contour-band';charts?:number[];axis?:Vec3;around?:Vec3;
- radialFitError?:number;maxAnisotropy?:number;boundaryLoops?:number;seamEdges?:string[];
+ plannedPanels?:number;requestedPanels?:number;budgetExpanded?:boolean;radialFitError?:number;maxAnisotropy?:number;boundaryLoops?:number;seamEdges?:string[];
  lowerBoundary?:number[];upperBoundary?:number[];panelFaces?:number[][];
 }
 export interface HumanTemplateReport {version:1;options:HumanTemplateOptions;before:number;after:number;applied:number;entries:HumanTemplateEntry[];protectedSeams:string[];addedSeams:string[];removedSeams:string[]}
@@ -68,16 +69,33 @@ export function unfoldBand(mesh:MeshData,faces:readonly number[],sourceChart:num
  const o=humanOptions(opts.humanTemplates),fraction=area(mesh,faces)/Math.max(totalArea,1e-30),base={sourceChart,faces:faces.length,sourceAreaFraction:fraction};
  if(o.selectedCharts&&!o.selectedCharts.includes(sourceChart))return{...base,status:'skipped',reason:'outside-selected-scope'};
  if(!o.selectedCharts&&(fraction<o.minAreaFraction||faces.length<16))return{...base,status:'skipped',reason:'below-structural-area-threshold'};
- if(faces.length>opts.maxChartFaces)return{...base,status:'rejected',reason:'template-face-budget'};
  work?.check();const band=inspectBand(mesh,faces,o);if(!band.ok)return{...base,status:'skipped',reason:band.reason,boundaryLoops:band.boundaryLoops};
  const protectedCuts=new Set(opts.mergeOptions?.protectedSeams??[]),edgeFaces=new Map<string,number[]>();
  for(const fi of faces)for(let k=0;k<3;k++){const f=mesh.faces[fi]!.vertices,key=edgeKey(f[k]!,f[(k+1)%3]!);const list=edgeFaces.get(key)??[];list.push(fi);edgeFaces.set(key,list);}
- const phase=new Map<number,number[]>(),groups:number[][]=Array.from({length:o.panels},()=>[]),groupOf=new Map<number,number>();
- for(const fi of faces){const a=mesh.faces[fi]!.vertices.map(v=>band.coord(mesh.positions[v]!).theta);if(Math.max(...a)-Math.min(...a)>Math.PI)for(let k=0;k<3;k++)if(a[k]!<Math.PI)a[k]!+=TAU;
-  let center=a.reduce((s,x)=>s+x,0)/3;if(center>=TAU){for(let k=0;k<3;k++)a[k]!-=TAU;center-=TAU;}
-  const group=o.panels===1?0:Math.min(1,Math.floor(center/Math.PI));phase.set(fi,a);groups[group]!.push(fi);groupOf.set(fi,group);
+ // The face budget constrains EACH solved panel, not the pre-cut parent.
+ // Rejecting the whole parent here sent medium/high meshes into unconstrained
+ // geodesic bisection before their already-known longitudinal cuts were tried.
+ let panelCount:number=o.panels;
+ let phase=new Map<number,number[]>(),groups:number[][]=[],groupOf=new Map<number,number>();
+ for(;;){
+  phase=new Map();groups=Array.from({length:panelCount},()=>[]);groupOf=new Map();
+  for(const fi of faces){
+   const a=mesh.faces[fi]!.vertices.map(v=>band.coord(mesh.positions[v]!).theta);
+   // Round only the angular seam convention, never positions or input UV.
+   for(let k=0;k<3;k++)if(a[k]!<1e-10||TAU-a[k]!<1e-10)a[k]=0;
+   if(Math.max(...a)-Math.min(...a)>Math.PI)for(let k=0;k<3;k++)if(a[k]!<Math.PI)a[k]!+=TAU;
+   let center=a.reduce((s,x)=>s+x,0)/3;
+   if(center>=TAU){for(let k=0;k<3;k++)a[k]!-=TAU;center-=TAU;}
+   const group=Math.min(panelCount-1,Math.max(0,Math.floor(center/(TAU/panelCount))));
+   phase.set(fi,a);groups[group]!.push(fi);groupOf.set(fi,group);
+  }
+  if(groups.some(g=>g.length<2))return{...base,status:'rejected',reason:'empty-side-panel'};
+  if(groups.every(g=>g.length<=opts.maxChartFaces))break;
+  if(!opts.autoCut||panelCount>=16)return{...base,status:'rejected',reason:'per-panel-face-budget'};
+  // Respect the configured solver budget with additional parallel meridians,
+  // never a triangle-count split with an unconstrained meandering interface.
+  panelCount*=2;
  }
- if(groups.some(g=>g.length<2))return{...base,status:'rejected',reason:'empty-side-panel'};
  const seams=new Set(inputSeams),locked:string[]=[];
  for(const [key,fs]of edgeFaces)if(fs.length===2)seams.delete(key);
  for(const [key,fs]of edgeFaces){
@@ -90,8 +108,8 @@ export function unfoldBand(mesh:MeshData,faces:readonly number[],sourceChart:num
  try{
   for(let gi=0;gi<groups.length;gi++){
    const fs=groups[gi]!,local=cutLocalMesh(mesh,fs,seams);if(!local.disk)return{...base,status:'rejected',reason:'planned-cuts-not-one-disk-per-panel'};
-   uvProgress(work,{stage:'parameterize',detail:`结构环带 #${sourceChart+1}：${o.panels===2?'两侧切缝 / 两片':'单纵缝 / 一片'}，${band.template}`});
-   const refs:Vec2[]=new Array(local.positions.length),middle=(gi+.5)*TAU/o.panels;
+   uvProgress(work,{stage:'parameterize',detail:`结构环带 #${sourceChart+1}：${panelCount===1?'单纵缝 / 一片':`${panelCount} 片 / 同向连续切缝`}，${band.template}`});
+   const refs:Vec2[]=new Array(local.positions.length),middle=(gi+.5)*TAU/panelCount;
    for(let i=0;i<fs.length;i++)for(let k=0;k<3;k++){const v=local.triangles[i]![k]!,p=band.coord(local.positions[v]!),theta=phase.get(fs[i]!)![k]!-middle;refs[v]=[theta*band.radius,p.t];}
    let uv:Vec2[],method:string,iterations=0,residual=0;
    if(band.template==='cylinder-strip'){uv=refs.map(p=>[...p]);method='human-cylinder';}
@@ -109,12 +127,12 @@ export function unfoldBand(mesh:MeshData,faces:readonly number[],sourceChart:num
    }
    if(local.triangles.reduce((s,t)=>s+signedArea2(uv[t[0]]!,uv[t[1]]!,uv[t[2]]!),0)<0)uv=uv.map(p=>[-p[0],p[1]]);
    const quality=checkUVTriangles(local.triangles.map(t=>t.map(v=>uv[v]!) as [Vec2,Vec2,Vec2]),100,work),shape=shapeQuality(local,uv,1,opts.maxStretch);
-   if(!quality.valid||shape.maxStretch>Math.min(o.maxAnisotropy,opts.maxStretch)||shape.aspect>opts.maxAspect||shape.fill<opts.minFill)return{...base,status:'rejected',reason:`template-quality: flips=${quality.flipped}, overlap=${quality.overlaps}, anisotropy=${shape.maxStretch.toFixed(3)}`};
+   if(!quality.valid||!simpleUVBoundary(uv,local.boundaries,work)||shape.maxStretch>Math.min(o.maxAnisotropy,opts.maxStretch)||shape.aspect>opts.maxAspect||shape.fill<opts.minFill)return{...base,status:'rejected',reason:`template-quality: flips=${quality.flipped}, overlap=${quality.overlaps}, anisotropy=${shape.maxStretch.toFixed(3)}`};
    const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
    result.push({id:sourceChart+gi,faceUVs,area3D:area(mesh,fs)});diagnostics.push({id:sourceChart+gi,sourceChart,faces:fs.length,method,iterations,residual,...shape});
   }
  }catch(error){rethrowUVStop(error);return{...base,status:'rejected',reason:'band-solve: '+(error instanceof Error?error.message:String(error))};}
- work?.check();return{raw:result,seams,locked,diagnostics,entry:{...base,status:'applied',reason:'ordered-longitudinal-seams',template:band.template,axis:band.axis,around:band.around,radialFitError:band.fitError,boundaryLoops:2,charts:[],panelFaces:groups.map(g=>[...g]),seamEdges:locked.filter(k=>edgeFaces.get(k)?.length===2),lowerBoundary:band.lower,upperBoundary:band.upper,maxAnisotropy:Math.max(...diagnostics.map(d=>d.maxStretch))}};
+ work?.check();return{raw:result,seams,locked,diagnostics,entry:{...base,status:'applied',reason:'ordered-longitudinal-seams',plannedPanels:panelCount,requestedPanels:o.panels,budgetExpanded:panelCount!==o.panels,template:band.template,axis:band.axis,around:band.around,radialFitError:band.fitError,boundaryLoops:2,charts:[],panelFaces:groups.map(g=>[...g]),seamEdges:locked.filter(k=>edgeFaces.get(k)?.length===2),lowerBoundary:band.lower,upperBoundary:band.upper,maxAnisotropy:Math.max(...diagnostics.map(d=>d.maxStretch))}};
 }
 /** Runs before generic merging. Template region interfaces are protected so the
  * downstream optimizer cannot silently merge a recognizable panel away. */
