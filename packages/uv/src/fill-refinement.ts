@@ -53,7 +53,7 @@ export function validateFillOptions(o:FillOptions):void {
  * no shrink of the small islands to buy density for a large island. */
 export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions&{rotate?:boolean}={},work?:UVWork):AtlasPacking {
   validateFillOptions(options);if(!options.fillMode||options.fillMode==='off')return base;
-  const mode=options.fillMode,R=options.fillResolution??512,roundLimit=options.fillRounds??8,step=options.fillStep??.08,cap=options.fillMaxAreaGain??1.6,maxTrials=options.fillMaxTrials??Math.max(256,raw.length*8),budget=options.fillTimeBudgetMs??15000,start=performance.now();
+  const mode=options.fillMode,R=options.fillResolution??512,roundLimit=options.fillRounds??8,step=options.fillStep??.08,cap=options.fillMaxAreaGain??1.6,maxTrials=options.fillMaxTrials??Math.min(5000,Math.max(256,raw.length*roundLimit*((options.fillGrowthSteps??4)+1)+16)),budget=options.fillTimeBudgetMs??15000,start=performance.now();
   const reference=new Map(raw.map(c=>[c.id,c.area3D]));
   const items:Island[]=base.packed.map(chart=>({chart,area3D:reference.get(chart.id)!,areaUV:area(chart),w:chart.bounds[2]-chart.bounds[0],h:chart.bounds[3]-chart.bounds[1],triangles:[...chart.faceUVs.values()].map(t=>t.map(p=>[p[0]-chart.bounds[0],p[1]-chart.bounds[1]]) as [Vec2,Vec2,Vec2]),cache:new Map(),poses:new Map(),contour:null})).sort((a,b)=>b.area3D-a.area3D||a.chart.id-b.chart.id);
   for(const it of items)it.contour=contourEdges(it.triangles);

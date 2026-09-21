@@ -61,12 +61,12 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess,selec
       <label>共同面积放大上限<input aria-label="Fill common gain limit" type="number" min="1" max="16" step=".5" value={draft.fillCommonGainLimit??4} onChange={e=>patch({fillCommonGainLimit:+e.target.value})}/></label>
       <label>补充旋转步长<select aria-label="Fill rotation step" value={draft.fillRotationStep??45} onChange={e=>patch({fillRotationStep:+e.target.value as 15|30|45|90})}><option value="90">90°（快速）</option><option value="45">45°</option><option value="30">30°</option><option value="15">15°（更慢）</option></select></label>
       <label>允许前方大岛重新排布次数<input aria-label="Fill reflow budget" type="number" min="0" max="64" value={draft.fillReflowBudget??4} onChange={e=>patch({fillReflowBudget:+e.target.value})}/></label>
-      <small>先试直角，放不下再试补充方向；空间被前面大岛锁住时有限重排。共同放大与岛间密度差分开限制，小岛不缩水。报告明确剩余未尝试岛与停止原因。</small>
+      <small>直角与补充方向共同比较；空洞扫描可先搬移，再继续增长。空间被前面大岛锁住时有限重排。共同放大与岛间密度差分开限制，小岛不缩水。报告明确剩余未尝试岛与停止原因。</small>
       <label>最小面积步长 %<input aria-label="Fill minimum step" type="number" min=".1" max="5" step=".1" value={(draft.fillMinStep??.005)*100} onChange={e=>patch({fillMinStep:+e.target.value/100})}/></label>
       <label>最大轮数<input aria-label="Fill rounds" type="number" min="1" max="24" value={draft.fillRounds??8} onChange={e=>patch({fillRounds:+e.target.value})}/></label>
       <label>轮廓搜索网格<select aria-label="Fill resolution" value={draft.fillResolution??512} onChange={e=>patch({fillResolution:+e.target.value})}><option value="256">256（快速 / 保守）</option><option value="512">512（默认）</option><option value="1024">1024（更细 / 更慢）</option></select></label>
       <label>精排搜索预算（秒）<input aria-label="Fill budget" type="number" min="1" max="120" value={(draft.fillTimeBudgetMs??15000)/1000} onChange={e=>patch({fillTimeBudgetMs:+e.target.value*1000})}/></label>
-      <small>不缩小其他岛腾空间，不拉伸宽高。8% 面积增量约为 3.9% 边长；默认岛间密度差上限 1.6 倍，共同放大另限 4 倍。轮廓栅格可利用凹口，但不保证最优。仅支持有效单页，原样重叠 UV 须先整理。可在预算停止后继续精排，不会无界累积大岛密度。</small>
+      <small>不缩小其他岛腾空间，不拉伸宽高。8% 面积增量约为 3.9% 边长；默认岛间密度差上限 1.6 倍，共同放大另限 4 倍。轮廓栅格可利用凹口，但不保证最优。仅支持有效单页；生成无重叠 UV 后再精排。可在预算停止后继续精排，不会无界累积大岛密度。</small>
       {snapshot?.packingReport?.refinement&&<div role="status" data-testid="fill-report"><p>{describeFill(snapshot.packingReport.refinement)}</p>{snapshot.packingReport.refinement.recut&&<small>大岛旧切缝试验：{snapshot.packingReport.refinement.recut.trials} 个候选，{snapshot.packingReport.refinement.recut.accepted?'接受一次切分':'未接受，原岛保留'}。</small>}<small>可检查形状 / 切缝的岛：{snapshot.packingReport.refinement.shapeWaste.slice(0,5).map(c=>`#${c.id+1}（轮廓/框 ${(c.shapeFill*100).toFixed(0)}%）`).join('、')}。只是诊断，不会自动再切。</small></div>}
     </details>
     <details open><summary>面积与空间邻居</summary>
