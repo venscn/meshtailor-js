@@ -1,0 +1,5 @@
+{
+  "command": "node scripts/camera-policy-smoke.mjs",
+  "exitCode": 0,
+  "output": "PASS Studio and lab share a manual-camera default\nPASS A new renderer never enables follow implicitly\nPASS Ordinary progress updates keep manual mode\nPASS An explicit enable requests an immediate fit even when paused\nPASS First manual input interrupts follow and signals UI exactly once\nPASS Stale enabled props cannot override the manual camera for later frames\nPASS Acknowledging off does not itself resume follow\nPASS Only an explicit off/on transition re-arms follow\nPASS Manual input while already in manual mode is idempotent\nPASS Explicitly disabling follow preserves manual ownership\n"
+}
