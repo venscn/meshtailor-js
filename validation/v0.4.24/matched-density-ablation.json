@@ -1,0 +1,217 @@
+{
+  "description": "Identical geometry-generated gear atlas, explicit same caps and trial/time/round limits. No source UV.",
+  "records": [
+    {
+      "version": "v0.4.23",
+      "densityCap": 1.6,
+      "options": {
+        "fillMode": "area-priority",
+        "fillMaxAreaGain": 1.6,
+        "fillTimeBudgetMs": 30000,
+        "fillRounds": 8,
+        "fillMaxTrials": 2000,
+        "fillResolution": 512
+      },
+      "after": 0.4647485264000929,
+      "stop": "converged",
+      "trials": 78,
+      "gains": [
+        {
+          "id": 5,
+          "area3D": 0.4948582366091717,
+          "areaFactor": 2.0356945920000062,
+          "linearFactor": 1.4267776953681348
+        },
+        {
+          "id": 2,
+          "area3D": 0.49485823660917155,
+          "areaFactor": 1.8694395123847014,
+          "linearFactor": 1.3672744831908117
+        },
+        {
+          "id": 3,
+          "area3D": 0.27149999763054583,
+          "areaFactor": 1.3232014848000002,
+          "linearFactor": 1.1503049529581277
+        },
+        {
+          "id": 4,
+          "area3D": 0.2714999976305453,
+          "areaFactor": 1.3166509824000001,
+          "linearFactor": 1.1474541308479393
+        },
+        {
+          "id": 0,
+          "area3D": 0.05808358327730174,
+          "areaFactor": 2.106641571840003,
+          "linearFactor": 1.4514274256193462
+        },
+        {
+          "id": 1,
+          "area3D": 0.05808358327730167,
+          "areaFactor": 2.1066415718400053,
+          "linearFactor": 1.4514274256193471
+        }
+      ]
+    },
+    {
+      "version": "v0.4.24",
+      "densityCap": 1.6,
+      "options": {
+        "fillMode": "area-priority",
+        "fillMaxAreaGain": 1.6,
+        "fillTimeBudgetMs": 30000,
+        "fillRounds": 8,
+        "fillMaxTrials": 2000,
+        "fillResolution": 512
+      },
+      "after": 0.463288246475173,
+      "stop": "converged",
+      "trials": 66,
+      "gains": [
+        {
+          "id": 5,
+          "area3D": 0.4948582366091717,
+          "areaFactor": 2.015539200000012,
+          "linearFactor": 1.4196968690533949
+        },
+        {
+          "id": 2,
+          "area3D": 0.49485823660917155,
+          "areaFactor": 1.8694395123847014,
+          "linearFactor": 1.3672744831908117
+        },
+        {
+          "id": 3,
+          "area3D": 0.27149999763054583,
+          "areaFactor": 1.3185774056816226,
+          "linearFactor": 1.1482932577010208
+        },
+        {
+          "id": 4,
+          "area3D": 0.2714999976305453,
+          "areaFactor": 1.3232014848000002,
+          "linearFactor": 1.1503049529581277
+        },
+        {
+          "id": 0,
+          "area3D": 0.05808358327730174,
+          "areaFactor": 2.109723849090593,
+          "linearFactor": 1.4524888464599628
+        },
+        {
+          "id": 1,
+          "area3D": 0.05808358327730167,
+          "areaFactor": 2.1097238490905954,
+          "linearFactor": 1.4524888464599635
+        }
+      ]
+    },
+    {
+      "version": "v0.4.23",
+      "densityCap": 3,
+      "options": {
+        "fillMode": "area-priority",
+        "fillMaxAreaGain": 3,
+        "fillTimeBudgetMs": 30000,
+        "fillRounds": 8,
+        "fillMaxTrials": 2000,
+        "fillResolution": 512
+      },
+      "after": 0.4927816157850209,
+      "stop": "converged",
+      "trials": 83,
+      "gains": [
+        {
+          "id": 5,
+          "area3D": 0.4948582366091717,
+          "areaFactor": 2.158924997272788,
+          "linearFactor": 1.4693280768000005
+        },
+        {
+          "id": 2,
+          "area3D": 0.49485823660917155,
+          "areaFactor": 1.7138242687795207,
+          "linearFactor": 1.3091311121425235
+        },
+        {
+          "id": 3,
+          "area3D": 0.27149999763054583,
+          "areaFactor": 1.3232014848000002,
+          "linearFactor": 1.1503049529581277
+        },
+        {
+          "id": 4,
+          "area3D": 0.2714999976305453,
+          "areaFactor": 1.2786706656,
+          "linearFactor": 1.130783208930872
+        },
+        {
+          "id": 0,
+          "area3D": 0.05808358327730174,
+          "areaFactor": 3.8360119968000044,
+          "linearFactor": 1.9585739702140443
+        },
+        {
+          "id": 1,
+          "area3D": 0.05808358327730167,
+          "areaFactor": 3.8360119968000084,
+          "linearFactor": 1.9585739702140454
+        }
+      ]
+    },
+    {
+      "version": "v0.4.24",
+      "densityCap": 3,
+      "options": {
+        "fillMode": "area-priority",
+        "fillMaxAreaGain": 3,
+        "fillTimeBudgetMs": 30000,
+        "fillRounds": 8,
+        "fillMaxTrials": 2000,
+        "fillResolution": 512
+      },
+      "after": 0.49257999976319866,
+      "stop": "converged",
+      "trials": 53,
+      "gains": [
+        {
+          "id": 5,
+          "area3D": 0.4948582366091717,
+          "areaFactor": 2.158924997272788,
+          "linearFactor": 1.4693280768000005
+        },
+        {
+          "id": 2,
+          "area3D": 0.49485823660917155,
+          "areaFactor": 1.7138242687795207,
+          "linearFactor": 1.3091311121425235
+        },
+        {
+          "id": 3,
+          "area3D": 0.27149999763054583,
+          "areaFactor": 1.3185774056816226,
+          "linearFactor": 1.1482932577010208
+        },
+        {
+          "id": 4,
+          "area3D": 0.2714999976305453,
+          "areaFactor": 1.2786706656,
+          "linearFactor": 1.130783208930872
+        },
+        {
+          "id": 0,
+          "area3D": 0.05808358327730174,
+          "areaFactor": 3.8360119968000044,
+          "linearFactor": 1.9585739702140443
+        },
+        {
+          "id": 1,
+          "area3D": 0.05808358327730167,
+          "areaFactor": 3.8360119968000084,
+          "linearFactor": 1.9585739702140454
+        }
+      ]
+    }
+  ]
+}

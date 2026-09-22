@@ -1,0 +1,42 @@
+[
+  {
+    "name": "fill-refinement-smoke.mjs",
+    "status": 0,
+    "ms": 3094.7871569999998
+  },
+  {
+    "name": "fill-adaptive-smoke.mjs",
+    "status": 0,
+    "ms": 2846.9340349999998
+  },
+  {
+    "name": "fill-search-smoke.mjs",
+    "status": 0,
+    "ms": 2725.447779
+  },
+  {
+    "name": "cavity-fill-smoke.mjs",
+    "status": 0,
+    "ms": 2713.523756999999
+  },
+  {
+    "name": "raster-window-smoke.mjs",
+    "status": 0,
+    "ms": 2692.1192630000005
+  },
+  {
+    "name": "contour-raster-smoke.mjs",
+    "status": 0,
+    "ms": 2770.1931529999983
+  },
+  {
+    "name": "fill-growth-smoke.mjs",
+    "status": 0,
+    "ms": 2658.5092669999976
+  },
+  {
+    "name": "tsx-syntax-smoke.mjs",
+    "status": 0,
+    "ms": 504.6974590000027
+  }
+]

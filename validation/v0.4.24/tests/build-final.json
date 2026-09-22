@@ -1,0 +1,5 @@
+{
+  "command": "npm run build",
+  "exitCode": 127,
+  "output": "\n> meshtailor-js@0.4.24 build\n> npm --workspace @meshtailor/studio run build && npm run typecheck\n\n\n> @meshtailor/studio@0.4.24 build\n> vite build\n\nsh: 1: vite: not found\nnpm error Lifecycle script `build` failed with error:\nnpm error code 127\nnpm error path /mnt/data/dev-0424/meshtailor-js/apps/studio\nnpm error workspace @meshtailor/studio@0.4.24\nnpm error location /mnt/data/dev-0424/meshtailor-js/apps/studio\nnpm error command failed\nnpm error command sh -c vite build\n"
+}

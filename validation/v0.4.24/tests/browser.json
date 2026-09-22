@@ -1,0 +1,120 @@
+{
+  "scope": "Real offline workbench DOM, production Worker/WebGL; not React/Vite certification.",
+  "passed": 17,
+  "tests": [
+    {
+      "name": "New bounded enlargement default is explicit in the UI",
+      "passed": true
+    },
+    {
+      "name": "Cavity search is on by default with four growth steps",
+      "passed": true
+    },
+    {
+      "name": "Actual medium garment loads as structured panels before budget feedback",
+      "passed": true
+    },
+    {
+      "name": "Actual 3D seams follow longitudinal plane, not old zigzag partition",
+      "passed": true
+    },
+    {
+      "name": "Source UV is not present in runtime input",
+      "passed": true
+    },
+    {
+      "name": "Actual fill button transmits cavity settings to production Worker",
+      "passed": true,
+      "detail": {
+        "enabled": true,
+        "growthSteps": 4,
+        "windowTrials": 0,
+        "windowAccepted": 0,
+        "relocationTrials": 8,
+        "relocations": 4,
+        "relocatedIds": [
+          3,
+          0,
+          0,
+          1
+        ],
+        "largestBefore": 0.36893463134765625,
+        "largestAfter": 0.051029205322265625,
+        "positionOnly": false
+      }
+    },
+    {
+      "name": "Filling preserves islands, seam edges and valid actual triangles",
+      "passed": true
+    },
+    {
+      "name": "UI reports real stopping reason, gap metric and geometric occupancy separately",
+      "passed": true
+    },
+    {
+      "name": "Committed coordinates, summary and table report the same area gain",
+      "passed": true,
+      "detail": {
+        "enlarged": 6,
+        "gains": [
+          {
+            "id": 5,
+            "gain": 2.1589249972727935
+          },
+          {
+            "id": 2,
+            "gain": 1.7138242687795218
+          },
+          {
+            "id": 3,
+            "gain": 1.318577406466825
+          },
+          {
+            "id": 4,
+            "gain": 1.2786706656000033
+          },
+          {
+            "id": 0,
+            "gain": 3.8360119967999853
+          },
+          {
+            "id": 1,
+            "gain": 3.836011996799995
+          }
+        ]
+      }
+    },
+    {
+      "name": "Area is not mislabeled as edge-length enlargement",
+      "passed": true
+    },
+    {
+      "name": "Changing a density preset never starts a hidden fill or discards the result",
+      "passed": true
+    },
+    {
+      "name": "UV fill does not change user camera",
+      "passed": true
+    },
+    {
+      "name": "Largest empty window decreases without shrinking input charts",
+      "passed": true
+    },
+    {
+      "name": "Animation endpoint equals the repacked target",
+      "passed": true
+    },
+    {
+      "name": "Picking still selects the island before any triangle",
+      "passed": true
+    },
+    {
+      "name": "Controls do not silently rerun generation",
+      "passed": true
+    },
+    {
+      "name": "No JS or WebGL errors",
+      "passed": true
+    }
+  ]
+}

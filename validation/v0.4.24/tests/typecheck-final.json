@@ -1,0 +1,5 @@
+{
+  "command": "npm run typecheck",
+  "exitCode": 2,
+  "output": "\n> meshtailor-js@0.4.24 typecheck\n> tsc -p tsconfig.json --noEmit\n\nerror TS2688: Cannot find type definition file for 'node'.\n  The file is in the program because:\n    Entry point of type library 'node' specified in compilerOptions\n"
+}
