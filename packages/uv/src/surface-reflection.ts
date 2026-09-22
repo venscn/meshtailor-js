@@ -61,7 +61,17 @@ export class SurfaceIndex {
 }
 interface BoundaryEdge {a:number;b:number;face:number;ca:number;cb:number;length:number}
 function boundaryEdges(mesh:CutMesh):BoundaryEdge[]{
- const edges=new Map<string,{count:number;e:BoundaryEdge}>();mesh.triangles.forEach((t,f)=>{for(let k=0;k<3;k++){const a=t[k]!,b=t[(k+1)%3]!,key=a<b?`${a}:${b}`:`${b}:${a}`,old=edges.get(key);if(old)old.count++;else edges.set(key,{count:1,e:{a,b,face:f,ca:k,cb:(k+1)%3,length:Math.hypot(...sub(mesh.positions[a]!,mesh.positions[b]!))}});}});return[...edges.values()].filter(e=>e.count===1).map(e=>e.e);
+ const edges=new Map<string,{faces:number[];e:BoundaryEdge}>();mesh.triangles.forEach((t,f)=>{for(let k=0;k<3;k++){const a=t[k]!,b=t[(k+1)%3]!,key=a<b?`${a}:${b}`:`${b}:${a}`,old=edges.get(key);if(old)old.faces.push(f);else edges.set(key,{faces:[f],e:{a,b,face:f,ca:k,cb:(k+1)%3,length:Math.hypot(...sub(mesh.positions[a]!,mesh.positions[b]!))}});}});
+ const boundary=[...edges.values()].filter(e=>e.faces.length===1).map(e=>e.e);if(boundary.length)return boundary;
+ // Closed shallow shells have no topological boundary. A continuous physical
+ // rim is nevertheless strong symmetry evidence; without it a broad flat
+ // surface can admit a slightly tilted plane that does not preserve its rim.
+ // Only entire degree-two crease loops enter the matcher, not isolated noise.
+ const ns=mesh.triangles.map(t=>{const[a,b,c]=t.map(v=>mesh.positions[v]!) as [Vec3,Vec3,Vec3];return norm(cross(sub(b,a),sub(c,a)));});
+ const candidates=[...edges.values()].filter(e=>e.faces.length===2&&dot3(ns[e.faces[0]!]!,ns[e.faces[1]!]!)<.5).map(e=>e.e),incident=new Map<number,number[]>();
+ candidates.forEach((e,i)=>{for(const v of[e.a,e.b]){const a=incident.get(v)??[];a.push(i);incident.set(v,a);}});
+ const seen=new Set<number>(),loops:BoundaryEdge[]=[];for(let i=0;i<candidates.length;i++)if(!seen.has(i)){const q=[i],vertices=new Set<number>();seen.add(i);for(let h=0;h<q.length;h++){const e=candidates[q[h]!]!;for(const v of[e.a,e.b]){vertices.add(v);for(const j of incident.get(v)??[])if(!seen.has(j)){seen.add(j);q.push(j);}}}if(q.length>=6&&[...vertices].every(v=>incident.get(v)!.length===2))loops.push(...q.map(j=>candidates[j]!));}
+ return loops;
 }
 function boundaryNearest(p:Vec3,edges:BoundaryEdge[],mesh:CutMesh,max=Infinity):{binding:SurfaceBinding;point:Vec3;distance:number}|undefined {
  let best=max*max,found:ReturnType<typeof boundaryNearest>;
@@ -76,6 +86,7 @@ function eigenSmallest(m:number[][]):Vec3{
  * distribution is set by the number of vertices on one side of the mesh. */
 export function detectSurfaceReflection(mesh:CutMesh,options:SurfaceReflectionOptions={},work?:UVWork):SurfaceReflection|undefined{
  if(mesh.triangles.length<12||!mesh.manifold)return;
+ if(options.fixedPlane&&(!Number.isFinite(options.fixedPlane.offset)||options.fixedPlane.normal.length!==3||!options.fixedPlane.normal.every(Number.isFinite)||Math.abs(Math.hypot(...options.fixedPlane.normal)-1)>1e-6))throw Error('Invalid fixed reflection plane.');
  const tol=options.tolerance??.018,minCoverage=options.minimumCoverage??.94,count=options.maxSamples??256;
  if(!Number.isFinite(tol)||tol<.001||tol>.06||!Number.isInteger(count)||count<32||count>2048||!Number.isFinite(minCoverage)||minCoverage<.8||minCoverage>1)throw Error('Invalid surface reflection options.');
  const data={name:'geometry',positions:mesh.positions,faces:mesh.triangles.map(t=>({vertices:t}))},frames=reflectionFrames(data,mesh.triangles.map((_,i)=>i));if(!frames.length)return;
@@ -93,7 +104,7 @@ export function detectSurfaceReflection(mesh:CutMesh,options:SurfaceReflectionOp
   const a=k*Math.PI/12,n=norm(add(scale(frames[i]!.normal,Math.cos(a)),scale(frames[j]!.normal,Math.sin(a))));
   if(!normals.some(q=>Math.abs(dot3(n,q))>.99999))normals.push(n);
  }
- const coarse=normals.map(normal=>{const offset=dot3(frames[0]!.origin,normal),h=hits(normal,offset,span*.06,Math.max(1,Math.floor(samples.length/64)));
+ const coarse=options.fixedPlane?[]:normals.map(normal=>{const offset=dot3(frames[0]!.origin,normal),h=hits(normal,offset,span*.06,Math.max(1,Math.floor(samples.length/64)));
   const score=h.reduce((s,p)=>s+(p?(p.distance/span)**2+(1-p.normal)*.001:.006),0)/h.length;return {normal,origin:frames[0]!.origin,score};
  }).filter(f=>{const v=mesh.positions.map(p=>dot3(p,f.normal));return Math.max(...v)-Math.min(...v)>span*.12;}).sort((a,b)=>a.score-b.score).slice(0,4);
  const candidates:SurfaceReflection[]=[];
