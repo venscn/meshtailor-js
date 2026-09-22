@@ -1,0 +1,56 @@
+{
+  "scope": "Offline production Worker/WebGL with whole UV-free FlightHelmet; not complete React/Three importer certification.",
+  "tests": [
+    {
+      "name": "Current built release and default-on surface recognition",
+      "passed": true
+    },
+    {
+      "name": "Real whole helmet generated without source UV",
+      "passed": true,
+      "detail": {
+        "islands": 189,
+        "contracts": 25
+      }
+    },
+    {
+      "name": "Complete 544-face cap is two intact symmetric sheets, not an arbitrary diagonal slit",
+      "passed": true
+    },
+    {
+      "name": "Selection remains island-only",
+      "passed": true
+    },
+    {
+      "name": "Inspector distinguishes surface match from vertex correspondence",
+      "passed": true,
+      "detail": "表面对称已验证，使用三角面内的重心对应，不要求左右顶点或三角形一一配对。 表面采样匹配 100.0%，边界/闭合折边匹配 100.0%；原顶点近精确配对（采样） 12.9%（仅诊断，不是门槛）。当前 UV 镜像均方根误差 0.076%，边界 0.035%，最大 0.370%（相对当前岛直径）。 不改变三维网格、不复制半片，也不使用原 UV。"
+    },
+    {
+      "name": "Both sides shown and all source cap faces accounted for",
+      "passed": true
+    },
+    {
+      "name": "Playback does not bind the camera to symmetry plane",
+      "passed": true
+    },
+    {
+      "name": "Editing recognition setting alone does not change the current result",
+      "passed": true
+    },
+    {
+      "name": "Repacking retains symmetry contracts and actual inspector audit",
+      "passed": true,
+      "detail": 25
+    },
+    {
+      "name": "Fill preserves reflected surface relations, face ownership, final UV quality",
+      "passed": true
+    },
+    {
+      "name": "All registered browser and WebGL errors absent",
+      "passed": true
+    }
+  ],
+  "passed": 11
+}

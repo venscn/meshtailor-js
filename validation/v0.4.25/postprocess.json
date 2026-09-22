@@ -1,0 +1,78 @@
+{
+  "tests": [
+    {
+      "name": "Corset",
+      "target": "stitch",
+      "passed": true,
+      "faces": 18324,
+      "islands": 79,
+      "contracts": 29,
+      "maxRMS": 0.007251047695604197,
+      "occupancy": 0.7540424124325449,
+      "seconds": 6.091394691,
+      "sha256": "76227fe31d073c5499449d73e94dace1d25c7ac90b8c2353d752c504438b4ed2"
+    },
+    {
+      "name": "Corset",
+      "target": "repack",
+      "passed": true,
+      "faces": 18324,
+      "islands": 79,
+      "contracts": 29,
+      "maxRMS": 0.00725104769560329,
+      "occupancy": 0.7478991361260656,
+      "seconds": 6.201133941,
+      "sha256": "aecae9c8f66c6d51763c416fda24fa1a2f8737da1fc649bdfcaaf8ee9f7f8418"
+    },
+    {
+      "name": "Corset",
+      "target": "fill",
+      "passed": true,
+      "faces": 18324,
+      "islands": 79,
+      "contracts": 29,
+      "maxRMS": 0.007251047695603285,
+      "occupancy": 0.7819566214069837,
+      "seconds": 7.110476986000002,
+      "sha256": "076950f066bf4cb71c51b4b0150d65f61238af9228acf880498872d5cdba9b3b"
+    },
+    {
+      "name": "FlightHelmet",
+      "target": "stitch",
+      "passed": true,
+      "faces": 94722,
+      "islands": 164,
+      "contracts": 25,
+      "maxRMS": 0.009816981011611632,
+      "occupancy": 0.656883805265442,
+      "seconds": 22.314625319999998,
+      "sha256": "da5d61e1bc6a9b11bad459b5dc7329bd028d82816919b99a2e279b75f03e7637"
+    },
+    {
+      "name": "FlightHelmet",
+      "target": "repack",
+      "passed": true,
+      "faces": 94722,
+      "islands": 164,
+      "contracts": 25,
+      "maxRMS": 0.009816981011613058,
+      "occupancy": 0.618712561395918,
+      "seconds": 19.328618775999995,
+      "sha256": "a4d767fc18e8ed8c0f44973a8ed8a3a778c760e207b95634cc6fbd0ad7a130ac"
+    },
+    {
+      "name": "FlightHelmet",
+      "target": "fill",
+      "passed": true,
+      "faces": 94722,
+      "islands": 164,
+      "contracts": 25,
+      "maxRMS": 0.009816981011612469,
+      "occupancy": 0.6697477091371095,
+      "seconds": 18.203853627000004,
+      "sha256": "eeb2aaa36dabad672fbb89dbd3c2154ba952ba76814721f5a64a0fbad54cf4ab"
+    }
+  ],
+  "note": "Uses current geometry-only generated snapshot; finite search budget is not an optimal packing claim.",
+  "passed": 6
+}

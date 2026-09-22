@@ -1,0 +1,30 @@
+{
+  "engine": "GEOS/Shapely 2.1.2",
+  "area_tolerance": 1e-14,
+  "assets": [
+    {
+      "name": "Corset",
+      "sha256": "bca47ed011892c882952a304b0b94d3a7ad41980eb3fa2ac31f060ae604770b3",
+      "faces": 18324,
+      "positive_overlap": 0,
+      "maximum_intersection_area": 0,
+      "candidate_pairs": 109257,
+      "occupancy": 0.5990299677670436,
+      "geometry_and_face_order_unchanged": true,
+      "positive_winding": true,
+      "seconds": 1.1713344939998933
+    },
+    {
+      "name": "FlightHelmet",
+      "sha256": "df7cc6b883a5435935298d9633fa714a247bddf9a457c02780421add46567ffd",
+      "faces": 94722,
+      "positive_overlap": 0,
+      "maximum_intersection_area": 0,
+      "candidate_pairs": 667974,
+      "occupancy": 0.5729754109436302,
+      "geometry_and_face_order_unchanged": true,
+      "positive_winding": true,
+      "seconds": 5.567871157000354
+    }
+  ]
+}

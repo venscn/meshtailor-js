@@ -1,0 +1,30 @@
+{
+  "resolved": [
+    {
+      "scope": "test fixture",
+      "issue": "New closed test-shell helper appended vertices while iterating a growing array, exhausting its heap; fixed by immutable source-length bound."
+    },
+    {
+      "scope": "test fixture",
+      "issue": "A corner triangulation collapsed the closed pillow rim; corrected topology and now verifies unequal triangulation, transformed geometry and all-face coverage."
+    },
+    {
+      "scope": "browser QA selector",
+      "issue": "First cap selector required the underside to reach the outer apex height; replaced by shared physical rim selection. All 544 faces now asserted."
+    },
+    {
+      "scope": "geometry",
+      "issue": "One explicitly requested cut can leave cut-corner Euler value unchanged; planner now checks the declared cut edges directly."
+    },
+    {
+      "scope": "browser environment",
+      "issue": "Initial camera test without software GPU did not initialize WebGL. Rerun with explicit CHROME_SOFTWARE_WEBGL=1 passed 39 cases."
+    }
+  ],
+  "not_resolved": [
+    {
+      "scope": "complete React/Vite",
+      "issue": "npm install timed out after 25 seconds; build exited 127 (vite missing), typecheck exited 2 (node types missing). Offline/core tests are not full Studio certification."
+    }
+  ]
+}

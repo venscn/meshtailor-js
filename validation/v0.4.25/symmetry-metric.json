@@ -1,0 +1,101 @@
+{
+  "passed": 7,
+  "tests": [
+    {
+      "name": "Asymmetric initial UV is diagnosed despite symmetric geometry",
+      "passed": true,
+      "detail": {
+        "rms": 0.06913687987098503,
+        "boundaryRms": 0.0768591965200235,
+        "p95": 0.10569978153725129,
+        "max": 0.11865061015545077,
+        "axis": [
+          0.9982370864518297,
+          0.059352499797078725
+        ],
+        "center": [
+          0.12854070600094958,
+          0.12503229958485337
+        ],
+        "span": 3.277571511428736
+      }
+    },
+    {
+      "name": "Barycentric coupled solve corrects unequal tessellation without copying half UV",
+      "passed": true,
+      "detail": {
+        "status": "constrained",
+        "surface": {
+          "normal": [
+            0.999999670283254,
+            0.0007862596032165535,
+            -0.00020304979559093215
+          ],
+          "offset": 0.0006543219834009731,
+          "span": 2.9497670485515566,
+          "tolerance": 0.018,
+          "coverage": 1,
+          "boundaryCoverage": 1,
+          "rms": 0.000538446975167221,
+          "boundaryRms": 0.0006523316062109157,
+          "p95": 0.0010652340968295,
+          "normalAgreement": 0.9993837861270554,
+          "sampleCount": 312,
+          "vertexPairCoverage": 0.009569377990430622,
+          "confidence": "reliable"
+        },
+        "before": {
+          "rms": 0.06913687987098503,
+          "boundaryRms": 0.0768591965200235,
+          "p95": 0.10569978153725129,
+          "max": 0.11865061015545077,
+          "axis": [
+            0.9982370864518297,
+            0.059352499797078725
+          ],
+          "center": [
+            0.12854070600094958,
+            0.12503229958485337
+          ],
+          "span": 3.277571511428736
+        },
+        "after": {
+          "rms": 0.0012756214595243817,
+          "boundaryRms": 0.0010466756657644533,
+          "p95": 0.0009032973421233423,
+          "max": 0.017911262248203837,
+          "axis": [
+            0.9999999755897582,
+            0.0002209535764599553
+          ],
+          "center": [
+            -0.028016701831124615,
+            0.5194073950918857
+          ],
+          "span": 1.5287738357555796
+        },
+        "iterations": 41
+      }
+    },
+    {
+      "name": "Rigid UV placement and common scale leave reflection error unchanged",
+      "passed": true
+    },
+    {
+      "name": "Real geometry, triangulation and all source faces remain untouched",
+      "passed": true
+    },
+    {
+      "name": "Exact symmetric planar seed need not be moved",
+      "passed": true
+    },
+    {
+      "name": "Invalid or nonfinite constraint coefficients are rejected",
+      "passed": true
+    },
+    {
+      "name": "Cancellation is never turned into a successful relaxed result",
+      "passed": true
+    }
+  ]
+}

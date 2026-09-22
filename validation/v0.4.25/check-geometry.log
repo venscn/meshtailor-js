@@ -1,0 +1,165 @@
+
+> meshtailor-js@0.4.24 check:geometry
+> npm run test:geometry-input && npm run test:geometry-boundaries && npm run test:geometry-candidates && npm run test:geometry-topology && npm run test:geometry-policy && npm run test:core
+
+
+> meshtailor-js@0.4.24 test:geometry-input
+> node scripts/geometry-input-smoke.mjs
+
+5 geometry-input tests passed
+
+> meshtailor-js@0.4.24 test:geometry-boundaries
+> node scripts/boundary-regularization-smoke.mjs
+
+Graph cut shortens sawtooth boundary without changing geometry {
+  beforeLength: 3.839351584680302,
+  afterLength: 1,
+  beforeTeeth: 18,
+  afterTeeth: 0,
+  movedFaces: 72,
+  accepted: true,
+  reason: 'length-crease-mincut'
+}
+Every triangle still belongs to exactly one connected group 
+Hard seam locks cannot be moved 
+No coordinate/index properties from source UV are read 
+Cancelled graph cut stops promptly 
+Renaming and uniform scaling do not alter the cut 
+
+> meshtailor-js@0.4.24 test:geometry-candidates
+> node scripts/candidate-contract-smoke.mjs
+
+Curved multiply-connected LSCM preserves the hole without invented slit { method: 'lscm', residual: 2.801688076437878e-10, boundaries: 2 }
+Coplanar seam sides cannot be collapsed by a projection seed 
+Rejected projection tries another solver instead of returning invalid no-op { method: 'lscm', residual: 9.558136002390675e-10 }
+No source UV read in direct automatic unwrap API 
+
+> meshtailor-js@0.4.24 test:geometry-topology
+> node scripts/geometry-topology-smoke.mjs
+
+PASS Closed genus-one surface opens without fragmenting face set { faces: 360, cutEdges: 31, boundaries: 1 }
+PASS Every handle cut is a real original mesh edge 
+PASS Genus-one with a real boundary opens without capping or deleting geometry 
+PASS Feature groups never read UV or triangulation hints 
+PASS Cancellation aborts the handle graph search 
+
+> meshtailor-js@0.4.24 test:geometry-policy
+> node scripts/geometry-policy-smoke.mjs
+
+PASS Old local-storage source mode cannot re-enable original UV
+PASS Old imported configuration is explicitly rejected
+PASS Every geometry task overrides obsolete source hints and normal-cone mode
+PASS Worker clone boundary does not invoke UV getters
+PASS Default load is a complete geometry-generation Worker path
+PASS Default load and Generate baseline share exact output, not just island count
+PASS Runtime Generate baseline produces the identical actual cut set
+PASS Low-poly planar features are not discarded solely because each face has two triangles
+PASS Open bent ribbons remain three connected sheets, not twelve planar micro-panels
+PASS Worker rejects obsolete source even with a valid new plan
+PASS Worker rejects obsolete source-atlas even with a valid new plan
+PASS Postprocessing rejects an unmarked seed, rather than treating imported UV as generated
+PASS Repack retains the current generated-island provenance
+PASS Original-seam recut cannot be requested during fill
+PASS GLTF import removes texture-coordinate attributes before Three parses them
+
+> meshtailor-js@0.4.24 test:core
+> node scripts/core-smoke.mjs
+
+{
+  "suite": "Strict core/view math compilation and executable regression",
+  "compiler": "5.8.3",
+  "node": "v22.16.0",
+  "cases": [
+    {
+      "name": "Cube: valid real-edge traversal, final seams and UV coverage",
+      "passed": true
+    },
+    {
+      "name": "Cube: normalized display preserves input and triangles",
+      "passed": true
+    },
+    {
+      "name": "Cylinder: valid real-edge traversal, final seams and UV coverage",
+      "passed": true
+    },
+    {
+      "name": "Cylinder: normalized display preserves input and triangles",
+      "passed": true
+    },
+    {
+      "name": "Torso-like tube: valid real-edge traversal, final seams and UV coverage",
+      "passed": true
+    },
+    {
+      "name": "Torso-like tube: normalized display preserves input and triangles",
+      "passed": true
+    },
+    {
+      "name": "OBJ per-corner UV extraction still finds the 12 cube seams",
+      "passed": true
+    },
+    {
+      "name": "training samples keep xyz+normal, sampled point count and EOS",
+      "passed": true
+    },
+    {
+      "name": "off-origin mesh is normalized before float32 conversion",
+      "passed": true
+    },
+    {
+      "name": "very small meshes do not collapse into fixed near-plane limits",
+      "passed": true
+    },
+    {
+      "name": "empty mesh has a clear validation failure",
+      "passed": true
+    },
+    {
+      "name": "NaN coordinates are rejected",
+      "passed": true
+    },
+    {
+      "name": "infinite coordinates are rejected",
+      "passed": true
+    },
+    {
+      "name": "out-of-range face index is rejected",
+      "passed": true
+    },
+    {
+      "name": "zero-extent mesh is rejected",
+      "passed": true
+    },
+    {
+      "name": "portrait camera fit uses horizontal FOV",
+      "passed": true
+    },
+    {
+      "name": "wide camera fit does not crop the vertical axis",
+      "passed": true
+    },
+    {
+      "name": "camera fit contains the entire bounding sphere",
+      "passed": true
+    },
+    {
+      "name": "invalid camera input is rejected",
+      "passed": true
+    },
+    {
+      "name": "DPR is clamped independently of CSS viewport size",
+      "passed": true
+    },
+    {
+      "name": "hidden or invalid viewport sizes are skipped",
+      "passed": true
+    }
+  ],
+  "strictCompile": "pass",
+  "syntaxOnly": {
+    "sourceFiles": 143,
+    "result": "pass",
+    "fullUITypecheck": "not performed by this script"
+  },
+  "passed": 21
+}

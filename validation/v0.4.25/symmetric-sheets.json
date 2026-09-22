@@ -1,0 +1,209 @@
+{
+  "passed": 12,
+  "tests": [
+    {
+      "name": "Recognize surface symmetry before splitting the whole closed component",
+      "passed": true,
+      "detail": {
+        "parts": [
+          384,
+          160
+        ],
+        "recognition": {
+          "normal": [
+            0.9999999743616685,
+            0.00004634981933562333,
+            -0.00022164917468524045
+          ],
+          "offset": 0.000025421875324852527,
+          "span": 0.2841049090537475,
+          "coverage": 1,
+          "boundaryCoverage": 1,
+          "rms": 0.00036886569790873424,
+          "boundaryRms": 0,
+          "p95": 0.0007430471154396844,
+          "normalAgreement": 0.999726049198018,
+          "sampleCount": 256,
+          "vertexPairCoverage": 0.08029197080291971,
+          "confidence": "reliable"
+        }
+      }
+    },
+    {
+      "name": "Every face belongs to one complete open sheet",
+      "passed": true
+    },
+    {
+      "name": "Default geometry generation commits two symmetry-verified sheets",
+      "passed": true,
+      "detail": [
+        {
+          "faces": 384,
+          "method": "symmetry-constrained",
+          "symmetry": {
+            "status": "constrained",
+            "surface": {
+              "normal": [
+                0.9999999743616685,
+                0.000046349819336079695,
+                -0.0002216491746853194
+              ],
+              "offset": 0.28439090551062,
+              "span": 0.4191566672738518,
+              "coverage": 1,
+              "boundaryCoverage": 1,
+              "rms": 0.000429562213726354,
+              "boundaryRms": 0.00004545269002093066,
+              "p95": 0.0007926619367605227,
+              "normalAgreement": 0.9995741073218559,
+              "sampleCount": 304,
+              "vertexPairCoverage": 0.1291866028708134,
+              "confidence": "reliable"
+            },
+            "before": {
+              "rms": 0.0019021898323828379,
+              "boundaryRms": 0.0016411886914538126,
+              "p95": 0.003683023673888334,
+              "max": 0.005386904262645233,
+              "axis": [
+                0.004356136962558316,
+                0.9999905119903706
+              ],
+              "center": [
+                0.2293479667318751,
+                -0.23945593153203049
+              ],
+              "span": 1.309772591523658
+            },
+            "after": {
+              "rms": 0.0007605264972294693,
+              "boundaryRms": 0.00035232882068880636,
+              "p95": 0.0023218947028415173,
+              "max": 0.0037031988276679255,
+              "axis": [
+                0.999999971893755,
+                0.000237091731526277
+              ],
+              "center": [
+                -0.24571195421923347,
+                -0.23013876476753237
+              ],
+              "span": 1.3088644252856634
+            },
+            "iterations": 6
+          }
+        },
+        {
+          "faces": 160,
+          "method": "projected-free",
+          "symmetry": {
+            "status": "already-symmetric",
+            "surface": {
+              "normal": [
+                0.9999999743616685,
+                0.000046349819336079695,
+                -0.0002216491746853194
+              ],
+              "offset": 0.28439090551062,
+              "span": 0.37863640995812103,
+              "coverage": 1,
+              "boundaryCoverage": 1,
+              "rms": 0.000022273006322865227,
+              "boundaryRms": 0.00004984474657886815,
+              "p95": 0.000057532549381594624,
+              "normalAgreement": 0.9999997003598375,
+              "sampleCount": 304,
+              "vertexPairCoverage": 0,
+              "confidence": "reliable"
+            },
+            "before": {
+              "rms": 0.000046768541445994096,
+              "boundaryRms": 0.00003571384139080965,
+              "p95": 0.0000559329466005232,
+              "max": 0.00030286613476120984,
+              "axis": [
+                -0.9999999707348973,
+                0.0002419301642779569
+              ],
+              "center": [
+                0.0000136461686000052,
+                -0.50661462398433
+              ],
+              "span": 1.013229248336233
+            },
+            "after": {
+              "rms": 0.000046768541445994096,
+              "boundaryRms": 0.00003571384139080965,
+              "p95": 0.0000559329466005232,
+              "max": 0.00030286613476120984,
+              "axis": [
+                -0.9999999707348973,
+                0.0002419301642779569
+              ],
+              "center": [
+                0.0000136461686000052,
+                -0.50661462398433
+              ],
+              "span": 1.013229248336233
+            },
+            "iterations": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "Later packing and fill must retain each verified reflection",
+      "passed": true
+    },
+    {
+      "name": "Asymmetric post-solve edit is rejected, not hidden in packing",
+      "passed": true
+    },
+    {
+      "name": "A missing whole side is rejected",
+      "passed": true
+    },
+    {
+      "name": "No geometry changed",
+      "passed": true
+    },
+    {
+      "name": "Poisoned source UV, indices and names cannot change generated UV",
+      "passed": true
+    },
+    {
+      "name": "Unseen closed shell with 5/13 unequal side subdivisions uses surface, not triangle identity",
+      "passed": true,
+      "detail": {
+        "normal": [
+          -0.9999907652957543,
+          -0.004297583895212981,
+          -0.000009791579178211657
+        ],
+        "offset": 0.00023756838971611315,
+        "span": 2.832664038785359,
+        "coverage": 1,
+        "boundaryCoverage": 1,
+        "rms": 0.0005334930206465262,
+        "boundaryRms": 0.0017759925499191771,
+        "p95": 0.00219837418401931,
+        "normalAgreement": 0.9992961338193161,
+        "sampleCount": 312,
+        "vertexPairCoverage": 0,
+        "confidence": "reliable"
+      }
+    },
+    {
+      "name": "Rotated/scaled/renamed closed shell keeps the same face grouping",
+      "passed": true
+    },
+    {
+      "name": "Explicit cuts disable the closed-sheet assumption",
+      "passed": true
+    },
+    {
+      "name": "Known planar gear keeps holes and tooth outline",
+      "passed": true
+    }
+  ]
+}
