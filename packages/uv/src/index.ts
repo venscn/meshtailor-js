@@ -51,3 +51,5 @@ export * from "./generation-policy.js";
 export {validateFeatureOutput} from './feature-output.js';
 
 export {validateStructureOutput} from './structure-output.js';
+
+export * from './fill-growth.js';

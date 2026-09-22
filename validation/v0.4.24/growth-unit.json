@@ -1,0 +1,233 @@
+{
+  "passed": 13,
+  "tests": [
+    {
+      "name": "Audit calculates area x4 and length x2 from real coordinates",
+      "passed": true
+    },
+    {
+      "name": "Translation and identity do not masquerade as enlargement",
+      "passed": true
+    },
+    {
+      "name": "Rollback is audited from baseline coordinates, not accepted trial count",
+      "passed": true
+    },
+    {
+      "name": "Budget, untried and density limit are distinct",
+      "passed": true
+    },
+    {
+      "name": "Missing or duplicated island identity fails audit",
+      "passed": true
+    },
+    {
+      "name": "Largest blocked chart is kept; a smaller chart really grows",
+      "passed": true
+    },
+    {
+      "name": "Capacity-directed enlargement is executed, not just relocation",
+      "passed": true
+    },
+    {
+      "name": "New default has a finite 3x density limit, not unlimited growth",
+      "passed": true
+    },
+    {
+      "name": "Explicit 1.6x cap is honoured and reported, never silently raised",
+      "passed": true
+    },
+    {
+      "name": "Repeated fill cannot evade the density cap",
+      "passed": true
+    },
+    {
+      "name": "Committed area summary agrees with independently summed triangle area",
+      "passed": true
+    },
+    {
+      "name": "Vacancy enlargement has a working disable switch",
+      "passed": true
+    },
+    {
+      "name": "Invalid capacity-fit parameter is rejected",
+      "passed": true
+    }
+  ],
+  "example": {
+    "mode": "area-priority",
+    "resolution": 256,
+    "settings": {
+      "step": 0.08,
+      "maxAreaGain": 3,
+      "maxRounds": 8,
+      "warmupPasses": 0,
+      "timeBudgetMs": 10000,
+      "maxTrials": 256,
+      "rotate": true
+    },
+    "densitySpreadBefore": 1,
+    "densitySpreadAfter": 3,
+    "before": 0.6605,
+    "after": 0.6892999999999999,
+    "beforeBox": 0.6605,
+    "afterBox": 0.6893,
+    "trials": 8,
+    "accepted": 1,
+    "commonAccepted": 0,
+    "rounds": 5,
+    "stop": "converged",
+    "elapsedMs": 64.87255900000036,
+    "order": [
+      9,
+      1
+    ],
+    "gains": [
+      {
+        "id": 9,
+        "area3D": 0.6461,
+        "areaFactor": 1,
+        "linearFactor": 1
+      },
+      {
+        "id": 1,
+        "area3D": 0.0144,
+        "areaFactor": 3,
+        "linearFactor": 1.7320508075688772
+      }
+    ],
+    "history": [
+      {
+        "round": 1,
+        "id": 1,
+        "occupancy": 0.6893,
+        "areaFactor": 3
+      }
+    ],
+    "shapeWaste": [
+      {
+        "id": 9,
+        "area3D": 0.6461,
+        "boxWaste": 0,
+        "shapeFill": 1
+      },
+      {
+        "id": 1,
+        "area3D": 0.0144,
+        "boxWaste": 0,
+        "shapeFill": 1
+      }
+    ],
+    "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。",
+    "search": {
+      "commonGainLimit": 4,
+      "commonGain": 1,
+      "rotationStep": 45,
+      "reflowBudget": 4,
+      "reflowTrials": 0,
+      "reflowAccepted": 0,
+      "islandsTried": 2,
+      "untriedIds": [],
+      "completedSweeps": 5,
+      "freeGridFraction": 0.285064697265625,
+      "emptyRegions": [
+        {
+          "cells": 18682,
+          "bounds": [
+            0.003,
+            0.66315625,
+            0.99909375,
+            0.99909375
+          ]
+        }
+      ]
+    },
+    "cavities": {
+      "enabled": true,
+      "growthSteps": 4,
+      "windowTrials": 0,
+      "windowAccepted": 0,
+      "relocationTrials": 2,
+      "relocations": 2,
+      "relocatedIds": [
+        1,
+        1
+      ],
+      "largestBefore": 0.29132080078125,
+      "largestAfter": 0.187652587890625,
+      "positionOnly": false
+    },
+    "vacancyGrowth": {
+      "enabled": true,
+      "trials": 1,
+      "accepted": 1
+    },
+    "adaptive": {
+      "strategy": "adaptive",
+      "seed": "current-layout",
+      "localAccepted": 1,
+      "reflowAccepted": 0,
+      "failedTrials": 5,
+      "smallerAfterFailure": 0,
+      "skippedAtCap": 5,
+      "attempts": [
+        {
+          "id": 9,
+          "tries": 5,
+          "accepted": 0,
+          "failed": 5,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 1,
+          "tries": 1,
+          "accepted": 1,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        }
+      ]
+    },
+    "growth": {
+      "rows": [
+        {
+          "id": 9,
+          "areaBefore": 0.6461,
+          "areaAfter": 0.6461,
+          "areaFactor": 1,
+          "linearFactor": 1,
+          "area3D": 0.6461,
+          "densityBefore": 1,
+          "densityAfter": 1,
+          "allowedAreaFactor": 3,
+          "tries": 5,
+          "reason": "no-fit-found"
+        },
+        {
+          "id": 1,
+          "areaBefore": 0.0144,
+          "areaAfter": 0.0432,
+          "areaFactor": 3.0000000000000004,
+          "linearFactor": 1.7320508075688774,
+          "area3D": 0.0144,
+          "densityBefore": 1,
+          "densityAfter": 3.0000000000000004,
+          "allowedAreaFactor": 3.0000000000000004,
+          "tries": 1,
+          "reason": "density-limit"
+        }
+      ],
+      "beforeArea": 0.6605,
+      "afterArea": 0.6893,
+      "addedArea": 0.028800000000000048,
+      "enlarged": 1,
+      "unchanged": 1,
+      "densityLimited": 1,
+      "gainLimited": 0,
+      "notTried": 0,
+      "maxAreaFactor": 3.0000000000000004,
+      "minAreaFactor": 1
+    }
+  }
+}
