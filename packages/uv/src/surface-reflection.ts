@@ -11,7 +11,7 @@ import type {UVWork} from './work.js';
 export interface SurfaceBinding {face:number;weights:[number,number,number]}
 export interface SurfacePair {a:SurfaceBinding;b:SurfaceBinding;weight:number;boundary:boolean;distance:number}
 export interface SurfaceReflectionReport {
-  normal:Vec3;offset:number;span:number;coverage:number;boundaryCoverage:number;
+  normal:Vec3;offset:number;span:number;tolerance:number;coverage:number;boundaryCoverage:number;
   rms:number;boundaryRms:number;p95:number;normalAgreement:number;sampleCount:number;
   vertexPairCoverage:number;confidence:'reliable'|'partial';
 }
@@ -124,7 +124,7 @@ export function detectSurfaceReflection(mesh:CutMesh,options:SurfaceReflectionOp
   // A separate diagnostic measures how many source vertices have any reflected
   // vertex. It is NEVER a gate for the surface correspondence.
   let matched=0;const step=Math.max(1,Math.ceil(mesh.positions.length/256));for(let i=0;i<mesh.positions.length;i+=step){const rp=reflected(mesh.positions[i]!,normal,offset);if(mesh.positions.some(p=>dot3(sub(p,rp),sub(p,rp))<(span*1e-4)**2))matched++;}
-  candidates.push({normal,offset,span,coverage,boundaryCoverage,rms,boundaryRms,p95:dist[Math.floor((dist.length-1)*.95)]??0,normalAgreement:agreement,sampleCount:samples.length,vertexPairCoverage:matched/Math.ceil(mesh.positions.length/step),confidence:'reliable',pairs:accepted.map(h=>({a:h.sample.a,b:h.b,weight:h.sample.weight,boundary:h.sample.boundary,distance:h.distance/span}))});
+  candidates.push({normal,offset,span,tolerance:tol,coverage,boundaryCoverage,rms,boundaryRms,p95:dist[Math.floor((dist.length-1)*.95)]??0,normalAgreement:agreement,sampleCount:samples.length,vertexPairCoverage:matched/Math.ceil(mesh.positions.length/step),confidence:'reliable',pairs:accepted.map(h=>({a:h.sample.a,b:h.b,weight:h.sample.weight,boundary:h.sample.boundary,distance:h.distance/span}))});
  }
  candidates.sort((a,b)=>(a.rms+a.boundaryRms)-(b.rms+b.boundaryRms)||b.coverage-a.coverage);
  return candidates[0];

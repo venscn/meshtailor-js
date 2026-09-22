@@ -25,7 +25,7 @@ export interface FragmentationReport {
 }
 export interface UnwrapResult extends AtlasPacking { peel?:PeelReport; human?:HumanTemplateReport; spatialReport?:import('./spatial-neighbors.js').SpatialReport; pageReport?:PageReport; merge?:MergeReport; fragmentation:FragmentationReport; seams:string[]; addedSeams:string[]; diagnostics:ChartDiagnostic[]; warnings:string[] }
 export const LEGACY_UNWRAP:UnwrapOptions={chartPolicy:'legacy',uvObjective:'compact',method:'auto',iterations:2000,tolerance:1e-9,padding:.003,rotate:true,rotationSteps:12,autoCut:true,maxChartFaces:2048,maxAspect:6,minFill:.4,maxStretch:12};
-export const DEFAULT_UNWRAP:UnwrapOptions={...LEGACY_UNWRAP,initialSegmentation:'hierarchical',peelSourceHints:false,postMerge:false,structureTemplates:true,uvObjective:'paint',chartPolicy:'large',stretchAreaPercentile:.99,maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
+export const DEFAULT_UNWRAP:UnwrapOptions={surfaceSymmetry:true,symmetryTolerance:.018,symmetryStrength:30,symmetryIterations:40,...LEGACY_UNWRAP,initialSegmentation:'hierarchical',peelSourceHints:false,postMerge:false,structureTemplates:true,uvObjective:'paint',chartPolicy:'large',stretchAreaPercentile:.99,maxChartFaces:8192,maxAspect:24,minFill:0,maxStretch:30};
 export function recommendUnwrap(mesh:MeshData,goal:ChartGoal='large'):{options:UnwrapOptions;analysis:MeshAnalysis;regions:RegionOptions;reasons:string[]}{
   const r=recommendRegions(mesh,goal),large=goal==='large';
   return{options:{...DEFAULT_UNWRAP,chartPolicy:goal,stretchAreaPercentile:large?.99:1,regionOptions:{...r.options},maxChartFaces:r.options.maxChartFaces,maxAspect:large?24:10,minFill:0,maxStretch:large?30:16},analysis:r.analysis,regions:r.options,reasons:[
