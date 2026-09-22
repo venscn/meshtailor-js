@@ -71,7 +71,7 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
   const report:FillReport={mode,resolution:R,settings:{step,maxAreaGain:cap,maxRounds:roundLimit,warmupPasses:mode==='area-priority'?(options.fillWarmupPasses??3):0,timeBudgetMs:budget,maxTrials,rotate:options.rotate!==false},densitySpreadBefore:spread,densitySpreadAfter:spread,before:base.occupancy,after:base.occupancy,beforeBox:base.boxOccupancy,afterBox:base.boxOccupancy,trials:0,accepted:0,commonAccepted:0,rounds:0,stop:'converged',elapsedMs:0,order:items.map(i=>i.chart.id),gains:[],history:[],shapeWaste:items.map(i=>({id:i.chart.id,area3D:i.area3D,boxWaste:Math.max(0,i.w*i.h-i.areaUV),shapeFill:i.areaUV/(i.w*i.h)})).sort((a,b)=>b.boxWaste-a.boxWaste).slice(0,10),note:'轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。'};
   report.search={commonGainLimit:commonLimit,commonGain,rotationStep,reflowBudget,reflowTrials:0,reflowAccepted:0,islandsTried:0,untriedIds:items.map(c=>c.chart.id),completedSweeps:0};
   report.cavities={enabled:cavitiesEnabled,growthSteps,windowTrials:0,windowAccepted:0,relocationTrials:0,relocations:0,relocatedIds:[],largestBefore:0,largestAfter:0,positionOnly:false};
-  report.vacancyGrowth={enabled:options.fillFitVacancies!==false,trials:0,accepted:0};
+  report.vacancyGrowth={enabled:mode==='area-priority'&&options.fillFitVacancies!==false,trials:0,accepted:0};
   const adaptive=options.fillStrategy!=='legacy',minStep=Math.min(step,options.fillMinStep??.005);
   const attempts=items.map(it=>({id:it.chart.id,tries:0,accepted:0,failed:0,nextStep:step,minStepFailed:false}));
   report.adaptive={strategy:adaptive?'adaptive':'legacy',seed:'none',localAccepted:0,reflowAccepted:0,failedTrials:0,smallerAfterFailure:0,skippedAtCap:0,attempts};
@@ -205,6 +205,7 @@ export function refineAtlas(base:AtlasPacking,raw:RawChart[],options:FillOptions
       for(let i=0;i<count;i++){
        const vacancy=growToVacancy(i);
        if(vacancy){
+         if(failedLarger)report.adaptive!.smallerAfterFailure++;
          const next=placements!.slice();next[i]=vacancy.placement;placements=next;gains[i]=vacancy.gain;
          report.vacancyGrowth!.accepted++;report.accepted++;changed++;
          attempts[i]!.accepted++;attempts[i]!.minStepFailed=false;attempts[i]!.nextStep=step;

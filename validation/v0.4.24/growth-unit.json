@@ -77,7 +77,7 @@
     "commonAccepted": 0,
     "rounds": 5,
     "stop": "converged",
-    "elapsedMs": 64.87255900000036,
+    "elapsedMs": 52.89707199999975,
     "order": [
       9,
       1
@@ -168,7 +168,7 @@
       "localAccepted": 1,
       "reflowAccepted": 0,
       "failedTrials": 5,
-      "smallerAfterFailure": 0,
+      "smallerAfterFailure": 1,
       "skippedAtCap": 5,
       "attempts": [
         {
