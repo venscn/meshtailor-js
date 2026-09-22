@@ -10,7 +10,7 @@ import {checkUVTriangles} from './uv-quality.js';
 import {simpleUVBoundary} from './boundary-guard.js';
 import type {UVWork} from './work.js';
 export interface UVReflectionAudit {rms:number;boundaryRms:number;p95:number;max:number;axis:Vec2;center:Vec2;span:number}
-export interface UVSymmetryReport {status:'constrained'|'already-symmetric'|'rejected';surface:SurfaceReflectionReport;before:UVReflectionAudit;after:UVReflectionAudit;iterations:number;reason?:string}
+export interface UVSymmetryReport {status:'constrained'|'already-symmetric'|'rejected';surface:SurfaceReflectionReport;before:UVReflectionAudit;after:UVReflectionAudit;attempted?:UVReflectionAudit;iterations:number;reason?:string}
 export function bindingUV(mesh:Pick<CutMesh,'triangles'>,uv:readonly Vec2[],b:SurfaceBinding):Vec2 {const t=mesh.triangles[b.face]!;return [0,1].map(k=>t.reduce((s,v,j)=>s+uv[v]![k]!*b.weights[j]!,0)) as Vec2;}
 /** Fit only rotation/translation of a 2D reflection. Unlike arbitrary affine
  * fitting, this cannot make a distorted outline look symmetric by shearing. */
@@ -40,6 +40,6 @@ export function relaxSurfaceSymmetry(mesh:CutMesh,input:Vec2[],reflection:Surfac
  const after=auditUVReflection(mesh,r.uv,reflection.pairs),q=checkUVTriangles(mesh.triangles.map(t=>t.map(v=>r.uv[v]!) as [Vec2,Vec2,Vec2]),100,work);
  const valid=q.valid&&simpleUVBoundary(r.uv,mesh.boundaries,work)&&r.maxAnisotropy<=100&&symmetrySatisfied(after)&&(after.rms<=before.rms+1e-5);
  report.after=after;report.iterations=r.accepted;report.status=valid?'constrained':'rejected';
- if(!valid){report.reason='Surface symmetry solve did not satisfy the combined reflection, injectivity and distortion contract; original valid candidate retained and explicitly flagged.';return{uv:input,report,residual:r.residual};}
+ if(!valid){report.attempted=after;report.after=before;report.reason='Surface symmetry solve did not satisfy the combined reflection, injectivity and distortion contract; original valid candidate retained and explicitly flagged.';return{uv:input,report,residual:r.residual};}
  return{uv:r.uv,report,residual:r.residual};
 }

@@ -53,3 +53,8 @@ export {validateFeatureOutput} from './feature-output.js';
 export {validateStructureOutput} from './structure-output.js';
 
 export * from './fill-growth.js';
+
+export * from './surface-reflection.js';
+export * from './symmetry-parameterization.js';
+export * from './surface-symmetry-output.js';
+export * from './symmetric-sheets.js';

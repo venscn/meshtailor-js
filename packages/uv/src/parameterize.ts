@@ -1,3 +1,5 @@
+import {detectSurfaceReflection,type SurfaceReflectionReport} from './surface-reflection.js';
+import {relaxSurfaceSymmetry,type UVSymmetryReport} from './symmetry-parameterization.js';
 import {featureContract,type FeatureContractReport} from './feature-contract.js';
 import {simpleUVBoundary} from './boundary-guard.js';
 import {incompleteCholesky} from './sparse-preconditioner.js';
@@ -7,8 +9,8 @@ import { uvProgress, rethrowUVStop, type UVWork } from './work.js';
 import type { Vec2,Vec3 } from '@meshtailor/mesh-core';
 import type { CutMesh } from './cut-topology.js';
 import { checkUVTriangles, type UVQuality, signedArea2 } from './uv-quality.js';
-export interface SolverOptions { featureFrame?:ProjectionFrame; projectionSeed?:boolean; iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte'; uvObjective?:'paint'|'compact'; paintIterations?:number }
-export interface Parameterization { feature?:FeatureContractReport; boundaryValid?:boolean; uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'|'projected-free'|'feature-constrained'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
+export interface SolverOptions {surfaceSymmetry?:boolean;symmetryTolerance?:number;symmetryStrength?:number;symmetryIterations?:number;symmetryPlane?:{normal:Vec3;offset:number}; featureFrame?:ProjectionFrame; projectionSeed?:boolean; iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte'; uvObjective?:'paint'|'compact'; paintIterations?:number }
+export interface Parameterization {symmetryPairs?:import('./surface-reflection.js').SurfacePair[];symmetry?:UVSymmetryReport; feature?:FeatureContractReport; boundaryValid?:boolean; uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'|'projected-free'|'feature-constrained'|'symmetry-constrained'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
 export function triangleArea(a:Vec3,b:Vec3,c:Vec3):number{const u=b.map((x,i)=>x-a[i]!),v=c.map((x,i)=>x-a[i]!);return Math.hypot(u[1]!*v[2]!-u[2]!*v[1]!,u[2]!*v[0]!-u[0]!*v[2]!,u[0]!*v[1]!-u[1]!*v[0]!)*.5;}
 type Row={ids:number[];values:number[]};
 /** Matrix-free, diagonally preconditioned conjugate gradients on A^T A.
@@ -102,7 +104,7 @@ export function chartAreaDensity(mesh:CutMesh,uv:readonly Vec2[]):{min:number;ma
   const mean=b/a;let min=Infinity,max=0;for(const r of ratios){min=Math.min(min,r/mean);max=Math.max(max,r/mean);}return{min,max};
 }
 const areaNotCollapsed=(mesh:CutMesh,uv:readonly Vec2[])=>{const r=chartAreaDensity(mesh,uv);return r.min>=1e-3&&r.max<=200;};
-export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={},work?:UVWork):Parameterization{
+function parameterizeUnconstrained(mesh:CutMesh,options:Partial<SolverOptions>={},work?:UVWork):Parameterization{
   const opts:SolverOptions={iterations:2000,tolerance:1e-9,method:'auto',uvObjective:'paint',paintIterations:24,...options};let reason='';
   const finish=(r:ReturnType<typeof lscm>,method:Parameterization['method']):Parameterization=>{
     const signs=mesh.triangles.reduce((s,t)=>s+signedArea2(r.uv[t[0]]!,r.uv[t[1]]!,r.uv[t[2]]!),0);
@@ -171,4 +173,27 @@ export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={}
     return r;
   }
   return seed;
+}
+
+/** Recognition is run on the cut surface before selecting its UV candidate.
+ * Surface reflection remains separate from the old exact-cell grouping map. */
+export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={},work?:UVWork):Parameterization {
+  if(options.surfaceSymmetry!==undefined&&typeof options.surfaceSymmetry!=='boolean')throw Error('surfaceSymmetry must be boolean');
+  const enabled=options.surfaceSymmetry!==false&&(options.uvObjective??'paint')==='paint'&&(options.method??'auto')==='auto';
+  // Coincident cut lips require a branch-aware correspondence. Never glue them
+  // through nearest-surface matching; nonmatching deliberate slits are reported
+  // separately by the group planner rather than hallucinating a UV symmetry.
+  const unslit=new Set(mesh.sourceVertices).size===mesh.sourceVertices.length;
+  const reflection=enabled&&unslit&&mesh.boundaryLoops>0?detectSurfaceReflection(mesh,{tolerance:options.symmetryTolerance??.018,fixedPlane:options.symmetryPlane},work):undefined;
+  const base=parameterizeUnconstrained(mesh,options,work);
+  if(!reflection)return base;
+  try {
+    const r=relaxSurfaceSymmetry(mesh,base.uv,reflection,options.symmetryIterations??40,options.symmetryStrength??30,work);
+    const result={...base,symmetry:r.report,...(r.report.status!=='rejected'?{symmetryPairs:reflection.pairs}:{})};
+    if(r.report.status==='constrained'){
+      const quality=checkUVTriangles(mesh.triangles.map(t=>t.map(v=>r.uv[v]!) as [Vec2,Vec2,Vec2]),100,work);
+      return {...result,uv:r.uv,method:'symmetry-constrained',quality,iterations:base.iterations+r.report.iterations,residual:r.residual,boundaryValid:true};
+    }
+    return result;
+  }catch(error){rethrowUVStop(error);throw error;}
 }

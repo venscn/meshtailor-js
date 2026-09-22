@@ -1,3 +1,4 @@
+import {validateSurfaceSymmetryOutput,type SurfaceUVContract} from './surface-symmetry-output.js';
 import {simpleUVBoundary} from './boundary-guard.js';
 import {freeBoundaryARAP} from './free-boundary.js';
 import {validateStructureOutput} from './structure-output.js';
@@ -17,7 +18,7 @@ import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
 export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions,PeelOptions { structuralRelaxIterations?:number; sourceFeaturePolicy?:'repair'|'preserve'; sourceFeatureTolerance?:number; structureTemplates?:boolean; humanTemplates?:Partial<import('./human-templates.js').HumanTemplateOptions>; sourceRepairPolicy?:'repair'|'reject'; sourceAtlasMerge?:boolean; initialSegmentation?:'regions'|'connected'|'hierarchical'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
-export interface ChartDiagnostic {structuralRelaxation?:{initialEnergy:number;finalEnergy:number;acceptedIterations:number};feature?:import('./feature-contract.js').FeatureContractReport;areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
+export interface ChartDiagnostic {symmetry?:import('./symmetry-parameterization.js').UVSymmetryReport;structuralRelaxation?:{initialEnergy:number;finalEnergy:number;acceptedIterations:number};feature?:import('./feature-contract.js').FeatureContractReport;areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
@@ -66,6 +67,10 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   input=geometryOnlyMesh(input);
   if(options.peelSourceHints===true)throw Error('原 UV 提示已禁用：自动生成只使用几何。');
   const opts={...(options.chartPolicy==='legacy'?LEGACY_UNWRAP:recommendUnwrap(input,options.chartPolicy??'large').options),...options};
+  if(opts.surfaceSymmetry!==undefined&&typeof opts.surfaceSymmetry!=='boolean')throw Error('surfaceSymmetry must be boolean');
+  if(opts.symmetryTolerance!==undefined&&(!Number.isFinite(opts.symmetryTolerance)||opts.symmetryTolerance<.001||opts.symmetryTolerance>.06))throw Error('symmetryTolerance must be .001..06');
+  if(opts.symmetryStrength!==undefined&&(!Number.isFinite(opts.symmetryStrength)||opts.symmetryStrength<1||opts.symmetryStrength>200))throw Error('symmetryStrength must be 1..200');
+  if(opts.symmetryIterations!==undefined&&(!Number.isInteger(opts.symmetryIterations)||opts.symmetryIterations<1||opts.symmetryIterations>100))throw Error('symmetryIterations must be 1..100');
   if(opts.structureTemplates!==undefined&&typeof opts.structureTemplates!=='boolean')throw Error('Invalid structural template switch.');
   if(opts.structuralRelaxIterations!==undefined&&(!Number.isInteger(opts.structuralRelaxIterations)||opts.structuralRelaxIterations<0||opts.structuralRelaxIterations>100))throw Error('structuralRelaxIterations must be 0..100');
   const hierarchical=opts.initialSegmentation==='hierarchical';
@@ -87,7 +92,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     const panels=paintPanelSeams(mesh,effective);
     if(panels.panels.length){for(const key of panels.seams)effective.add(key);warnings.push(`保留 ${panels.panels.length} 个主要平面特征面板，优先保持凹口、齿形与孔洞；没有按小平面切碎。`);}
   }
-  const planned=hierarchical?planSurfaceGroups(mesh,effective,{...opts,structureGroups:opts.uvObjective==='paint'&&opts.method==='auto'&&opts.structureGroups!==false,featureSheets:opts.uvObjective==='paint'&&opts.method==='auto'},work):undefined,peel=planned?.report;
+  const planned=hierarchical?planSurfaceGroups(mesh,effective,{...opts,surfaceSymmetry:opts.uvObjective==='paint'&&opts.method==='auto'&&opts.surfaceSymmetry!==false,structureGroups:opts.uvObjective==='paint'&&opts.method==='auto'&&opts.structureGroups!==false,featureSheets:opts.uvObjective==='paint'&&opts.method==='auto'},work):undefined,peel=planned?.report;
   if(planned){for(const key of planned.seams)effective.add(key);warnings.push(`通用剥展：先建立 ${peel!.groups.length} 个空间组，组内再开缝和展平；组数不是 UV 岛数。`);}
   const wholeBands=useTemplates&&buildCharts(mesh,effective,topology).some(c=>inspectBand(mesh,c.faces,opts.humanTemplates).ok);
   if(!hierarchical&&!wholeBands&&opts.autoCut&&opts.chartPolicy!=='legacy'&&effective.size===0&&opts.initialSegmentation!=='connected'){
@@ -101,6 +106,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   const componentFaces=buildCharts(mesh,new Set([...topology.edges].filter(([,e])=>e.faces.length>2).map(([k])=>k)),topology).map(c=>c.faces.length).sort((a,b)=>b-a);
   const fragmentation:FragmentationReport={inputComponents:componentFaces.length,componentFaces,initialCharts:0,outputCharts:0,tinyCharts:0,reasons:{},events:[],omittedEvents:0};
   const record=(reason:string,faces:number,sourceChart:number,depth:number,detail?:string)=>{fragmentation.reasons[reason]=(fragmentation.reasons[reason]??0)+1;if(fragmentation.events.length<1000)fragmentation.events.push({reason,faces,sourceChart,depth,...(detail?{detail}:{})});else fragmentation.omittedEvents++;};
+  const surfaceContracts:SurfaceUVContract[]=[];
   const charts=buildCharts(mesh,effective,topology),raw:RawChart[]=[],diagnostics:ChartDiagnostic[]=[];let partitions=0,facesDone=0;
   fragmentation.initialCharts=charts.length;
   const human:HumanTemplateReport|undefined=useTemplates?{version:1,options:humanOptions(opts.humanTemplates),before:charts.length,after:charts.length,applied:0,entries:[],protectedSeams:[],addedSeams:[],removedSeams:[]}:undefined;
@@ -110,10 +116,10 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     const event=(action:string,detail:string)=>{if(peel&&peel.events.length<2000)peel.events.push({group:sourceChart,faces:faces.length,depth,action,detail});};
     uvProgress(work,{stage:'topology',detail:`检查几何组 ${sourceChart+1} 的 ${faces.length} 个面（补切层 ${depth}）`,facesDone,facesTotal:mesh.faces.length,islandsDone:raw.length});
     const featureFrame=depth===0?peel?.groups[sourceChart]?.featureFrame:undefined;
-    const solveOptions={...opts,featureFrame};
+    const solveOptions={...opts,featureFrame,symmetryPlane:depth===0&&peel?.groups[sourceChart]?.surfaceReflection?{normal:peel.groups[sourceChart]!.surfaceReflection!.normal,offset:peel.groups[sourceChart]!.surfaceReflection!.offset}:undefined};
     const structure=depth===0?peel?.groups[sourceChart]:undefined;
-    if(structure?.kind==='closed-shell'&&faces.length>opts.maxChartFaces)throw Error(`Complete shell needs a per-chart face budget of at least ${faces.length}; current ${opts.maxChartFaces}. Do not split a protected skin merely to satisfy the solver budget.`);
-    if(human&&!featureFrame&&structure?.kind!=='closed-shell'){
+    if((structure?.kind==='closed-shell'||structure?.kind==='symmetric-sheet')&&faces.length>opts.maxChartFaces)throw Error(`Complete shell needs a per-chart face budget of at least ${faces.length}; current ${opts.maxChartFaces}. Do not split a protected skin merely to satisfy the solver budget.`);
+    if(human&&!featureFrame&&structure?.kind!=='closed-shell'&&structure?.kind!=='symmetric-sheet'){
       const t=unfoldBand(mesh,faces,sourceChart,effective,opts,totalArea,work);
       if('raw' in t){
         event('analytic-seed','Validated generic ring geometry candidate; actual side cuts preserved.');
@@ -155,17 +161,18 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     // after it has appended solved siblings (that could duplicate source faces).
     try{p??=parameterizeChart(local,solveOptions,work);}catch(error){
       rethrowUVStop(error);
-      if(structure?.kind==='closed-shell')throw Error('Complete skin/wall solve rejected; protected holes will not be opened into the outside boundary. '+String(error));
+      if(structure?.kind==='closed-shell'||structure?.kind==='symmetric-sheet')throw Error('Complete skin/wall solve rejected; protected holes will not be opened into the outside boundary. '+String(error));
       if(!opts.autoCut||faces.length<2||depth>(opts.peelMaxDepth??20))throw error;
       
       record('solver-invalid',faces.length,sourceChart,depth,String(error));
       partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),true))solve(fs,sourceChart,depth+1);return;
     }
+      if(structure?.kind==='symmetric-sheet'&&p.symmetry?.status==='rejected')throw Error('Recognized symmetric sheet did not satisfy UV symmetry constraints.');
       let structuralRelaxation:ChartDiagnostic['structuralRelaxation'];
       // Conformal validity alone does not preserve the relative size of a
       // shoulder versus its waist. Balance the intrinsic 3D metric of verified
       // bilateral panels, without consulting any authored UV coordinates.
-      if(structure?.kind==='bilateral-connector'&&opts.method==='auto'&&opts.uvObjective==='paint'&&(opts.structuralRelaxIterations??60)>0){
+      if(!p.symmetryPairs&&structure?.kind==='bilateral-connector'&&opts.method==='auto'&&opts.uvObjective==='paint'&&(opts.structuralRelaxIterations??60)>0){
         try{const r=freeBoundaryARAP(local,p.uv,opts.structuralRelaxIterations??60,Math.min(opts.iterations,600),work);
           const quality=checkUVTriangles(local.triangles.map(t=>t.map(v=>r.uv[v]!) as [Vec2,Vec2,Vec2]),100,work);
           if(r.accepted&&r.energy<r.initialEnergy&&r.maxAnisotropy<=100&&quality.valid&&simpleUVBoundary(r.uv,local.boundaries,work)){
@@ -176,13 +183,19 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       }
       const shape=shapeQuality(local,p.uv,opts.stretchAreaPercentile??1,opts.maxStretch);
       if(opts.autoCut&&faces.length>16&&((opts.uvObjective==='compact'&&shape.aspect>opts.maxAspect)||shape.fill<opts.minFill||shape.areaStretch>opts.maxStretch)){record(shape.areaStretch>opts.maxStretch?'stretch':shape.aspect>opts.maxAspect?'aspect':'fill',faces.length,sourceChart,depth,`area stretch ${shape.areaStretch}; maximum ${shape.maxStretch}`);partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),shape.areaStretch>opts.maxStretch))solve(fs,sourceChart,depth+1);return;}
+      if(p.symmetryPairs&&p.symmetry&&p.symmetry.status!=='rejected'){
+        surfaceContracts.push({faces:[...faces],pairs:p.symmetryPairs.map(pair=>({...pair,a:{...pair.a,face:local.sourceFaces[pair.a.face]!},b:{...pair.b,face:local.sourceFaces[pair.b.face]!}})),baseline:p.symmetry.after,surface:p.symmetry.surface});
+        // Weak segmentation may be revisited elsewhere; a fully solved and
+        // verified symmetric region must not be unilaterally joined afterwards.
+        const members=new Set(faces);for(const[k,e]of topology.edges)if(e.faces.length===2&&e.faces.some(f=>members.has(f))&&!e.faces.every(f=>members.has(f)))templateLocks.add(k);
+      }
       for(const key of pendingSlits)effective.add(key);
       event('unfold',`${p.method}; ${pendingSlits.length} internal slit edges; aspect ${shape.aspect.toFixed(2)}`);
       const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();
       local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...p.uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
       const area3D=local.triangles.reduce((s,t)=>s+triangleArea(local.positions[t[0]]!,local.positions[t[1]]!,local.positions[t[2]]!),0),id=raw.length;
       facesDone+=faces.length;uvProgress(work,{stage:'parameterize',detail:'已接受有效 UV 岛',facesDone,facesTotal:mesh.faces.length,islandsDone:raw.length+1});
-      raw.push({id,faceUVs,area3D});diagnostics.push({id,sourceChart,faces:faces.length,structuralRelaxation,method:p.method,...shape,iterations:p.iterations,residual:p.residual,...(p.feature?{feature:p.feature}:{}),...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});
+      raw.push({id,faceUVs,area3D});diagnostics.push({id,sourceChart,faces:faces.length,structuralRelaxation,symmetry:p.symmetry,method:p.method,...shape,iterations:p.iterations,residual:p.residual,...(p.feature?{feature:p.feature}:{}),...(p.fallbackReason?{fallbackReason:p.fallbackReason}:{})});
   };
   charts.forEach(chart=>solve(chart.faces,chart.id));
   for(const key of peel?.groupSeams??[])templateLocks.add(key);
@@ -205,10 +218,13 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   warnings.push(`碎片诊断：输入 ${fragmentation.inputComponents} 个几何连通分量 → ${fragmentation.initialCharts} 个初始区域 → ${raw.length} 个最终岛（${fragmentation.tinyCharts} 个小于16面）。补切原因：${JSON.stringify(fragmentation.reasons)}。详细事件可导出诊断。`);
   const tolerated=diagnostics.filter(d=>d.maxStretch>opts.maxStretch&&d.areaStretch!<=opts.maxStretch);
   if(tolerated.length)warnings.push(`${tolerated.length} 个岛含超过软形变阈值的微小细节；采用 ${((opts.stretchAreaPercentile??1)*100).toFixed(1)}% 源表面积分位数避免整块反复切碎。最坏值仍报告；不豁免翻面、退化或交叠。`);
+  const sym=diagnostics.filter(d=>d.symmetry), rejected=sym.filter(d=>d.symmetry!.status==='rejected');
+  if(sym.length)warnings.push(`表面对称：识别 ${sym.length} 个候选，${sym.length-rejected.length} 个通过展平与最终输出约束，${rejected.length} 个未通过并明确保留原有效候选；未识别、已开缝或未通过区域不保证对称。原 UV 使用 0。`);
   work?.step?.('pack');
   const atlas=packConnectedAtlas(mesh,raw,opts,work);
   warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
-  if(peel){peel.totalIslands=raw.length;for(const group of peel.groups){const fs=new Set(group.faces);group.charts=raw.filter(c=>[...c.faceUVs.keys()].some(f=>fs.has(f))).map(c=>c.id);}warnings.push(`通用剥展完成：${peel.groups.length} 个空间组 → ${raw.length} 个有效岛；${peel.feedbackSplits} 次反馈细分，${peel.sourceHintCharts} 个有效源形状回退。空间组边界与组内 UV 缝分别记录。`);}
+  if(peel){peel.surfaceContracts=surfaceContracts;peel.totalIslands=raw.length;for(const group of peel.groups){const fs=new Set(group.faces);group.charts=raw.filter(c=>[...c.faceUVs.keys()].some(f=>fs.has(f))).map(c=>c.id);}warnings.push(`通用剥展完成：${peel.groups.length} 个空间组 → ${raw.length} 个有效岛；${peel.feedbackSplits} 次反馈细分，${peel.sourceHintCharts} 个有效源形状回退。空间组边界与组内 UV 缝分别记录。`);}
   validateStructureOutput(mesh,atlas.packed,effective,peel,work);
+  validateSurfaceSymmetryOutput(mesh,atlas.packed,peel,work);
   return{...atlas,peel,human,merge,fragmentation,seams:[...effective],addedSeams,diagnostics,warnings};
 }
