@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.24",
+  "version": "0.4.25",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -131,7 +131,7 @@
     "test:complete-structure": "node scripts/complete-structure-smoke.mjs",
     "test:complete-structure:browser": "node scripts/complete-structure-browser.mjs",
     "test:structure-relax": "node scripts/structure-relax-smoke.mjs",
-    "results:restore": "node scripts/restore-cavity-results.mjs",
+    "results:restore": "node scripts/restore-symmetry-results.mjs",
     "test:longitudinal-budget": "node scripts/longitudinal-budget-smoke.mjs --include-high",
     "test:raster-window": "node scripts/raster-window-smoke.mjs",
     "test:cavity-fill": "node scripts/cavity-fill-smoke.mjs",
@@ -139,7 +139,12 @@
     "test:seams-fill:real": "node scripts/seam-fill-models-smoke.mjs",
     "test:cavity-load": "node scripts/cavity-load-pipeline-smoke.mjs",
     "test:fill-growth": "node scripts/fill-growth-smoke.mjs",
-    "test:fill-growth:browser": "node scripts/fill-growth-browser-smoke.mjs"
+    "test:fill-growth:browser": "node scripts/fill-growth-browser-smoke.mjs",
+    "test:surface-reflection": "node scripts/surface-reflection-smoke.mjs",
+    "test:symmetry-metric": "node scripts/symmetry-metric-smoke.mjs",
+    "test:symmetric-sheets": "node scripts/symmetric-sheets-smoke.mjs",
+    "test:surface-symmetry:browser": "node scripts/surface-symmetry-browser.mjs",
+    "test:surface-symmetry:postprocess": "node scripts/surface-symmetry-postprocess.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

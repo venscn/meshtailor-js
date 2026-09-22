@@ -1,0 +1,16 @@
+{
+  "version": "0.4.25",
+  "scope": "Exact pure-geometry outputs, not source-UV hints. Optional external QA viewing only.",
+  "files": [
+    {
+      "file": "Corset-generated.obj",
+      "bytes": 1694627,
+      "sha256": "bca47ed011892c882952a304b0b94d3a7ad41980eb3fa2ac31f060ae604770b3"
+    },
+    {
+      "file": "FlightHelmet-generated.obj",
+      "bytes": 8586084,
+      "sha256": "df7cc6b883a5435935298d9633fa714a247bddf9a457c02780421add46567ffd"
+    }
+  ]
+}
