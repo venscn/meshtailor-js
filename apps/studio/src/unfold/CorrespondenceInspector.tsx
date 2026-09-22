@@ -1,3 +1,4 @@
+import {describeSurfaceSymmetry} from './symmetry-description';
 import {describeGrowthStop} from '@meshtailor/uv';
 import {describeStructure} from './structure-description';
 import type { MeshData } from '@meshtailor/mesh-core';
@@ -25,6 +26,7 @@ export function CorrespondenceInspector({mesh,snapshot,player:p}:{mesh:MeshData;
       <p className="selection-help">{p.selection.length?'在已选岛内点击三角形查看坐标；再次点击该面取消。':'点击任一视图或岛列表选择 UV 岛，再点击岛内三角形。'}</p>
       <div className="button-grid two"><button disabled={fi===null} onClick={p.clearFace}>取消三角形</button><button disabled={!p.selection.length} onClick={p.clear}>清空选择</button></div>
       {chart&&<dl className="property-list"><dt>UV 岛</dt><dd>#{chart.id+1}</dd><dt>三角面</dt><dd>{chart.faceUVs.size.toLocaleString()}</dd><dt>材质空间</dt><dd>{chart.uvSpaceName??chart.uvSpace??'默认'}</dd>{diagnostic&&<><dt>求解方式</dt><dd>{diagnostic.method}</dd><dt>最大形变比</dt><dd>{diagnostic.maxStretch.toFixed(2)}</dd></>}</dl>}
+      {chart&&<p data-testid="surface-symmetry-correspondence" className="selection-help">{describeSurfaceSymmetry(diagnostic,chart,snapshot?.peel)}</p>}
       {diagnostic?.feature&&<dl className="property-list" data-testid="feature-correspondence"><dt>几何特征保护</dt><dd>透孔主面 · 保留 {diagnostic.feature.holes} 个孔</dd><dt>边界最大变化</dt><dd>{(100*diagnostic.feature.boundaryMax).toFixed(2)}% 参考轮廓直径</dd><dt>孔面积比例</dt><dd>{diagnostic.feature.holeAreaRatios.map(x=>x.toFixed(3)+'×').join(' / ')}</dd><dt>度量范围</dt><dd>相对源几何投影；去除整体旋转与尺度。不是原 UV，也不是人工语义评分。</dd></dl>}
       {structure?.structureReason&&<p data-testid="structure-correspondence" className="selection-help">{describeStructure(structure)}</p>}
       {diagnostic?.structuralRelaxation&&<p className="selection-help">内在长度松弛：{diagnostic.structuralRelaxation.acceptedIterations} 次接受；能量 {diagnostic.structuralRelaxation.initialEnergy.toFixed(4)} → {diagnostic.structuralRelaxation.finalEnergy.toFixed(4)}。不读取参考 UV。</p>}

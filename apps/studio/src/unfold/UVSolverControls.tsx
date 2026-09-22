@@ -1,3 +1,4 @@
+import {describeSymmetrySummary} from './symmetry-description';
 import {renderFillGrowth} from './fill-growth-panel';
 import { useState, useEffect, useRef } from 'react';
 import { DEFAULT_FILL_DENSITY_LIMIT, describeFill, DEFAULT_HUMAN, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
@@ -22,6 +23,15 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess,selec
     <details open className="peel-controls"><summary>通用分组剥展 · 空间组与切缝分离</summary>
       <button className="primary" aria-label="Peel spatial groups" onClick={()=>onProcess('connected',{...draft,initialSegmentation:'hierarchical',uvObjective:'paint',method:'auto',autoCut:true,postMerge:false})}>空间分组 → 组内开缝 → 剥展</button>
       <label className="check"><input aria-label="Complete structural groups" type="checkbox" checked={draft.structureGroups!==false} onChange={e=>patch({structureGroups:e.target.checked})}/>完整主片／回折壁与双侧结构优先（默认）</label><small>可靠镜像单元联合划线；未匹配部分不强制复制。原 UV 不参与生成。</small>
+      <label className="check"><input aria-label="Surface symmetry" type="checkbox" checked={draft.surfaceSymmetry!==false} onChange={e=>patch({surfaceSymmetry:e.target.checked})}/>按表面识别并约束对称（默认）</label>
+      <small>在连续表面、边界和闭合折边上寻找对应；不要求左右网格相同。可靠闭合片先分层再展开；已开缝或识别不足的区域不强行镜像。新配置需重新生成才生效。</small>
+      <details><summary>表面对称数值设置</summary>
+        <label>几何匹配容差 % 部件直径<input aria-label="Surface symmetry tolerance" type="number" min=".1" max="6" step=".1" value={(draft.symmetryTolerance??.018)*100} onChange={e=>patch({symmetryTolerance:+e.target.value/100})}/></label>
+        <label>对称约束强度<input aria-label="Surface symmetry strength" type="number" min="1" max="200" value={draft.symmetryStrength??30} onChange={e=>patch({symmetryStrength:+e.target.value})}/></label>
+        <label>对称松弛迭代<input aria-label="Surface symmetry iterations" type="number" min="1" max="100" value={draft.symmetryIterations??40} onChange={e=>patch({symmetryIterations:+e.target.value})}/></label>
+        <small>增大容差可能误认近似结构；最终仍须通过镜像误差、形变、边界和全图交叠检查。</small>
+      </details>
+      {snapshot&&<p data-testid="surface-symmetry-summary">{describeSymmetrySummary(snapshot.diagnostics,snapshot.peel)}</p>}
       <label>结构片内在尺寸松弛迭代<input aria-label="Structural relaxation iterations" type="number" min="0" max="100" value={draft.structuralRelaxIterations??60} onChange={e=>patch({structuralRelaxIterations:+e.target.value})}/></label><small>根据三维边长展开肩部／腰部，不让数值有效的共形种子提前结束；0 可对照关闭。</small>
       <label>主要平面特征最小总面积 %<input aria-label="Peel feature area" type="number" min=".1" max="25" step=".1" value={(draft.peelFeatureArea??.015)*100} onChange={e=>patch({peelFeatureArea:+e.target.value/100})}/></label>
       <label>几何折角阈值（度）<input aria-label="Group feature degrees" type="number" min="20" max="100" value={draft.groupFeatureDegrees??48} onChange={e=>patch({groupFeatureDegrees:+e.target.value})}/></label>
