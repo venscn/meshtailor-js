@@ -1,0 +1,3997 @@
+{
+  "description": "v0.4.23 reports: enlargement exists; density limits are active. Same-layout headroom probe is in v23-headroom.log.",
+  "models": [
+    {
+      "model": "garment",
+      "before": 0.45454423423324014,
+      "after": 0.572182463865124,
+      "stop": "converged",
+      "densitySpread": 1.1757537744724693,
+      "gains": [
+        {
+          "id": 1,
+          "area3D": 1.0660159629559143,
+          "areaFactor": 1.3604889600000003,
+          "linearFactor": 1.1664
+        },
+        {
+          "id": 0,
+          "area3D": 1.0660159629559125,
+          "areaFactor": 1.1571206400000003,
+          "linearFactor": 1.0756954215762007
+        }
+      ],
+      "attempts": [
+        {
+          "id": 1,
+          "tries": 8,
+          "accepted": 3,
+          "failed": 5,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 0,
+          "tries": 8,
+          "accepted": 3,
+          "failed": 5,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        }
+      ]
+    },
+    {
+      "model": "gear",
+      "before": 0.26480120832032816,
+      "after": 0.4647485264000929,
+      "stop": "converged",
+      "densitySpread": 1.6000000000000003,
+      "gains": [
+        {
+          "id": 5,
+          "area3D": 0.4948582366091717,
+          "areaFactor": 2.0356945920000062,
+          "linearFactor": 1.4267776953681348
+        },
+        {
+          "id": 2,
+          "area3D": 0.49485823660917155,
+          "areaFactor": 1.8694395123847014,
+          "linearFactor": 1.3672744831908117
+        },
+        {
+          "id": 3,
+          "area3D": 0.27149999763054583,
+          "areaFactor": 1.3232014848000002,
+          "linearFactor": 1.1503049529581277
+        },
+        {
+          "id": 4,
+          "area3D": 0.2714999976305453,
+          "areaFactor": 1.3166509824000001,
+          "linearFactor": 1.1474541308479393
+        },
+        {
+          "id": 0,
+          "area3D": 0.05808358327730174,
+          "areaFactor": 2.106641571840003,
+          "linearFactor": 1.4514274256193462
+        },
+        {
+          "id": 1,
+          "area3D": 0.05808358327730167,
+          "areaFactor": 2.1066415718400053,
+          "linearFactor": 1.4514274256193471
+        }
+      ],
+      "attempts": [
+        {
+          "id": 5,
+          "tries": 14,
+          "accepted": 8,
+          "failed": 6,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 2,
+          "tries": 13,
+          "accepted": 6,
+          "failed": 7,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 3,
+          "tries": 10,
+          "accepted": 2,
+          "failed": 8,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 4,
+          "tries": 10,
+          "accepted": 2,
+          "failed": 8,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 0,
+          "tries": 8,
+          "accepted": 8,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 1,
+          "tries": 8,
+          "accepted": 8,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        }
+      ]
+    },
+    {
+      "model": "Corset",
+      "before": 0.5118625788778093,
+      "after": 0.6401046943317579,
+      "stop": "round-limit",
+      "densitySpread": 1.6000000000000003,
+      "gains": [
+        {
+          "id": 14,
+          "area3D": 0.35415426146889967,
+          "areaFactor": 1.08,
+          "linearFactor": 1.0392304845413265
+        },
+        {
+          "id": 19,
+          "area3D": 0.3278069143743917,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 20,
+          "area3D": 0.32690504893723465,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 21,
+          "area3D": 0.3268539088257714,
+          "areaFactor": 1,
+          "linearFactor": 1
+        },
+        {
+          "id": 17,
+          "area3D": 0.2372335083898163,
+          "areaFactor": 1,
+          "linearFactor": 1
+        },
+        {
+          "id": 11,
+          "area3D": 0.13266408807311067,
+          "areaFactor": 1.599999999999998,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 12,
+          "area3D": 0.11998891546916494,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 18,
+          "area3D": 0.11970856628744105,
+          "areaFactor": 1.599999999999998,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 13,
+          "area3D": 0.06551121220152197,
+          "areaFactor": 1.5999999999999979,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 22,
+          "area3D": 0.06500757090613105,
+          "areaFactor": 1.599999999999998,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 15,
+          "area3D": 0.02459741680362726,
+          "areaFactor": 1.2759271327568358,
+          "linearFactor": 1.1295694457433043
+        },
+        {
+          "id": 16,
+          "area3D": 0.019008810170098717,
+          "areaFactor": 1,
+          "linearFactor": 1
+        },
+        {
+          "id": 65,
+          "area3D": 0.008374405587346093,
+          "areaFactor": 1.599999999999997,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 57,
+          "area3D": 0.00837440514144283,
+          "areaFactor": 1.599999999999998,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 26,
+          "area3D": 0.007818987003999781,
+          "areaFactor": 1.5999999999999974,
+          "linearFactor": 1.2649110640673507
+        },
+        {
+          "id": 29,
+          "area3D": 0.007818986634264826,
+          "areaFactor": 1.5999999999999963,
+          "linearFactor": 1.2649110640673502
+        },
+        {
+          "id": 25,
+          "area3D": 0.007818984582824514,
+          "areaFactor": 1.5999999999999965,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 28,
+          "area3D": 0.007818983253386811,
+          "areaFactor": 1.599999999999997,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 32,
+          "area3D": 0.007587807806170855,
+          "areaFactor": 1.5999999999999974,
+          "linearFactor": 1.2649110640673507
+        },
+        {
+          "id": 31,
+          "area3D": 0.0075878077542152755,
+          "areaFactor": 1.5999999999999999,
+          "linearFactor": 1.2649110640673518
+        },
+        {
+          "id": 4,
+          "area3D": 0.005855871784080469,
+          "areaFactor": 1.5999999999999963,
+          "linearFactor": 1.2649110640673502
+        },
+        {
+          "id": 9,
+          "area3D": 0.005855870784719615,
+          "areaFactor": 1.600000000000001,
+          "linearFactor": 1.2649110640673522
+        },
+        {
+          "id": 0,
+          "area3D": 0.005801700388152603,
+          "areaFactor": 1.600000000000001,
+          "linearFactor": 1.2649110640673522
+        },
+        {
+          "id": 5,
+          "area3D": 0.005801700061763843,
+          "areaFactor": 1.599999999999996,
+          "linearFactor": 1.2649110640673502
+        },
+        {
+          "id": 8,
+          "area3D": 0.005530033942365512,
+          "areaFactor": 1.6,
+          "linearFactor": 1.2649110640673518
+        },
+        {
+          "id": 3,
+          "area3D": 0.005530033729350717,
+          "areaFactor": 1.5999999999999976,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 6,
+          "area3D": 0.005394407935982941,
+          "areaFactor": 1.5999999999999939,
+          "linearFactor": 1.2649110640673493
+        },
+        {
+          "id": 1,
+          "area3D": 0.005394407866136598,
+          "areaFactor": 1.5999999999999954,
+          "linearFactor": 1.26491106406735
+        },
+        {
+          "id": 7,
+          "area3D": 0.005253213324155972,
+          "areaFactor": 1.599999999999997,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 2,
+          "area3D": 0.005234287342113922,
+          "areaFactor": 1.6000000000000008,
+          "linearFactor": 1.264911064067352
+        },
+        {
+          "id": 45,
+          "area3D": 0.0032819645252303385,
+          "areaFactor": 1.5999999999999968,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 68,
+          "area3D": 0.0018637974141944406,
+          "areaFactor": 1.599999999999997,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 78,
+          "area3D": 0.0018637972845086189,
+          "areaFactor": 1.5999999999999988,
+          "linearFactor": 1.2649110640673513
+        },
+        {
+          "id": 72,
+          "area3D": 0.0018637972675478378,
+          "areaFactor": 1.599999999999995,
+          "linearFactor": 1.2649110640673498
+        },
+        {
+          "id": 82,
+          "area3D": 0.0018637971963680045,
+          "areaFactor": 1.5999999999999956,
+          "linearFactor": 1.26491106406735
+        },
+        {
+          "id": 74,
+          "area3D": 0.0018637966849261176,
+          "areaFactor": 1.5999999999999983,
+          "linearFactor": 1.264911064067351
+        },
+        {
+          "id": 84,
+          "area3D": 0.0018637965797239147,
+          "areaFactor": 1.599999999999998,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 81,
+          "area3D": 0.0018637965734261245,
+          "areaFactor": 1.5999999999999963,
+          "linearFactor": 1.2649110640673502
+        },
+        {
+          "id": 71,
+          "area3D": 0.0018637965032714302,
+          "areaFactor": 1.5999999999999956,
+          "linearFactor": 1.26491106406735
+        },
+        {
+          "id": 86,
+          "area3D": 0.001863796460985524,
+          "areaFactor": 1.5999999999999963,
+          "linearFactor": 1.2649110640673502
+        },
+        {
+          "id": 76,
+          "area3D": 0.0018637964357420067,
+          "areaFactor": 1.5999999999999996,
+          "linearFactor": 1.2649110640673515
+        },
+        {
+          "id": 73,
+          "area3D": 0.0018637962363385458,
+          "areaFactor": 1.5999999999999988,
+          "linearFactor": 1.2649110640673513
+        },
+        {
+          "id": 83,
+          "area3D": 0.001863796196925602,
+          "areaFactor": 1.5999999999999979,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 70,
+          "area3D": 0.0018637961107236115,
+          "areaFactor": 1.599999999999999,
+          "linearFactor": 1.2649110640673513
+        },
+        {
+          "id": 80,
+          "area3D": 0.0018637959731717573,
+          "areaFactor": 1.5999999999999976,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 67,
+          "area3D": 0.0018637959217953932,
+          "areaFactor": 1.5999999999999979,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 77,
+          "area3D": 0.0018637958809501886,
+          "areaFactor": 1.5999999999999985,
+          "linearFactor": 1.264911064067351
+        },
+        {
+          "id": 85,
+          "area3D": 0.001863795759027978,
+          "areaFactor": 1.600000000000003,
+          "linearFactor": 1.2649110640673529
+        },
+        {
+          "id": 75,
+          "area3D": 0.0018637957382882137,
+          "areaFactor": 1.599999999999995,
+          "linearFactor": 1.2649110640673498
+        },
+        {
+          "id": 79,
+          "area3D": 0.0018637957210282927,
+          "areaFactor": 1.599999999999997,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 69,
+          "area3D": 0.0018637956466708652,
+          "areaFactor": 1.599999999999998,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 41,
+          "area3D": 0.0012521485122778716,
+          "areaFactor": 1.5999999999999972,
+          "linearFactor": 1.2649110640673507
+        },
+        {
+          "id": 38,
+          "area3D": 0.0012521478618200143,
+          "areaFactor": 1.6000000000000003,
+          "linearFactor": 1.2649110640673518
+        },
+        {
+          "id": 35,
+          "area3D": 0.0012521471011635815,
+          "areaFactor": 1.599999999999995,
+          "linearFactor": 1.2649110640673498
+        },
+        {
+          "id": 44,
+          "area3D": 0.0012521469219613497,
+          "areaFactor": 1.5999999999999988,
+          "linearFactor": 1.2649110640673513
+        },
+        {
+          "id": 59,
+          "area3D": 0.001150520177221592,
+          "areaFactor": 1.5999999999999985,
+          "linearFactor": 1.264911064067351
+        },
+        {
+          "id": 60,
+          "area3D": 0.0010997477605668737,
+          "areaFactor": 1.5999999999999965,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 42,
+          "area3D": 0.001061284096600987,
+          "areaFactor": 1.6000000000000012,
+          "linearFactor": 1.2649110640673522
+        },
+        {
+          "id": 39,
+          "area3D": 0.001061282986138876,
+          "areaFactor": 1.599999999999997,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 33,
+          "area3D": 0.0010612826455987981,
+          "areaFactor": 1.5999999999999939,
+          "linearFactor": 1.2649110640673493
+        },
+        {
+          "id": 36,
+          "area3D": 0.0010612822916722328,
+          "areaFactor": 1.6000000000000025,
+          "linearFactor": 1.2649110640673527
+        },
+        {
+          "id": 37,
+          "area3D": 0.0008962979611255351,
+          "areaFactor": 1.600000000000003,
+          "linearFactor": 1.2649110640673529
+        },
+        {
+          "id": 43,
+          "area3D": 0.0008962975851424367,
+          "areaFactor": 1.599999999999992,
+          "linearFactor": 1.2649110640673487
+        },
+        {
+          "id": 34,
+          "area3D": 0.0008962970401932453,
+          "areaFactor": 1.5999999999999952,
+          "linearFactor": 1.2649110640673498
+        },
+        {
+          "id": 40,
+          "area3D": 0.0008962968685669315,
+          "areaFactor": 1.5999999999999972,
+          "linearFactor": 1.2649110640673507
+        },
+        {
+          "id": 48,
+          "area3D": 0.0007614376951365415,
+          "areaFactor": 1.5999999999999976,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 23,
+          "area3D": 0.0007614362804467615,
+          "areaFactor": 1.5999999999999963,
+          "linearFactor": 1.2649110640673502
+        },
+        {
+          "id": 46,
+          "area3D": 0.0007614358620188146,
+          "areaFactor": 1.6000000000000019,
+          "linearFactor": 1.2649110640673524
+        },
+        {
+          "id": 47,
+          "area3D": 0.0007614358557796356,
+          "areaFactor": 1.600000000000003,
+          "linearFactor": 1.2649110640673529
+        },
+        {
+          "id": 49,
+          "area3D": 0.000691622253817353,
+          "areaFactor": 1.6000000000000016,
+          "linearFactor": 1.2649110640673524
+        },
+        {
+          "id": 10,
+          "area3D": 0.0006614526401156797,
+          "areaFactor": 1.5999999999999968,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 56,
+          "area3D": 0.0006557722117099168,
+          "areaFactor": 1.5999999999999983,
+          "linearFactor": 1.264911064067351
+        },
+        {
+          "id": 58,
+          "area3D": 0.0006554902527205385,
+          "areaFactor": 1.6000000000000003,
+          "linearFactor": 1.2649110640673518
+        },
+        {
+          "id": 66,
+          "area3D": 0.0006554901984491602,
+          "areaFactor": 1.5999999999999943,
+          "linearFactor": 1.2649110640673495
+        },
+        {
+          "id": 27,
+          "area3D": 0.0006475181324566252,
+          "areaFactor": 1.5999999999999972,
+          "linearFactor": 1.2649110640673507
+        },
+        {
+          "id": 30,
+          "area3D": 0.0006475179055292085,
+          "areaFactor": 1.599999999999998,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 24,
+          "area3D": 0.0006475175957438769,
+          "areaFactor": 1.5999999999999979,
+          "linearFactor": 1.2649110640673509
+        },
+        {
+          "id": 50,
+          "area3D": 0.000564089201204047,
+          "areaFactor": 1.5999999999999965,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 52,
+          "area3D": 0.0004276013156733627,
+          "areaFactor": 1.5999999999999988,
+          "linearFactor": 1.2649110640673513
+        },
+        {
+          "id": 64,
+          "area3D": 0.0003838687598327051,
+          "areaFactor": 1.599999999999996,
+          "linearFactor": 1.2649110640673502
+        },
+        {
+          "id": 53,
+          "area3D": 0.0002830043404963081,
+          "areaFactor": 1.6000000000000014,
+          "linearFactor": 1.2649110640673522
+        },
+        {
+          "id": 63,
+          "area3D": 0.0002719035628464782,
+          "areaFactor": 1.5999999999999883,
+          "linearFactor": 1.264911064067347
+        },
+        {
+          "id": 51,
+          "area3D": 0.0002546670971057229,
+          "areaFactor": 1.599999999999995,
+          "linearFactor": 1.2649110640673498
+        },
+        {
+          "id": 61,
+          "area3D": 0.00022636815523143037,
+          "areaFactor": 1.5999999999999965,
+          "linearFactor": 1.2649110640673504
+        },
+        {
+          "id": 54,
+          "area3D": 0.0002263681476567955,
+          "areaFactor": 1.6,
+          "linearFactor": 1.2649110640673518
+        },
+        {
+          "id": 55,
+          "area3D": 0.0002086586940555943,
+          "areaFactor": 1.6000000000000008,
+          "linearFactor": 1.264911064067352
+        },
+        {
+          "id": 62,
+          "area3D": 0.00020865868658508324,
+          "areaFactor": 1.599999999999992,
+          "linearFactor": 1.2649110640673487
+        }
+      ],
+      "attempts": [
+        {
+          "id": 14,
+          "tries": 9,
+          "accepted": 1,
+          "failed": 8,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 19,
+          "tries": 11,
+          "accepted": 3,
+          "failed": 8,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 20,
+          "tries": 11,
+          "accepted": 3,
+          "failed": 8,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 21,
+          "tries": 8,
+          "accepted": 0,
+          "failed": 8,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 17,
+          "tries": 8,
+          "accepted": 0,
+          "failed": 8,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 11,
+          "tries": 17,
+          "accepted": 14,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 12,
+          "tries": 11,
+          "accepted": 3,
+          "failed": 8,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 18,
+          "tries": 9,
+          "accepted": 8,
+          "failed": 1,
+          "nextStep": 0.04,
+          "minStepFailed": false
+        },
+        {
+          "id": 13,
+          "tries": 17,
+          "accepted": 14,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 22,
+          "tries": 10,
+          "accepted": 9,
+          "failed": 1,
+          "nextStep": 0.04,
+          "minStepFailed": false
+        },
+        {
+          "id": 15,
+          "tries": 23,
+          "accepted": 19,
+          "failed": 4,
+          "nextStep": 0.005,
+          "minStepFailed": false
+        },
+        {
+          "id": 16,
+          "tries": 8,
+          "accepted": 0,
+          "failed": 8,
+          "nextStep": 0.005,
+          "minStepFailed": true
+        },
+        {
+          "id": 65,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 57,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 26,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 29,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 25,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 28,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 32,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 31,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 4,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 9,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 0,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 5,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 8,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 3,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 6,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 1,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 7,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 2,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 45,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 68,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 78,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 72,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 82,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 74,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 84,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 81,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 71,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 86,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 76,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 73,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 83,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 70,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 80,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 67,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 77,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 85,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 75,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 79,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 69,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 41,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 38,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 35,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 44,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 59,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 60,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 42,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 39,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 33,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 36,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 37,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 43,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 34,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 40,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 48,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 23,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 46,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 47,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 49,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 10,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 56,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 58,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 66,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 27,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 30,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 24,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 50,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 52,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 64,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 53,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 63,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 51,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 61,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 54,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 55,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 62,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        }
+      ]
+    },
+    {
+      "model": "FlightHelmet",
+      "before": 0.5733150092670439,
+      "after": 0.703598795333508,
+      "stop": "time-budget",
+      "densitySpread": 1.5999999999999963,
+      "gains": [
+        {
+          "id": 143,
+          "area3D": 0.7375133120166033,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 5,
+          "area3D": 0.2694512430216875,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 24,
+          "area3D": 0.1991246965405753,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 25,
+          "area3D": 0.1804741126571462,
+          "areaFactor": 1.27230912,
+          "linearFactor": 1.1279668080222929
+        },
+        {
+          "id": 0,
+          "area3D": 0.1796682317915018,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 20,
+          "area3D": 0.1284455277361788,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 23,
+          "area3D": 0.10497415573843723,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 18,
+          "area3D": 0.09519965619875832,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 26,
+          "area3D": 0.08610259366248384,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 32,
+          "area3D": 0.08385720186152351,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 34,
+          "area3D": 0.0835415223671515,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 31,
+          "area3D": 0.05851841767302088,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 19,
+          "area3D": 0.05836615750285982,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 29,
+          "area3D": 0.05834939196995836,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 1,
+          "area3D": 0.05424618213113279,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 28,
+          "area3D": 0.051177895989364695,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 30,
+          "area3D": 0.04996374143087536,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 21,
+          "area3D": 0.044122904645950554,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 7,
+          "area3D": 0.04093235101589925,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 2,
+          "area3D": 0.03910405745193765,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 37,
+          "area3D": 0.036285416099226545,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 17,
+          "area3D": 0.034496171262118486,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 36,
+          "area3D": 0.03253458312451367,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 27,
+          "area3D": 0.031154149755611944,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 22,
+          "area3D": 0.02751800483339244,
+          "areaFactor": 1.4693280768000003,
+          "linearFactor": 1.2121584371690033
+        },
+        {
+          "id": 142,
+          "area3D": 0.027085535818077135,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 6,
+          "area3D": 0.024766464693003053,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 4,
+          "area3D": 0.024519820148454108,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 158,
+          "area3D": 0.02351650334136006,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 3,
+          "area3D": 0.023477609034316036,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 103,
+          "area3D": 0.023080117307772968,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 104,
+          "area3D": 0.023080110391569864,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 9,
+          "area3D": 0.020956356385971823,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 10,
+          "area3D": 0.02088066096359791,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 185,
+          "area3D": 0.02056157225674601,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 186,
+          "area3D": 0.020561074519551203,
+          "areaFactor": 1.2130560000000001,
+          "linearFactor": 1.1013882149360417
+        },
+        {
+          "id": 107,
+          "area3D": 0.01939375300898102,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 156,
+          "area3D": 0.017928761762247548,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 12,
+          "area3D": 0.01774384645970546,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 155,
+          "area3D": 0.017675629180051045,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 157,
+          "area3D": 0.01672539494272636,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 154,
+          "area3D": 0.016725391703215322,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 43,
+          "area3D": 0.016295043185483162,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 42,
+          "area3D": 0.014980032402351504,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 41,
+          "area3D": 0.01497850725149546,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 39,
+          "area3D": 0.012716145604374325,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 38,
+          "area3D": 0.012567800989610791,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 144,
+          "area3D": 0.012217712886521924,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 110,
+          "area3D": 0.011741116810971036,
+          "areaFactor": 1.3604889600000003,
+          "linearFactor": 1.1664
+        },
+        {
+          "id": 64,
+          "area3D": 0.010644917274794786,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 33,
+          "area3D": 0.009734275634006898,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 35,
+          "area3D": 0.009734270435741923,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 13,
+          "area3D": 0.009484972441969525,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 44,
+          "area3D": 0.006411159049159809,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 8,
+          "area3D": 0.006027646939499434,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 108,
+          "area3D": 0.005985573900535163,
+          "areaFactor": 1.5281011998720004,
+          "linearFactor": 1.2361639049381763
+        },
+        {
+          "id": 11,
+          "area3D": 0.00593449064919481,
+          "areaFactor": 1.3876987392000004,
+          "linearFactor": 1.1780062560105529
+        },
+        {
+          "id": 14,
+          "area3D": 0.005750252880904319,
+          "areaFactor": 1.5281011998720004,
+          "linearFactor": 1.2361639049381763
+        },
+        {
+          "id": 40,
+          "area3D": 0.00478003428663857,
+          "areaFactor": 1.4149085184000003,
+          "linearFactor": 1.189499272130925
+        },
+        {
+          "id": 62,
+          "area3D": 0.004573915059871052,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 146,
+          "area3D": 0.004455118750962295,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 106,
+          "area3D": 0.003995023484070271,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 148,
+          "area3D": 0.0038725705411779636,
+          "areaFactor": 1.4432066887680004,
+          "linearFactor": 1.2013353773064375
+        },
+        {
+          "id": 147,
+          "area3D": 0.003712307728122949,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 16,
+          "area3D": 0.003561291587876105,
+          "areaFactor": 1.3876987392000004,
+          "linearFactor": 1.1780062560105529
+        },
+        {
+          "id": 151,
+          "area3D": 0.003029247442892407,
+          "areaFactor": 1.3604889600000003,
+          "linearFactor": 1.1664
+        },
+        {
+          "id": 145,
+          "area3D": 0.0029893425483070815,
+          "areaFactor": 1.3876987392000004,
+          "linearFactor": 1.1780062560105529
+        },
+        {
+          "id": 109,
+          "area3D": 0.0029528783499482426,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 58,
+          "area3D": 0.002927821739909693,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 63,
+          "area3D": 0.0029278192350020104,
+          "areaFactor": 1.3363024896000002,
+          "linearFactor": 1.1559855057914872
+        },
+        {
+          "id": 150,
+          "area3D": 0.002786720480594599,
+          "areaFactor": 1.8662399999999872,
+          "linearFactor": 1.3661039491927351
+        },
+        {
+          "id": 59,
+          "area3D": 0.0025399630326384992,
+          "areaFactor": 1.3876987392000004,
+          "linearFactor": 1.1780062560105529
+        },
+        {
+          "id": 57,
+          "area3D": 0.0025399627583885713,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 149,
+          "area3D": 0.002429984432172421,
+          "areaFactor": 1.866239999999984,
+          "linearFactor": 1.366103949192734
+        },
+        {
+          "id": 47,
+          "area3D": 0.00234236049804745,
+          "areaFactor": 1.2597120000000002,
+          "linearFactor": 1.1223689233046326
+        },
+        {
+          "id": 48,
+          "area3D": 0.0023423604980474496,
+          "areaFactor": 1.4149085184000003,
+          "linearFactor": 1.189499272130925
+        },
+        {
+          "id": 15,
+          "area3D": 0.002220073816787806,
+          "areaFactor": 1.4432066887680004,
+          "linearFactor": 1.2013353773064375
+        },
+        {
+          "id": 61,
+          "area3D": 0.0021641025786597215,
+          "areaFactor": 1.2373171200000002,
+          "linearFactor": 1.1123475715800346
+        },
+        {
+          "id": 56,
+          "area3D": 0.002164102227632703,
+          "areaFactor": 1.2130560000000001,
+          "linearFactor": 1.1013882149360417
+        },
+        {
+          "id": 98,
+          "area3D": 0.002022356606783957,
+          "areaFactor": 1.8662399999999884,
+          "linearFactor": 1.3661039491927356
+        },
+        {
+          "id": 93,
+          "area3D": 0.002022353133363683,
+          "areaFactor": 1.3604889600000003,
+          "linearFactor": 1.1664
+        },
+        {
+          "id": 97,
+          "area3D": 0.0020223450896308974,
+          "areaFactor": 1.3876987392000004,
+          "linearFactor": 1.1780062560105529
+        },
+        {
+          "id": 94,
+          "area3D": 0.0020223408166955186,
+          "areaFactor": 1.3876987392000004,
+          "linearFactor": 1.1780062560105529
+        },
+        {
+          "id": 96,
+          "area3D": 0.002022330121297689,
+          "areaFactor": 1.4149085184000003,
+          "linearFactor": 1.189499272130925
+        },
+        {
+          "id": 95,
+          "area3D": 0.002022329721675409,
+          "areaFactor": 1.2373171200000002,
+          "linearFactor": 1.1123475715800346
+        },
+        {
+          "id": 162,
+          "area3D": 0.002022184447283364,
+          "areaFactor": 1.4693280768000003,
+          "linearFactor": 1.2121584371690033
+        },
+        {
+          "id": 141,
+          "area3D": 0.002006828756982611,
+          "areaFactor": 1.3604889600000003,
+          "linearFactor": 1.1664
+        },
+        {
+          "id": 112,
+          "area3D": 0.0019986963979427464,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 164,
+          "area3D": 0.0019093552706597099,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 163,
+          "area3D": 0.0018171136230330403,
+          "areaFactor": 1.5281011998720004,
+          "linearFactor": 1.2361639049381763
+        },
+        {
+          "id": 105,
+          "area3D": 0.0017418700694351744,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 152,
+          "area3D": 0.0016301432164134535,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 111,
+          "area3D": 0.0016208810279245305,
+          "areaFactor": 1.4432066887680004,
+          "linearFactor": 1.2013353773064375
+        },
+        {
+          "id": 49,
+          "area3D": 0.0015868015581967316,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 52,
+          "area3D": 0.0015867912371641283,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 60,
+          "area3D": 0.0010187546385918274,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 55,
+          "area3D": 0.0010187542916496176,
+          "areaFactor": 1.7823772395307016,
+          "linearFactor": 1.3350570173332303
+        },
+        {
+          "id": 91,
+          "area3D": 0.0009722016080635793,
+          "areaFactor": 1.7823772395307016,
+          "linearFactor": 1.3350570173332303
+        },
+        {
+          "id": 92,
+          "area3D": 0.0009722003066581826,
+          "areaFactor": 1.8662399999999864,
+          "linearFactor": 1.366103949192735
+        },
+        {
+          "id": 102,
+          "area3D": 0.0008902710808521195,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 100,
+          "area3D": 0.0008902707690135219,
+          "areaFactor": 1.7138242687795207,
+          "linearFactor": 1.3091311121425235
+        },
+        {
+          "id": 99,
+          "area3D": 0.0008902693083545839,
+          "areaFactor": 1.7823772395307016,
+          "linearFactor": 1.3350570173332303
+        },
+        {
+          "id": 101,
+          "area3D": 0.0008902585840382492,
+          "areaFactor": 1.7138242687795207,
+          "linearFactor": 1.3091311121425235
+        },
+        {
+          "id": 153,
+          "area3D": 0.0008870626907986155,
+          "areaFactor": 1.3604889600000003,
+          "linearFactor": 1.1664
+        },
+        {
+          "id": 182,
+          "area3D": 0.0008443351829335032,
+          "areaFactor": 1.7823772395307016,
+          "linearFactor": 1.3350570173332303
+        },
+        {
+          "id": 161,
+          "area3D": 0.0008039417235815076,
+          "areaFactor": 1.3101004800000002,
+          "linearFactor": 1.144596208276089
+        },
+        {
+          "id": 140,
+          "area3D": 0.000803243856499514,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 113,
+          "area3D": 0.0006793886615836516,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 117,
+          "area3D": 0.0006771895725384068,
+          "areaFactor": 1.8662399999999872,
+          "linearFactor": 1.3661039491927351
+        },
+        {
+          "id": 73,
+          "area3D": 0.0006618066441165123,
+          "areaFactor": 1.8662399999999983,
+          "linearFactor": 1.3661039491927394
+        },
+        {
+          "id": 80,
+          "area3D": 0.0006618066441165109,
+          "areaFactor": 1.7189060280928181,
+          "linearFactor": 1.311070565641994
+        },
+        {
+          "id": 116,
+          "area3D": 0.0006138870107730576,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 86,
+          "area3D": 0.0006056203049559891,
+          "areaFactor": 1.8662399999999923,
+          "linearFactor": 1.3661039491927371
+        },
+        {
+          "id": 54,
+          "area3D": 0.0006034888213006921,
+          "areaFactor": 1.7163632676962313,
+          "linearFactor": 1.3101004800000002
+        },
+        {
+          "id": 51,
+          "area3D": 0.0006034468484433095,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 181,
+          "area3D": 0.0005995242956301461,
+          "areaFactor": 1.4987146383360004,
+          "linearFactor": 1.2242200122265607
+        },
+        {
+          "id": 180,
+          "area3D": 0.0005872864729101014,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 179,
+          "area3D": 0.0005845175666471612,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 85,
+          "area3D": 0.0005735846726930376,
+          "areaFactor": 1.8662399999999908,
+          "linearFactor": 1.3661039491927365
+        },
+        {
+          "id": 159,
+          "area3D": 0.0005676344483843207,
+          "areaFactor": 1.8662399999999932,
+          "linearFactor": 1.3661039491927374
+        },
+        {
+          "id": 138,
+          "area3D": 0.0005676171585712348,
+          "areaFactor": 1.7823772395307016,
+          "linearFactor": 1.3350570173332303
+        },
+        {
+          "id": 74,
+          "area3D": 0.0005082503459951753,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 81,
+          "area3D": 0.0005082466557288761,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 126,
+          "area3D": 0.00047389221551391987,
+          "areaFactor": 1.8662399999999943,
+          "linearFactor": 1.3661039491927378
+        },
+        {
+          "id": 184,
+          "area3D": 0.00045676413601238627,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 183,
+          "area3D": 0.00044692647453423975,
+          "areaFactor": 1.7823772395307016,
+          "linearFactor": 1.3350570173332303
+        },
+        {
+          "id": 118,
+          "area3D": 0.0004197516499827697,
+          "areaFactor": 1.866239999999977,
+          "linearFactor": 1.3661039491927314
+        },
+        {
+          "id": 160,
+          "area3D": 0.00040435653763039114,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 139,
+          "area3D": 0.0004043475093923968,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 114,
+          "area3D": 0.0004004556934232395,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 115,
+          "area3D": 0.0003895096348225529,
+          "areaFactor": 1.866239999999981,
+          "linearFactor": 1.366103949192733
+        },
+        {
+          "id": 133,
+          "area3D": 0.0003873224196054202,
+          "areaFactor": 1.8662399999999837,
+          "linearFactor": 1.3661039491927338
+        },
+        {
+          "id": 173,
+          "area3D": 0.0003812108286628274,
+          "areaFactor": 1.7138242687795207,
+          "linearFactor": 1.3091311121425235
+        },
+        {
+          "id": 137,
+          "area3D": 0.00038072499499643337,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 172,
+          "area3D": 0.00037698568164245774,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 125,
+          "area3D": 0.00037265365383913986,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 132,
+          "area3D": 0.000366138182208939,
+          "areaFactor": 1.7138242687795207,
+          "linearFactor": 1.3091311121425235
+        },
+        {
+          "id": 171,
+          "area3D": 0.0003559056023318364,
+          "areaFactor": 1.8662399999999943,
+          "linearFactor": 1.3661039491927378
+        },
+        {
+          "id": 174,
+          "area3D": 0.00035380060186979324,
+          "areaFactor": 1.8662399999999912,
+          "linearFactor": 1.3661039491927367
+        },
+        {
+          "id": 177,
+          "area3D": 0.0003493650097489727,
+          "areaFactor": 1.8662399999999888,
+          "linearFactor": 1.3661039491927358
+        },
+        {
+          "id": 175,
+          "area3D": 0.0003479284486645793,
+          "areaFactor": 1.8662399999999888,
+          "linearFactor": 1.3661039491927358
+        },
+        {
+          "id": 170,
+          "area3D": 0.000346282327168256,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 168,
+          "area3D": 0.0003455257973578739,
+          "areaFactor": 1.8662399999999861,
+          "linearFactor": 1.3661039491927347
+        },
+        {
+          "id": 166,
+          "area3D": 0.00034326336019943306,
+          "areaFactor": 1.866239999999987,
+          "linearFactor": 1.3661039491927351
+        },
+        {
+          "id": 127,
+          "area3D": 0.0003334861891180279,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 90,
+          "area3D": 0.00032879740479194267,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 87,
+          "area3D": 0.0003287971105214651,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 89,
+          "area3D": 0.00032879711052146484,
+          "areaFactor": 1.8662399999999817,
+          "linearFactor": 1.3661039491927331
+        },
+        {
+          "id": 88,
+          "area3D": 0.00032879518004868023,
+          "areaFactor": 1.8662399999999892,
+          "linearFactor": 1.366103949192736
+        },
+        {
+          "id": 169,
+          "area3D": 0.0003121733643677266,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 120,
+          "area3D": 0.00031175042902295856,
+          "areaFactor": 1.8662399999999886,
+          "linearFactor": 1.3661039491927356
+        },
+        {
+          "id": 176,
+          "area3D": 0.00030934974668426563,
+          "areaFactor": 1.8662399999999884,
+          "linearFactor": 1.3661039491927356
+        },
+        {
+          "id": 167,
+          "area3D": 0.00030914767080037815,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 178,
+          "area3D": 0.00030901261108491433,
+          "areaFactor": 1.6540658824760412,
+          "linearFactor": 1.2861049266976785
+        },
+        {
+          "id": 134,
+          "area3D": 0.0003063567418980461,
+          "areaFactor": 1.4693280768000003,
+          "linearFactor": 1.2121584371690033
+        },
+        {
+          "id": 165,
+          "area3D": 0.00030460696024286544,
+          "areaFactor": 1.3604889600000003,
+          "linearFactor": 1.1664
+        },
+        {
+          "id": 123,
+          "area3D": 0.00030231251752137444,
+          "areaFactor": 1.4693280768000003,
+          "linearFactor": 1.2121584371690033
+        },
+        {
+          "id": 136,
+          "area3D": 0.00030154007154954655,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 119,
+          "area3D": 0.00026823976820198166,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 78,
+          "area3D": 0.00025792913811448556,
+          "areaFactor": 1.1664,
+          "linearFactor": 1.08
+        },
+        {
+          "id": 71,
+          "area3D": 0.0002579291381144853,
+          "areaFactor": 1.1897280000000001,
+          "linearFactor": 1.0907465333431046
+        },
+        {
+          "id": 122,
+          "area3D": 0.00024827570651492507,
+          "areaFactor": 1.7823772395307016,
+          "linearFactor": 1.3350570173332303
+        },
+        {
+          "id": 124,
+          "area3D": 0.000228390480713365,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 128,
+          "area3D": 0.00022706089206770585,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 129,
+          "area3D": 0.00022548043985643786,
+          "areaFactor": 1.3876987392000004,
+          "linearFactor": 1.1780062560105529
+        },
+        {
+          "id": 77,
+          "area3D": 0.00020946205571226436,
+          "areaFactor": 1.866239999999992,
+          "linearFactor": 1.366103949192737
+        },
+        {
+          "id": 84,
+          "area3D": 0.00020946202386186273,
+          "areaFactor": 1.2373171200000002,
+          "linearFactor": 1.1123475715800346
+        },
+        {
+          "id": 79,
+          "area3D": 0.00018991570092504703,
+          "areaFactor": 1.4149085184000003,
+          "linearFactor": 1.189499272130925
+        },
+        {
+          "id": 72,
+          "area3D": 0.00018991465373466556,
+          "areaFactor": 1.3101004800000002,
+          "linearFactor": 1.144596208276089
+        },
+        {
+          "id": 46,
+          "area3D": 0.00016059344905936556,
+          "areaFactor": 1.8662399999999848,
+          "linearFactor": 1.3661039491927343
+        },
+        {
+          "id": 45,
+          "area3D": 0.00016059189569236882,
+          "areaFactor": 1.6503492958617607,
+          "linearFactor": 1.284659213901399
+        },
+        {
+          "id": 69,
+          "area3D": 0.00014847374225516677,
+          "areaFactor": 1.8662399999999755,
+          "linearFactor": 1.366103949192731
+        },
+        {
+          "id": 70,
+          "area3D": 0.00014847154347515524,
+          "areaFactor": 1.5868743229440005,
+          "linearFactor": 1.2597120000000002
+        },
+        {
+          "id": 135,
+          "area3D": 0.00013862154470161727,
+          "areaFactor": 1.866240000000035,
+          "linearFactor": 1.3661039491927527
+        },
+        {
+          "id": 121,
+          "area3D": 0.00012712111494218457,
+          "areaFactor": 1.8662400000000003,
+          "linearFactor": 1.36610394919274
+        },
+        {
+          "id": 131,
+          "area3D": 0.00012485568756215014,
+          "areaFactor": 1.8662399999999715,
+          "linearFactor": 1.3661039491927294
+        },
+        {
+          "id": 83,
+          "area3D": 0.0001195985480798891,
+          "areaFactor": 1.8662400000000021,
+          "linearFactor": 1.3661039491927407
+        },
+        {
+          "id": 76,
+          "area3D": 0.00011959838861732238,
+          "areaFactor": 1.8662399999999746,
+          "linearFactor": 1.3661039491927305
+        },
+        {
+          "id": 66,
+          "area3D": 0.00011670650994975929,
+          "areaFactor": 1.8662400000000037,
+          "linearFactor": 1.3661039491927411
+        },
+        {
+          "id": 130,
+          "area3D": 0.00011570397656745331,
+          "areaFactor": 1.8662399999999586,
+          "linearFactor": 1.3661039491927247
+        },
+        {
+          "id": 67,
+          "area3D": 0.00010785692712701587,
+          "areaFactor": 1.8662399999999928,
+          "linearFactor": 1.3661039491927371
+        },
+        {
+          "id": 53,
+          "area3D": 0.00010709716235557585,
+          "areaFactor": 1.866240000000016,
+          "linearFactor": 1.3661039491927458
+        },
+        {
+          "id": 50,
+          "area3D": 0.00010709147223080499,
+          "areaFactor": 1.8662399999999824,
+          "linearFactor": 1.3661039491927334
+        },
+        {
+          "id": 82,
+          "area3D": 9.810023280726873e-05,
+          "areaFactor": 1.8662399999999735,
+          "linearFactor": 1.3661039491927303
+        },
+        {
+          "id": 75,
+          "area3D": 9.80992315111818e-05,
+          "areaFactor": 1.8662399999999806,
+          "linearFactor": 1.3661039491927327
+        },
+        {
+          "id": 65,
+          "area3D": 6.436779252359829e-05,
+          "areaFactor": 1.866239999999977,
+          "linearFactor": 1.3661039491927314
+        },
+        {
+          "id": 68,
+          "area3D": 6.410292887986805e-05,
+          "areaFactor": 1.8662399999999872,
+          "linearFactor": 1.3661039491927351
+        }
+      ],
+      "attempts": [
+        {
+          "id": 143,
+          "tries": 5,
+          "accepted": 1,
+          "failed": 4,
+          "nextStep": 0.005,
+          "minStepFailed": false
+        },
+        {
+          "id": 5,
+          "tries": 4,
+          "accepted": 0,
+          "failed": 4,
+          "nextStep": 0.005,
+          "minStepFailed": false
+        },
+        {
+          "id": 24,
+          "tries": 4,
+          "accepted": 0,
+          "failed": 4,
+          "nextStep": 0.005,
+          "minStepFailed": false
+        },
+        {
+          "id": 25,
+          "tries": 6,
+          "accepted": 2,
+          "failed": 4,
+          "nextStep": 0.005,
+          "minStepFailed": false
+        },
+        {
+          "id": 0,
+          "tries": 4,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 20,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 23,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 18,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 26,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 32,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 34,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 31,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 19,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 29,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 1,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 28,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 30,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 21,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 7,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 2,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 37,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 17,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 36,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 27,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 22,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 142,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 6,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 4,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 158,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 3,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 103,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 104,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 9,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 10,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 185,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 186,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 107,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 156,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 12,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 155,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 157,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 154,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 43,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 42,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 41,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 39,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 38,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 144,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 110,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 64,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 33,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 35,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 13,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 44,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 8,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 108,
+          "tries": 7,
+          "accepted": 4,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 11,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 14,
+          "tries": 7,
+          "accepted": 4,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 40,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 62,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 146,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 106,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 148,
+          "tries": 7,
+          "accepted": 4,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 147,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 16,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 151,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 145,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 109,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 58,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 63,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 150,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 59,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 57,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 149,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 47,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 48,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 15,
+          "tries": 7,
+          "accepted": 4,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 61,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 56,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 98,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 93,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 97,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 94,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 96,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 95,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 162,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 141,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 112,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 164,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 163,
+          "tries": 7,
+          "accepted": 4,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 105,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 152,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 111,
+          "tries": 7,
+          "accepted": 4,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 49,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 52,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 60,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 55,
+          "tries": 8,
+          "accepted": 6,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 91,
+          "tries": 8,
+          "accepted": 6,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 92,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 102,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 100,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 99,
+          "tries": 8,
+          "accepted": 6,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 101,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 153,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 182,
+          "tries": 8,
+          "accepted": 6,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 161,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 140,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 113,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 117,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 73,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 80,
+          "tries": 9,
+          "accepted": 7,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 116,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 86,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 54,
+          "tries": 8,
+          "accepted": 6,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 51,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 181,
+          "tries": 7,
+          "accepted": 4,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 180,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 179,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 85,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 159,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 138,
+          "tries": 8,
+          "accepted": 6,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 74,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 81,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 126,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 184,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 183,
+          "tries": 8,
+          "accepted": 6,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 118,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 160,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 139,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 114,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 115,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 133,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 173,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 137,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 172,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 125,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 132,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 171,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 174,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 177,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 175,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 170,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 168,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 166,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 127,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 90,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 87,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 89,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 88,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 169,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 120,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 176,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 167,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 178,
+          "tries": 10,
+          "accepted": 8,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 134,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 165,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 123,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 136,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 119,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 78,
+          "tries": 3,
+          "accepted": 0,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 71,
+          "tries": 4,
+          "accepted": 1,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 122,
+          "tries": 8,
+          "accepted": 6,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 124,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 128,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 129,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 77,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 84,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 79,
+          "tries": 6,
+          "accepted": 3,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 72,
+          "tries": 5,
+          "accepted": 2,
+          "failed": 3,
+          "nextStep": 0.01,
+          "minStepFailed": false
+        },
+        {
+          "id": 46,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 45,
+          "tries": 7,
+          "accepted": 5,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 69,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 70,
+          "tries": 6,
+          "accepted": 4,
+          "failed": 2,
+          "nextStep": 0.02,
+          "minStepFailed": false
+        },
+        {
+          "id": 135,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 121,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 131,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 83,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 76,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 66,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 130,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 67,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 53,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 50,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 82,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 75,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 65,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        },
+        {
+          "id": 68,
+          "tries": 7,
+          "accepted": 7,
+          "failed": 0,
+          "nextStep": 0.08,
+          "minStepFailed": false
+        }
+      ]
+    }
+  ]
+}

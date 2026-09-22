@@ -1,0 +1,8 @@
+id 1 extra area 1.08 fits { x: 229, y: 0 }
+id 1 extra area 1.25 fits { x: 229, y: 0 }
+id 1 extra area 1.5 fits { x: 229, y: 0 }
+id 1 extra area 2 fits { x: 232, y: 0 }
+id 2 extra area 1.08 fits { x: 254, y: 40 }
+id 2 extra area 1.25 fits { x: 254, y: 40 }
+id 2 extra area 1.5 fits { x: 272, y: 40 }
+id 2 extra area 2 fits { x: 272, y: 40 }
