@@ -4,11 +4,8 @@ import {compileCore} from './lib/compiled-core.mjs';
 const out=process.argv.includes('--out')?process.argv[process.argv.indexOf('--out')+1]:'validation/local-surface-reflection';
 await mkdir(out,{recursive:true});const c=await compileCore(),tests=[];
 const test=(name,fn)=>{const detail=fn();tests.push({name,passed:true,detail});console.log('PASS',name);};
-export function unequalSheet(curved=true){const positions=[],faces=[],center=[];for(let j=0;j<=10;j++){center.push(positions.length);positions.push([0,j/5-1,0]);}
- for(const[sign,N]of[[-1,5],[1,13]]){const grid=center.map(v=>[v]);for(let j=0;j<=10;j++)for(let i=1;i<=N;i++){const x=sign*i/N,y=j/5-1;grid[j].push(positions.length);positions.push([x,y,curved?.25*x*x*(1+.7*y)+.12*y*y*y:0]);} // center must agree in z
- for(let j=0;j<=10;j++)positions[center[j]][2]=curved?.12*(j/5-1)**3:0;
- for(let j=0;j<10;j++)for(let i=0;i<N;i++){const a=grid[j][i],b=grid[j][i+1],d=grid[j+1][i],e=grid[j+1][i+1];const ts=(i+j)%2?[[a,b,d],[b,e,d]]:[[a,b,e],[a,e,d]];for(const t of ts)faces.push({vertices:sign>0?t:[t[0],t[2],t[1]]});}}
- return{name:'unequal tessellation',positions,faces};}
+import {unequalSheet} from './lib/symmetry-fixtures.mjs';
+
 try{const uv=await c.load('packages/uv/src/index.js'),s=await c.load('packages/uv/src/surface-reflection.js');
  for(const [p,w]of[[[.2,.3,1],[.5,.2,.3]],[[-1,0,0],[1,0,0]],[[2,0,0],[0,1,0]],[[.5,-1,0],[.5,.5,0]]])test('Triangle closest point '+p,()=>{const r=s.triangleClosest(p,[0,0,0],[1,0,0],[0,1,0]);r.weights.forEach((x,i)=>assert.ok(Math.abs(x-w[i])<1e-10));});
  test('Degenerate segment has finite barycentrics',()=>{const r=s.triangleClosest([1,.1,0],[0,0,0],[1,0,0],[2,0,0]);assert.ok(r.weights.every(Number.isFinite));assert.equal(r.point[0],1);});

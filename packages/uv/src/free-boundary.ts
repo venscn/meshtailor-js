@@ -32,7 +32,8 @@ type Element={t:[number,number,number];gx:number[];gy:number[];area:number};
  * in ARAP energy. Every accepted iterate also has a simple boundary; final
  * global triangle overlaps are independently checked by parameterizeChart.
  * This is an independent TS implementation, not libigl bindings. */
-export interface ShapeAnchors {boundaryStiffness?:number;interiorStiffness?:number}
+export interface LinearShapeConstraint {axis:0|1;ids:number[];coefficients:number[];target:number;weight:number}
+export interface ShapeAnchors {boundaryStiffness?:number;interiorStiffness?:number;linearConstraints?:LinearShapeConstraint[]}
 export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,linearIterations:number,work?:UVWork,anchors:ShapeAnchors={}){
   if(!simpleUVBoundary(seed,mesh.boundaries,work))throw Error('ARAP seed violates cut-boundary contract.');
   const n=mesh.positions.length,ps=mesh.positions,min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
@@ -47,6 +48,13 @@ export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,l
   let uv=seed.map(p=>[(p[0]-origin[0])*scale,(p[1]-origin[1])*scale] as Vec2);
   // Anchors refer ONLY to the validated geometry-derived seed, never model UV.
   // Their scale uses surface area, avoiding sensitivity to mesh units/density.
+  // General sparse equality penalties, used for surface-to-surface reflection.
+  // Expressed in the incoming seed frame; normalize exactly like all vertices.
+  const constraints=(anchors.linearConstraints??[]).map(row=>{
+    if(row.ids.length!==row.coefficients.length||!row.ids.length||row.ids.some(i=>!Number.isInteger(i)||i<0||i>=n)||!row.coefficients.every(Number.isFinite)||!Number.isFinite(row.target)||!Number.isFinite(row.weight)||row.weight<0||row.weight>1000||![0,1].includes(row.axis))throw Error('Invalid linear shape constraint.');
+    const target=(row.target-origin[row.axis]*row.coefficients.reduce((a,x)=>a+x,0))*scale;
+    return {...row,target,weight:row.weight*totalArea};
+  });
   const reference=uv.map(p=>[...p] as Vec2),boundaryIds=new Set(mesh.boundaries.flat()),anchorWeights=new Float64Array(n);
   const boundaryWeight=anchors.boundaryStiffness??0,interiorWeight=anchors.interiorStiffness??0;
   if(![boundaryWeight,interiorWeight].every(x=>Number.isFinite(x)&&x>=0&&x<=1000))throw Error('Invalid shape anchor strength');
@@ -64,21 +72,24 @@ export function freeBoundaryARAP(mesh:CutMesh,seed:Vec2[],maxIterations:number,l
   const columns=new Uint32Array(offsets[n-1]!),values=new Float64Array(columns.length),diag=new Float64Array(n-1);
   for(let i=0;i<n-1;i++){let k=offsets[i]!;for(const [j,value] of rows[i]!){columns[k]=j;values[k++]=value;}diag[i]=rows[i]!.get(i)??0;}
   const mul=(x:Float64Array,out:Float64Array)=>{for(let i=0;i<n-1;i++){let s=0;for(let k=offsets[i]!;k<offsets[i+1]!;k++)s+=values[k]!*x[columns[k]!]!;out[i]=s;}};
-  const solve=(b:Float64Array,axis:number)=>{
-    const x=Float64Array.from(uv.slice(1).map(p=>p[axis]!)),r=new Float64Array(n-1),z=r.slice(),p=r.slice(),ap=r.slice();mul(x,ap);let rz=0,bn=0;
-    for(let i=0;i<x.length;i++){r[i]=b[i]!-ap[i]!;z[i]=r[i]!/Math.max(diag[i]!,1e-25);p[i]=z[i]!;rz+=r[i]!*z[i]!;bn+=b[i]!*b[i]!;}
+  const solve=(input:Float64Array,axis:number)=>{
+    const b=input.slice(),diagonal=diag.slice(),terms=constraints.filter(row=>row.axis===axis);
+    for(const row of terms)row.ids.forEach((id,k)=>{if(id>0){b[id-1]+=row.weight*row.coefficients[k]!*row.target;diagonal[id-1]+=row.weight*row.coefficients[k]!**2;}});
+    const apply=(x:Float64Array,out:Float64Array)=>{mul(x,out);for(const row of terms){let d=0;row.ids.forEach((id,k)=>{if(id>0)d+=row.coefficients[k]!*x[id-1]!;});row.ids.forEach((id,k)=>{if(id>0)out[id-1]+=row.weight*row.coefficients[k]!*d;});}};
+    const x=Float64Array.from(uv.slice(1).map(p=>p[axis]!)),r=new Float64Array(n-1),z=r.slice(),p=r.slice(),ap=r.slice();apply(x,ap);let rz=0,bn=0;
+    for(let i=0;i<x.length;i++){r[i]=b[i]!-ap[i]!;z[i]=r[i]!/Math.max(diagonal[i]!,1e-25);p[i]=z[i]!;rz+=r[i]!*z[i]!;bn+=b[i]!*b[i]!;}
     let iterations=0,residual=0;
     for(;iterations<linearIterations;iterations++){
       if(iterations%64===0)work?.check();let rr=0;for(let i=0;i<r.length;i++)rr+=r[i]!*r[i]!;residual=Math.sqrt(rr/Math.max(bn,1e-30));if(residual<1e-8)break;
-      mul(p,ap);let den=0;for(let i=0;i<x.length;i++)den+=p[i]!*ap[i]!;if(!(den>0))break;
+      apply(p,ap);let den=0;for(let i=0;i<x.length;i++)den+=p[i]!*ap[i]!;if(!(den>0))break;
       const alpha=rz/den;let next=0;
-      for(let i=0;i<x.length;i++){x[i]+=alpha*p[i]!;r[i]-=alpha*ap[i]!;z[i]=r[i]!/Math.max(diag[i]!,1e-25);next+=r[i]!*z[i]!;}
+      for(let i=0;i<x.length;i++){x[i]+=alpha*p[i]!;r[i]-=alpha*ap[i]!;z[i]=r[i]!/Math.max(diagonal[i]!,1e-25);next+=r[i]!*z[i]!;}
       const beta=next/Math.max(rz,1e-300);for(let i=0;i<x.length;i++)p[i]=z[i]!+beta*p[i]!;rz=next;
     }
     return{x,iterations,residual};
   };
   const jac=(vs:Vec2[],e:Element)=>{let a=0,b=0,c=0,d=0;for(let k=0;k<3;k++){const p=vs[e.t[k]!]!;a+=p[0]*e.gx[k]!;b+=p[0]*e.gy[k]!;c+=p[1]*e.gx[k]!;d+=p[1]*e.gy[k]!;}return[a,b,c,d];};
-  const energy=(vs:Vec2[])=>{let s=0;for(const e of elements){const [a,b,c,d]=jac(vs,e) as [number,number,number,number];s+=e.area*(a*a+b*b+c*c+d*d+2-2*Math.hypot(a+d,c-b));}for(let i=0;i<n;i++)s+=anchorWeights[i]!*((vs[i]![0]-reference[i]![0])**2+(vs[i]![1]-reference[i]![1])**2);return s/totalArea;};
+  const energy=(vs:Vec2[])=>{let s=0;for(const e of elements){const [a,b,c,d]=jac(vs,e) as [number,number,number,number];s+=e.area*(a*a+b*b+c*c+d*d+2-2*Math.hypot(a+d,c-b));}for(let i=0;i<n;i++)s+=anchorWeights[i]!*((vs[i]![0]-reference[i]![0])**2+(vs[i]![1]-reference[i]![1])**2);for(const row of constraints){const d=row.ids.reduce((sum,id,k)=>sum+row.coefficients[k]!*vs[id]![row.axis],0)-row.target;s+=row.weight*d*d;}return s/totalArea;};
   const initialEnergy=energy(uv);let previous=initialEnergy,iterations=0,residual=0,accepted=0,boundaryRejected=0;
   for(;iterations<maxIterations;iterations++){
     uvProgress(work,{stage:'parameterize',detail:'自由边界保形 ARAP（不固定圆形边界）',current:iterations,total:maxIterations,unit:'保形迭代'});

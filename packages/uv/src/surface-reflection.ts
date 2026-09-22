@@ -16,7 +16,7 @@ export interface SurfaceReflectionReport {
   vertexPairCoverage:number;confidence:'reliable'|'partial';
 }
 export interface SurfaceReflection extends SurfaceReflectionReport {pairs:SurfacePair[]}
-export interface SurfaceReflectionOptions {tolerance?:number;minimumCoverage?:number;maxSamples?:number}
+export interface SurfaceReflectionOptions {tolerance?:number;minimumCoverage?:number;maxSamples?:number;fixedPlane?:{normal:Vec3;offset:number}}
 const sub=(a:readonly number[],b:readonly number[]):Vec3=>[a[0]!-b[0]!,a[1]!-b[1]!,a[2]!-b[2]!];
 const add=(a:Vec3,b:Vec3):Vec3=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
 export const dot3=(a:readonly number[],b:readonly number[])=>a[0]!*b[0]!+a[1]!*b[1]!+a[2]!*b[2]!;
@@ -79,7 +79,7 @@ export function detectSurfaceReflection(mesh:CutMesh,options:SurfaceReflectionOp
  const tol=options.tolerance??.018,minCoverage=options.minimumCoverage??.94,count=options.maxSamples??256;
  if(!Number.isFinite(tol)||tol<.001||tol>.06||!Number.isInteger(count)||count<32||count>2048||!Number.isFinite(minCoverage)||minCoverage<.8||minCoverage>1)throw Error('Invalid surface reflection options.');
  const data={name:'geometry',positions:mesh.positions,faces:mesh.triangles.map(t=>({vertices:t}))},frames=reflectionFrames(data,mesh.triangles.map((_,i)=>i));if(!frames.length)return;
- const lo:Vec3=[Infinity,Infinity,Infinity],hi:Vec3=[-Infinity,-Infinity,-Infinity];for(const p of mesh.positions)for(let k=0;k<3;k++){lo[k]=Math.min(lo[k]!,p[k]!);hi[k]=Math.max(hi[k]!,p[k]!);}const span=Math.hypot(...sub(hi,lo));if(!(span>0))return;
+ const lo:Vec3=[Infinity,Infinity,Infinity],hi:Vec3=[-Infinity,-Infinity,-Infinity];for(const p of mesh.positions)for(let k=0;k<3;k++){lo[k]=Math.min(lo[k]!,p[k]!);hi[k]=Math.max(hi[k]!,p[k]!);}const span=2*Math.sqrt(mesh.positions.reduce((max,p)=>Math.max(max,dot3(sub(p,frames[0]!.origin),sub(p,frames[0]!.origin))),0));if(!(span>0))return;
  const index=new SurfaceIndex(mesh,work),edges=boundaryEdges(mesh),total=index.triangles.reduce((s,t)=>s+t.area,0),perimeter=edges.reduce((s,e)=>s+e.length,0);
  const samples:{a:SurfaceBinding;p:Vec3;n:Vec3;weight:number;boundary:boolean}[]=[];
  let at=0,acc=0;for(let i=0;i<count;i++){const target=(i+.5)*total/count;while(at<index.triangles.length-1&&acc+index.triangles[at]!.area<target){acc+=index.triangles[at]!.area;at++;}const t=index.triangles[at]!,weights:[number,number,number]=[.2,.3,.5];const shift=i%3,w=weights.map((_,k)=>weights[(k+shift)%3]!) as [number,number,number];samples.push({a:{face:at,weights:w},p:mix(t.positions,w),n:t.normal,weight:1/count,boundary:false});}
@@ -97,10 +97,10 @@ export function detectSurfaceReflection(mesh:CutMesh,options:SurfaceReflectionOp
   const score=h.reduce((s,p)=>s+(p?(p.distance/span)**2+(1-p.normal)*.001:.006),0)/h.length;return {normal,origin:frames[0]!.origin,score};
  }).filter(f=>{const v=mesh.positions.map(p=>dot3(p,f.normal));return Math.max(...v)-Math.min(...v)>span*.12;}).sort((a,b)=>a.score-b.score).slice(0,4);
  const candidates:SurfaceReflection[]=[];
- for(const frame of coarse){work?.check();let normal=frame.normal,offset=dot3(frame.origin,normal);
+ for(const frame of options.fixedPlane?[{normal:options.fixedPlane.normal,origin:frames[0]!.origin,score:0}]:coarse){work?.check();let normal=frame.normal,offset=options.fixedPlane?.offset??dot3(frame.origin,normal);
   // Exclude the identity reflection of a thin planar sheet. We need both sides.
   const extent=Math.max(...mesh.positions.map(p=>dot3(p,normal)))-Math.min(...mesh.positions.map(p=>dot3(p,normal)));if(extent<span*.12)continue;
-  for(let iteration=0;iteration<18;iteration++){
+  for(let iteration=0;iteration<(options.fixedPlane?0:18);iteration++){
    const pairs=hits(normal,offset,span*.06).filter((x):x is NonNullable<typeof x>=>!!x);if(pairs.length<samples.length*.6)break;
    const sum=pairs.reduce((s,p)=>s+p.sample.weight,0),center:Vec3=[0,0,0];for(const p of pairs)for(let k=0;k<3;k++)center[k]!+=(p.sample.p[k]!+p.q[k]!)*.5*p.sample.weight/sum;
    const cov=Array.from({length:3},()=>[0,0,0]);for(const p of pairs){const a=scale(sub(p.sample.p,center),1/span),b=scale(sub(p.q,center),1/span);for(let i=0;i<3;i++)for(let j=0;j<3;j++)cov[i]![j]!+=.5*p.sample.weight*(a[i]!*b[j]!+a[j]!*b[i]!);}
