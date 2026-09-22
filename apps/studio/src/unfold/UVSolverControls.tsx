@@ -1,6 +1,12 @@
-import { useState, useEffect } from 'react';
-import { describeFill, DEFAULT_HUMAN, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
+import {renderFillGrowth} from './fill-growth-panel';
+import { useState, useEffect, useRef } from 'react';
+import { DEFAULT_FILL_DENSITY_LIMIT, describeFill, DEFAULT_HUMAN, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
 import type { UVSnapshot } from '../workers/uv.worker';
+function FillGrowthPanel({snapshot}:{snapshot:UVSnapshot|null}){
+  const host=useRef<HTMLDivElement>(null);
+  useEffect(()=>{if(host.current)renderFillGrowth(host.current,snapshot?.packingReport?.refinement);},[snapshot]);
+  return <div ref={host} data-testid="fill-growth-report"/>;
+}
 /** Draft settings are applied together: dragging a control never launches dozens of solvers. */
 export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess,selectedCharts=[]}:{onProcess:(operation:'connected'|'stitch'|'repack'|'fill'|'templates',config:UnwrapOptions)=>void;onAuto:(goal:'large'|'balanced')=>void;value:UnwrapOptions;onChange:(v:UnwrapOptions)=>void;snapshot:UVSnapshot|null;selectedCharts?:number[]}){
   const [draft,setDraft]=useState(value),patch=(v:Partial<UnwrapOptions>)=>setDraft(d=>({...d,...v}));
@@ -53,9 +59,13 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess,selec
     </details>
     <details open className="uv-fill-controls"><summary>空白精排 · 大岛优先</summary>
       <button className="primary" aria-label="Refine current atlas" disabled={!snapshot?.metrics?.validated} onClick={()=>onProcess('fill',{...draft,fillMode:draft.fillMode==='uniform'?'uniform':'area-priority'})}>{draft.fillRecutLarge?'填补空白 + 大岛旧切缝试验':'填补空白（保留当前岛 / 切缝）'}</button>
+      <FillGrowthPanel snapshot={snapshot}/>
       <label>精排模式<select aria-label="Fill mode" value={draft.fillMode==='uniform'?'uniform':'area-priority'} onChange={e=>patch({fillMode:e.target.value as UnwrapOptions['fillMode']})}><option value="area-priority">从大到小逐岛扩张</option><option value="uniform">全岛共同放大（保持密度比例）</option></select></label>
+      <div className="button-grid two"><button aria-label="Balanced density preset" onClick={()=>patch({fillMaxAreaGain:1.6})}>密度均衡 · 1.6 倍</button><button aria-label="Bounded growth preset" onClick={()=>patch({fillMaxAreaGain:DEFAULT_FILL_DENSITY_LIMIT,fillFitVacancies:true})}>有界放大 · 3 倍</button></div>
+      <label className="check"><input aria-label="Fit enlargement to vacant space" type="checkbox" checked={draft.fillFitVacancies!==false} onChange={e=>patch({fillFitVacancies:e.target.checked})}/>按空位容量放大岛（仍遵守面积密度上限）</label>
+      <small>新默认允许最大 / 最小面积密度差 3 倍，优先大岛，放不下再处理小岛。保留 1.6 倍可对照旧限制；切换预设不立即计算，也不缩小现有岛。</small>
       <label>每步面积增量 %<input aria-label="Fill step" type="number" min=".5" max="25" step=".5" value={(draft.fillStep??.08)*100} onChange={e=>patch({fillStep:+e.target.value/100})}/></label>
-      <label>相对密度差上限（不限制共同放大）<input aria-label="Fill area cap" type="number" min="1" max="3" step=".1" value={draft.fillMaxAreaGain??1.6} onChange={e=>patch({fillMaxAreaGain:+e.target.value})}/></label>
+      <label>相对密度差上限（不限制共同放大）<input aria-label="Fill area cap" type="number" min="1" max="3" step=".1" value={draft.fillMaxAreaGain??DEFAULT_FILL_DENSITY_LIMIT} onChange={e=>patch({fillMaxAreaGain:+e.target.value})}/></label>
       <label className="check"><input aria-label="Cavity-directed fill" type="checkbox" checked={draft.fillCavitySearch!==false} onChange={e=>patch({fillCavitySearch:e.target.checked})}/>扫描真实空洞，允许等面积搬移后继续扩张</label>
       <label>每岛每轮连续增长步数<input aria-label="Fill growth steps" type="number" min="1" max="16" value={draft.fillGrowthSteps??4} onChange={e=>patch({fillGrowthSteps:+e.target.value})}/></label>
       <label>共同面积放大上限<input aria-label="Fill common gain limit" type="number" min="1" max="16" step=".5" value={draft.fillCommonGainLimit??4} onChange={e=>patch({fillCommonGainLimit:+e.target.value})}/></label>
@@ -66,7 +76,7 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess,selec
       <label>最大轮数<input aria-label="Fill rounds" type="number" min="1" max="24" value={draft.fillRounds??8} onChange={e=>patch({fillRounds:+e.target.value})}/></label>
       <label>轮廓搜索网格<select aria-label="Fill resolution" value={draft.fillResolution??512} onChange={e=>patch({fillResolution:+e.target.value})}><option value="256">256（快速 / 保守）</option><option value="512">512（默认）</option><option value="1024">1024（更细 / 更慢）</option></select></label>
       <label>精排搜索预算（秒）<input aria-label="Fill budget" type="number" min="1" max="120" value={(draft.fillTimeBudgetMs??15000)/1000} onChange={e=>patch({fillTimeBudgetMs:+e.target.value*1000})}/></label>
-      <small>不缩小其他岛腾空间，不拉伸宽高。8% 面积增量约为 3.9% 边长；默认岛间密度差上限 1.6 倍，共同放大另限 4 倍。轮廓栅格可利用凹口，但不保证最优。仅支持有效单页；生成无重叠 UV 后再精排。可在预算停止后继续精排，不会无界累积大岛密度。</small>
+      <small>不缩小其他岛腾空间，不拉伸宽高。8% 面积增量约为 3.9% 边长；默认岛间密度差上限 3 倍，共同放大另限 4 倍。轮廓栅格可利用凹口，但不保证最优。仅支持有效单页；生成无重叠 UV 后再精排。可在预算停止后继续精排，不会无界累积大岛密度。</small>
       {snapshot?.packingReport?.refinement&&<div role="status" data-testid="fill-report"><p>{describeFill(snapshot.packingReport.refinement)}</p>{snapshot.packingReport.refinement.recut&&<small>大岛旧切缝试验：{snapshot.packingReport.refinement.recut.trials} 个候选，{snapshot.packingReport.refinement.recut.accepted?'接受一次切分':'未接受，原岛保留'}。</small>}<small>可检查形状 / 切缝的岛：{snapshot.packingReport.refinement.shapeWaste.slice(0,5).map(c=>`#${c.id+1}（轮廓/框 ${(c.shapeFill*100).toFixed(0)}%）`).join('、')}。只是诊断，不会自动再切。</small></div>}
     </details>
     <details open><summary>面积与空间邻居</summary>

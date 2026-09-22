@@ -1,3 +1,4 @@
+import {describeGrowthStop} from '@meshtailor/uv';
 import {describeStructure} from './structure-description';
 import type { MeshData } from '@meshtailor/mesh-core';
 import type { UVSnapshot } from '../workers/uv.worker';
@@ -5,6 +6,7 @@ import type { UnfoldPlayer } from './useUnfoldPlayer';
 export function CorrespondenceInspector({mesh,snapshot,player:p}:{mesh:MeshData;snapshot:UVSnapshot|null;player:UnfoldPlayer}){
   const fi=p.focusFace,face=fi===null?null:mesh.faces[fi];
   const chart=fi===null?snapshot?.packed.find(c=>c.id===p.selection[0]):snapshot?.packed.find(c=>c.faceUVs.has(fi));
+  const growth=chart?snapshot?.packingReport?.refinement?.growth?.rows.find(r=>r.id===chart.id):undefined;
   const coords=fi===null?null:chart?.faceUVs.get(fi);
   const fmt=(v:readonly number[])=>v.map(x=>Number(x.toPrecision(5))).join(', ');
   const diagnostic=chart?snapshot?.diagnostics?.find(d=>d.id===chart.id):undefined;
@@ -27,6 +29,7 @@ export function CorrespondenceInspector({mesh,snapshot,player:p}:{mesh:MeshData;
       {structure?.structureReason&&<p data-testid="structure-correspondence" className="selection-help">{describeStructure(structure)}</p>}
       {diagnostic?.structuralRelaxation&&<p className="selection-help">内在长度松弛：{diagnostic.structuralRelaxation.acceptedIterations} 次接受；能量 {diagnostic.structuralRelaxation.initialEnergy.toFixed(4)} → {diagnostic.structuralRelaxation.finalEnergy.toFixed(4)}。不读取参考 UV。</p>}
       {template&&<dl className="property-list" data-testid="template-correspondence"><dt>结构来源</dt><dd>原区域 #{template.sourceChart+1} · {template.template}</dd><dt>上/下边界</dt><dd>{template.upperBoundary?.length} / {template.lowerBoundary?.length} 个源顶点</dd><dt>真实侧缝</dt><dd>{template.seamEdges?.length} 条源网格边 · 不属于动画临时切缝</dd><dt>同组面片</dt><dd>{template.charts?.map(id=>'#'+(id+1)).join(' / ')}</dd></dl>}
+      {growth&&<dl className="property-list" data-testid="selected-island-growth"><dt>本轮实际面积增益</dt><dd>{growth.areaFactor.toFixed(3)} ×</dd><dt>本轮实际边长增益</dt><dd>{growth.linearFactor.toFixed(3)} ×</dd><dt>增长停止依据</dt><dd>{describeGrowthStop(growth.reason)}</dd></dl>}
       {area&&<dl className="property-list" data-testid="island-area"><dt>3D 表面积占比（同域）</dt><dd>{(area.share3D*100).toFixed(4)}%</dd><dt>UV 面积占比（同域）</dt><dd>{(area.shareUV*100).toFixed(4)}%</dd><dt>相对平均面积密度</dt><dd>{area.densityRatio?.toFixed(3)??'无效'} ×</dd></dl>}
       {chart&&<details open><summary>3D 邻居 · {neighbors.length}</summary>{neighbors.map(l=><p key={`${l.a}:${l.b}`}>#{(l.a===chart.id?l.b:l.a)+1} · {l.stitchable?'共享网格边，可作为缝合候选':'空间接近，仅关联'} · {(l.distance/(snapshot?.spatialReport?.distance||1)*(snapshot?.spatialReport?.distanceRatio??0)*100).toFixed(3)}% 模型边长</p>)}<small>空间关联不改变真实岛数，未列出的关系可能被采样或预算遗漏。</small></details>}
       {face&&coords&&<div className="coordinate-table"><h4>面角坐标</h4>{face.vertices.map((vi,k)=><div className="corner-correspondence" key={k}><b>角 {k+1} <span>顶点 {vi}</span></b><code><i>3D</i>{fmt(mesh.positions[vi]!)}</code><code><i>UV</i>{fmt(coords[k]!)}</code></div>)}</div>}

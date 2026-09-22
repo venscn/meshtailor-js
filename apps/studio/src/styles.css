@@ -158,3 +158,12 @@ footer{flex:0 0 24px;display:flex;align-items:center;justify-content:space-betwe
 .uv-selection-box[data-mode=subtract]{border-style:dashed;border-color:#df9c91}
 .uv-selection-box[hidden]{display:none}
 .uv-box-hint{position:absolute;bottom:5px;left:8px;font-size:10px;color:#a5abad;pointer-events:none;background:#1b1d1faa;padding:2px 4px;}
+
+/* Numeric enlargement audit; it stays within the existing workbench column. */
+.fill-growth-title {font-weight:600;margin:10px 0 6px;line-height:1.45;}
+.fill-growth-scroll {max-height:230px;overflow:auto;border:1px solid var(--border,#3b3e40);margin:6px 0;}
+.fill-growth-table {width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums;}
+.fill-growth-table th,.fill-growth-table td {padding:5px 6px;border-bottom:1px solid var(--border,#3b3e40);text-align:left;}
+.fill-growth-table th {position:sticky;top:0;background:var(--panel,#252829);font-weight:500;}
+.fill-growth-table td:nth-child(2),.fill-growth-table td:nth-child(3) {text-align:right;}
+.fill-growth-table th:not(:last-child),.fill-growth-table td:not(:last-child) {white-space:nowrap;}
