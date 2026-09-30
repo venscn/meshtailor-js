@@ -1,0 +1,41 @@
+START folded-strip 4096
+PLAN folded-strip [
+  [ 'longitudinal-panels', 6 ],
+  [ 'longitudinal-panels', 32 ],
+  [ 'longitudinal-panels', 96 ],
+  [ 'longitudinal-panels', 32 ],
+  [ 'longitudinal-panels', 96 ]
+]
+RESULT folded-strip 5 [
+  { n: 6, m: 'intrinsic-strip', s: undefined, r: undefined },
+  {
+    n: 32,
+    m: 'intrinsic-strip',
+    s: 'already-symmetric',
+    r: 2.3235599275504557e-9
+  },
+  { n: 96, m: 'projected-free', s: undefined, r: undefined },
+  {
+    n: 32,
+    m: 'intrinsic-strip',
+    s: 'already-symmetric',
+    r: 2.215005817154227e-9
+  },
+  { n: 96, m: 'projected-free', s: undefined, r: undefined }
+]
+START large-shell 11776
+PLAN large-shell [ [ 'symmetric-sheet', 7414 ], [ 'symmetric-sheet', 7578 ] ]
+RESULT large-shell 2 [
+  {
+    n: 7414,
+    m: 'symmetry-constrained',
+    s: 'constrained',
+    r: 0.001108954684926816
+  },
+  {
+    n: 7578,
+    m: 'symmetry-constrained',
+    s: 'constrained',
+    r: 0.0009995384017636754
+  }
+]

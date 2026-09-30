@@ -1,0 +1,11 @@
+PASS Built version and default recognition
+PASS Correct whole model generated with no source UV
+PASS Complete narrow part: full-length sides and end cap, not upper/lower diagonal fragments
+PASS Complete 14992-face closed shell becomes two verified skins
+PASS Island-only selection is unchanged
+PASS Full ribbon reaches its actual target UV
+PASS Shell inspector reports measured current UV reflection
+PASS Playback speed and camera independence preserved
+PASS Repacking cannot change complete group membership
+PASS Fill executes on current result and preserves skin correspondence
+PASS No unhandled UI/WebGL error

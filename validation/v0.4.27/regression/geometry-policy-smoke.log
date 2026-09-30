@@ -1,0 +1,15 @@
+PASS Old local-storage source mode cannot re-enable original UV
+PASS Old imported configuration is explicitly rejected
+PASS Every geometry task overrides obsolete source hints and normal-cone mode
+PASS Worker clone boundary does not invoke UV getters
+PASS Default load is a complete geometry-generation Worker path
+PASS Default load and Generate baseline share exact output, not just island count
+PASS Runtime Generate baseline produces the identical actual cut set
+PASS Low-poly planar features are not discarded solely because each face has two triangles
+PASS Open bent ribbons remain three connected sheets, not twelve planar micro-panels
+PASS Worker rejects obsolete source even with a valid new plan
+PASS Worker rejects obsolete source-atlas even with a valid new plan
+PASS Postprocessing rejects an unmarked seed, rather than treating imported UV as generated
+PASS Repack retains the current generated-island provenance
+PASS Original-seam recut cannot be requested during fill
+PASS GLTF import removes texture-coordinate attributes before Three parses them

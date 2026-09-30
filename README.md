@@ -1,3 +1,5 @@
+> 当前交付：**v0.4.27**。请先阅读 [START_HERE.md](START_HERE.md) 和 [当前修复说明](docs/releases/0.4.27.md)。自动生成仅使用几何，不读取原UV；离线工作台已构建。
+
 # MeshTailor-JS · 0.4.24
 
 TypeScript / JavaScript 自动展 UV 工程。先读 [START_HERE.md](START_HERE.md)，本轮改动与实际结果见 [v0.4.24 发布说明](docs/releases/0.4.24.md)。

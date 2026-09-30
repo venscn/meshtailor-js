@@ -1,0 +1,8 @@
+PASS Unseen folded extrusion is split along full-length bands before numerical failure
+PASS The symmetry family is geometric, not name or UV metadata
+PASS Translation rotation and common scale retain the geometric grouping
+PASS User edge constraints are never overwritten by an automatic strip family
+PASS No source geometry or triangle was modified
+PASS A large planar patch is not split merely for being symmetric
+PASS Intrinsic unfolding retains bent ribbon edge lengths, including reversed diagonals
+PASS Cancellation exits the geometry inspection without returning a partial grouping

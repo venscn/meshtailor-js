@@ -1,0 +1,15 @@
+PASS Triangle closest point 0.2,0.3,1
+PASS Triangle closest point -1,0,0
+PASS Triangle closest point 2,0,0
+PASS Triangle closest point 0.5,-1,0
+PASS Degenerate segment has finite barycentrics
+PASS Different vertex counts and diagonals still match surfaces
+PASS Narrow curved sheets retain their actual transverse reflection plane
+PASS Reflection is an involution on positions
+PASS BVH agrees with brute triangle closest points
+PASS Rigid rotation and scale do not require a world mirror axis
+PASS A planar sheet does not use its identity plane
+PASS Forbidden UV getters cannot be accessed
+PASS Cancellation propagates
+PASS Invalid controls fail explicitly
+PASSED 14

@@ -1,0 +1,120 @@
+{
+  "version": "0.4.27",
+  "productionScope": "Geometry-only groups/cuts/UV, default generated and automatic fill; not a complete React build.",
+  "core": 21,
+  "continuousUnit": 8,
+  "completePartCases": 2,
+  "fillOnce": 3,
+  "surfaceReflection": 14,
+  "oldBrowser": {
+    "camera": 39,
+    "arrival": 28,
+    "selection": 39
+  },
+  "regression": [
+    {
+      "script": "surface-reflection-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "symmetry-metric-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "symmetric-sheets-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "structure-symmetry-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "complete-structure-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "structure-relax-smoke",
+      "initialExit": 1,
+      "finalExit": 0,
+      "note": "New narrow-connector reflection means unconstrained ARAP must not overwrite it. Two large panels still required to reduce energy; connector now required to satisfy actual reflection contract. Rerun passed."
+    },
+    {
+      "script": "longitudinal-budget-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "geometry-input-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "geometry-policy-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "candidate-contract-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "boundary-regularization-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    },
+    {
+      "script": "fill-once-smoke",
+      "initialExit": 0,
+      "finalExit": 0,
+      "note": ""
+    }
+  ],
+  "fullBuild": {
+    "exit": 127,
+    "reason": "vite: not found"
+  },
+  "fullTypecheck": {
+    "exit": 2,
+    "reason": "missing node type declarations"
+  },
+  "failuresAndCorrections": [
+    "Initial concurrent whole-model test was killed by memory pressure during the final Helmet variant; not counted as passing. Worker termination is now awaited; current complete six-path test reran sequentially with explicit GC and passed.",
+    "First synthetic narrow-surface RMS test assumed curved surfaces with different tessellations were exactly identical; replaced with genuinely reflected piecewise-linear geometry, without relaxing production gates.",
+    "Initial structure-relax regression required ARAP on every panel, including a newly recognized symmetric connector. Updated to assert two main panels improve and the connector retains its validated reflection.",
+    "Initial exploratory bevel merge did not compile due to an incorrect topology member name. Corrected to source triangle edges before accepting/committing the implementation.",
+    "First browser test used unsupported hide/ghost context strings; final test uses hidden/dim and explicitly checks the option, with a full rerun."
+  ],
+  "nonClaims": [
+    "No use of source UV in generation. QA-only fixed face counts select matching test components, never production rules.",
+    "No optimal packing or all-model semantic/symmetry guarantee.",
+    "Offline WebGL passing is not Three/React/macOS/Windows browser certification."
+  ],
+  "wholeModelBrowser": 11,
+  "wholeModelMetamorphic": {
+    "models": 2,
+    "variantsEach": 3,
+    "allUVAndOBJIdentical": true
+  },
+  "autoLoadMergeFill": {
+    "models": 4,
+    "passed": 4,
+    "searchSeconds": 3,
+    "rounds": 2
+  }
+}

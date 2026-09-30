@@ -1,0 +1,5 @@
+Verified: /mnt/data/dev-0427/meshtailor-js/results/v0.4.27/Corset-generated.obj
+Verified: /mnt/data/dev-0427/meshtailor-js/results/v0.4.27/FlightHelmet-generated.obj
+Verified: /mnt/data/dev-0427/meshtailor-js/results/v0.4.27/folded-strip-generated.obj
+Verified: /mnt/data/dev-0427/meshtailor-js/results/v0.4.27/large-shell-generated.obj
+These are exact reference results. Importing them into this app intentionally ignores their UV and generates a new atlas. Use an external UV viewer for an unchanged comparison.

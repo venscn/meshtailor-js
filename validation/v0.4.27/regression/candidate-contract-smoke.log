@@ -1,0 +1,4 @@
+Curved multiply-connected LSCM preserves the hole without invented slit { method: 'lscm', residual: 2.801688076437878e-10, boundaries: 2 }
+Coplanar seam sides cannot be collapsed by a projection seed 
+Rejected projection tries another solver instead of returning invalid no-op { method: 'lscm', residual: 9.558136002390675e-10 }
+No source UV read in direct automatic unwrap API 

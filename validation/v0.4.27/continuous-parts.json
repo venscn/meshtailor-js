@@ -1,0 +1,306 @@
+{
+  "passed": 2,
+  "tests": [
+    {
+      "name": "folded-strip",
+      "passed": true,
+      "pairedAudit": {
+        "surfaceSamples": 103,
+        "rms": 0.000033273805473800104,
+        "max": 0.00016161942139761908,
+        "note": "Independent paired return-side similarity/reflection audit; this is not a global semantic score."
+      },
+      "sourceFaces": 262,
+      "islands": 5,
+      "parts": [
+        {
+          "faces": 6,
+          "method": "intrinsic-strip",
+          "shape": {
+            "maxStretch": 1.0000000149011614,
+            "areaStretch": 1.0000000149011614
+          }
+        },
+        {
+          "faces": 32,
+          "method": "intrinsic-strip",
+          "symmetry": {
+            "status": "already-symmetric",
+            "surface": {
+              "normal": [
+                1,
+                -7.1524717201974964e-9,
+                -9.62360887293127e-9
+              ],
+              "offset": 0.28440850461483297,
+              "span": 0.8971684312369664,
+              "tolerance": 0.018,
+              "coverage": 1,
+              "boundaryCoverage": 1,
+              "rms": 2.5902043989556193e-10,
+              "boundaryRms": 3.1753596628560307e-9,
+              "p95": 1.3087591247174753e-9,
+              "normalAgreement": 1,
+              "sampleCount": 304,
+              "vertexPairCoverage": 1,
+              "confidence": "reliable"
+            },
+            "before": {
+              "rms": 2.3235599275504557e-9,
+              "boundaryRms": 3.2550311109821817e-9,
+              "p95": 1.5505992104326523e-9,
+              "max": 1.2400236728257909e-8,
+              "axis": [
+                -1,
+                2.4471261798124392e-9
+              ],
+              "center": [
+                0.029592602555133313,
+                0.23507248226491642
+              ],
+              "span": 0.8491841083601261
+            },
+            "after": {
+              "rms": 2.3235599275504557e-9,
+              "boundaryRms": 3.2550311109821817e-9,
+              "p95": 1.5505992104326523e-9,
+              "max": 1.2400236728257909e-8,
+              "axis": [
+                -1,
+                2.4471261798124392e-9
+              ],
+              "center": [
+                0.029592602555133313,
+                0.23507248226491642
+              ],
+              "span": 0.8491841083601261
+            },
+            "iterations": 0
+          },
+          "shape": {
+            "maxStretch": 1.0000000210734246,
+            "areaStretch": 1.0000000210734246
+          }
+        },
+        {
+          "faces": 96,
+          "method": "projected-free",
+          "shape": {
+            "maxStretch": 1.0291953601096855,
+            "areaStretch": 1.0280700630057182
+          }
+        },
+        {
+          "faces": 32,
+          "method": "intrinsic-strip",
+          "symmetry": {
+            "status": "already-symmetric",
+            "surface": {
+              "normal": [
+                1,
+                -4.515452549513334e-9,
+                -5.958053914618691e-9
+              ],
+              "offset": 0.284408507465713,
+              "span": 0.8790512079257232,
+              "tolerance": 0.018,
+              "coverage": 1,
+              "boundaryCoverage": 1,
+              "rms": 1.541312656969256e-10,
+              "boundaryRms": 3.019729896783065e-9,
+              "p95": 1.0158609192102725e-9,
+              "normalAgreement": 1,
+              "sampleCount": 304,
+              "vertexPairCoverage": 1,
+              "confidence": "reliable"
+            },
+            "before": {
+              "rms": 2.215005817154227e-9,
+              "boundaryRms": 3.1156027484958216e-9,
+              "p95": 1.4558133353376978e-9,
+              "max": 1.241085956130794e-8,
+              "axis": [
+                1,
+                2.3264610238271644e-9
+              ],
+              "center": [
+                0.024786918651996726,
+                0.08225280816885729
+              ],
+              "span": 0.8398711022249341
+            },
+            "after": {
+              "rms": 2.215005817154227e-9,
+              "boundaryRms": 3.1156027484958216e-9,
+              "p95": 1.4558133353376978e-9,
+              "max": 1.241085956130794e-8,
+              "axis": [
+                1,
+                2.3264610238271644e-9
+              ],
+              "center": [
+                0.024786918651996726,
+                0.08225280816885729
+              ],
+              "span": 0.8398711022249341
+            },
+            "iterations": 0
+          },
+          "shape": {
+            "maxStretch": 1.0000000210734246,
+            "areaStretch": 1.0000000210734246
+          }
+        },
+        {
+          "faces": 96,
+          "method": "projected-free",
+          "shape": {
+            "maxStretch": 1.0295612339882187,
+            "areaStretch": 1.0271755696941665
+          }
+        }
+      ],
+      "reasons": [
+        "Complete longitudinal crease panels (35 degrees), end caps retained, mirrored family conflict 0.000%; geometry only.",
+        "Complete longitudinal crease panels (35 degrees), end caps retained, mirrored family conflict 0.000%; geometry only.",
+        "Complete longitudinal crease panels (35 degrees), end caps retained, mirrored family conflict 0.000%; geometry only.",
+        "Complete longitudinal crease panels (35 degrees), end caps retained, mirrored family conflict 0.000%; geometry only.",
+        "Complete longitudinal crease panels (35 degrees), end caps retained, mirrored family conflict 0.000%; geometry only."
+      ]
+    },
+    {
+      "name": "large-shell",
+      "passed": true,
+      "sourceFaces": 14992,
+      "islands": 2,
+      "parts": [
+        {
+          "faces": 7414,
+          "method": "symmetry-constrained",
+          "symmetry": {
+            "status": "constrained",
+            "surface": {
+              "normal": [
+                0.9998715107953976,
+                -0.01238376542634829,
+                -0.0101786174696932
+              ],
+              "offset": 0.27282118085837836,
+              "span": 0.535422895403954,
+              "tolerance": 0.018,
+              "coverage": 1,
+              "boundaryCoverage": 0.945054945054945,
+              "rms": 0.005214933415822376,
+              "boundaryRms": 0.007007707265028103,
+              "p95": 0.01412648353115689,
+              "normalAgreement": 0.9875178129137648,
+              "sampleCount": 438,
+              "vertexPairCoverage": 0,
+              "confidence": "reliable"
+            },
+            "before": {
+              "rms": 0.03520830975066846,
+              "boundaryRms": 0.04328442591495888,
+              "p95": 0.06317419250259186,
+              "max": 0.07052539930083002,
+              "axis": [
+                0.40966705257162594,
+                0.9122351155471251
+              ],
+              "center": [
+                0.577455615335739,
+                0.08390621129675987
+              ],
+              "span": 2.211271724967405
+            },
+            "after": {
+              "rms": 0.001108954684926816,
+              "boundaryRms": 0.0012090890001768214,
+              "p95": 0.002429623840984181,
+              "max": 0.006331167966094284,
+              "axis": [
+                -0.9999999886454606,
+                0.0001506953177443392
+              ],
+              "center": [
+                -0.8805816771543168,
+                -0.02868429509283455
+              ],
+              "span": 2.2685113156322094
+            },
+            "iterations": 40
+          },
+          "shape": {
+            "maxStretch": 2.1869298460030304,
+            "areaStretch": 1.7703397244436072
+          }
+        },
+        {
+          "faces": 7578,
+          "method": "symmetry-constrained",
+          "symmetry": {
+            "status": "constrained",
+            "surface": {
+              "normal": [
+                0.9998910812041409,
+                -0.010150446656667405,
+                -0.010714203707445871
+              ],
+              "offset": 0.2743516873951298,
+              "span": 0.5464513314044649,
+              "tolerance": 0.018,
+              "coverage": 1,
+              "boundaryCoverage": 0.945054945054945,
+              "rms": 0.003883918222152359,
+              "boundaryRms": 0.006756985835808925,
+              "p95": 0.012742729870048698,
+              "normalAgreement": 0.9832838052250866,
+              "sampleCount": 438,
+              "vertexPairCoverage": 0,
+              "confidence": "reliable"
+            },
+            "before": {
+              "rms": 0.03636725908656508,
+              "boundaryRms": 0.04549148956358638,
+              "p95": 0.06483475116768456,
+              "max": 0.07080224666089649,
+              "axis": [
+                -0.38606711846425634,
+                0.9224706933234822
+              ],
+              "center": [
+                0.541894061042685,
+                -0.07735167626712983
+              ],
+              "span": 2.3526204006873965
+            },
+            "after": {
+              "rms": 0.0009995384017636754,
+              "boundaryRms": 0.001239865697739907,
+              "p95": 0.0015108105594476646,
+              "max": 0.006406624629969144,
+              "axis": [
+                0.9999999875640306,
+                0.00015770839709400555
+              ],
+              "center": [
+                0.909231518255537,
+                -0.01175526956337641
+              ],
+              "span": 2.2793061843412383
+            },
+            "iterations": 40
+          },
+          "shape": {
+            "maxStretch": 5.018775791804301,
+            "areaStretch": 1.7854913909164407
+          }
+        }
+      ],
+      "reasons": [
+        "Two complete radial-orientation skins; tiny sign islands reassigned, actual shared rim regularized, each disk and its own surface reflection verified before any slit. No source UV.",
+        "Two complete radial-orientation skins; tiny sign islands reassigned, actual shared rim regularized, each disk and its own surface reflection verified before any slit. No source UV."
+      ]
+    }
+  ]
+}

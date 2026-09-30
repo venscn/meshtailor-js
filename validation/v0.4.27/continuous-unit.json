@@ -1,0 +1,51 @@
+{
+  "passed": 8,
+  "tests": [
+    {
+      "name": "Unseen folded extrusion is split along full-length bands before numerical failure",
+      "passed": true,
+      "detail": {
+        "sizes": [
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          32,
+          8
+        ],
+        "reason": "Complete longitudinal crease panels (35 degrees), end caps retained, mirrored family conflict 0.000%; geometry only."
+      }
+    },
+    {
+      "name": "The symmetry family is geometric, not name or UV metadata",
+      "passed": true
+    },
+    {
+      "name": "Translation rotation and common scale retain the geometric grouping",
+      "passed": true
+    },
+    {
+      "name": "User edge constraints are never overwritten by an automatic strip family",
+      "passed": true
+    },
+    {
+      "name": "No source geometry or triangle was modified",
+      "passed": true
+    },
+    {
+      "name": "A large planar patch is not split merely for being symmetric",
+      "passed": true
+    },
+    {
+      "name": "Intrinsic unfolding retains bent ribbon edge lengths, including reversed diagonals",
+      "passed": true
+    },
+    {
+      "name": "Cancellation exits the geometry inspection without returning a partial grouping",
+      "passed": true
+    }
+  ]
+}

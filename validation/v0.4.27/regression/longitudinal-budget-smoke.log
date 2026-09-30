@@ -1,0 +1,12 @@
+PASS low: structured meridians are used before solver-budget partition
+PASS low: real seam edges keep a constant longitudinal plane
+PASS low: all faces, holes and input geometry retained
+PASS low: per-panel limit adds only ordered meridians
+PASS low: model labels and poisoned UV cannot affect the result
+PASS medium: structured meridians are used before solver-budget partition
+PASS medium: real seam edges keep a constant longitudinal plane
+PASS medium: all faces, holes and input geometry retained
+PASS medium: per-panel limit adds only ordered meridians
+PASS medium: model labels and poisoned UV cannot affect the result
+PASS Rigid rotation and uniform scale retain continuous two-panel plan
+PASS Opposite quad diagonals do not turn longitudinal cuts into a zipper

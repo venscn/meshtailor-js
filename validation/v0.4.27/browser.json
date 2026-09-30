@@ -1,0 +1,60 @@
+{
+  "scope": "Current offline production Worker / DOM / software WebGL with whole geometry-only FlightHelmet. Not React or generic Three importer certification.",
+  "tests": [
+    {
+      "name": "Built version and default recognition",
+      "passed": true
+    },
+    {
+      "name": "Correct whole model generated with no source UV",
+      "passed": true,
+      "detail": {
+        "islands": 191,
+        "faces": 94722
+      }
+    },
+    {
+      "name": "Complete narrow part: full-length sides and end cap, not upper/lower diagonal fragments",
+      "passed": true
+    },
+    {
+      "name": "Complete 14992-face closed shell becomes two verified skins",
+      "passed": true
+    },
+    {
+      "name": "Island-only selection is unchanged",
+      "passed": true
+    },
+    {
+      "name": "Full ribbon reaches its actual target UV",
+      "passed": true
+    },
+    {
+      "name": "Shell inspector reports measured current UV reflection",
+      "passed": true,
+      "detail": "表面对称已验证，使用三角面内的重心对应，不要求左右顶点或三角形一一配对。 表面采样匹配 99.6%，边界/闭合折边匹配 95.1%；原顶点近精确配对（采样） 0.0%（仅诊断，不是门槛）。当前 UV 镜像均方根误差 0.105%，边界 0.112%，最大 0.504%（相对当前岛直径）。 不改变三维网格、不复制半片，也不使用原 UV。"
+    },
+    {
+      "name": "Playback speed and camera independence preserved",
+      "passed": true
+    },
+    {
+      "name": "Repacking cannot change complete group membership",
+      "passed": true
+    },
+    {
+      "name": "Fill executes on current result and preserves skin correspondence",
+      "passed": true,
+      "detail": {
+        "before": 0.531432661346818,
+        "after": 0.5739472742545574,
+        "stop": "time-budget"
+      }
+    },
+    {
+      "name": "No unhandled UI/WebGL error",
+      "passed": true
+    }
+  ],
+  "passed": 11
+}

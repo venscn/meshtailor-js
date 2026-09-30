@@ -1,0 +1,410 @@
+{
+  "passed": 3,
+  "tests": [
+    {
+      "name": "Single owner and explicit settings retained",
+      "passed": true
+    },
+    {
+      "name": "Source UV repair cannot be re-enabled",
+      "passed": true
+    },
+    {
+      "name": "Production worker fills exactly once after initial pack",
+      "passed": true,
+      "baseline": 0.3326168217973218,
+      "refinement": {
+        "mode": "area-priority",
+        "resolution": 512,
+        "settings": {
+          "step": 0.08,
+          "maxAreaGain": 1.6,
+          "maxRounds": 2,
+          "warmupPasses": 1,
+          "timeBudgetMs": 3000,
+          "maxTrials": 12,
+          "rotate": true
+        },
+        "densitySpreadBefore": 1.0000000000000009,
+        "densitySpreadAfter": 1.360488960000001,
+        "before": 0.3326168217973213,
+        "after": 0.4045174484935604,
+        "beforeBox": 0.6325730779146332,
+        "afterBox": 0.761893325443691,
+        "trials": 12,
+        "accepted": 8,
+        "commonAccepted": 0,
+        "rounds": 1,
+        "stop": "trial-budget",
+        "elapsedMs": 584.4250239999997,
+        "order": [
+          5,
+          2,
+          4,
+          3,
+          0,
+          1
+        ],
+        "gains": [
+          {
+            "id": 5,
+            "area3D": 0.49325979774371587,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 2,
+            "area3D": 0.4932597977437158,
+            "areaFactor": 1.3604889600000003,
+            "linearFactor": 1.1664
+          },
+          {
+            "id": 4,
+            "area3D": 0.2712507525809683,
+            "areaFactor": 1,
+            "linearFactor": 1
+          },
+          {
+            "id": 3,
+            "area3D": 0.27125075258096826,
+            "areaFactor": 1,
+            "linearFactor": 1
+          },
+          {
+            "id": 0,
+            "area3D": 0.05807148998615042,
+            "areaFactor": 1,
+            "linearFactor": 1
+          },
+          {
+            "id": 1,
+            "area3D": 0.05807148998615041,
+            "areaFactor": 1,
+            "linearFactor": 1
+          }
+        ],
+        "history": [
+          {
+            "round": 1,
+            "id": 5,
+            "occupancy": 0.34059494425591125,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 5,
+            "occupancy": 0.3492113165111878,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 5,
+            "occupancy": 0.3585169985468865,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 1,
+            "id": 5,
+            "occupancy": 0.36856713514544115,
+            "areaFactor": 1.3604889600000003
+          },
+          {
+            "round": 1,
+            "id": 2,
+            "occupancy": 0.37654525760403057,
+            "areaFactor": 1.08
+          },
+          {
+            "round": 1,
+            "id": 2,
+            "occupancy": 0.38516162985930713,
+            "areaFactor": 1.1664
+          },
+          {
+            "round": 1,
+            "id": 2,
+            "occupancy": 0.39446731189500583,
+            "areaFactor": 1.2597120000000002
+          },
+          {
+            "round": 1,
+            "id": 2,
+            "occupancy": 0.40451744849356047,
+            "areaFactor": 1.3604889600000003
+          }
+        ],
+        "shapeWaste": [
+          {
+            "id": 5,
+            "area3D": 0.49325979774371587,
+            "boxWaste": 0.08010397109456642,
+            "shapeFill": 0.5545584854583951
+          },
+          {
+            "id": 2,
+            "area3D": 0.4932597977437158,
+            "boxWaste": 0.07917863448874764,
+            "shapeFill": 0.5574267831178163
+          },
+          {
+            "id": 4,
+            "area3D": 0.2712507525809683,
+            "boxWaste": 0.07082495511947143,
+            "shapeFill": 0.4364033283231761
+          },
+          {
+            "id": 3,
+            "area3D": 0.27125075258096826,
+            "boxWaste": 0.06944745646466671,
+            "shapeFill": 0.4412400176051266
+          },
+          {
+            "id": 0,
+            "area3D": 0.05807148998615042,
+            "boxWaste": 0.00020061947723489827,
+            "shapeFill": 0.9831997062752952
+          },
+          {
+            "id": 1,
+            "area3D": 0.05807148998615041,
+            "boxWaste": 0.00020061947262429297,
+            "shapeFill": 0.9831997066549102
+          }
+        ],
+        "note": "轮廓栅格只用于保守搜索；占用率为实际三角形面积。面积增益相对本次基线，不改变形状/切缝；小岛不缩小。高包围盒浪费仅供检查切缝，不能证明切缝不合理。",
+        "search": {
+          "commonGainLimit": 2,
+          "commonGain": 1,
+          "rotationStep": 45,
+          "reflowBudget": 0,
+          "reflowTrials": 0,
+          "reflowAccepted": 0,
+          "islandsTried": 4,
+          "untriedIds": [
+            0,
+            1
+          ],
+          "completedSweeps": 0,
+          "freeGridFraction": 0.47185516357421875,
+          "emptyRegions": [
+            {
+              "cells": 71290,
+              "bounds": [
+                0.003,
+                0.71003125,
+                0.997140625,
+                0.997140625
+              ]
+            },
+            {
+              "cells": 14614,
+              "bounds": [
+                0.003,
+                0.575265625,
+                0.92096875,
+                0.65925
+              ]
+            },
+            {
+              "cells": 5760,
+              "bounds": [
+                0.643625,
+                0.003,
+                0.997140625,
+                0.223703125
+              ]
+            },
+            {
+              "cells": 5004,
+              "bounds": [
+                0.003,
+                0.290109375,
+                0.34284375,
+                0.5264375
+              ]
+            },
+            {
+              "cells": 4833,
+              "bounds": [
+                0.17096875,
+                0.17096875,
+                0.329171875,
+                0.329171875
+              ]
+            }
+          ]
+        },
+        "cavities": {
+          "enabled": true,
+          "growthSteps": 4,
+          "windowTrials": 0,
+          "windowAccepted": 0,
+          "relocationTrials": 1,
+          "relocations": 1,
+          "relocatedIds": [
+            4
+          ],
+          "largestBefore": 0.295135498046875,
+          "largestAfter": 0.23882675170898438,
+          "positionOnly": false
+        },
+        "vacancyGrowth": {
+          "enabled": false,
+          "trials": 0,
+          "accepted": 0
+        },
+        "adaptive": {
+          "strategy": "adaptive",
+          "seed": "contour-reflow",
+          "localAccepted": 2,
+          "reflowAccepted": 6,
+          "failedTrials": 2,
+          "smallerAfterFailure": 1,
+          "skippedAtCap": 0,
+          "attempts": [
+            {
+              "id": 5,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 2,
+              "tries": 4,
+              "accepted": 4,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 4,
+              "tries": 1,
+              "accepted": 0,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 3,
+              "tries": 1,
+              "accepted": 0,
+              "failed": 1,
+              "nextStep": 0.04,
+              "minStepFailed": false
+            },
+            {
+              "id": 0,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            },
+            {
+              "id": 1,
+              "tries": 0,
+              "accepted": 0,
+              "failed": 0,
+              "nextStep": 0.08,
+              "minStepFailed": false
+            }
+          ]
+        },
+        "growth": {
+          "rows": [
+            {
+              "id": 5,
+              "areaBefore": 0.09972653073236783,
+              "areaAfter": 0.13567684408048736,
+              "areaFactor": 1.360488960000002,
+              "linearFactor": 1.166400000000001,
+              "area3D": 0.49325979774371587,
+              "densityBefore": 0.20217850955731642,
+              "densityAfter": 0.27506163020198393,
+              "allowedAreaFactor": 1.5999999999999994,
+              "tries": 4,
+              "reason": "trial-budget"
+            },
+            {
+              "id": 2,
+              "areaBefore": 0.09972653073236783,
+              "areaAfter": 0.13567684408048725,
+              "areaFactor": 1.360488960000001,
+              "linearFactor": 1.1664000000000003,
+              "area3D": 0.4932597977437158,
+              "densityBefore": 0.20217850955731645,
+              "densityAfter": 0.2750616302019837,
+              "allowedAreaFactor": 1.5999999999999992,
+              "tries": 4,
+              "reason": "trial-budget"
+            },
+            {
+              "id": 4,
+              "areaBefore": 0.05484107287312056,
+              "areaAfter": 0.05484107287312055,
+              "areaFactor": 0.9999999999999999,
+              "linearFactor": 0.9999999999999999,
+              "area3D": 0.2712507525809683,
+              "densityBefore": 0.20217850955731637,
+              "densityAfter": 0.20217850955731634,
+              "allowedAreaFactor": 1.5999999999999999,
+              "tries": 1,
+              "reason": "trial-budget"
+            },
+            {
+              "id": 3,
+              "areaBefore": 0.054841072873120546,
+              "areaAfter": 0.054841072873120546,
+              "areaFactor": 1,
+              "linearFactor": 1,
+              "area3D": 0.27125075258096826,
+              "densityBefore": 0.20217850955731637,
+              "densityAfter": 0.20217850955731637,
+              "allowedAreaFactor": 1.5999999999999999,
+              "tries": 1,
+              "reason": "trial-budget"
+            },
+            {
+              "id": 0,
+              "areaBefore": 0.011740807293172516,
+              "areaAfter": 0.011740807293172518,
+              "areaFactor": 1.0000000000000002,
+              "linearFactor": 1,
+              "area3D": 0.05807148998615042,
+              "densityBefore": 0.2021785095573164,
+              "densityAfter": 0.20217850955731642,
+              "allowedAreaFactor": 1.5999999999999996,
+              "tries": 0,
+              "reason": "trial-budget"
+            },
+            {
+              "id": 1,
+              "areaBefore": 0.011740807293172522,
+              "areaAfter": 0.011740807293172515,
+              "areaFactor": 0.9999999999999994,
+              "linearFactor": 0.9999999999999997,
+              "area3D": 0.05807148998615041,
+              "densityBefore": 0.20217850955731653,
+              "densityAfter": 0.20217850955731642,
+              "allowedAreaFactor": 1.5999999999999985,
+              "tries": 0,
+              "reason": "trial-budget"
+            }
+          ],
+          "beforeArea": 0.33261682179732177,
+          "afterArea": 0.40451744849356075,
+          "addedArea": 0.07190062669623898,
+          "enlarged": 2,
+          "unchanged": 4,
+          "densityLimited": 0,
+          "gainLimited": 0,
+          "notTried": 0,
+          "maxAreaFactor": 1.360488960000002,
+          "minAreaFactor": 0.9999999999999994
+        }
+      }
+    }
+  ]
+}

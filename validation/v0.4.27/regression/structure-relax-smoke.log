@@ -1,0 +1,17 @@
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(b.diagnostics.every(d=>d.structuralRelaxation?.acceptedIterations>0))
+
+    at file:///mnt/data/dev-0427/meshtailor-js/scripts/structure-relax-smoke.mjs:2:634 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '=='
+}
+
+Node.js v22.16.0

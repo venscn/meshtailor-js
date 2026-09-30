@@ -1,0 +1,12 @@
+START:surface-reflection-smoke
+START:symmetry-metric-smoke
+START:symmetric-sheets-smoke
+START:structure-symmetry-smoke
+START:complete-structure-smoke
+START:structure-relax-smoke
+START:longitudinal-budget-smoke
+START:geometry-input-smoke
+START:geometry-policy-smoke
+START:candidate-contract-smoke
+START:boundary-regularization-smoke
+START:fill-once-smoke

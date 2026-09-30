@@ -1,0 +1,99 @@
+{
+  "passed": 14,
+  "tests": [
+    {
+      "name": "Triangle closest point 0.2,0.3,1",
+      "passed": true
+    },
+    {
+      "name": "Triangle closest point -1,0,0",
+      "passed": true
+    },
+    {
+      "name": "Triangle closest point 2,0,0",
+      "passed": true
+    },
+    {
+      "name": "Triangle closest point 0.5,-1,0",
+      "passed": true
+    },
+    {
+      "name": "Degenerate segment has finite barycentrics",
+      "passed": true
+    },
+    {
+      "name": "Different vertex counts and diagonals still match surfaces",
+      "passed": true,
+      "detail": {
+        "normal": [
+          0.999999670283254,
+          0.0007862596032165535,
+          -0.00020304979559093215
+        ],
+        "offset": 0.0006543219834009731,
+        "span": 2.9497670485515566,
+        "tolerance": 0.018,
+        "coverage": 1,
+        "boundaryCoverage": 1,
+        "rms": 0.000538446975167221,
+        "boundaryRms": 0.0006523316062109157,
+        "p95": 0.0010652340968295,
+        "normalAgreement": 0.9993837861270554,
+        "sampleCount": 312,
+        "vertexPairCoverage": 0.009569377990430622,
+        "confidence": "reliable"
+      }
+    },
+    {
+      "name": "Narrow curved sheets retain their actual transverse reflection plane",
+      "passed": true,
+      "detail": {
+        "normal": [
+          1,
+          0,
+          0
+        ],
+        "offset": 0,
+        "span": 2.0152419209613517,
+        "tolerance": 0.018,
+        "coverage": 1,
+        "boundaryCoverage": 1,
+        "rms": 2.164502986758007e-15,
+        "boundaryRms": 4.619667641611099e-18,
+        "p95": 3.6776317736143306e-15,
+        "normalAgreement": 1,
+        "sampleCount": 312,
+        "vertexPairCoverage": 0.15789473684210525,
+        "confidence": "reliable"
+      }
+    },
+    {
+      "name": "Reflection is an involution on positions",
+      "passed": true
+    },
+    {
+      "name": "BVH agrees with brute triangle closest points",
+      "passed": true
+    },
+    {
+      "name": "Rigid rotation and scale do not require a world mirror axis",
+      "passed": true
+    },
+    {
+      "name": "A planar sheet does not use its identity plane",
+      "passed": true
+    },
+    {
+      "name": "Forbidden UV getters cannot be accessed",
+      "passed": true
+    },
+    {
+      "name": "Cancellation propagates",
+      "passed": true
+    },
+    {
+      "name": "Invalid controls fail explicitly",
+      "passed": true
+    }
+  ]
+}
