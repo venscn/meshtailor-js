@@ -7,6 +7,9 @@ try{
  const core=await compiled.load('packages/mesh-core/src/index.js'),uv=await compiled.load('packages/uv/src/index.js'),chain=await compiled.load('packages/chaining-seams/src/index.js'),pipeline=await compiled.load('apps/studio/src/unfold/load-pipeline.js'),guard=await compiled.load('packages/uv/src/boundary-guard.js');
  for(const name of names){const loaded=await loadVerifiedFixture(core,'examples/verified-models',name),geometry=core.geometryOnlyMesh(loaded.mesh),geoHash=hash(JSON.stringify(geometry)),record={name,identity:loaded.identity,vertices:geometry.positions.length,faces:geometry.faces.length,variants:[]};let expected;
   for(const kind of fast?['absent']:['original','absent','random']){
+   // The parent intentionally retains only compact diagnostics across variants.
+   // In --expose-gc test runs, reclaim prior whole-model snapshots before the next worker.
+   globalThis.gc?.();
    const mesh=kind==='original'?loaded.mesh:kind==='absent'?geometry:{...geometry,uvHints:[999,1],faces:geometry.faces.map((f,i)=>({...f,uvs:[[i%7,99],[.2,-i],[i*13,.04]],uvIndices:[i+18,i+2,i],originalChart:999-i}))};
    const input=hash(JSON.stringify(mesh)),progress=[];console.log('START',name,kind);
    const s=await runGeometryJob(compiled,{mesh,edges:[],target:'generated',pipeline:{...pipeline.DEFAULT_LOAD_PIPELINE},config:{timeBudgetMs:300000,...extraConfig}},p=>{if(progress.at(-1)?.stage!==p.stage){progress.push({stage:p.stage,detail:p.detail,elapsedMs:p.elapsedMs});}});
@@ -19,6 +22,7 @@ try{
    const reload=core.parseOBJ(obj),islands=uv.buildCharts(reload,chain.extractSeamEdgesFromUV(reload));assert.equal(islands.length,s.packed.length);assert.deepEqual(reload.positions,geometry.positions);assert.deepEqual(reload.faces.map(f=>f.vertices),geometry.faces.map(f=>f.vertices));
    const boundary=core.auditPartitionBoundary(geometry,s.packed.map(c=>[...c.faceUVs.keys()])),item={kind,islands:s.packed.length,groups:s.peel.groups.length,signature,objHash,quality,boundary,elapsedMs:s.timing.elapsedMs,reasons:s.fragmentation?.reasons,methods:s.diagnostics.reduce((r,d)=>(r[d.method]=(r[d.method]??0)+1,r),{}),sourceUVUse:0,coverage:seen.size,exportIslands:islands.length,pipeline:s.pipeline.steps.map(p=>({id:p.id,state:p.state,elapsedMs:p.elapsedMs}))};item.surfaceSymmetry={recognized:s.diagnostics.filter(d=>d.symmetry).length,constrained:s.diagnostics.filter(d=>d.symmetry?.status==='constrained').length,alreadySymmetric:s.diagnostics.filter(d=>d.symmetry?.status==='already-symmetric').length,rejected:s.diagnostics.filter(d=>d.symmetry?.status==='rejected').length,contracts:s.peel.surfaceContracts?.length??0,reports:s.diagnostics.filter(d=>d.symmetry).map(d=>({id:d.id,faces:d.faces,method:d.method,report:d.symmetry}))}; uv.validateSurfaceSymmetryOutput(geometry,s.packed,s.peel); record.variants.push(item);
    if(kind==='absent'){await writeFile(join(out,name+'-generated.obj'),obj);if(process.argv.includes('--snapshot'))await writeFile(join(out,name+'-snapshot.json'),JSON.stringify({mesh:geometry,seams:s.seams,packed:s.packed.map(c=>({...c,faceUVs:[...c.faceUVs]})),peel:s.peel,inputPolicy:s.inputPolicy,metrics:s.metrics}));}
+   await writeFile(join(out,'partial-'+name+'.json'),JSON.stringify({complete:false,record},null,2));
    console.log('PASS',name,kind,'islands',s.packed.length,'teeth',boundary.teeth,'occupancy',quality.area,'hash',objHash);
   }
   record.originalAbsentRandomIdentical=fast?null:true;report.models.push(record);await writeFile(join(out,'report.json'),JSON.stringify(report,null,2));
