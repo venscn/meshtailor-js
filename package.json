@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.27",
+  "version": "0.4.28",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -148,7 +148,11 @@
     "test:fill-once": "node scripts/fill-once-smoke.mjs",
     "test:continuous-structure": "node scripts/continuous-structure-smoke.mjs",
     "test:continuous-structure:unit": "node scripts/continuous-structure-unit.mjs",
-    "test:continuous-structure:browser": "node scripts/continuous-structure-browser.mjs"
+    "test:continuous-structure:browser": "node scripts/continuous-structure-browser.mjs",
+    "test:tube-strips": "node scripts/tube-strips-smoke.mjs",
+    "test:tube-strips:worker": "node scripts/tube-worker-smoke.mjs",
+    "test:tube-strips:browser": "node scripts/tube-browser-smoke.mjs",
+    "results:tubes": "node scripts/restore-tube-results.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
