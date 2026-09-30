@@ -33,3 +33,6 @@ results/v0.4.18/
 
 # Optional verified outputs restored from current compressed references.
 /results/v0.4.27/
+
+# Optional actual tube comparison exports.
+/results/v0.4.28/

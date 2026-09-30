@@ -1,0 +1,21 @@
+{
+  "version": "0.4.28",
+  "source": "Built-in Medium knot, 9216 faces. Old entry is v0.4.27 generated output; never source UV. New entries are the production Worker results.",
+  "files": [
+    {
+      "file": "knot-v0.4.27-generated.obj",
+      "bytes": 769794,
+      "sha256": "b75cf8d1e03006e634feaa30524e674e2a65cb07c058665c0acf4c2a6744539f"
+    },
+    {
+      "file": "knot-single.obj",
+      "bytes": 765925,
+      "sha256": "cd872317fe9cf0241546ed25a6b3095252e3b67faf02a85685a61f71f568cf63"
+    },
+    {
+      "file": "knot-five.obj",
+      "bytes": 765325,
+      "sha256": "44f50266bd47c760b01b875ae75f426ba42bdc8e476a22083dfbb398f16a1ed3"
+    }
+  ]
+}
