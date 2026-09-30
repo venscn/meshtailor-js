@@ -1,3 +1,4 @@
+import {unfoldClosedTube,validateTubeOptions,validateTubeOutput,type TubeOptions,type TubeStripContract,type TubeStripReport} from './tube-strips.js';
 import {validateSurfaceSymmetryOutput,type SurfaceUVContract} from './surface-symmetry-output.js';
 import {simpleUVBoundary} from './boundary-guard.js';
 import {freeBoundaryARAP} from './free-boundary.js';
@@ -17,8 +18,8 @@ import { openChartWithSlits } from './topology-slits.js';
 import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
-export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions,PeelOptions { structuralRelaxIterations?:number; sourceFeaturePolicy?:'repair'|'preserve'; sourceFeatureTolerance?:number; structureTemplates?:boolean; humanTemplates?:Partial<import('./human-templates.js').HumanTemplateOptions>; sourceRepairPolicy?:'repair'|'reject'; sourceAtlasMerge?:boolean; initialSegmentation?:'regions'|'connected'|'hierarchical'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
-export interface ChartDiagnostic {symmetry?:import('./symmetry-parameterization.js').UVSymmetryReport;structuralRelaxation?:{initialEnergy:number;finalEnergy:number;acceptedIterations:number};feature?:import('./feature-contract.js').FeatureContractReport;areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
+export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions,PeelOptions,TubeOptions { structuralRelaxIterations?:number; sourceFeaturePolicy?:'repair'|'preserve'; sourceFeatureTolerance?:number; structureTemplates?:boolean; humanTemplates?:Partial<import('./human-templates.js').HumanTemplateOptions>; sourceRepairPolicy?:'repair'|'reject'; sourceAtlasMerge?:boolean; initialSegmentation?:'regions'|'connected'|'hierarchical'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
+export interface ChartDiagnostic {tube?:TubeStripReport;symmetry?:import('./symmetry-parameterization.js').UVSymmetryReport;structuralRelaxation?:{initialEnergy:number;finalEnergy:number;acceptedIterations:number};feature?:import('./feature-contract.js').FeatureContractReport;areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
@@ -66,6 +67,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   // Enforce no-read even for direct library callers, not only the Studio Worker.
   input=geometryOnlyMesh(input);
   if(options.peelSourceHints===true)throw Error('原 UV 提示已禁用：自动生成只使用几何。');
+  validateTubeOptions(options);
   const opts={...(options.chartPolicy==='legacy'?LEGACY_UNWRAP:recommendUnwrap(input,options.chartPolicy??'large').options),...options};
   if(opts.surfaceSymmetry!==undefined&&typeof opts.surfaceSymmetry!=='boolean')throw Error('surfaceSymmetry must be boolean');
   if(opts.symmetryTolerance!==undefined&&(!Number.isFinite(opts.symmetryTolerance)||opts.symmetryTolerance<.001||opts.symmetryTolerance>.06))throw Error('symmetryTolerance must be .001..06');
@@ -106,7 +108,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   const componentFaces=buildCharts(mesh,new Set([...topology.edges].filter(([,e])=>e.faces.length>2).map(([k])=>k)),topology).map(c=>c.faces.length).sort((a,b)=>b-a);
   const fragmentation:FragmentationReport={inputComponents:componentFaces.length,componentFaces,initialCharts:0,outputCharts:0,tinyCharts:0,reasons:{},events:[],omittedEvents:0};
   const record=(reason:string,faces:number,sourceChart:number,depth:number,detail?:string)=>{fragmentation.reasons[reason]=(fragmentation.reasons[reason]??0)+1;if(fragmentation.events.length<1000)fragmentation.events.push({reason,faces,sourceChart,depth,...(detail?{detail}:{})});else fragmentation.omittedEvents++;};
-  const surfaceContracts:SurfaceUVContract[]=[];
+  const surfaceContracts:SurfaceUVContract[]=[],tubeContracts:TubeStripContract[]=[],tubeReports:TubeStripReport[]=[];
   const charts=buildCharts(mesh,effective,topology),raw:RawChart[]=[],diagnostics:ChartDiagnostic[]=[];let partitions=0,facesDone=0;
   fragmentation.initialCharts=charts.length;
   const human:HumanTemplateReport|undefined=useTemplates?{version:1,options:humanOptions(opts.humanTemplates),before:charts.length,after:charts.length,applied:0,entries:[],protectedSeams:[],addedSeams:[],removedSeams:[]}:undefined;
@@ -119,6 +121,17 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     const solveOptions={...opts,featureFrame,symmetryPlane:depth===0&&peel?.groups[sourceChart]?.surfaceReflection?{normal:peel.groups[sourceChart]!.surfaceReflection!.normal,offset:peel.groups[sourceChart]!.surfaceReflection!.offset}:undefined};
     const structure=depth===0?peel?.groups[sourceChart]:undefined;
     if((structure?.kind==='closed-shell'||structure?.kind==='symmetric-sheet')&&faces.length>opts.maxChartFaces)throw Error(`Complete shell needs a per-chart face budget of at least ${faces.length}; current ${opts.maxChartFaces}. Do not split a protected skin merely to satisfy the solver budget.`);
+    if(useTemplates&&!featureFrame&&structure?.kind!=='closed-shell'&&structure?.kind!=='symmetric-sheet'){
+      const tube=unfoldClosedTube(mesh,faces,sourceChart,new Set([...effective,...templateLocks]),opts,work);
+      if(tube){
+        tube.report.charts=[];
+        for(let i=0;i<tube.raw.length;i++){const chart=tube.raw[i]!,id=raw.length;chart.id=id;raw.push(chart);tube.report.charts.push(id);
+          diagnostics.push({id,sourceChart,faces:chart.faceUVs.size,method:'closed-tube-strip',iterations:0,residual:0,...tube.shapes[i]!,tube:tube.report});}
+        for(const key of tube.locked){effective.add(key);templateLocks.add(key);}tubeContracts.push(...tube.contracts);tubeReports.push(tube.report);
+        event('closed-tube-strip',`${tube.report.rings} geometric cross-sections; longitudinal seam + transverse section; ${tube.report.panels} rectangles; no source UV`);
+        facesDone+=faces.length;return;
+      }
+    }
     if(human&&!featureFrame&&structure?.kind!=='closed-shell'&&structure?.kind!=='symmetric-sheet'){
       const t=unfoldBand(mesh,faces,sourceChart,effective,opts,totalArea,work);
       if('raw' in t){
@@ -230,7 +243,9 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   work?.step?.('pack');
   const atlas=packConnectedAtlas(mesh,raw,opts,work);
   warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
-  if(peel){peel.surfaceContracts=surfaceContracts;peel.totalIslands=raw.length;for(const group of peel.groups){const fs=new Set(group.faces);group.charts=raw.filter(c=>[...c.faceUVs.keys()].some(f=>fs.has(f))).map(c=>c.id);}warnings.push(`通用剥展完成：${peel.groups.length} 个空间组 → ${raw.length} 个有效岛；${peel.feedbackSplits} 次反馈细分，${peel.sourceHintCharts} 个有效源形状回退。空间组边界与组内 UV 缝分别记录。`);}
+  if(peel){if(tubeContracts.length){peel.tubeContracts=tubeContracts;peel.tubeReports=tubeReports;}peel.surfaceContracts=surfaceContracts;peel.totalIslands=raw.length;for(const group of peel.groups){const fs=new Set(group.faces);group.charts=raw.filter(c=>[...c.faceUVs.keys()].some(f=>fs.has(f))).map(c=>c.id);}warnings.push(`通用剥展完成：${peel.groups.length} 个空间组 → ${raw.length} 个有效岛；${peel.feedbackSplits} 次反馈细分，${peel.sourceHintCharts} 个有效源形状回退。空间组边界与组内 UV 缝分别记录。`);}
+  validateTubeOutput(atlas.packed,effective,tubeContracts,work);
+  if(tubeReports.length)warnings.push(`闭合管身条带：${tubeReports.length} 个完整周期管状区域，按几何弧长/周长建立矩形。长宽比来自3D，单条带不保证填满正方形；可显式增加横向分段。`);
   validateStructureOutput(mesh,atlas.packed,effective,peel,work);
   validateSurfaceSymmetryOutput(mesh,atlas.packed,peel,work);
   return{...atlas,peel,human,merge,fragmentation,seams:[...effective],addedSeams,diagnostics,warnings};

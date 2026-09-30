@@ -1,6 +1,6 @@
 import {PipelineRecorder,resolveLoadPipeline,type LoadPipelineConfig,type PipelineTrace} from '../unfold/load-pipeline.js';
 import {geometryOnlyMesh,GEOMETRY_INPUT_POLICY,type GeometryInputPolicy,type MeshData} from '@meshtailor/mesh-core';
-import {validateSurfaceSymmetryOutput,validateStructureOutput,validateFeatureOutput,geometryGenerationOptions,carryPeelReport, inheritedTemplateSeams,carryHumanTemplates, checkUVTriangles,fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildUnfoldGeometry, unwrapMesh, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
+import {validateTubeOutput,validateSurfaceSymmetryOutput,validateStructureOutput,validateFeatureOutput,geometryGenerationOptions,carryPeelReport, inheritedTemplateSeams,carryHumanTemplates, checkUVTriangles,fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildUnfoldGeometry, unwrapMesh, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
 export type UVTarget = 'generated' | 'source' | 'stitch' | 'repack' | 'source-atlas' | 'fill' | 'templates';
 export interface UVSnapshot {
   inputPolicy:GeometryInputPolicy;
@@ -38,7 +38,7 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
       config={...config,mergeOptions:{...config?.mergeOptions,protectedSeams:[...new Set([...(config?.mergeOptions?.protectedSeams??[]),...locks])]}};
       if(target==='fill'&&config.fillRecutLarge)throw Error('结构模板已锁定裁片边界；请关闭大岛旧接缝试验，或先显式重展所选结构。');
     }
-    if(seedCharts&&seedPeel&&['stitch','repack','fill'].includes(target))config={...config,mergeOptions:{...config?.mergeOptions,protectedSeams:[...new Set([...(config?.mergeOptions?.protectedSeams??[]),...seedPeel.groupSeams])]}};
+    if(seedCharts&&seedPeel&&['stitch','repack','fill'].includes(target))config={...config,mergeOptions:{...config?.mergeOptions,protectedSeams:[...new Set([...(config?.mergeOptions?.protectedSeams??[]),...seedPeel.groupSeams,...(seedPeel.tubeContracts?.flatMap(c=>c.seams)??[])])]}};
     recorder=new PipelineRecorder(target,config??{},pipeline,()=>performance.now()-start);
     recorder.enter('input');
     const budget=config?.timeBudgetMs??DEFAULT_UV_BUDGET_MS;
@@ -100,6 +100,7 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     
     // Validate the submitted coordinates after every path, including automatic
     // fill and standalone postprocessing; a stored recognition badge is not QA.
+    validateTubeOutput(snapshot.packed,seams,snapshot.peel?.tubeContracts,work);
     validateStructureOutput(mesh,snapshot.packed,seams,snapshot.peel,work);
     validateSurfaceSymmetryOutput(mesh,snapshot.packed,snapshot.peel,work);
     const featureChecks=validateFeatureOutput(mesh,snapshot.packed,seams,snapshot.peel,work);
