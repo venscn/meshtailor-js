@@ -56,8 +56,7 @@ export function findSheetFeatures(mesh:MeshData,faces:readonly number[],cuts:Rea
   // Never smooth a rendered UV outline or move the original mesh vertices.
   const selected=new Set(c.faces),rest=faces.filter(f=>!selected.has(f));
   if(rest.length){
-   let best:{faces:number[];area3D:number;regularization:BoundaryRegularizationReport}|undefined;
-   for(const band of [8,5,3,2]){
+   for(const band of [5,2]){
     work?.check();
     const regular=regularizeBinaryPartition(mesh,[c.faces,rest],cuts,topology,()=>work?.check(),band),fs=regular.parts[0]!;
     if(!regular.report.movedFaces||fs.some(f=>used.has(f)))continue;
@@ -65,10 +64,8 @@ export function findSheetFeatures(mesh:MeshData,faces:readonly number[],cuts:Rea
     if(!patch.manifold||patch.boundaryLoops!==c.boundaryLoops||patch.euler!==2-c.boundaryLoops||!simpleUVBoundary(coords,patch.boundaries,work))continue;
     if(!checkUVTriangles(patch.triangles.map(t=>t.map(v=>coords[v]!) as [Vec2,Vec2,Vec2]),1,work).valid)continue;
     const sum=fs.reduce((s,f)=>s+areas[indices.get(f)!]!,0);
-    const candidate={faces:[...fs].sort((a,b)=>a-b),area3D:sum,regularization:regular.report};
-    if(!best||candidate.regularization.afterTeeth<best.regularization.afterTeeth||(candidate.regularization.afterTeeth===best.regularization.afterTeeth&&candidate.regularization.afterLength<best.regularization.afterLength))best=candidate;
+    c={...c,faces:[...fs].sort((a,b)=>a-b),area3D:sum,regularization:regular.report};break;
    }
-   if(best)c={...c,...best};
   }
   chosen.push(c);c.faces.forEach(f=>used.add(f));
  }

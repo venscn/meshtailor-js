@@ -33,8 +33,8 @@ export function relaxSurfaceSymmetry(mesh:CutMesh,input:Vec2[],reflection:Surfac
  for(const p of reflection.pairs)for(const a of[0,1] as const){
    const coeff=new Map<number,number>();for(const [binding,sign]of[[p.a,1],[p.b,a===0?1:-1]] as const)mesh.triangles[binding.face]!.forEach((v,k)=>coeff.set(v,(coeff.get(v)??0)+sign*binding.weights[k]!));
    const entries=[...coeff].filter(([,w])=>Math.abs(w)>1e-14);if(!entries.length)continue;
-   const confidence=Math.max(.10,1-(p.distance/reflection.tolerance)**2);
-   terms.push({axis:a,ids:entries.map(e=>e[0]),coefficients:entries.map(e=>e[1]),target:0,weight:strength*p.weight*(p.boundary?6:1)*confidence});
+   const confidence=Math.max(.05,1-(p.distance/reflection.tolerance)**2);
+   terms.push({axis:a,ids:entries.map(e=>e[0]),coefficients:entries.map(e=>e[1]),target:0,weight:strength*p.weight*(p.boundary?4:1)*confidence});
  }
  const r=freeBoundaryARAP(mesh,seed,iterations,600,work,{linearConstraints:terms});
  const after=auditUVReflection(mesh,r.uv,reflection.pairs),q=checkUVTriangles(mesh.triangles.map(t=>t.map(v=>r.uv[v]!) as [Vec2,Vec2,Vec2]),100,work);
