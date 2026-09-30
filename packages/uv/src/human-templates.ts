@@ -8,18 +8,18 @@ import {checkUVTriangles,signedArea2} from './uv-quality.js';
 import {uvProgress,rethrowUVStop,type UVWork} from './work.js';
 import type {RawChart} from './atlas-pack.js';
 import type {UnwrapOptions,ChartDiagnostic} from './unwrap.js';
-export interface HumanTemplateOptions {panels:1|2;axis:'auto'|'x'|'y'|'z';seamAngleDegrees:number;minAreaFraction:number;maxAnisotropy:number;selectedCharts?:number[]}
-export const DEFAULT_HUMAN:HumanTemplateOptions={panels:2,axis:'auto',seamAngleDegrees:0,minAreaFraction:.005,maxAnisotropy:4};
+export interface HumanTemplateOptions {panels:'auto'|1|2;axis:'auto'|'x'|'y'|'z';seamAngleDegrees:number;minAreaFraction:number;maxAnisotropy:number;selectedCharts?:number[]}
+export const DEFAULT_HUMAN:HumanTemplateOptions={panels:'auto',axis:'auto',seamAngleDegrees:0,minAreaFraction:.005,maxAnisotropy:4};
 export interface HumanTemplateEntry {
  sourceChart:number;faces:number;sourceAreaFraction:number;status:'applied'|'skipped'|'rejected';reason:string;
  template?:'cylinder-strip'|'cone-sector'|'contour-band';charts?:number[];axis?:Vec3;around?:Vec3;
- plannedPanels?:number;requestedPanels?:number;budgetExpanded?:boolean;radialFitError?:number;maxAnisotropy?:number;boundaryLoops?:number;seamEdges?:string[];
+ plannedPanels?:number;requestedPanels?:'auto'|number;autoAttempts?:{panels:number;status:string;reason:string}[];budgetExpanded?:boolean;radialFitError?:number;maxAnisotropy?:number;boundaryLoops?:number;seamEdges?:string[];
  lowerBoundary?:number[];upperBoundary?:number[];panelFaces?:number[][];
 }
 export interface HumanTemplateReport {version:1;options:HumanTemplateOptions;before:number;after:number;applied:number;entries:HumanTemplateEntry[];protectedSeams:string[];addedSeams:string[];removedSeams:string[]}
 export function humanOptions(value:Partial<HumanTemplateOptions>={}):HumanTemplateOptions{
  const o={...DEFAULT_HUMAN,...value};
- if(![1,2].includes(o.panels)||!['auto','x','y','z'].includes(o.axis)||!Number.isFinite(o.seamAngleDegrees)||o.seamAngleDegrees<-180||o.seamAngleDegrees>180||!Number.isFinite(o.minAreaFraction)||o.minAreaFraction<0||o.minAreaFraction>.25||!Number.isFinite(o.maxAnisotropy)||o.maxAnisotropy<1.1||o.maxAnisotropy>20||o.selectedCharts&&(!Array.isArray(o.selectedCharts)||o.selectedCharts.some(x=>!Number.isInteger(x)||x<0)))throw Error('Invalid structural UV template settings.');return o;
+ if(!['auto',1,2].includes(o.panels)||!['auto','x','y','z'].includes(o.axis)||!Number.isFinite(o.seamAngleDegrees)||o.seamAngleDegrees<-180||o.seamAngleDegrees>180||!Number.isFinite(o.minAreaFraction)||o.minAreaFraction<0||o.minAreaFraction>.25||!Number.isFinite(o.maxAnisotropy)||o.maxAnisotropy<1.1||o.maxAnisotropy>20||o.selectedCharts&&(!Array.isArray(o.selectedCharts)||o.selectedCharts.some(x=>!Number.isInteger(x)||x<0)))throw Error('Invalid structural UV template settings.');return o;
 }
 const dot=(a:readonly number[],b:readonly number[])=>a.reduce((s,x,i)=>s+x*b[i]!,0);
 const sub=(a:Vec3,b:Vec3):Vec3=>a.map((x,i)=>x-b[i]!) as Vec3;
@@ -39,7 +39,7 @@ export function inspectBand(mesh:MeshData,faces:readonly number[],settings:Parti
  const dominant=axis.reduce((m,x,k)=>Math.abs(x)>Math.abs(axis[m]!)?k:m,0);if(axis[dominant]!<0)axis=axis.map(x=>-x) as Vec3;
  let lower=0,upper=1;if(dot(A.center,axis)>dot(B.center,axis)){lower=1;upper=0;}
  const low=infos[lower]!,high=infos[upper]!,origin=mean([low.center,high.center]),span=dot(sub(high.center,low.center),axis),radius=(A.length+B.length)/(2*TAU);
- if(span<radius*.12||span>radius*12||Math.abs(dot(A.normal,axis))<.9||Math.abs(dot(B.normal,axis))<.9)return{ok:false as const,reason:'not-longitudinal-cross-sections',boundaryLoops:2};
+ if(span<radius*1e-5||span>radius*12||Math.abs(dot(A.normal,axis))<.9||Math.abs(dot(B.normal,axis))<.9)return{ok:false as const,reason:'not-longitudinal-cross-sections',boundaryLoops:2};
  // Deterministic transverse principal direction. This is a configurable
  // geometric convention, not a claim to know the object's front/back semantics.
  const base:Vec3=Math.abs(axis[0])<.8?[1,0,0]:[0,0,1];let u=unit(sub(base,axis.map(x=>x*dot(base,axis)) as Vec3)),v=unit(cross(axis,u));
@@ -65,7 +65,7 @@ export function inspectBand(mesh:MeshData,faces:readonly number[],settings:Parti
 }
 export interface BandTemplateResult {raw:RawChart[];seams:Set<string>;locked:string[];entry:HumanTemplateEntry;diagnostics:ChartDiagnostic[]}
 /** Atomically replace a region's UV. Plan cuts on real edges before solving. */
-export function unfoldBand(mesh:MeshData,faces:readonly number[],sourceChart:number,inputSeams:ReadonlySet<string>,opts:UnwrapOptions,totalArea:number,work?:UVWork):BandTemplateResult|HumanTemplateEntry{
+function unfoldBandFixed(mesh:MeshData,faces:readonly number[],sourceChart:number,inputSeams:ReadonlySet<string>,opts:UnwrapOptions,totalArea:number,work?:UVWork):BandTemplateResult|HumanTemplateEntry{
  const o=humanOptions(opts.humanTemplates),fraction=area(mesh,faces)/Math.max(totalArea,1e-30),base={sourceChart,faces:faces.length,sourceAreaFraction:fraction};
  if(o.selectedCharts&&!o.selectedCharts.includes(sourceChart))return{...base,status:'skipped',reason:'outside-selected-scope'};
  if(!o.selectedCharts&&(fraction<o.minAreaFraction||faces.length<16))return{...base,status:'skipped',reason:'below-structural-area-threshold'};
@@ -75,7 +75,7 @@ export function unfoldBand(mesh:MeshData,faces:readonly number[],sourceChart:num
  // The face budget constrains EACH solved panel, not the pre-cut parent.
  // Rejecting the whole parent here sent medium/high meshes into unconstrained
  // geodesic bisection before their already-known longitudinal cuts were tried.
- let panelCount:number=o.panels;
+ let panelCount:number=o.panels==='auto'?1:o.panels;
  let phase=new Map<number,number[]>(),groups:number[][]=[],groupOf=new Map<number,number>();
  for(;;){
   phase=new Map();groups=Array.from({length:panelCount},()=>[]);groupOf=new Map();
@@ -127,13 +127,34 @@ export function unfoldBand(mesh:MeshData,faces:readonly number[],sourceChart:num
    }
    if(local.triangles.reduce((s,t)=>s+signedArea2(uv[t[0]]!,uv[t[1]]!,uv[t[2]]!),0)<0)uv=uv.map(p=>[-p[0],p[1]]);
    const quality=checkUVTriangles(local.triangles.map(t=>t.map(v=>uv[v]!) as [Vec2,Vec2,Vec2]),100,work),shape=shapeQuality(local,uv,1,opts.maxStretch);
-   if(!quality.valid||!simpleUVBoundary(uv,local.boundaries,work)||shape.maxStretch>Math.min(o.maxAnisotropy,opts.maxStretch)||shape.aspect>opts.maxAspect||shape.fill<opts.minFill)return{...base,status:'rejected',reason:`template-quality: flips=${quality.flipped}, overlap=${quality.overlaps}, anisotropy=${shape.maxStretch.toFixed(3)}`};
+   if(!quality.valid||!simpleUVBoundary(uv,local.boundaries,work)||shape.maxStretch>Math.min(o.maxAnisotropy,opts.maxStretch)||(opts.uvObjective!=='paint'&&shape.aspect>opts.maxAspect)||shape.fill<opts.minFill)return{...base,status:'rejected',reason:`template-quality: flips=${quality.flipped}, overlap=${quality.overlaps}, anisotropy=${shape.maxStretch.toFixed(3)}`};
    const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
    result.push({id:sourceChart+gi,faceUVs,area3D:area(mesh,fs)});diagnostics.push({id:sourceChart+gi,sourceChart,faces:fs.length,method,iterations,residual,...shape});
   }
  }catch(error){rethrowUVStop(error);return{...base,status:'rejected',reason:'band-solve: '+(error instanceof Error?error.message:String(error))};}
  work?.check();return{raw:result,seams,locked,diagnostics,entry:{...base,status:'applied',reason:'ordered-longitudinal-seams',plannedPanels:panelCount,requestedPanels:o.panels,budgetExpanded:panelCount!==o.panels,template:band.template,axis:band.axis,around:band.around,radialFitError:band.fitError,boundaryLoops:2,charts:[],panelFaces:groups.map(g=>[...g]),seamEdges:locked.filter(k=>edgeFaces.get(k)?.length===2),lowerBoundary:band.lower,upperBoundary:band.upper,maxAnisotropy:Math.max(...diagnostics.map(d=>d.maxStretch))}};
 }
+/** Automatic means continuity first, not two equal angular sectors. Test the
+ * whole band with one opening. A second panel is a recorded fallback after a
+ * failed quality/solver candidate, or an explicit user choice; no source UV. */
+export function unfoldBand(mesh:MeshData,faces:readonly number[],sourceChart:number,inputSeams:ReadonlySet<string>,opts:UnwrapOptions,totalArea:number,work?:UVWork):BandTemplateResult|HumanTemplateEntry{
+ const choice=humanOptions(opts.humanTemplates).panels;
+ if(choice!=='auto')return unfoldBandFixed(mesh,faces,sourceChart,inputSeams,opts,totalArea,work);
+ const attempts:NonNullable<HumanTemplateEntry['autoAttempts']>=[];
+ for(const panels of [1,2] as const){
+  work?.check();
+  const r=unfoldBandFixed(mesh,faces,sourceChart,inputSeams,{...opts,humanTemplates:{...opts.humanTemplates,panels}},totalArea,work);
+  const e='raw' in r?r.entry:r;
+  attempts.push({panels,status:e.status,reason:e.reason});
+  e.requestedPanels='auto';e.autoAttempts=[...attempts];
+  if('raw' in r){e.reason=e.budgetExpanded?'continuity-first-per-panel-budget':panels===1?'whole-band-one-opening':'single-panel-quality-rejected';return r;}
+  // Unsupported geometry, hard cuts and explicit scope must not be retried as
+  // if halving anything could manufacture a valid ring.
+  if(e.status==='skipped'||e.reason==='protected-seam-would-be-removed'||panels===2)return r;
+ }
+ throw Error('Unreachable band candidate state');
+}
+
 /** Runs before generic merging. Template region interfaces are protected so the
  * downstream optimizer cannot silently merge a recognizable panel away. */
 export function applyHumanTemplates(mesh:MeshData,input:RawChart[],inputSeams:ReadonlySet<string>,opts:UnwrapOptions,work?:UVWork){
