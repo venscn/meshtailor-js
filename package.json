@@ -1,6 +1,6 @@
 {
   "name": "meshtailor-js",
-  "version": "0.4.29",
+  "version": "0.4.30",
   "private": true,
   "type": "module",
   "workspaces": [
@@ -157,7 +157,11 @@
     "test:cap-rim": "node scripts/cap-rim-smoke.mjs",
     "test:continuity:worker": "node scripts/continuity-worker-smoke.mjs",
     "test:continuity:browser": "node scripts/continuity-browser-smoke.mjs",
-    "results:continuity": "node scripts/restore-continuity-results.mjs"
+    "results:continuity": "node scripts/restore-continuity-results.mjs",
+    "test:revolved-profile": "node scripts/revolved-profile-smoke.mjs",
+    "test:revolved-profile:worker": "node scripts/revolved-worker-smoke.mjs",
+    "test:revolved-profile:browser": "node scripts/revolved-browser-smoke.mjs",
+    "results:profiles": "node scripts/restore-profile-results.mjs"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
