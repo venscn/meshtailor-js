@@ -77,6 +77,8 @@ body{display:flex;flex-direction:column;overflow:hidden}
 <small>1 保留整条；例如 5 将整条切成五段以改善方形页排布。长宽由几何管长/周长决定，不拉成正方形。仅对完整周期截面族生效，不强制其他模型矩形化。重新生成才应用，填空不偷偷新增切缝。</small>
 <label>闭合管身最大方向拉伸比<input id="closed-tube-stretch" aria-label="Closed tube maximum stretch" type="number" min="1.05" max="8" step=".1" value="4"></label>
 <label><input type="checkbox" id="preserve-rim-bands" aria-label="Preserve complete rim" checked> 完整侧边独立展开，不混入端面</label>
+<label><input type="checkbox" id="revolved-profiles" aria-label="Revolved profile metric" checked> 重复截面度量：直筒/倒角侧壁保宽，径向环件保孔</label>
+<p>验证剖面连接后展平，不把锥面、齿面或任意曲面强制拉方。</p>
 <label>环带裁片<select id="human-panels" aria-label="Band panels"><option value="auto">自动 · 完整一片优先</option><option value="2">指定两侧切缝 · 两片</option><option value="1">单侧切缝 · 整条</option></select></label>
 <label>上下主轴<select id="human-axis" aria-label="Band axis"><option value="auto">从边界环识别</option><option value="x">X</option><option value="y">Y</option><option value="z">Z</option></select></label>
 <label>侧缝方位（度）<input id="human-angle" aria-label="Band seam angle" type="number" min="-180" max="180" step="5" value="0"></label>
