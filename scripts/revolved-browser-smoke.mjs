@@ -24,6 +24,8 @@ try{
  await test('Correct Corset fixture is also solved, not substituted by a demo ring',async()=>{await ev('void lab.loadVerified("corset")');await wait('lab.ready&&lab.mesh.faces.length===18324');assert.equal(await ev('lab.snapshot.human.entries.filter(e=>e.metric?.mapping==="annulus"&&e.faces===288).length'),3);});
  await test('The actual shoulder annulus has two loops, no radial slit, all 288 faces',async()=>{await ev('window.ring=lab.snapshot.human.entries.find(e=>e.metric?.mapping==="annulus"&&e.faces===288);lab.select(ring.charts[0]);lab.update({context:"dim",labels:true,progress:0});lab.view.fitCurrent()');assert.match(await ev('document.querySelector("#selection-template").textContent'),/保留内外两圈边界/);assert.equal(await ev('lab.uv.cutLocalMesh(lab.mesh,ring.panelFaces[0],new Set(lab.snapshot.seams)).boundaryLoops'),2);assert.equal(await ev('ring.seamEdges.length'),0);assert.equal(await ev('lab.options.focusFace'),null);});
  await delay(300);await writeFile(out+'/corset-annulus.png',Buffer.from((await p.send('Page.captureScreenshot',{format:'png'},120000)).data,'base64'));
+ await ev('lab.update({progress:1,context:"hide"});lab.view.fit("uv");lab.view.fitCurrent()');
+ await delay(300);await writeFile(out+'/corset-annulus-flat.png',Buffer.from((await p.send('Page.captureScreenshot',{format:'png'},120000)).data,'base64'));
  await test('No DOM, Worker or WebGL errors',async()=>{assert.deepEqual(await ev('lab.errors'),[]);assert.equal(await ev('lab.view.gl.getError()'),0);});
  report.passed=report.tests.length;
 }catch(e){report.error=String(e.stack??e);console.error(e);process.exitCode=1;}finally{await writeFile(out+'/report.json',JSON.stringify(report,null,2));await b.close();}
