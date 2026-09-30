@@ -1,6 +1,6 @@
 import {PipelineRecorder,resolveLoadPipeline,type LoadPipelineConfig,type PipelineTrace} from '../unfold/load-pipeline.js';
 import {geometryOnlyMesh,GEOMETRY_INPUT_POLICY,type GeometryInputPolicy,type MeshData} from '@meshtailor/mesh-core';
-import {validateTubeOutput,validateSurfaceSymmetryOutput,validateStructureOutput,validateFeatureOutput,geometryGenerationOptions,carryPeelReport, inheritedTemplateSeams,carryHumanTemplates, checkUVTriangles,fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildUnfoldGeometry, unwrapMesh, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
+import {validateHumanMetricOutput,validateTubeOutput,validateSurfaceSymmetryOutput,validateStructureOutput,validateFeatureOutput,geometryGenerationOptions,carryPeelReport, inheritedTemplateSeams,carryHumanTemplates, checkUVTriangles,fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildUnfoldGeometry, unwrapMesh, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
 export type UVTarget = 'generated' | 'source' | 'stitch' | 'repack' | 'source-atlas' | 'fill' | 'templates';
 export interface UVSnapshot {
   inputPolicy:GeometryInputPolicy;
@@ -101,6 +101,7 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     // Validate the submitted coordinates after every path, including automatic
     // fill and standalone postprocessing; a stored recognition badge is not QA.
     validateTubeOutput(snapshot.packed,seams,snapshot.peel?.tubeContracts,work);
+    validateHumanMetricOutput(snapshot.packed,seams,snapshot.human,work);
     validateStructureOutput(mesh,snapshot.packed,seams,snapshot.peel,work);
     validateSurfaceSymmetryOutput(mesh,snapshot.packed,snapshot.peel,work);
     const featureChecks=validateFeatureOutput(mesh,snapshot.packed,seams,snapshot.peel,work);

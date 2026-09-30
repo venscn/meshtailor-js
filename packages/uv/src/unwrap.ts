@@ -6,7 +6,7 @@ import {validateStructureOutput} from './structure-output.js';
 import {planSurfaceGroups,bisectSurface,type PeelOptions,type PeelReport} from './peel-plan.js';
 import {geometryOnlyMesh} from '@meshtailor/mesh-core';
 import {checkUVTriangles,signedArea2} from './uv-quality.js';
-import {unfoldBand,inspectBand,humanOptions,remapHumanReport,type HumanTemplateReport} from './human-templates.js';
+import {unfoldBand,inspectBand,humanOptions,remapHumanReport,validateHumanMetricOutput,type HumanTemplateReport} from './human-templates.js';
 import {planarShapeCandidate} from './free-boundary.js';
 import { packConnectedAtlas, type PageOptions, type PageReport } from './atlas-pages.js';
 import { mergeAdjacentCharts, type MergeOptions, type MergeReport } from './chart-merge.js';
@@ -19,7 +19,7 @@ import { cutLocalMesh, type CutMesh } from './cut-topology.js';
 import { parameterizeChart, triangleArea, type SolverOptions, type Parameterization } from './parameterize.js';
 import { packAtlas, type AtlasPacking, type PackOptions, type RawChart } from './atlas-pack.js';
 export interface UnwrapOptions extends SolverOptions,PackOptions,PageOptions,PeelOptions,TubeOptions { structuralRelaxIterations?:number; sourceFeaturePolicy?:'repair'|'preserve'; sourceFeatureTolerance?:number; structureTemplates?:boolean; humanTemplates?:Partial<import('./human-templates.js').HumanTemplateOptions>; sourceRepairPolicy?:'repair'|'reject'; sourceAtlasMerge?:boolean; initialSegmentation?:'regions'|'connected'|'hierarchical'; postMerge?:boolean; mergeOptions?:Partial<MergeOptions>; sourceUVLayout?:'materials'|'overlay'; stretchAreaPercentile?:number; chartPolicy?:ChartGoal|'legacy'; regionOptions?:Partial<RegionOptions>; autoCut:boolean; maxChartFaces:number; maxAspect:number; minFill:number; maxStretch:number; timeBudgetMs?:number }
-export interface ChartDiagnostic {tube?:TubeStripReport;symmetry?:import('./symmetry-parameterization.js').UVSymmetryReport;structuralRelaxation?:{initialEnergy:number;finalEnergy:number;acceptedIterations:number};feature?:import('./feature-contract.js').FeatureContractReport;areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
+export interface ChartDiagnostic {profileMetric?:import('./revolved-profile.js').RevolvedProfileReport;tube?:TubeStripReport;symmetry?:import('./symmetry-parameterization.js').UVSymmetryReport;structuralRelaxation?:{initialEnergy:number;finalEnergy:number;acceptedIterations:number};feature?:import('./feature-contract.js').FeatureContractReport;areaStretch?:number;excessAreaRatio?:number;id:number; sourceChart:number; faces:number; method:string; iterations:number; residual:number; fallbackReason?:string; aspect:number; fill:number; maxStretch:number}
 export interface FragmentationReport {
   inputComponents:number;componentFaces:number[];initialCharts:number;outputCharts:number;tinyCharts:number;
   reasons:Record<string,number>;events:{reason:string;faces:number;sourceChart:number;depth:number;detail?:string}[];omittedEvents:number;
@@ -245,6 +245,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
   if(peel){if(tubeContracts.length){peel.tubeContracts=tubeContracts;peel.tubeReports=tubeReports;}peel.surfaceContracts=surfaceContracts;peel.totalIslands=raw.length;for(const group of peel.groups){const fs=new Set(group.faces);group.charts=raw.filter(c=>[...c.faceUVs.keys()].some(f=>fs.has(f))).map(c=>c.id);}warnings.push(`通用剥展完成：${peel.groups.length} 个空间组 → ${raw.length} 个有效岛；${peel.feedbackSplits} 次反馈细分，${peel.sourceHintCharts} 个有效源形状回退。空间组边界与组内 UV 缝分别记录。`);}
   validateTubeOutput(atlas.packed,effective,tubeContracts,work);
+  validateHumanMetricOutput(atlas.packed,effective,human,work);
   if(tubeReports.length)warnings.push(`闭合管身条带：${tubeReports.length} 个完整周期管状区域，按几何弧长/周长建立矩形。长宽比来自3D，单条带不保证填满正方形；可显式增加横向分段。`);
   validateStructureOutput(mesh,atlas.packed,effective,peel,work);
   validateSurfaceSymmetryOutput(mesh,atlas.packed,peel,work);

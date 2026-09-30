@@ -1,24 +1,27 @@
+import {inspectRevolvedProfile,metricStripPoint,metricAnnulusPoints,revolvedReport,metricContract,validateRevolvedMetric,type RevolvedProfileReport,type RevolvedMetricContract} from './revolved-profile.js';
 /** Geometry-driven seam templates. No model-name/ID-specific production branches. */
 import {simpleUVBoundary} from './boundary-guard.js';
 import {buildTopology,edgeKey,type MeshData,type Vec2,type Vec3} from '@meshtailor/mesh-core';
 import {cutLocalMesh} from './cut-topology.js';
-import {parameterizeChart,triangleArea} from './parameterize.js';
+import {parameterizeChart,triangleArea,chartAreaDensity} from './parameterize.js';
 import {shapeQuality} from './chart-quality.js';
 import {checkUVTriangles,signedArea2} from './uv-quality.js';
 import {uvProgress,rethrowUVStop,type UVWork} from './work.js';
 import type {RawChart} from './atlas-pack.js';
 import type {UnwrapOptions,ChartDiagnostic} from './unwrap.js';
-export interface HumanTemplateOptions {panels:'auto'|1|2;axis:'auto'|'x'|'y'|'z';seamAngleDegrees:number;minAreaFraction:number;maxAnisotropy:number;selectedCharts?:number[]}
-export const DEFAULT_HUMAN:HumanTemplateOptions={panels:'auto',axis:'auto',seamAngleDegrees:0,minAreaFraction:.005,maxAnisotropy:4};
+export interface HumanTemplateOptions {revolvedProfiles?:boolean;panels:'auto'|1|2;axis:'auto'|'x'|'y'|'z';seamAngleDegrees:number;minAreaFraction:number;maxAnisotropy:number;selectedCharts?:number[]}
+export const DEFAULT_HUMAN:HumanTemplateOptions={revolvedProfiles:true,panels:'auto',axis:'auto',seamAngleDegrees:0,minAreaFraction:.005,maxAnisotropy:4};
 export interface HumanTemplateEntry {
  sourceChart:number;faces:number;sourceAreaFraction:number;status:'applied'|'skipped'|'rejected';reason:string;
- template?:'cylinder-strip'|'cone-sector'|'contour-band';charts?:number[];axis?:Vec3;around?:Vec3;
+ metric?:RevolvedProfileReport;metricContracts?:RevolvedMetricContract[];
+ template?:'cylinder-strip'|'cone-sector'|'contour-band'|'revolved-strip'|'revolved-annulus';charts?:number[];axis?:Vec3;around?:Vec3;
  plannedPanels?:number;requestedPanels?:'auto'|number;autoAttempts?:{panels:number;status:string;reason:string}[];budgetExpanded?:boolean;radialFitError?:number;maxAnisotropy?:number;boundaryLoops?:number;seamEdges?:string[];
  lowerBoundary?:number[];upperBoundary?:number[];panelFaces?:number[][];
 }
 export interface HumanTemplateReport {version:1;options:HumanTemplateOptions;before:number;after:number;applied:number;entries:HumanTemplateEntry[];protectedSeams:string[];addedSeams:string[];removedSeams:string[]}
 export function humanOptions(value:Partial<HumanTemplateOptions>={}):HumanTemplateOptions{
  const o={...DEFAULT_HUMAN,...value};
+ if(o.revolvedProfiles!==undefined&&typeof o.revolvedProfiles!=='boolean')throw Error('revolvedProfiles must be boolean.');
  if(!['auto',1,2].includes(o.panels)||!['auto','x','y','z'].includes(o.axis)||!Number.isFinite(o.seamAngleDegrees)||o.seamAngleDegrees<-180||o.seamAngleDegrees>180||!Number.isFinite(o.minAreaFraction)||o.minAreaFraction<0||o.minAreaFraction>.25||!Number.isFinite(o.maxAnisotropy)||o.maxAnisotropy<1.1||o.maxAnisotropy>20||o.selectedCharts&&(!Array.isArray(o.selectedCharts)||o.selectedCharts.some(x=>!Number.isInteger(x)||x<0)))throw Error('Invalid structural UV template settings.');return o;
 }
 const dot=(a:readonly number[],b:readonly number[])=>a.reduce((s,x,i)=>s+x*b[i]!,0);
@@ -72,6 +75,24 @@ function unfoldBandFixed(mesh:MeshData,faces:readonly number[],sourceChart:numbe
  work?.check();const band=inspectBand(mesh,faces,o);if(!band.ok)return{...base,status:'skipped',reason:band.reason,boundaryLoops:band.boundaryLoops};
  const protectedCuts=new Set(opts.mergeOptions?.protectedSeams??[]),edgeFaces=new Map<string,number[]>();
  for(const fi of faces)for(let k=0;k<3;k++){const f=mesh.faces[fi]!.vertices,key=edgeKey(f[k]!,f[(k+1)%3]!);const list=edgeFaces.get(key)??[];list.push(fi);edgeFaces.set(key,list);}
+ const profile=o.revolvedProfiles!==false?inspectRevolvedProfile(band.local,band.coord,work):undefined;
+ // Test the uncut annulus first. Radial return details are represented by their
+ // measured meridian length, not a free-boundary map whose slit spirals inward.
+ if(profile?.annular&&o.panels!==2&&faces.length<=opts.maxChartFaces){
+  let uv=metricAnnulusPoints(profile,band.local);
+  if(band.local.triangles.reduce((s,t)=>s+signedArea2(uv[t[0]]!,uv[t[1]]!,uv[t[2]]!),0)<0)uv=uv.map(p=>[-p[0],p[1]]);
+  const q=checkUVTriangles(band.local.triangles.map(t=>t.map(v=>uv[v]!) as [Vec2,Vec2,Vec2]),100,work),shape=shapeQuality(band.local,uv,1,opts.maxStretch);
+  const density=chartAreaDensity(band.local,uv);
+  if(density.min>=1e-3&&density.max<=200&&q.valid&&simpleUVBoundary(uv,band.local.boundaries,work)&&shape.maxStretch<=Math.min(o.maxAnisotropy,opts.maxStretch)&&shape.fill>=opts.minFill){
+   const seams=new Set(inputSeams),locked:string[]=[];
+   for(const[key,fs]of edgeFaces){if(fs.length===2){if(protectedCuts.has(key))return{...base,status:'rejected',reason:'protected-seam-would-be-removed'};seams.delete(key);}else{seams.add(key);locked.push(key);}}
+   const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();band.local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,band.local.triangles[i]!.map(v=>[...uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
+   const metric=revolvedReport(profile,'annulus',shape.maxStretch),contract=metricContract(band.local,uv,locked,'annulus');
+   return{raw:[{id:sourceChart,faceUVs,area3D:area(mesh,faces)}],seams,locked,diagnostics:[{id:sourceChart,sourceChart,faces:faces.length,method:'human-profile-annulus',iterations:0,residual:0,...shape,profileMetric:metric}],
+    entry:{...base,status:'applied',reason:'whole-annulus-hole-retained',template:'revolved-annulus',plannedPanels:1,requestedPanels:o.panels,budgetExpanded:false,axis:band.axis,around:band.around,radialFitError:band.fitError,boundaryLoops:2,charts:[],panelFaces:[[...faces]],seamEdges:[],lowerBoundary:band.lower,upperBoundary:band.upper,maxAnisotropy:shape.maxStretch,metric,metricContracts:[contract]}};
+  }
+ }
+ const stripProfile=profile&&!profile.annular?profile:undefined;
  // The face budget constrains EACH solved panel, not the pre-cut parent.
  // Rejecting the whole parent here sent medium/high meshes into unconstrained
  // geodesic bisection before their already-known longitudinal cuts were tried.
@@ -80,7 +101,8 @@ function unfoldBandFixed(mesh:MeshData,faces:readonly number[],sourceChart:numbe
  for(;;){
   phase=new Map();groups=Array.from({length:panelCount},()=>[]);groupOf=new Map();
   for(const fi of faces){
-   const a=mesh.faces[fi]!.vertices.map(v=>band.coord(mesh.positions[v]!).theta);
+   const a=mesh.faces[fi]!.vertices.map(v=>mod(band.coord(mesh.positions[v]!).theta-(stripProfile?.seamAngle??0)));
+   if(stripProfile)for(let k=0;k<3;k++){const step=TAU/panelCount,nearest=Math.round(a[k]!/step)*step;if(Math.abs(a[k]!-nearest)<1e-4)a[k]=nearest>=TAU?0:nearest;}
    // Round only the angular seam convention, never positions or input UV.
    for(let k=0;k<3;k++)if(a[k]!<1e-10||TAU-a[k]!<1e-10)a[k]=0;
    if(Math.max(...a)-Math.min(...a)>Math.PI)for(let k=0;k<3;k++)if(a[k]!<Math.PI)a[k]!+=TAU;
@@ -104,7 +126,7 @@ function unfoldBandFixed(mesh:MeshData,faces:readonly number[],sourceChart:numbe
   for(let k=0;k<3;k++){const j=B.indexOf(A[k]!);if(j>=0&&Math.abs(phase.get(fa)![k]!-phase.get(fb)![j]!)>1e-5)cut=true;}
   if(cut){seams.add(key);locked.push(key);}else if(protectedCuts.has(key))return{...base,status:'rejected',reason:'protected-seam-would-be-removed'};
  }
- const result:RawChart[]=[],diagnostics:ChartDiagnostic[]=[];
+ const result:RawChart[]=[],diagnostics:ChartDiagnostic[]=[],metricContracts:RevolvedMetricContract[]=[];
  try{
   for(let gi=0;gi<groups.length;gi++){
    const fs=groups[gi]!,local=cutLocalMesh(mesh,fs,seams);if(!local.disk)return{...base,status:'rejected',reason:'planned-cuts-not-one-disk-per-panel'};
@@ -112,7 +134,12 @@ function unfoldBandFixed(mesh:MeshData,faces:readonly number[],sourceChart:numbe
    const refs:Vec2[]=new Array(local.positions.length),middle=(gi+.5)*TAU/panelCount;
    for(let i=0;i<fs.length;i++)for(let k=0;k<3;k++){const v=local.triangles[i]![k]!,p=band.coord(local.positions[v]!),theta=phase.get(fs[i]!)![k]!-middle;refs[v]=[theta*band.radius,p.t];}
    let uv:Vec2[],method:string,iterations=0,residual=0;
-   if(band.template==='cylinder-strip'){uv=refs.map(p=>[...p]);method='human-cylinder';}
+   if(stripProfile){
+    uv=new Array(local.positions.length);
+    for(let i=0;i<fs.length;i++)for(let k=0;k<3;k++){const v=local.triangles[i]![k]!;uv[v]=metricStripPoint(stripProfile,local.sourceVertices[v]!,phase.get(fs[i]!)![k]!,middle);}
+    method='human-profile-strip';
+   }
+   else if(band.template==='cylinder-strip'){uv=refs.map(p=>[...p]);method='human-cylinder';}
    else if(band.template==='cone-sector'){
     const k=band.slope,f=Math.abs(k)/Math.sqrt(1+k*k),sgn=Math.sign(k),R0=band.intercept/f;
     uv=local.positions.map((p,i)=>{const t=band.coord(p).t,R=(band.intercept+k*t)/f,theta=refs[i]![0]/band.radius*f;return[R*Math.sin(theta),sgn*(R*Math.cos(theta)-R0)] as Vec2;});method='human-cone';
@@ -126,13 +153,19 @@ function unfoldBandFixed(mesh:MeshData,faces:readonly number[],sourceChart:numbe
     const angle=Math.atan2(bb,aa),co=Math.cos(angle),si=Math.sin(angle);uv=uv.map(p=>[(p[0]-center[0])*co-(p[1]-center[1])*si,(p[0]-center[0])*si+(p[1]-center[1])*co]);
    }
    if(local.triangles.reduce((s,t)=>s+signedArea2(uv[t[0]]!,uv[t[1]]!,uv[t[2]]!),0)<0)uv=uv.map(p=>[-p[0],p[1]]);
+   if(stripProfile){
+    const X=uv.map(p=>p[0]),Y=uv.map(p=>p[1]),minX=Math.min(...X),maxX=Math.max(...X),minY=Math.min(...Y),maxY=Math.max(...Y),eps=Math.max(maxX-minX,maxY-minY)*1e-7;
+    if(local.boundary.some(v=>Math.min(Math.abs(X[v]!-minX),Math.abs(X[v]!-maxX),Math.abs(Y[v]!-minY),Math.abs(Y[v]!-maxY))>eps))
+     return{...base,status:'rejected',reason:'revolved-opening-not-a-complete-meridian'};
+   }
    const quality=checkUVTriangles(local.triangles.map(t=>t.map(v=>uv[v]!) as [Vec2,Vec2,Vec2]),100,work),shape=shapeQuality(local,uv,1,opts.maxStretch);
    if(!quality.valid||!simpleUVBoundary(uv,local.boundaries,work)||shape.maxStretch>Math.min(o.maxAnisotropy,opts.maxStretch)||(opts.uvObjective!=='paint'&&shape.aspect>opts.maxAspect)||shape.fill<opts.minFill)return{...base,status:'rejected',reason:`template-quality: flips=${quality.flipped}, overlap=${quality.overlaps}, anisotropy=${shape.maxStretch.toFixed(3)}`};
    const faceUVs=new Map<number,[Vec2,Vec2,Vec2]>();local.sourceFaces.forEach((fi,i)=>faceUVs.set(fi,local.triangles[i]!.map(v=>[...uv[v]!] as Vec2) as [Vec2,Vec2,Vec2]));
-   result.push({id:sourceChart+gi,faceUVs,area3D:area(mesh,fs)});diagnostics.push({id:sourceChart+gi,sourceChart,faces:fs.length,method,iterations,residual,...shape});
+   if(stripProfile)metricContracts.push(metricContract(local,uv,locked,'rectangle'));
+   result.push({id:sourceChart+gi,faceUVs,area3D:area(mesh,fs)});diagnostics.push({id:sourceChart+gi,sourceChart,faces:fs.length,method,iterations,residual,...shape,...(stripProfile?{profileMetric:revolvedReport(stripProfile,'rectangle',shape.maxStretch,panelCount)}:{})});
   }
  }catch(error){rethrowUVStop(error);return{...base,status:'rejected',reason:'band-solve: '+(error instanceof Error?error.message:String(error))};}
- work?.check();return{raw:result,seams,locked,diagnostics,entry:{...base,status:'applied',reason:'ordered-longitudinal-seams',plannedPanels:panelCount,requestedPanels:o.panels,budgetExpanded:panelCount!==o.panels,template:band.template,axis:band.axis,around:band.around,radialFitError:band.fitError,boundaryLoops:2,charts:[],panelFaces:groups.map(g=>[...g]),seamEdges:locked.filter(k=>edgeFaces.get(k)?.length===2),lowerBoundary:band.lower,upperBoundary:band.upper,maxAnisotropy:Math.max(...diagnostics.map(d=>d.maxStretch))}};
+ work?.check();return{raw:result,seams,locked,diagnostics,entry:{...base,status:'applied',reason:'ordered-longitudinal-seams',plannedPanels:panelCount,requestedPanels:o.panels,budgetExpanded:panelCount!==o.panels,...(stripProfile?{metric:revolvedReport(stripProfile,'rectangle',Math.max(...diagnostics.map(d=>d.maxStretch)),panelCount),metricContracts}:{}),template:stripProfile?'revolved-strip':band.template,axis:band.axis,around:band.around,radialFitError:band.fitError,boundaryLoops:2,charts:[],panelFaces:groups.map(g=>[...g]),seamEdges:locked.filter(k=>edgeFaces.get(k)?.length===2),lowerBoundary:band.lower,upperBoundary:band.upper,maxAnisotropy:Math.max(...diagnostics.map(d=>d.maxStretch))}};
 }
 /** Automatic means continuity first, not two equal angular sectors. Test the
  * whole band with one opening. A second panel is a recorded fallback after a
@@ -147,7 +180,7 @@ export function unfoldBand(mesh:MeshData,faces:readonly number[],sourceChart:num
   const e='raw' in r?r.entry:r;
   attempts.push({panels,status:e.status,reason:e.reason});
   e.requestedPanels='auto';e.autoAttempts=[...attempts];
-  if('raw' in r){e.reason=e.budgetExpanded?'continuity-first-per-panel-budget':panels===1?'whole-band-one-opening':'single-panel-quality-rejected';return r;}
+  if('raw' in r){e.reason=e.template==='revolved-annulus'?'whole-annulus-hole-retained':e.budgetExpanded?'continuity-first-per-panel-budget':panels===1?'whole-band-one-opening':'single-panel-quality-rejected';return r;}
   // Unsupported geometry, hard cuts and explicit scope must not be retried as
   // if halving anything could manufacture a valid ring.
   if(e.status==='skipped'||e.reason==='protected-seam-would-be-removed'||panels===2)return r;
@@ -203,4 +236,9 @@ export function carryHumanTemplates(previous:HumanTemplateReport|undefined,curre
  const owner=new Map<number,number>();for(const p of packed)for(const f of p.faceUVs.keys())owner.set(f,p.id);
  for(const e of report.entries)if(e.panelFaces)e.charts=e.panelFaces.map(fs=>owner.get(fs[0]!)!).filter(id=>id!==undefined);
  return report;
+}
+
+/** Validate current coordinates, not a remembered successful solver flag. */
+export function validateHumanMetricOutput(packed:readonly import('./preview.js').PackedChart[],seams:ReadonlySet<string>,report:HumanTemplateReport|undefined,work?:UVWork):void {
+ validateRevolvedMetric(packed,seams,report?.entries.flatMap(e=>e.status==='applied'?e.metricContracts??[]:[])??[],work);
 }

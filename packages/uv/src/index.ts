@@ -66,3 +66,5 @@ export * from './intrinsic-strip.js';
 export * from './tube-strips.js';
 
 export * from './cap-rim-partitions.js';
+
+export * from './revolved-profile.js';
