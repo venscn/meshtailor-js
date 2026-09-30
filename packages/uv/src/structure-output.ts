@@ -9,6 +9,26 @@ import type {UVWork} from './work.js';
  * Packing may move/rotate/scale, but not silently cut holes into outer borders.
  */
 export function validateStructureOutput(mesh:MeshData,charts:readonly PackedChart[],seams:ReadonlySet<string>,peel:PeelReport|undefined,work?:UVWork):void {
+ for(const g of peel?.groups??[]){
+  if(g.kind!=='cap-rim')continue;
+  work?.check();const members=new Set(g.faces),seen=new Set<number>();
+  const matches=charts.filter(c=>[...c.faceUVs.keys()].some(f=>members.has(f)));
+  if(!matches.length||(g.structureRole==='cap'&&matches.length!==1))throw Error('A protected cap/rim region was split or lost.');
+  for(const c of matches){
+   const faces=[...c.faceUVs.keys()];
+   if(faces.some(f=>!members.has(f)||seen.has(f)))throw Error('Cap/rim boundary crossed by a later merge.');
+   faces.forEach(f=>seen.add(f));
+   const local=cutLocalMesh(mesh,faces,seams),coords:Vec2[]=new Array(local.positions.length);
+   if(!local.disk)throw Error('Cap/rim opening no longer defines a complete disk.');
+   local.sourceFaces.forEach((f,i)=>local.triangles[i]!.forEach((v,k)=>{
+    const p=c.faceUVs.get(f)![k]!;
+    if(coords[v]&&Math.hypot(p[0]-coords[v]![0],p[1]-coords[v]![1])>1e-9)throw Error('Cap/rim corner mismatch.');
+    coords[v]=p;
+   }));
+   if(!simpleUVBoundary(coords,local.boundaries,work))throw Error('Cap/rim boundary collapsed or self-contacted.');
+  }
+  if(seen.size!==members.size)throw Error('A protected cap/rim face was lost.');
+ }
  for(const g of peel?.groups??[]){if(g.kind!=='closed-shell'&&g.kind!=='longitudinal-panels')continue;work?.check();const matches=charts.filter(c=>c.faceUVs.has(g.faces[0]!)),c=matches[0];
   if(matches.length!==1||!c||c.faceUVs.size!==g.faces.length||g.faces.some(f=>!c.faceUVs.has(f)))throw Error('Complete shell skin/wall grouping was split, merged or lost; no partial structure is accepted.');
   for(const e of g.openingEdges??[])if(!seams.has(e))throw Error('Planned wall opening was lost.');

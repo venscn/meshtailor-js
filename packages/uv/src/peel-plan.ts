@@ -1,3 +1,5 @@
+import {partitionCapRim} from './cap-rim-partitions.js';
+import {inspectBand} from './human-templates.js';
 import {partitionLongitudinalPanels} from './longitudinal-panels.js';
 import {partitionLayeredShell} from './layered-shell.js';
 import {partitionSymmetricSheets,type SymmetricSheets} from './symmetric-sheets.js';
@@ -12,8 +14,8 @@ import {regularizeBinaryPartition,auditPartitionBoundary,buildTopology,edgeKey,t
 import {buildCharts} from './charts.js';
 import type {UVWork} from './work.js';
 
-export interface PeelOptions {surfaceSymmetry?:boolean;symmetryTolerance?:number;structureGroups?:boolean;symmetryBoundaries?:boolean;featureSheets?:boolean;peelSourceHints?:boolean;peelOrientationPanels?:boolean;peelPanelArea?:number;peelFeatureArea?:number;peelMaxDepth?:number;seamBandRings?:number;groupFeatureDegrees?:number}
-export interface PeelGroup {id:number;faces:number[];area3D:number;kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region'|'feature-sheet'|'bilateral-connector'|'closed-shell'|'symmetric-sheet'|'longitudinal-panels';surfaceCorrespondence?:import('./surface-reflection.js').SurfaceReflection;surfaceReflection?:SurfaceReflectionReport;structureReason?:string;structureBoundaryLoops?:number;openingEdges?:string[];pairedOpening?:import('./paired-openings.js').PairedOpening;symmetry?:SymmetryAudit;featureFrame?:ProjectionFrame;boundaryLoops?:number;boundaryRegularization?:import('@meshtailor/mesh-core').BoundaryRegularizationReport;charts:number[]}
+export interface PeelOptions {structureTemplates?:boolean;preserveRimBands?:boolean;surfaceSymmetry?:boolean;symmetryTolerance?:number;structureGroups?:boolean;symmetryBoundaries?:boolean;featureSheets?:boolean;peelSourceHints?:boolean;peelOrientationPanels?:boolean;peelPanelArea?:number;peelFeatureArea?:number;peelMaxDepth?:number;seamBandRings?:number;groupFeatureDegrees?:number}
+export interface PeelGroup {id:number;faces:number[];area3D:number;kind:'planar-feature'|'surface'|'oriented-panel'|'crease-region'|'feature-sheet'|'bilateral-connector'|'closed-shell'|'symmetric-sheet'|'longitudinal-panels'|'cap-rim'|'continuous-band';structureRole?:'cap'|'rim';componentFaceCount?:number;surfaceCorrespondence?:import('./surface-reflection.js').SurfaceReflection;surfaceReflection?:SurfaceReflectionReport;structureReason?:string;structureBoundaryLoops?:number;openingEdges?:string[];pairedOpening?:import('./paired-openings.js').PairedOpening;symmetry?:SymmetryAudit;featureFrame?:ProjectionFrame;boundaryLoops?:number;boundaryRegularization?:import('@meshtailor/mesh-core').BoundaryRegularizationReport;charts:number[]}
 export interface PeelReport {tubeContracts?:import('./tube-strips.js').TubeStripContract[];tubeReports?:import('./tube-strips.js').TubeStripReport[];surfaceContracts?:import('./surface-symmetry-output.js').SurfaceUVContract[];version:1;groups:PeelGroup[];groupSeams:string[];events:{group:number;faces:number;depth:number;action:string;detail:string}[];sourceHintCharts:number;feedbackSplits:number;totalIslands:number;note:string}
 const sub=(a:Vec3,b:Vec3):Vec3=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
 const dot=(a:Vec3,b:Vec3)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
@@ -35,16 +37,29 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   if(!Number.isFinite(fraction)||fraction<.001||fraction>.25)throw Error('peelFeatureArea must be 0.001..0.25');
   const topology=buildTopology(mesh),frames=mesh.faces.map((_,i)=>faceFrame(mesh,i)),total=frames.reduce((s,f)=>s+f.area,0),components=buildCharts(mesh,new Set(cuts),topology);
   const structural=new Map<number,StructurePartition>();
+  const continuousBands=new Set<number>();
+  if(options.structureTemplates!==false)for(const comp of components){
+    work?.check();if(comp.faces.length>=16&&inspectBand(mesh,comp.faces).ok)comp.faces.forEach(f=>continuousBands.add(f));
+  }
+  if(options.preserveRimBands!==undefined&&typeof options.preserveRimBands!=='boolean')throw Error('preserveRimBands must be boolean');
   const structureSeams=new Set(cuts);
+  if(options.structureGroups!==false&&options.structureTemplates!==false&&options.preserveRimBands!==false)for(const comp of components){
+    // Do not multiply tiny fasteners merely because they also have end caps.
+    if(continuousBands.has(comp.faces[0]!)||comp.faces.reduce((s,f)=>s+frames[f]!.area,0)<total*fraction)continue;
+    const found=partitionCapRim(mesh,comp.faces,cuts,topology,work);if(!found)continue;
+    const labels=new Map<number,number>();found.parts.forEach((p,i)=>p.forEach(f=>{labels.set(f,i);structural.set(f,found);}));
+    for(const[k,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>labels.has(f))&&labels.get(e.faces[0]!)!==labels.get(e.faces[1]!))structureSeams.add(k);
+  }
   const reflectionSheets=new Map<number,{plan:SymmetricSheets;reflection:SurfaceReflectionReport;correspondence:import('./surface-reflection.js').SurfaceReflection}>();
   if(options.structureGroups!==false)for(const comp of components){
+    if(structural.has(comp.faces[0]!)||continuousBands.has(comp.faces[0]!))continue;
     if(comp.faces.reduce((s,f)=>s+frames[f]!.area,0)<total*.02)continue;
     const found=partitionClosedShell(mesh,comp.faces,cuts,topology,work)??partitionConnector(mesh,comp.faces,cuts,topology,work);if(!found)continue;
     const labels=new Map<number,number>();found.parts.forEach((p,i)=>p.forEach(f=>{labels.set(f,i);structural.set(f,found);}));
     for(const[k,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>labels.has(f))&&labels.get(e.faces[0]!)!==labels.get(e.faces[1]!))structureSeams.add(k);
   }
   if(options.surfaceSymmetry!==false)for(const comp of components){
-    if(structural.has(comp.faces[0]!)||comp.faces.reduce((a,f)=>a+frames[f]!.area,0)<total*.002)continue;
+    if(structural.has(comp.faces[0]!)||continuousBands.has(comp.faces[0]!)||comp.faces.reduce((a,f)=>a+frames[f]!.area,0)<total*.002)continue;
     const plan=partitionSymmetricSheets(mesh,comp.faces,cuts,topology,options.symmetryTolerance??.018,work)??partitionLayeredShell(mesh,comp.faces,cuts,topology,options.symmetryTolerance??.018,work);if(!plan)continue;
     const labels=new Map<number,number>();plan.parts.forEach((part,i)=>{
       const local=cutLocalMesh(mesh,part,cuts),r=plan.partCorrespondences[i]!;
@@ -54,7 +69,7 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
     for(const[k,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>labels.has(f))&&labels.get(e.faces[0]!)!==labels.get(e.faces[1]!))structureSeams.add(k);
   }
   if(options.structureGroups!==false&&options.surfaceSymmetry!==false)for(const comp of components){
-    if(structural.has(comp.faces[0]!)||reflectionSheets.has(comp.faces[0]!))continue;
+    if(structural.has(comp.faces[0]!)||continuousBands.has(comp.faces[0]!)||reflectionSheets.has(comp.faces[0]!))continue;
     const found=partitionLongitudinalPanels(mesh,comp.faces,cuts,topology,options.symmetryTolerance??.018,work);if(!found)continue;
     const labels=new Map<number,number>();found.parts.forEach((p,i)=>p.forEach(f=>{labels.set(f,i);structural.set(f,found);}));
     for(const[k,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>labels.has(f))&&labels.get(e.faces[0]!)!==labels.get(e.faces[1]!))structureSeams.add(k);
@@ -64,7 +79,7 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   const tolerance=Math.max(...high.map((x,i)=>x-low[i]!))*1e-5;
   const adj:number[][]=Array.from({length:mesh.faces.length},()=>[]);
   for(const [key,e]of topology.edges)if(e.faces.length===2&&!cuts.has(key)){const[a,b]=e.faces;adj[a!]!.push(b!);adj[b!]!.push(a!);}
-  for(const comp of components){work?.check();if(structural.has(comp.faces[0]!)||reflectionSheets.has(comp.faces[0]!))continue;const ca=comp.faces.reduce((s,f)=>s+frames[f]!.area,0);if(ca<total*fraction*2)continue;
+  for(const comp of components){work?.check();if(structural.has(comp.faces[0]!)||continuousBands.has(comp.faces[0]!)||reflectionSheets.has(comp.faces[0]!))continue;const ca=comp.faces.reduce((s,f)=>s+frames[f]!.area,0);if(ca<total*fraction*2)continue;
     // Closed polyhedra can have a meaningful face with only two triangles.
     // Do not turn every two-triangle bend of an open ribbon into a new panel.
     const minPlanarFaces=comp.faces.every(fi=>adj[fi]!.length===3)?2:4;
@@ -83,7 +98,7 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   if(!Number.isFinite(degrees)||degrees<20||degrees>100)throw Error('groupFeatureDegrees must be 20..100');
   const creaseCos=Math.cos(degrees*Math.PI/180);
   for(const group of buildCharts(mesh,seams,topology)){
-    if(structural.has(group.faces[0]!)||reflectionSheets.has(group.faces[0]!))continue;
+    if(structural.has(group.faces[0]!)||continuousBands.has(group.faces[0]!)||reflectionSheets.has(group.faces[0]!))continue;
     const groupArea=group.faces.reduce((a,f)=>a+frames[f]!.area,0);
     if(groupArea<total*.015||group.faces.length<24||group.faces.every(f=>planes[f]!>=0))continue;
     const members=new Set(group.faces),barriers=new Set(seams);
@@ -121,7 +136,7 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
   // remain in the model and are solved as return walls/back/transition groups.
   const featureByFace=new Map<number,import('./sheet-features.js').SheetFeature>();
   for(const group of options.featureSheets===false?[]:buildCharts(mesh,seams,topology)){
-    if(structural.has(group.faces[0]!)||reflectionSheets.has(group.faces[0]!)||group.faces.every(f=>planes[f]!>=0))continue;
+    if(structural.has(group.faces[0]!)||continuousBands.has(group.faces[0]!)||reflectionSheets.has(group.faces[0]!)||group.faces.every(f=>planes[f]!>=0))continue;
     const ar=group.faces.reduce((s,f)=>s+frames[f]!.area,0);if(ar<total*.001)continue;
     const found=findSheetFeatures(mesh,group.faces,seams,topology,work);
     if(!found.length)continue;
@@ -129,7 +144,7 @@ export function planSurfaceGroups(mesh:MeshData,cuts:ReadonlySet<string>,options
     const members=new Set(group.faces);
     for(const[key,e]of topology.edges)if(e.faces.length===2&&e.faces.every(f=>members.has(f))&&(labels.get(e.faces[0]!)??-1)!==(labels.get(e.faces[1]!)??-1))seams.add(key);
   }
-  const groups=buildCharts(mesh,seams,topology).map(c=>({id:c.id,faces:c.faces,area3D:c.faces.reduce((s,f)=>s+frames[f]!.area,0),...(featureByFace.has(c.faces[0]!)?{featureFrame:featureByFace.get(c.faces[0]!)!.frame,boundaryLoops:featureByFace.get(c.faces[0]!)!.boundaryLoops,boundaryRegularization:featureByFace.get(c.faces[0]!)!.regularization}:{}),...(structural.has(c.faces[0]!)?{structureReason:structural.get(c.faces[0]!)!.reason,structureBoundaryLoops:cutLocalMesh(mesh,c.faces,seams).boundaryLoops,openingEdges:structural.get(c.faces[0]!)!.openings?.find(o=>o.faces.includes(c.faces[0]!))?.edges,pairedOpening:structural.get(c.faces[0]!)!.openings?.find(o=>o.faces.includes(c.faces[0]!))?.paired,symmetry:structural.get(c.faces[0]!)!.symmetry}:{}),...(reflectionSheets.has(c.faces[0]!)?{surfaceReflection:reflectionSheets.get(c.faces[0]!)!.reflection,surfaceCorrespondence:reflectionSheets.get(c.faces[0]!)!.correspondence,structureReason:reflectionSheets.get(c.faces[0]!)!.plan.reason}:{}),kind:(reflectionSheets.has(c.faces[0]!)?'symmetric-sheet':structural.has(c.faces[0]!)?structural.get(c.faces[0]!)!.kind:featureByFace.has(c.faces[0]!)?'feature-sheet':c.faces.every(f=>planes[f]===planes[c.faces[0]!]&&planes[f]!>=0)?'planar-feature':c.faces.every(f=>oriented[f])?'crease-region':'surface') as PeelGroup['kind'],charts:[]}));
+  const groups=buildCharts(mesh,seams,topology).map(c=>({id:c.id,faces:c.faces,area3D:c.faces.reduce((s,f)=>s+frames[f]!.area,0),...(featureByFace.has(c.faces[0]!)?{featureFrame:featureByFace.get(c.faces[0]!)!.frame,boundaryLoops:featureByFace.get(c.faces[0]!)!.boundaryLoops,boundaryRegularization:featureByFace.get(c.faces[0]!)!.regularization}:{}),...(structural.has(c.faces[0]!)?{structureReason:structural.get(c.faces[0]!)!.reason,structureRole:structural.get(c.faces[0]!)!.roles?.[structural.get(c.faces[0]!)!.parts.findIndex(p=>p.includes(c.faces[0]!))],componentFaceCount:structural.get(c.faces[0]!)!.parts.reduce((n,p)=>n+p.length,0),structureBoundaryLoops:cutLocalMesh(mesh,c.faces,seams).boundaryLoops,openingEdges:structural.get(c.faces[0]!)!.openings?.find(o=>o.faces.includes(c.faces[0]!))?.edges,pairedOpening:structural.get(c.faces[0]!)!.openings?.find(o=>o.faces.includes(c.faces[0]!))?.paired,symmetry:structural.get(c.faces[0]!)!.symmetry}:{}),...(reflectionSheets.has(c.faces[0]!)?{surfaceReflection:reflectionSheets.get(c.faces[0]!)!.reflection,surfaceCorrespondence:reflectionSheets.get(c.faces[0]!)!.correspondence,structureReason:reflectionSheets.get(c.faces[0]!)!.plan.reason}:{}),...(continuousBands.has(c.faces[0]!)?{structureReason:'A complete two-boundary band is recognized before local crease grouping; one opening is tested before dividing its circumference.'}:{}),kind:(continuousBands.has(c.faces[0]!)?'continuous-band':reflectionSheets.has(c.faces[0]!)?'symmetric-sheet':structural.has(c.faces[0]!)?structural.get(c.faces[0]!)!.kind:featureByFace.has(c.faces[0]!)?'feature-sheet':c.faces.every(f=>planes[f]===planes[c.faces[0]!]&&planes[f]!>=0)?'planar-feature':c.faces.every(f=>oriented[f])?'crease-region':'surface') as PeelGroup['kind'],charts:[]}));
   const report:PeelReport={version:1,groups,groupSeams:[...seams],events:[],sourceHintCharts:0,feedbackSplits:0,totalIslands:0,note:'纯几何：连通结构与完整平面特征优先，成组折角边界提供分组依据。不按相向法线强制二分。组内先尝试保孔求解、规则开缝，失败反馈使用长度/折角图割约束的连通分割；原 UV 从未进入生成。没有人工语义标签或模型名称特例。'};
   return{report,seams,topology};
 }

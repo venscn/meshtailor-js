@@ -94,7 +94,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     const panels=paintPanelSeams(mesh,effective);
     if(panels.panels.length){for(const key of panels.seams)effective.add(key);warnings.push(`保留 ${panels.panels.length} 个主要平面特征面板，优先保持凹口、齿形与孔洞；没有按小平面切碎。`);}
   }
-  const planned=hierarchical?planSurfaceGroups(mesh,effective,{...opts,surfaceSymmetry:opts.uvObjective==='paint'&&opts.method==='auto'&&opts.surfaceSymmetry!==false,structureGroups:opts.uvObjective==='paint'&&opts.method==='auto'&&opts.structureGroups!==false,featureSheets:opts.uvObjective==='paint'&&opts.method==='auto'},work):undefined,peel=planned?.report;
+  const planned=hierarchical?planSurfaceGroups(mesh,effective,{...opts,structureTemplates:useTemplates,surfaceSymmetry:opts.uvObjective==='paint'&&opts.method==='auto'&&opts.surfaceSymmetry!==false,structureGroups:opts.uvObjective==='paint'&&opts.method==='auto'&&opts.structureGroups!==false,featureSheets:opts.uvObjective==='paint'&&opts.method==='auto'},work):undefined,peel=planned?.report;
   if(planned){for(const key of planned.seams)effective.add(key);warnings.push(`通用剥展：先建立 ${peel!.groups.length} 个空间组，组内再开缝和展平；组数不是 UV 岛数。`);}
   const wholeBands=useTemplates&&buildCharts(mesh,effective,topology).some(c=>inspectBand(mesh,c.faces,opts.humanTemplates).ok);
   if(!hierarchical&&!wholeBands&&opts.autoCut&&opts.chartPolicy!=='legacy'&&effective.size===0&&opts.initialSegmentation!=='connected'){
@@ -133,7 +133,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       }
     }
     if(human&&!featureFrame&&structure?.kind!=='closed-shell'&&structure?.kind!=='symmetric-sheet'){
-      const t=unfoldBand(mesh,faces,sourceChart,effective,opts,totalArea,work);
+      const t=unfoldBand(mesh,faces,sourceChart,effective,structure?.kind==='cap-rim'&&structure.structureRole==='rim'?{...opts,humanTemplates:{...opts.humanTemplates,minAreaFraction:0}}:opts,totalArea,work);
       if('raw' in t){
         event('analytic-seed','Validated generic ring geometry candidate; actual side cuts preserved.');
         t.entry.charts=[];for(let i=0;i<t.raw.length;i++){const p=t.raw[i]!,id=raw.length;p.id=id;raw.push(p);diagnostics.push({...t.diagnostics[i]!,id});t.entry.charts.push(id);}

@@ -64,3 +64,5 @@ export * from './longitudinal-panels.js';
 export * from './intrinsic-strip.js';
 
 export * from './tube-strips.js';
+
+export * from './cap-rim-partitions.js';
