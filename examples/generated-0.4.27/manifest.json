@@ -1,0 +1,26 @@
+{
+  "version": "0.4.27",
+  "note": "Actual geometry-only outputs, not source asset UV. Full models use default unmerged non-fill pipeline. Selected-part exports include complete part faces and original vertex array.",
+  "files": [
+    {
+      "file": "Corset-generated.obj",
+      "bytes": 1694788,
+      "sha256": "f3f246ab95f0720408ecb91aa745dd9ad5f9a3e6bb3a5aff5100ea144f79b697"
+    },
+    {
+      "file": "FlightHelmet-generated.obj",
+      "bytes": 8591521,
+      "sha256": "26819335c3f1d2b1d452423bcef70eb642847362c7f328ad5adc25da31ea69c5"
+    },
+    {
+      "file": "folded-strip-generated.obj",
+      "bytes": 2978296,
+      "sha256": "99f7a952f98db25edc4b45c38da8b455634cd54725a8cbc9377249b787636185"
+    },
+    {
+      "file": "large-shell-generated.obj",
+      "bytes": 3799164,
+      "sha256": "07179d429be5dc7fadff97090eb1bac9e0e2433d6492f289cb46b624df117866"
+    }
+  ]
+}
