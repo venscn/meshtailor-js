@@ -9,7 +9,7 @@ import type {UVWork} from './work.js';
  * Packing may move/rotate/scale, but not silently cut holes into outer borders.
  */
 export function validateStructureOutput(mesh:MeshData,charts:readonly PackedChart[],seams:ReadonlySet<string>,peel:PeelReport|undefined,work?:UVWork):void {
- for(const g of peel?.groups??[]){if(g.kind!=='closed-shell')continue;work?.check();const matches=charts.filter(c=>c.faceUVs.has(g.faces[0]!)),c=matches[0];
+ for(const g of peel?.groups??[]){if(g.kind!=='closed-shell'&&g.kind!=='longitudinal-panels')continue;work?.check();const matches=charts.filter(c=>c.faceUVs.has(g.faces[0]!)),c=matches[0];
   if(matches.length!==1||!c||c.faceUVs.size!==g.faces.length||g.faces.some(f=>!c.faceUVs.has(f)))throw Error('Complete shell skin/wall grouping was split, merged or lost; no partial structure is accepted.');
   for(const e of g.openingEdges??[])if(!seams.has(e))throw Error('Planned wall opening was lost.');
   const local=cutLocalMesh(mesh,g.faces,seams);const expected=g.openingEdges?.length?1:g.structureBoundaryLoops;

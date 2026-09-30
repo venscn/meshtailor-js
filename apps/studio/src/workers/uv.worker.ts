@@ -1,6 +1,6 @@
 import {PipelineRecorder,resolveLoadPipeline,type LoadPipelineConfig,type PipelineTrace} from '../unfold/load-pipeline.js';
 import {geometryOnlyMesh,GEOMETRY_INPUT_POLICY,type GeometryInputPolicy,type MeshData} from '@meshtailor/mesh-core';
-import {validateFeatureOutput,geometryGenerationOptions,carryPeelReport, inheritedTemplateSeams,carryHumanTemplates, checkUVTriangles,fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildUnfoldGeometry, unwrapMesh, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
+import {validateSurfaceSymmetryOutput,validateStructureOutput,validateFeatureOutput,geometryGenerationOptions,carryPeelReport, inheritedTemplateSeams,carryHumanTemplates, checkUVTriangles,fillCurrentUV,auditIslandAreas,buildSpatialNeighbors,type AreaAudit,type SpatialReport,type AtlasPacking,postprocessUV, type SourceUVAudit, type MergeReport, type PageReport, buildUnfoldGeometry, unwrapMesh, UVWorkStopped, type UVWork, type UVProgress, type UnwrapOptions, type FragmentationReport, type ChartDiagnostic, type PackedChart, type UnfoldGeometry } from '@meshtailor/uv';
 export type UVTarget = 'generated' | 'source' | 'stitch' | 'repack' | 'source-atlas' | 'fill' | 'templates';
 export interface UVSnapshot {
   inputPolicy:GeometryInputPolicy;
@@ -98,6 +98,10 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     if(seedCharts&&seedHuman&&['stitch','repack','fill','templates'].includes(target))snapshot.human=carryHumanTemplates(seedHuman,snapshot.human,snapshot.packed,seams);
     if(seedPeel&&seedCharts&&['stitch','repack','fill'].includes(target))snapshot.peel=carryPeelReport(seedPeel,snapshot.packed);
     
+    // Validate the submitted coordinates after every path, including automatic
+    // fill and standalone postprocessing; a stored recognition badge is not QA.
+    validateStructureOutput(mesh,snapshot.packed,seams,snapshot.peel,work);
+    validateSurfaceSymmetryOutput(mesh,snapshot.packed,snapshot.peel,work);
     const featureChecks=validateFeatureOutput(mesh,snapshot.packed,seams,snapshot.peel,work);
     if(featureChecks.size){
       snapshot.diagnostics??=[];
