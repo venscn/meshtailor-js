@@ -4,7 +4,7 @@
  * whole, manifold and injectively projectable, then preserve their shared rim.
  * This is a geometric test; no cap/helmet name or authored UV is consulted.
  */
-import type {MeshData,MeshTopology,Vec2,Vec3} from '@meshtailor/mesh-core';
+import {regularizeBinaryPartition,type MeshData,type MeshTopology,type Vec2,type Vec3} from '@meshtailor/mesh-core';
 import {cutLocalMesh} from './cut-topology.js';
 import {detectSurfaceReflection,reflectionSummary,dot3,type SurfaceReflectionReport} from './surface-reflection.js';
 import {checkUVTriangles} from './uv-quality.js';
@@ -29,7 +29,8 @@ export function partitionSymmetricSheets(mesh:MeshData,faces:readonly number[],c
  for(const frame of projectionFrames(local)){
   work?.check();const labels=new Map<number,number>();for(const f of faces)labels.set(f,dot3(frames.get(f)!.normal,frame.normal)>0?0:1);
   const seams=new Set(cuts);for(const[key,e]of top.edges)if(e.faces.length===2&&e.faces.every(f=>labels.has(f))&&labels.get(e.faces[0]!)!==labels.get(e.faces[1]!))seams.add(key);
-  const parts=subsetComponents(mesh,faces,seams,top);if(parts.length!==2)continue;
+  let parts=subsetComponents(mesh,faces,seams,top);if(parts.length!==2)continue;
+  for(const band of [8,5,3]){const regular=regularizeBinaryPartition(mesh,parts,cuts,top,()=>work?.check(),band);if(regular.report.accepted&&(regular.report.afterTeeth<regular.report.beforeTeeth||regular.report.afterLength<regular.report.beforeLength*.995))parts=regular.parts;}
   const partReflections:SurfaceReflectionReport[]=[];let valid=true,score=0;
   for(const part of parts){
    const ar=part.reduce((s,f)=>s+frames.get(f)!.area,0);if(ar<total*.10||part.length<32){valid=false;break;}

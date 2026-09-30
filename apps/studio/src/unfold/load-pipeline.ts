@@ -20,7 +20,7 @@ export function validateLoadPipeline(value:unknown):LoadPipelineConfig {
   for(const k of ['repairInvalid','mergeAdjacent','fill'])if(typeof s[k]!=='boolean')throw Error(`流程配置 ${k} 必须为布尔值。`);
   if(typeof s.fillBudgetSeconds!=='number'||!Number.isFinite(s.fillBudgetSeconds)||s.fillBudgetSeconds<1||s.fillBudgetSeconds>120)throw Error('精排搜索预算必须为 1–120 秒。');
   if(typeof s.fillRounds!=='number'||!Number.isInteger(s.fillRounds)||s.fillRounds<1||s.fillRounds>24)throw Error('精排轮数必须为 1–24。');
-  return {version:2,source:'geometry',repairInvalid:false,mergeAdjacent:s.mergeAdjacent as boolean,fill:s.fill as boolean,fillBudgetSeconds:s.fillBudgetSeconds,fillRounds:s.fillRounds};
+  return {version:2,source:'geometry',repairInvalid:s.repairInvalid as boolean,mergeAdjacent:s.mergeAdjacent as boolean,fill:s.fill as boolean,fillBudgetSeconds:s.fillBudgetSeconds,fillRounds:s.fillRounds};
 }
 export function readLoadPipeline(storage?:Pick<Storage,'getItem'>):LoadPipelineConfig {
   try {
@@ -36,7 +36,7 @@ export function resolveLoadPipeline(mesh:MeshData,value:LoadPipelineConfig,base:
   const plan=validateLoadPipeline(value);
   if(plan.fill&&base.atlasPageMode&&base.atlasPageMode!=='single')throw Error('自动填空只支持单页；请使用单页排布。');
   return {target:'generated' as PipelineTarget,config:{...geometryGenerationOptions(mesh,base),postMerge:plan.mergeAdjacent,
-    fillMode:'off',fillRecutLarge:false,fillTimeBudgetMs:plan.fillBudgetSeconds*1000,fillRounds:plan.fillRounds} as Partial<UnwrapOptions>};
+    ...(plan.fill?{fillMode:'area-priority',fillFitVacancies:true,fillStrategy:'adaptive',fillWarmupPasses:5,fillCommonGainLimit:6,fillReflowBudget:8}: {fillMode:'off'}),fillRecutLarge:false,fillTimeBudgetMs:plan.fillBudgetSeconds*1000,fillRounds:plan.fillRounds} as Partial<UnwrapOptions>};
 }
 export function pipelineSteps(target:PipelineTarget,config:Partial<UnwrapOptions>={},plan?:LoadPipelineConfig):PipelineStep[]{
   const generated=target==='generated',edit=['stitch','repack','fill','templates'].includes(target);

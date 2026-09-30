@@ -184,7 +184,7 @@ export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={}
   // through nearest-surface matching; nonmatching deliberate slits are reported
   // separately by the group planner rather than hallucinating a UV symmetry.
   const unslit=new Set(mesh.sourceVertices).size===mesh.sourceVertices.length;
-  const reflection=enabled&&unslit&&mesh.boundaryLoops>0?detectSurfaceReflection(mesh,{tolerance:options.symmetryTolerance??.018,fixedPlane:options.symmetryPlane},work):undefined;
+  const reflection=enabled&&unslit&&mesh.boundaryLoops>0?detectSurfaceReflection(mesh,{tolerance:options.symmetryTolerance??.018,fixedPlane:options.symmetryPlane,minimumCoverage:mesh.boundaryLoops>1?.88:.9},work):undefined;
   const base=parameterizeUnconstrained(mesh,options,work);
   if(!reflection)return base;
   try {
