@@ -106,11 +106,11 @@ export function detectSurfaceReflection(mesh:CutMesh,options:SurfaceReflectionOp
  }
  const coarse=options.fixedPlane?[]:normals.map(normal=>{const offset=dot3(frames[0]!.origin,normal),h=hits(normal,offset,span*.06,Math.max(1,Math.floor(samples.length/64)));
   const score=h.reduce((s,p)=>s+(p?(p.distance/span)**2+(1-p.normal)*.001:.006),0)/h.length;return {normal,origin:frames[0]!.origin,score};
- }).filter(f=>{const v=mesh.positions.map(p=>dot3(p,f.normal));return Math.max(...v)-Math.min(...v)>span*.12;}).sort((a,b)=>a.score-b.score).slice(0,4);
+ }).filter(f=>{const v=mesh.positions.map(p=>dot3(p,f.normal));return Math.max(...v)-Math.min(...v)>span*.005;}).sort((a,b)=>a.score-b.score).slice(0,4);
  const candidates:SurfaceReflection[]=[];
  for(const frame of options.fixedPlane?[{normal:options.fixedPlane.normal,origin:frames[0]!.origin,score:0}]:coarse){work?.check();let normal=frame.normal,offset=options.fixedPlane?.offset??dot3(frame.origin,normal);
   // Exclude the identity reflection of a thin planar sheet. We need both sides.
-  const extent=Math.max(...mesh.positions.map(p=>dot3(p,normal)))-Math.min(...mesh.positions.map(p=>dot3(p,normal)));if(extent<span*.12)continue;
+  const extent=Math.max(...mesh.positions.map(p=>dot3(p,normal)))-Math.min(...mesh.positions.map(p=>dot3(p,normal)));if(extent<span*.005)continue;
   for(let iteration=0;iteration<(options.fixedPlane?0:18);iteration++){
    const pairs=hits(normal,offset,span*.06).filter((x):x is NonNullable<typeof x>=>!!x);if(pairs.length<samples.length*.6)break;
    const sum=pairs.reduce((s,p)=>s+p.sample.weight,0),center:Vec3=[0,0,0];for(const p of pairs)for(let k=0;k<3;k++)center[k]!+=(p.sample.p[k]!+p.q[k]!)*.5*p.sample.weight/sum;
@@ -119,7 +119,13 @@ export function detectSurfaceReflection(mesh:CutMesh,options:SurfaceReflectionOp
   }
   const h=hits(normal,offset),accepted=h.filter((x):x is NonNullable<typeof x>=>!!x),body=accepted.filter(h=>!h.sample.boundary),border=accepted.filter(h=>h.sample.boundary),coverage=body.length/count,boundaryCoverage=bc?border.length/bc:1;
   const rms=Math.sqrt(body.reduce((s,h)=>s+(h.distance/span)**2,0)/Math.max(1,body.length)),boundaryRms=Math.sqrt(border.reduce((s,h)=>s+(h.distance/span)**2,0)/Math.max(1,border.length)),dist=accepted.map(h=>h.distance/span).sort((a,b)=>a-b),agreement=body.reduce((s,h)=>s+h.normal,0)/Math.max(1,body.length);
-  const pos=samples.filter(s=>!s.boundary&&dot3(s.p,normal)-offset>span*.02).length/count,neg=samples.filter(s=>!s.boundary&&dot3(s.p,normal)-offset< -span*.02).length/count;
+  // Off-plane support is measured against transverse width, not the length of
+  // an elongated part. A 12%-of-diameter gate rejected its actual midplane but
+  // admitted a tilted candidate, which could later converge to a biased axis.
+  const transverse=mesh.positions.map(p=>dot3(p,normal)),width=Math.max(...transverse)-Math.min(...transverse);
+  if(width<span*.005)continue;
+  const margin=Math.min(span*.02,width*.1);
+  const pos=samples.filter(s=>!s.boundary&&dot3(s.p,normal)-offset>margin).length/count,neg=samples.filter(s=>!s.boundary&&dot3(s.p,normal)-offset< -margin).length/count;
   if(coverage<minCoverage||boundaryCoverage<minCoverage||rms>tol*.45||boundaryRms>tol*.5||agreement<.8||Math.min(pos,neg)<.25)continue;
   // A separate diagnostic measures how many source vertices have any reflected
   // vertex. It is NEVER a gate for the surface correspondence.
