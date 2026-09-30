@@ -1,0 +1,26 @@
+{
+  "version": "0.4.29",
+  "note": "Exact actual geometry-only outputs. Default generation without post-merge or fill, plus screenshot-like Corset with shared-edge post-merge. Source UV never participates. Whole models include all faces.",
+  "files": [
+    {
+      "file": "Corset-generated.obj",
+      "bytes": 1694544,
+      "sha256": "db080e536bd83473ae69ab50b0db568c20d410311a2209f6083abf1d6642f282"
+    },
+    {
+      "file": "FlightHelmet-generated.obj",
+      "bytes": 8591385,
+      "sha256": "c59824223798b7e546a46015eeb07b12220ed39761e1a323b5e1132bed4b62dd"
+    },
+    {
+      "file": "Corset-postmerge.obj",
+      "bytes": 1694469,
+      "sha256": "8313790765d4d340a36a6c8e16f68ac72525e3311f904891372cc3b959fce038"
+    },
+    {
+      "file": "Corset-base-part.obj",
+      "bytes": 16524,
+      "sha256": "b08e6a52c99d96820ea5fcdbf6479fafe9752c47a6a5128eb76115cdee60ff44"
+    }
+  ]
+}

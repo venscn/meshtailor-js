@@ -36,3 +36,6 @@ results/v0.4.18/
 
 # Optional actual tube comparison exports.
 /results/v0.4.28/
+
+# Current continuity reference output; compressed sources are versioned.
+/results/v0.4.29/

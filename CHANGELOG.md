@@ -1,3 +1,10 @@
+# 0.4.29
+
+- Intact annuli: test one complete chart before a second seam; explicit panel requests and budget/quality guards remain.
+- Closed caps with a clear side belt: retain a complete rim instead of assigning tangent wall faces to both caps.
+- Actual component/decision diagnostics in both UIs; validated through post-merge, repack and fill.
+- Real Corset/FlightHelmet UV-isolation, complete geometry, export and offline browser checks. Ordinary atlas occupancy may decrease for longer unbroken strips; not a packing improvement.
+
 # v0.4.28
 
 闭合截面环几何识别、纵缝＋横向开口、带度量的矩形条带；主动选择横向分段而不是为填方形拉宽。后处理保持真实切缝与四边关系。实际变体/Worker/浏览器及六条真实模型隔离回归；未使用源UV。详见docs/releases/0.4.28.md。
