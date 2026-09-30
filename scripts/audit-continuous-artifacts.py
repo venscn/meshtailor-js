@@ -3,7 +3,7 @@ import argparse, gzip, hashlib, json, pathlib, time
 import numpy as np
 import shapely
 from shapely import STRtree
-p=argparse.ArgumentParser();p.add_argument('--root',type=pathlib.Path,required=True);p.add_argument('--out',type=pathlib.Path,required=True);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--root',type=pathlib.Path,required=True);p.add_argument('--out',type=pathlib.Path,required=True);p.add_argument('--generated-only',action='store_true');a=p.parse_args()
 def obj(path):
     text=(gzip.decompress(path.read_bytes()).decode() if path.suffix=='.gz' else path.read_text())
     v=[];f=[];uv=[];ts=[]
@@ -19,9 +19,9 @@ def obj(path):
 report={'engine':'Shapely '+shapely.__version__,'areaTolerance':1e-14,'scope':'Independent verification of exported OBJ; geometry compared against previous generated geometry, not source UV used to generate.','files':[]}
 for name in ['Corset','FlightHelmet']:
     old=pathlib.Path('examples/generated-0.4.25')/(name+'-generated.obj.gz');v0,f0,_=obj(old)
-    for path in [a.root/'real'/name/(name+'-generated.obj'),a.root/'postprocess'/(name+'-postprocessed.obj')]:
+    for path in ([a.root/(name+'-generated.obj')] if a.generated_only else [a.root/'real'/name/(name+'-generated.obj'),a.root/'postprocess'/(name+'-postprocessed.obj')]):
         start=time.monotonic();v,f,t=obj(path);assert np.array_equal(v,v0) and np.array_equal(f,f0),'Geometry changed'
-        signed=np.cross(t[:,1]-t[:,0],t[:,2]-t[:,0]);assert np.all(signed>0)
+        ab=t[:,1]-t[:,0];ac=t[:,2]-t[:,0];signed=ab[:,0]*ac[:,1]-ab[:,1]*ac[:,0];assert np.all(signed>0)
         ps=shapely.polygons(t);pairs=STRtree(ps).query(ps);pairs=pairs[:,pairs[0]<pairs[1]];count=0;largest=0.
         for k in range(0,pairs.shape[1],4096):
             i,j=pairs[:,k:k+4096];area=shapely.area(shapely.intersection(ps[i],ps[j]));count+=int((area>1e-14).sum());largest=max(largest,float(area.max(initial=0)))
