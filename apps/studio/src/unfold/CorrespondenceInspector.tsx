@@ -1,7 +1,7 @@
 import {describeTube} from './tube-description';
 import {describeSurfaceSymmetry} from './symmetry-description';
 import {describeGrowthStop} from '@meshtailor/uv';
-import {describeStructure} from './structure-description';
+import {describeStructure,describeBandPartition} from './structure-description';
 import type { MeshData } from '@meshtailor/mesh-core';
 import type { UVSnapshot } from '../workers/uv.worker';
 import type { UnfoldPlayer } from './useUnfoldPlayer';
@@ -32,6 +32,7 @@ export function CorrespondenceInspector({mesh,snapshot,player:p}:{mesh:MeshData;
       {diagnostic?.feature&&<dl className="property-list" data-testid="feature-correspondence"><dt>几何特征保护</dt><dd>透孔主面 · 保留 {diagnostic.feature.holes} 个孔</dd><dt>边界最大变化</dt><dd>{(100*diagnostic.feature.boundaryMax).toFixed(2)}% 参考轮廓直径</dd><dt>孔面积比例</dt><dd>{diagnostic.feature.holeAreaRatios.map(x=>x.toFixed(3)+'×').join(' / ')}</dd><dt>度量范围</dt><dd>相对源几何投影；去除整体旋转与尺度。不是原 UV，也不是人工语义评分。</dd></dl>}
       {structure?.structureReason&&<p data-testid="structure-correspondence" className="selection-help">{describeStructure(structure)}</p>}
       {diagnostic?.structuralRelaxation&&<p className="selection-help">内在长度松弛：{diagnostic.structuralRelaxation.acceptedIterations} 次接受；能量 {diagnostic.structuralRelaxation.initialEnergy.toFixed(4)} → {diagnostic.structuralRelaxation.finalEnergy.toFixed(4)}。不读取参考 UV。</p>}
+      {template&&<p data-testid="band-decision" className="selection-help">{describeBandPartition(template)}</p>}
       {template&&<dl className="property-list" data-testid="template-correspondence"><dt>结构来源</dt><dd>原区域 #{template.sourceChart+1} · {template.template}</dd><dt>上/下边界</dt><dd>{template.upperBoundary?.length} / {template.lowerBoundary?.length} 个源顶点</dd><dt>真实侧缝</dt><dd>{template.seamEdges?.length} 条源网格边 · 不属于动画临时切缝</dd><dt>同组面片</dt><dd>{template.charts?.map(id=>'#'+(id+1)).join(' / ')}</dd></dl>}
       {growth&&<dl className="property-list" data-testid="selected-island-growth"><dt>本轮实际面积增益</dt><dd>{growth.areaFactor.toFixed(3)} ×</dd><dt>本轮实际边长增益</dt><dd>{growth.linearFactor.toFixed(3)} ×</dd><dt>增长停止依据</dt><dd>{describeGrowthStop(growth.reason)}</dd></dl>}
       {area&&<dl className="property-list" data-testid="island-area"><dt>3D 表面积占比（同域）</dt><dd>{(area.share3D*100).toFixed(4)}%</dd><dt>UV 面积占比（同域）</dt><dd>{(area.shareUV*100).toFixed(4)}%</dd><dt>相对平均面积密度</dt><dd>{area.densityRatio?.toFixed(3)??'无效'} ×</dd></dl>}
