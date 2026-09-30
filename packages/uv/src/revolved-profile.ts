@@ -6,8 +6,8 @@
  * (R θ, R h). The straight sides follow the repeated physical cross-section;
  * chamfers do not turn a cylindrical band into an unconstrained tapered chart.
  */
-import {edgeKey,type Vec2} from '@meshtailor/mesh-core';
-import type {CutMesh} from './cut-topology.js';
+import {edgeKey,type Vec2,type MeshData} from '@meshtailor/mesh-core';
+import {cutLocalMesh,type CutMesh} from './cut-topology.js';
 import type {PackedChart} from './preview.js';
 import type {UVWork} from './work.js';
 
@@ -21,7 +21,7 @@ export interface RevolvedProfile {
 export interface RevolvedProfileReport {
   mapping:'rectangle'|'annulus'; sections:number; sourceMeridianLength:number;
   radiusRange:[number,number]; referenceRadius:number; conformalHeight:number;
-  radialResidual:number; stripLength?:number; stripWidth?:number;
+  radialResidual:number; seamSnapDegrees:number; stripLength?:number; stripWidth?:number;
   innerRadius?:number; outerRadius?:number; maxStretch:number;
   note:string;
 }
@@ -129,7 +129,7 @@ export function metricAnnulusPoints(profile:RevolvedProfile,local:CutMesh):Vec2[
 }
 export function revolvedReport(profile:RevolvedProfile,mapping:'rectangle'|'annulus',maxStretch:number,panels=1):RevolvedProfileReport {
   const radii=profile.nodes.map(n=>n.r),inner=Math.min(profile.nodes[0]!.r,profile.nodes.at(-1)!.r);
-  return{mapping,sections:profile.nodes.length,sourceMeridianLength:profile.length,radiusRange:[Math.min(...radii),Math.max(...radii)],referenceRadius:profile.referenceRadius,conformalHeight:profile.conformalHeight,radialResidual:profile.radialError,maxStretch,
+  return{mapping,sections:profile.nodes.length,sourceMeridianLength:profile.length,radiusRange:[Math.min(...radii),Math.max(...radii)],referenceRadius:profile.referenceRadius,conformalHeight:profile.conformalHeight,radialResidual:profile.radialError,seamSnapDegrees:Math.atan2(Math.sin(profile.seamAngle),Math.cos(profile.seamAngle))*180/Math.PI,maxStretch,
     ...(mapping==='rectangle'?{stripLength:TAU*profile.referenceRadius/panels,stripWidth:profile.length}:{innerRadius:inner,outerRadius:inner+profile.length}),
     note:mapping==='rectangle'?'Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch.':'Hole-preserving radial meridian length; no radial slit. Full triangle distortion and boundary checks required; not a claim of zero distortion.'};
 }
@@ -140,11 +140,18 @@ export function metricContract(local:CutMesh,uv:Vec2[],seams:string[],mapping:'r
 }
 /** Only uniform scale, translation and a proper rotation are permitted after
  * metric generation. All sampled vertices participate, including cut lips. */
-export function validateRevolvedMetric(charts:readonly PackedChart[],seams:ReadonlySet<string>,contracts:readonly RevolvedMetricContract[],work?:UVWork):void{
+export function validateRevolvedMetric(charts:readonly PackedChart[],seams:ReadonlySet<string>,contracts:readonly RevolvedMetricContract[],work?:UVWork,mesh?:MeshData):void{
   for(const ref of contracts){
     work?.check();const chart=charts.find(c=>c.faceUVs.has(ref.faces[0]!));
     if(!chart||chart.faceUVs.size!==ref.faces.length||ref.faces.some(f=>!chart.faceUVs.has(f)))throw Error('Revolved profile was merged, split or lost after metric generation.');
     if(ref.seams.some(e=>!seams.has(e)))throw Error('Revolved meridian opening or interface seam was removed.');
+    if(mesh){
+      const local=cutLocalMesh(mesh,ref.faces,seams),actual:Vec2[]=new Array(local.positions.length);
+      if(!local.manifold||local.boundaryLoops!==ref.boundaryLoops||local.positions.length!==ref.coordinates.length)throw Error('Revolved opening / hole topology changed.');
+      local.sourceFaces.forEach((f,i)=>local.triangles[i]!.forEach((v,k)=>{const p=chart.faceUVs.get(f)![k]!;
+        if(actual[v]&&Math.hypot(p[0]-actual[v]![0],p[1]-actual[v]![1])>1e-9)throw Error('Revolved face-corner continuity changed.');actual[v]=p;
+      }));
+    }
     const target=ref.bindings.map(b=>chart.faceUVs.get(b.face)![b.corner]!);
     const n=target.length;if(n!==ref.coordinates.length||n<3)throw Error('Invalid revolved profile contract.');
     const ca:Vec2=[0,0],cb:Vec2=[0,0];for(let i=0;i<n;i++)for(let k=0;k<2;k++){ca[k]!+=ref.coordinates[i]![k]!/n;cb[k]!+=target[i]![k]!/n;}

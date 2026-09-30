@@ -245,7 +245,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
   warnings.push(`占用率是有效 UV 三角形面积之和，不是包围盒面积。排布为 ${atlas.packingMethod==='shelf'?'面积感知 Shelf（大岛数快速路径）':'MaxRects'} 启发式，不宣称全局最优。`);
   if(peel){if(tubeContracts.length){peel.tubeContracts=tubeContracts;peel.tubeReports=tubeReports;}peel.surfaceContracts=surfaceContracts;peel.totalIslands=raw.length;for(const group of peel.groups){const fs=new Set(group.faces);group.charts=raw.filter(c=>[...c.faceUVs.keys()].some(f=>fs.has(f))).map(c=>c.id);}warnings.push(`通用剥展完成：${peel.groups.length} 个空间组 → ${raw.length} 个有效岛；${peel.feedbackSplits} 次反馈细分，${peel.sourceHintCharts} 个有效源形状回退。空间组边界与组内 UV 缝分别记录。`);}
   validateTubeOutput(atlas.packed,effective,tubeContracts,work);
-  validateHumanMetricOutput(atlas.packed,effective,human,work);
+  validateHumanMetricOutput(atlas.packed,effective,human,work,mesh);
   if(tubeReports.length)warnings.push(`闭合管身条带：${tubeReports.length} 个完整周期管状区域，按几何弧长/周长建立矩形。长宽比来自3D，单条带不保证填满正方形；可显式增加横向分段。`);
   validateStructureOutput(mesh,atlas.packed,effective,peel,work);
   validateSurfaceSymmetryOutput(mesh,atlas.packed,peel,work);

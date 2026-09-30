@@ -101,7 +101,7 @@ self.onmessage=(event:MessageEvent<UVJob>)=>{
     // Validate the submitted coordinates after every path, including automatic
     // fill and standalone postprocessing; a stored recognition badge is not QA.
     validateTubeOutput(snapshot.packed,seams,snapshot.peel?.tubeContracts,work);
-    validateHumanMetricOutput(snapshot.packed,seams,snapshot.human,work);
+    validateHumanMetricOutput(snapshot.packed,seams,snapshot.human,work,mesh);
     validateStructureOutput(mesh,snapshot.packed,seams,snapshot.peel,work);
     validateSurfaceSymmetryOutput(mesh,snapshot.packed,snapshot.peel,work);
     const featureChecks=validateFeatureOutput(mesh,snapshot.packed,seams,snapshot.peel,work);

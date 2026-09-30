@@ -28,7 +28,7 @@ try {
  const validate=(m,r,mapping='rectangle')=>{
   assert.ok(r.raw,JSON.stringify(r));assert.equal(r.entry.metric?.mapping,mapping);assert.equal(r.raw.reduce((n,ch)=>n+ch.faceUVs.size,0),m.faces.length);
   for(const chart of r.raw)assert.ok(uv.checkUVTriangles([...chart.faceUVs.values()]).valid);
-  const seams=new Set([...r.seams,...r.locked]);uv.validateRevolvedMetric(r.raw,seams,r.entry.metricContracts);
+  const seams=new Set([...r.seams,...r.locked]);uv.validateRevolvedMetric(r.raw,seams,r.entry.metricContracts,undefined,m);
   return {islands:r.raw.length,mode:r.entry.metric.mapping,maxStretch:r.entry.maxAnisotropy,sections:r.entry.metric.sections};
  };
  const repeated=lathedFixture(bevelProfile),source=JSON.stringify(repeated);
@@ -52,6 +52,7 @@ try {
   const r=solve(repeated),seams=new Set([...r.seams,...r.locked]),copy=()=>structuredClone(r.raw),good=copy();
   for(const ch of good)for(const[f,t]of ch.faceUVs)ch.faceUVs.set(f,t.map(([x,y])=>[.4*x-.3*y+5,.3*x+.4*y-1]));uv.validateRevolvedMetric(good,seams,r.entry.metricContracts);
   const bad=copy();for(const ch of bad)for(const[f,t]of ch.faceUVs)ch.faceUVs.set(f,t.map(([x,y])=>[x,y*(1+.2*x)]));assert.throws(()=>uv.validateRevolvedMetric(bad,seams,r.entry.metricContracts),/metric changed/);
+  const broken=copy();const tri=broken[0].faceUVs.values().next().value;tri[1][0]+=.001;assert.throws(()=>uv.validateRevolvedMetric(broken,seams,r.entry.metricContracts,undefined,repeated),/continuity|metric changed/);
   const missing=new Set(seams);missing.delete(r.entry.metricContracts[0].seams[0]);assert.throws(()=>uv.validateRevolvedMetric(r.raw,missing,r.entry.metricContracts),/seam/);
  });
  test('cancellation and option validation are not swallowed',()=>{assert.throws(()=>uv.unfoldBand(repeated,repeated.faces.map((_,i)=>i),0,new Set(),uv.geometryGenerationOptions(repeated),1,{check(){throw new uv.UVWorkStopped('cancel');}}),/cancel/);assert.throws(()=>uv.humanOptions({revolvedProfiles:'yes'}),/boolean/);});

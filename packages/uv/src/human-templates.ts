@@ -239,6 +239,6 @@ export function carryHumanTemplates(previous:HumanTemplateReport|undefined,curre
 }
 
 /** Validate current coordinates, not a remembered successful solver flag. */
-export function validateHumanMetricOutput(packed:readonly import('./preview.js').PackedChart[],seams:ReadonlySet<string>,report:HumanTemplateReport|undefined,work?:UVWork):void {
- validateRevolvedMetric(packed,seams,report?.entries.flatMap(e=>e.status==='applied'?e.metricContracts??[]:[])??[],work);
+export function validateHumanMetricOutput(packed:readonly import('./preview.js').PackedChart[],seams:ReadonlySet<string>,report:HumanTemplateReport|undefined,work?:UVWork,mesh?:MeshData):void {
+ validateRevolvedMetric(packed,seams,report?.entries.flatMap(e=>e.status==='applied'?e.metricContracts??[]:[])??[],work,mesh);
 }

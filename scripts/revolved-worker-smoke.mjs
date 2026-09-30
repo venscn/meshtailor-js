@@ -10,7 +10,7 @@ try{
  const mesh=core.geometryOnlyMesh(core.makeMultiPartAssembly('medium')),start=JSON.stringify(mesh),pipeline={...lp.DEFAULT_LOAD_PIPELINE,mergeAdjacent:true};let s;
  const check=(s,m=mesh)=>{
   assert.equal(s.inputPolicy,core.GEOMETRY_INPUT_POLICY);assert.equal(s.peel.sourceHintCharts,0);assert.equal(s.packed.reduce((sum,c)=>sum+c.faceUVs.size,0),m.faces.length);assert.equal(new Set(s.packed.flatMap(c=>[...c.faceUVs.keys()])).size,m.faces.length);
-  assert.ok(s.metrics.validated);uv.validateHumanMetricOutput(s.packed,new Set(s.seams),s.human);
+  assert.ok(s.metrics.validated);uv.validateHumanMetricOutput(s.packed,new Set(s.seams),s.human,undefined,m);
   for(const ch of s.packed)for(const[f,t]of ch.faceUVs)for(let k=0;k<3;k++)for(let a=0;a<2;a++)assert.ok(Math.abs(t[k][a]-s.geometry.uv[f*6+k*2+a])<1e-6);
   return{faces:m.faces.length,islands:s.packed.length,metrics:s.human.entries.filter(e=>e.metric).map(e=>({faces:e.faces,template:e.template,report:e.metric})),occupancy:s.metrics.occupancy};
  };
