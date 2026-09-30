@@ -1,0 +1,13 @@
+PASS Recognize surface symmetry before splitting the whole closed component
+PASS Every face belongs to one complete open sheet
+PASS Default geometry generation commits two symmetry-verified sheets
+PASS Later packing and fill must retain each verified reflection
+PASS Asymmetric post-solve edit is rejected, not hidden in packing
+PASS A missing whole side is rejected
+PASS No geometry changed
+PASS Poisoned source UV, indices and names cannot change generated UV
+PASS Unseen closed shell with 5/13 unequal side subdivisions uses surface, not triangle identity
+PASS Rotated/scaled/renamed closed shell keeps the same face grouping
+PASS Explicit cuts disable the closed-sheet assumption
+PASS Known planar gear keeps holes and tooth outline
+PASSED 12

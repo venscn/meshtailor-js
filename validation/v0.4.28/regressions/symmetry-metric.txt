@@ -1,0 +1,9 @@
+PASS Asymmetric initial UV is diagnosed despite symmetric geometry
+METRIC 0.06913687987098503 0.0012756214595243817 0.0010466756657644533 constrained
+PASS Barycentric coupled solve corrects unequal tessellation without copying half UV
+PASS Rigid UV placement and common scale leave reflection error unchanged
+PASS Real geometry, triangulation and all source faces remain untouched
+PASS Exact symmetric planar seed need not be moved
+PASS Invalid or nonfinite constraint coefficients are rejected
+PASS Cancellation is never turned into a successful relaxed result
+PASSED 7

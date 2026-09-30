@@ -1,0 +1,5 @@
+PASS Closed genus-one surface opens without fragmenting face set { faces: 360, cutEdges: 31, boundaries: 1 }
+PASS Every handle cut is a real original mesh edge 
+PASS Genus-one with a real boundary opens without capping or deleting geometry 
+PASS Feature groups never read UV or triangulation hints 
+PASS Cancellation aborts the handle graph search 
