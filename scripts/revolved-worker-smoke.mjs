@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {compileCore} from './lib/compiled-core.mjs';
+import {runGeometryJob} from './lib/geometry-worker.mjs';
+import {loadVerifiedFixture} from './lib/verified-model-fixtures.mjs';
+const out=process.argv.includes('--out')?process.argv[process.argv.indexOf('--out')+1]:'validation/local-revolved-worker';await mkdir(out,{recursive:true});
+const c=await compileCore(),report={tests:[]},test=async(name,fn)=>{const detail=await fn();report.tests.push({name,detail,passed:true});console.log('PASS',name);await writeFile(out+'/partial.json',JSON.stringify(report,null,2));};
+try{
+ const core=await c.load('packages/mesh-core/src/index.js'),uv=await c.load('packages/uv/src/index.js'),lp=await c.load('apps/studio/src/unfold/load-pipeline.js'),chain=await c.load('packages/chaining-seams/src/index.js');
+ const mesh=core.geometryOnlyMesh(core.makeMultiPartAssembly('medium')),start=JSON.stringify(mesh),pipeline={...lp.DEFAULT_LOAD_PIPELINE,mergeAdjacent:true};let s;
+ const check=(s,m=mesh)=>{
+  assert.equal(s.inputPolicy,core.GEOMETRY_INPUT_POLICY);assert.equal(s.peel.sourceHintCharts,0);assert.equal(s.packed.reduce((sum,c)=>sum+c.faceUVs.size,0),m.faces.length);assert.equal(new Set(s.packed.flatMap(c=>[...c.faceUVs.keys()])).size,m.faces.length);
+  assert.ok(s.metrics.validated);uv.validateHumanMetricOutput(s.packed,new Set(s.seams),s.human);
+  for(const ch of s.packed)for(const[f,t]of ch.faceUVs)for(let k=0;k<3;k++)for(let a=0;a<2;a++)assert.ok(Math.abs(t[k][a]-s.geometry.uv[f*6+k*2+a])<1e-6);
+  return{faces:m.faces.length,islands:s.packed.length,metrics:s.human.entries.filter(e=>e.metric).map(e=>({faces:e.faces,template:e.template,report:e.metric})),occupancy:s.metrics.occupancy};
+ };
+ await test('Mechanical assembly: real default load / optional merge retains rectangular bores',async()=>{s=await runGeometryJob(c,{mesh,edges:[],target:'generated',pipeline,config:{timeBudgetMs:240000}});const r=check(s);assert.equal(s.human.entries.filter(e=>e.metric?.mapping==='rectangle'&&e.faces===2304).length,3);return r;});
+ await writeFile(out+'/assembly-after.obj',core.meshToOBJ(uv.meshWithPreviewUV(mesh,s.packed)));
+ await test('Baseline button is the same production path as default load',async()=>{const r=await runGeometryJob(c,{mesh,edges:[],target:'generated',config:{postMerge:true,timeBudgetMs:240000}});assert.deepEqual(r.seams,s.seams);assert.deepEqual(r.packed.map(c=>[...c.faceUVs]),s.packed.map(c=>[...c.faceUVs]));return check(r);});
+ for(const target of ['repack','stitch','fill'])await test(target+' preserves repeated-profile metric and precise animation targets',async()=>{const r=await runGeometryJob(c,{mesh,edges:s.seams,target,seedCharts:s.packed,seedHuman:s.human,seedPeel:s.peel,seedPolicy:s.inputPolicy,config:{timeBudgetMs:240000,fillTimeBudgetMs:1000,fillRounds:1}});if(target==='fill')await writeFile(out+'/assembly-after-fill.obj',core.meshToOBJ(uv.meshWithPreviewUV(mesh,r.packed)));return check(r);});
+ await test('Automatic fill is run once, after metric solving, without UV taper',async()=>{let starts=0,last='';const r=await runGeometryJob(c,{mesh,edges:[],target:'generated',pipeline:{...pipeline,fill:true,fillBudgetSeconds:1,fillRounds:1},config:{timeBudgetMs:240000}},p=>{const id=p.pipeline?.steps.find(x=>x.state==='running')?.id;if(id&&id!==last){if(id==='fill')starts++;last=id;}});assert.equal(starts,1);return{...check(r),fillStarts:starts};});
+ await test('OBJ re-read has all source triangles and the same cut topology',async()=>{const obj=core.meshToOBJ(uv.meshWithPreviewUV(mesh,s.packed)),r=core.parseOBJ(obj);assert.deepEqual(r.positions,mesh.positions);assert.deepEqual(r.faces.map(f=>f.vertices),mesh.faces.map(f=>f.vertices));assert.equal(uv.buildCharts(r,chain.extractSeamEdgesFromUV(r)).length,s.packed.length);assert.equal(JSON.stringify(mesh),start);});
+ await test('Legacy option remains an explicit before-result control, not a fallback',async()=>{const r=await runGeometryJob(c,{mesh,edges:[],target:'generated',pipeline,config:{humanTemplates:{revolvedProfiles:false},timeBudgetMs:240000}});assert.equal(r.human.entries.filter(e=>e.metric).length,0);await writeFile(out+'/assembly-before.obj',core.meshToOBJ(uv.meshWithPreviewUV(mesh,r.packed)));return {islands:r.packed.length,firstMethod:r.diagnostics[0].method};});
+ const corset=core.geometryOnlyMesh((await loadVerifiedFixture(core,'examples/verified-models','Corset',{geometryOnly:true})).mesh);
+ await test('Verified Corset: previously spiralling shoulder rings now retain real inner holes',async()=>{const r=await runGeometryJob(c,{mesh:corset,edges:[],target:'generated',pipeline,config:{timeBudgetMs:240000}});const annuli=r.human.entries.filter(e=>e.metric?.mapping==='annulus'&&e.faces===288);assert.equal(annuli.length,3);for(const e of annuli){assert.equal(e.metricContracts[0].boundaryLoops,2);assert.equal(e.seamEdges.length,0);assert.equal(e.plannedPanels,1);const chart=r.packed.find(c=>c.faceUVs.has(e.panelFaces[0][0])),local=uv.cutLocalMesh(corset,e.panelFaces[0],new Set(r.seams));assert.equal(chart.faceUVs.size,288);assert.equal(local.boundaryLoops,2);}await writeFile(out+'/corset-after.obj',core.meshToOBJ(uv.meshWithPreviewUV(corset,r.packed)));return check(r,corset);});
+ report.passed=report.tests.length;
+}catch(e){report.error=String(e.stack??e);process.exitCode=1;console.error(e);}finally{await writeFile(out+'/report.json',JSON.stringify(report,null,2));await c.cleanup();}
