@@ -1,0 +1,28 @@
+{
+  "engine": "Shapely 2.1.2",
+  "areaTolerance": 1e-14,
+  "results": [
+    {
+      "file": "knot-single.obj",
+      "sha256": "cd872317fe9cf0241546ed25a6b3095252e3b67faf02a85685a61f71f568cf63",
+      "faces": 9216,
+      "sourcePositionsAndFaceOrderUnchanged": true,
+      "positiveOrientation": true,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "candidatePairs": 75752,
+      "occupancy": 0.04833220432321794
+    },
+    {
+      "file": "knot-five.obj",
+      "sha256": "44f50266bd47c760b01b875ae75f426ba42bdc8e476a22083dfbb398f16a1ed3",
+      "faces": 9216,
+      "sourcePositionsAndFaceOrderUnchanged": true,
+      "positiveOrientation": true,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "candidatePairs": 74632,
+      "occupancy": 0.7693721166421283
+    }
+  ]
+}

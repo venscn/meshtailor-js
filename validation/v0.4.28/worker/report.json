@@ -1,0 +1,104 @@
+{
+  "passed": 8,
+  "tests": [
+    {
+      "name": "Medium original/absent/random UV: actual Worker outputs are byte-identical",
+      "passed": true,
+      "detail": {
+        "signature": "b2eab4f987a4407f78e75871740fe051d416095432bf0695a3a32d8bb65c0618",
+        "occupancy": 0.048332204323216436
+      }
+    },
+    {
+      "name": "Explicit five sections pass production Worker and preserve their physical aspect",
+      "passed": true,
+      "detail": {
+        "status": "applied",
+        "sourceChart": 0,
+        "rings": 192,
+        "verticesPerRing": 24,
+        "panels": 5,
+        "requestedPanels": 5,
+        "budgetExpanded": false,
+        "faces": 9216,
+        "longitudinalEdges": 192,
+        "transverseEdges": 120,
+        "length": 5.1382611174742285,
+        "circumference": 0.2513506463882635,
+        "aspect": 20.442601566009554,
+        "ringFitError": 9.123712902577203e-15,
+        "maxStretch": 1.1468055387793743,
+        "minAreaDensity": 0.8872379720131937,
+        "maxAreaDensity": 1.1445717101384405,
+        "charts": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "note": "仅几何横截面与跨环邻接。宽＝平均周长，长＝中心轨迹弧长；矩形不是等距展开或正方形拉伸。"
+      }
+    },
+    {
+      "name": "repack: retains every strip, cut and post-packing rectangle contract",
+      "passed": true,
+      "detail": {
+        "occupancy": 0.7693721166421305
+      }
+    },
+    {
+      "name": "stitch: retains every strip, cut and post-packing rectangle contract",
+      "passed": true,
+      "detail": {
+        "occupancy": 0.7693721166421305
+      }
+    },
+    {
+      "name": "fill: retains every strip, cut and post-packing rectangle contract",
+      "passed": true,
+      "detail": {
+        "occupancy": 0.7693721166421156
+      }
+    },
+    {
+      "name": "Automatic load: fill executes exactly once after packing, before animation preparation",
+      "passed": true,
+      "detail": {
+        "steps": [
+          "input",
+          "parameterize",
+          "merge",
+          "pack",
+          "fill",
+          "correspondence",
+          "audit"
+        ],
+        "fillStarts": 1
+      }
+    },
+    {
+      "name": "Export/reload preserves source positions, face order and one/five island identities",
+      "passed": true,
+      "detail": [
+        {
+          "name": "single",
+          "sha256": "cd872317fe9cf0241546ed25a6b3095252e3b67faf02a85685a61f71f568cf63",
+          "islands": 1,
+          "occupancy": 0.048332204323216436
+        },
+        {
+          "name": "five",
+          "sha256": "44f50266bd47c760b01b875ae75f426ba42bdc8e476a22083dfbb398f16a1ed3",
+          "islands": 5,
+          "occupancy": 0.7693721166421263
+        }
+      ]
+    },
+    {
+      "name": "Source-derived edit requests and invalid tube controls are explicitly rejected",
+      "passed": true
+    }
+  ],
+  "scope": "Production Worker, not Three/React UI"
+}

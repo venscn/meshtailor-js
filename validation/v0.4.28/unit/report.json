@@ -1,0 +1,189 @@
+{
+  "passed": 21,
+  "tests": [
+    {
+      "name": "low: default geometry route yields rectangles, not tree/cotree ribbons",
+      "passed": true,
+      "detail": {
+        "faces": 2304,
+        "islands": 1,
+        "report": {
+          "status": "applied",
+          "sourceChart": 0,
+          "rings": 96,
+          "verticesPerRing": 12,
+          "panels": 1,
+          "requestedPanels": 1,
+          "budgetExpanded": false,
+          "faces": 2304,
+          "longitudinalEdges": 96,
+          "transverseEdges": 12,
+          "length": 5.136958719309793,
+          "circumference": 0.24933128960428486,
+          "aspect": 20.6029444898901,
+          "ringFitError": 8.038479138314524e-15,
+          "maxStretch": 1.1445116770146653,
+          "minAreaDensity": 0.8868693026914768,
+          "maxAreaDensity": 1.1426348744576846,
+          "charts": [
+            0
+          ],
+          "note": "仅几何横截面与跨环邻接。宽＝平均周长，长＝中心轨迹弧长；矩形不是等距展开或正方形拉伸。"
+        },
+        "occupancy": 0.04795605636754041
+      }
+    },
+    {
+      "name": "low: per-face metric does not collapse either direction",
+      "passed": true
+    },
+    {
+      "name": "low: explicit five panels retain all sides and produce a denser tile without shearing",
+      "passed": true,
+      "detail": {
+        "occupancy": 0.7753946843702537,
+        "panels": 5
+      }
+    },
+    {
+      "name": "medium: default geometry route yields rectangles, not tree/cotree ribbons",
+      "passed": true,
+      "detail": {
+        "faces": 9216,
+        "islands": 1,
+        "report": {
+          "status": "applied",
+          "sourceChart": 0,
+          "rings": 192,
+          "verticesPerRing": 24,
+          "panels": 1,
+          "requestedPanels": 1,
+          "budgetExpanded": false,
+          "faces": 9216,
+          "longitudinalEdges": 192,
+          "transverseEdges": 24,
+          "length": 5.1382611174742285,
+          "circumference": 0.2513506463882635,
+          "aspect": 20.442601566009554,
+          "ringFitError": 9.123712902577203e-15,
+          "maxStretch": 1.1468055387793743,
+          "minAreaDensity": 0.8873394929557404,
+          "maxAreaDensity": 1.1444338768123516,
+          "charts": [
+            0
+          ],
+          "note": "仅几何横截面与跨环邻接。宽＝平均周长，长＝中心轨迹弧长；矩形不是等距展开或正方形拉伸。"
+        },
+        "occupancy": 0.048332204323216436
+      }
+    },
+    {
+      "name": "medium: per-face metric does not collapse either direction",
+      "passed": true
+    },
+    {
+      "name": "medium: explicit five panels retain all sides and produce a denser tile without shearing",
+      "passed": true,
+      "detail": {
+        "occupancy": 0.7693721166421263,
+        "panels": 5
+      }
+    },
+    {
+      "name": "high: default geometry route yields rectangles, not tree/cotree ribbons",
+      "passed": true,
+      "detail": {
+        "faces": 36864,
+        "islands": 2,
+        "report": {
+          "status": "applied",
+          "sourceChart": 0,
+          "rings": 384,
+          "verticesPerRing": 48,
+          "panels": 2,
+          "requestedPanels": 1,
+          "budgetExpanded": true,
+          "faces": 36864,
+          "longitudinalEdges": 384,
+          "transverseEdges": 96,
+          "length": 5.13637896603748,
+          "circumference": 0.25174864013613046,
+          "aspect": 20.402807193953606,
+          "ringFitError": 1.1183904005152347e-14,
+          "maxStretch": 1.1475421508849548,
+          "minAreaDensity": 0.8875155433187403,
+          "maxAreaDensity": 1.14488263291321,
+          "charts": [
+            0,
+            1
+          ],
+          "note": "仅几何横截面与跨环邻接。宽＝平均周长，长＝中心轨迹弧长；矩形不是等距展开或正方形拉伸。"
+        },
+        "occupancy": 0.18997406672910808
+      }
+    },
+    {
+      "name": "high: per-face metric does not collapse either direction",
+      "passed": true
+    },
+    {
+      "name": "high: explicit five panels retain all sides and produce a denser tile without shearing",
+      "passed": true,
+      "detail": {
+        "occupancy": 0.7678786685109168,
+        "panels": 5
+      }
+    },
+    {
+      "name": "original, removed, randomized, and throwing UV getters yield the identical full result",
+      "passed": true
+    },
+    {
+      "name": "opposite quad diagonals retain tube coordinates from geometry",
+      "passed": true
+    },
+    {
+      "name": "mixed quad diagonals retain tube coordinates from geometry",
+      "passed": true
+    },
+    {
+      "name": "vertex/face reindexing and triangle cyclic permutations preserve rectangle recognition",
+      "passed": true
+    },
+    {
+      "name": "proper rotation/translation and uniform scale preserve measured aspect and valid cuts",
+      "passed": true
+    },
+    {
+      "name": "independent sweep: wavy=false, variable radius=false",
+      "passed": true,
+      "detail": 1.1114938209270773
+    },
+    {
+      "name": "independent sweep: wavy=true, variable radius=false",
+      "passed": true,
+      "detail": 1.1879528452912391
+    },
+    {
+      "name": "independent sweep: wavy=true, variable radius=true",
+      "passed": true,
+      "detail": 1.1991407816121216
+    },
+    {
+      "name": "open, nonmanifold, planar and noncircular gear inputs are not falsely forced to rectangles",
+      "passed": true
+    },
+    {
+      "name": "explicit cut constraints and disabled/strict policy are honored",
+      "passed": true
+    },
+    {
+      "name": "cancellation and parameter validation never return a partial tube",
+      "passed": true
+    },
+    {
+      "name": "rectangle output validation catches shear, collapsed side and a lost seam",
+      "passed": true
+    }
+  ]
+}

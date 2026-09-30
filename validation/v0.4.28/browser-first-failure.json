@@ -1,0 +1,5 @@
+{
+  "scope": "Actual offline DOM, production Worker, Chromium WebGL; not the React/Vite main entry.",
+  "tests": [],
+  "error": "Error: TypeError: Cannot set properties of null (setting 'textContent')\n    at selectionStatus (blob:null/ca967168-e945-4ebd-b66c-6e184891805b:72:34)\n    at solve (blob:null/ca967168-e945-4ebd-b66c-6e184891805b:136:91)\n    at load (blob:null/ca967168-e945-4ebd-b66c-6e184891805b:165:32)\n    at blob:null/ca967168-e945-4ebd-b66c-6e184891805b:242:7\n    at wait (file:///mnt/data/dev-0428/meshtailor-js/scripts/tube-browser-smoke.mjs:7:243)\n    at async file:///mnt/data/dev-0428/meshtailor-js/scripts/tube-browser-smoke.mjs:9:2"
+}

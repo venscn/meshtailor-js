@@ -1,0 +1,82 @@
+{
+  "scope": "Actual offline DOM, production Worker, Chromium WebGL; not the React/Vite main entry.",
+  "tests": [
+    {
+      "name": "Correct release and default rectangular tube controls",
+      "passed": true
+    },
+    {
+      "name": "Medium knot loads through actual geometry generation, with one rectangular strip",
+      "passed": true,
+      "detail": {
+        "status": "applied",
+        "sourceChart": 0,
+        "rings": 192,
+        "verticesPerRing": 24,
+        "panels": 1,
+        "requestedPanels": 1,
+        "budgetExpanded": false,
+        "faces": 9216,
+        "longitudinalEdges": 192,
+        "transverseEdges": 24,
+        "length": 5.138261117474225,
+        "circumference": 0.25135064638826343,
+        "aspect": 20.442601566009543,
+        "ringFitError": 9.123712902577203e-15,
+        "maxStretch": 1.1468055387793832,
+        "minAreaDensity": 0.8873394929557379,
+        "maxAreaDensity": 1.1444338768123543,
+        "charts": [
+          0
+        ],
+        "note": "仅几何横截面与跨环邻接。宽＝平均周长，长＝中心轨迹弧长；矩形不是等距展开或正方形拉伸。"
+      }
+    },
+    {
+      "name": "Inspector shows actual tube recognition and measured aspect; first pick is island only",
+      "passed": true,
+      "detail": "闭合管身 · 矩形条带。当前片长/宽 20.44:1，来自中心轨迹弧长与横截面周长，不拉成正方形。192 个几何截面，1 片；最大方向拉伸比 1.147，面积密度 0.887–1.144 倍各片平均值。纵向和横向裁切均为真实网格边，原 UV 使用 0。"
+    },
+    {
+      "name": "Generating again is deterministic and preserves real cuts",
+      "passed": true
+    },
+    {
+      "name": "Setting five panels does not change the existing snapshot until regeneration",
+      "passed": true
+    },
+    {
+      "name": "Explicit five transverse sections generate five complete metric rectangles",
+      "passed": true,
+      "detail": {
+        "occupancy": 0.7693730250340554,
+        "boxOccupancy": 0.7693730250340575,
+        "padding": 0.003,
+        "validated": true,
+        "elapsedMs": 1894.3000000000466,
+        "packingMethod": "maxrects"
+      }
+    },
+    {
+      "name": "Repack/stitch do not erase transverse/longitudinal cuts",
+      "passed": true
+    },
+    {
+      "name": "Filling retains rectangular shape, length ratio and geometry identity",
+      "passed": true
+    },
+    {
+      "name": "All geometry UV targets are the same submitted face-corner UV data",
+      "passed": true
+    },
+    {
+      "name": "Playback rate and pause do not move the free camera",
+      "passed": true
+    },
+    {
+      "name": "No DOM/Worker/WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 11
+}
