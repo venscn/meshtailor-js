@@ -131,6 +131,13 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     let pendingSlits:string[]=structure?.openingEdges??[];
     let local=cutLocalMesh(mesh,faces,new Set([...effective,...pendingSlits]));
     if(pendingSlits.length){if(!local.disk)throw Error('Planned shell opening no longer defines a disk.');event('structured-opening',structure?.pairedOpening?'Geometric reflection-guided opening validated on real target edges.':'Single continuous opening of a return-wall annulus.');}
+    const geometryReflection=structure?.surfaceCorrespondence;
+    const localFaceIds=new Map(local.sourceFaces.map((f,i)=>[f,i]));
+    const recognized=geometryReflection?{...geometryReflection,pairs:geometryReflection.pairs.map(p=>{
+      const a=localFaceIds.get(p.a.face),b=localFaceIds.get(p.b.face);
+      if(a===undefined||b===undefined)throw Error('Recognized surface correspondence lost its source faces.');
+      return {...p,a:{...p.a,face:a},b:{...p.b,face:b}};
+    })}:undefined;
     const planar=opts.uvObjective==='paint'&&opts.method==='auto'&&planarShapeCandidate(local)!==null;
     let p:Parameterization|undefined;
     // A hole is not, by itself, a reason to cut a visible panel into strips.
@@ -159,7 +166,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
     }
     // Catch this chart's numerical failure only. Never catch a child recursion
     // after it has appended solved siblings (that could duplicate source faces).
-    try{p??=parameterizeChart(local,solveOptions,work);}catch(error){
+    try{p??=parameterizeChart(local,solveOptions,work,recognized);}catch(error){
       rethrowUVStop(error);
       if(structure?.kind==='closed-shell'||structure?.kind==='symmetric-sheet')throw Error('Complete skin/wall solve rejected; protected holes will not be opened into the outside boundary. '+String(error));
       if(!opts.autoCut||faces.length<2||depth>(opts.peelMaxDepth??20))throw error;
@@ -167,7 +174,7 @@ export function unwrapMesh(input:MeshData,seams:ReadonlySet<string>,options:Part
       record('solver-invalid',faces.length,sourceChart,depth,String(error));
       partitions++;for(const fs of partition(Math.max(1,Math.floor(faces.length/2)),true))solve(fs,sourceChart,depth+1);return;
     }
-      if(structure?.kind==='symmetric-sheet'&&p.symmetry?.status==='rejected')throw Error('Recognized symmetric sheet did not satisfy UV symmetry constraints.');
+      if(structure?.kind==='symmetric-sheet'&&(!p.symmetryPairs||p.symmetry?.status==='rejected'))throw Error('Recognized symmetric sheet did not satisfy UV symmetry constraints.');
       let structuralRelaxation:ChartDiagnostic['structuralRelaxation'];
       // Conformal validity alone does not preserve the relative size of a
       // shoulder versus its waist. Balance the intrinsic 3D metric of verified

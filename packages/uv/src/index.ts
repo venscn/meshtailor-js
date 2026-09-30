@@ -58,3 +58,7 @@ export * from './surface-reflection.js';
 export * from './symmetry-parameterization.js';
 export * from './surface-symmetry-output.js';
 export * from './symmetric-sheets.js';
+
+export * from './layered-shell.js';
+export * from './longitudinal-panels.js';
+export * from './intrinsic-strip.js';

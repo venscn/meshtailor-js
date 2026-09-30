@@ -1,4 +1,5 @@
-import {detectSurfaceReflection,type SurfaceReflectionReport} from './surface-reflection.js';
+import {intrinsicStripSeed} from './intrinsic-strip.js';
+import {detectSurfaceReflection,type SurfaceReflectionReport,type SurfaceReflection} from './surface-reflection.js';
 import {relaxSurfaceSymmetry,type UVSymmetryReport} from './symmetry-parameterization.js';
 import {featureContract,type FeatureContractReport} from './feature-contract.js';
 import {simpleUVBoundary} from './boundary-guard.js';
@@ -10,7 +11,7 @@ import type { Vec2,Vec3 } from '@meshtailor/mesh-core';
 import type { CutMesh } from './cut-topology.js';
 import { checkUVTriangles, type UVQuality, signedArea2 } from './uv-quality.js';
 export interface SolverOptions {surfaceSymmetry?:boolean;symmetryTolerance?:number;symmetryStrength?:number;symmetryIterations?:number;symmetryPlane?:{normal:Vec3;offset:number}; featureFrame?:ProjectionFrame; projectionSeed?:boolean; iterations:number; tolerance:number; method:'auto'|'lscm'|'tutte'; uvObjective?:'paint'|'compact'; paintIterations?:number }
-export interface Parameterization {symmetryPairs?:import('./surface-reflection.js').SurfacePair[];symmetry?:UVSymmetryReport; feature?:FeatureContractReport; boundaryValid?:boolean; uv:Vec2[]; method:'lscm'|'tutte'|'planar-shape'|'arap-free'|'projected-free'|'feature-constrained'|'symmetry-constrained'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
+export interface Parameterization {symmetryPairs?:import('./surface-reflection.js').SurfacePair[];symmetry?:UVSymmetryReport; feature?:FeatureContractReport; boundaryValid?:boolean; uv:Vec2[]; method:'intrinsic-strip'|'lscm'|'tutte'|'planar-shape'|'arap-free'|'projected-free'|'feature-constrained'|'symmetry-constrained'; quality:UVQuality; iterations:number; residual:number; fallbackReason?:string }
 export function triangleArea(a:Vec3,b:Vec3,c:Vec3):number{const u=b.map((x,i)=>x-a[i]!),v=c.map((x,i)=>x-a[i]!);return Math.hypot(u[1]!*v[2]!-u[2]!*v[1]!,u[2]!*v[0]!-u[0]!*v[2]!,u[0]!*v[1]!-u[1]!*v[0]!)*.5;}
 type Row={ids:number[];values:number[]};
 /** Matrix-free, diagonally preconditioned conjugate gradients on A^T A.
@@ -121,6 +122,10 @@ function parameterizeUnconstrained(mesh:CutMesh,options:Partial<SolverOptions>={
     const uv=planarShapeCandidate(mesh);
     if(uv){const result=finish({uv,iterations:0,residual:0},'planar-shape');if(result.quality.valid)return result;}
   }
+  if(opts.uvObjective==='paint'&&opts.method==='auto'){
+    const uv=intrinsicStripSeed(mesh,work);
+    if(uv){const r=finish({uv,iterations:0,residual:0},'intrinsic-strip');if(r.quality.valid&&areaNotCollapsed(mesh,r.uv))return r;}
+  }
   if(opts.featureFrame&&opts.uvObjective==='paint'&&opts.method==='auto'){
     const seed=finish({uv:projectFrame(mesh.positions,opts.featureFrame),iterations:0,residual:0},'feature-constrained');
     if(!seed.quality.valid)throw Error('Geometric feature reference is not injective; do not erase its boundary.');
@@ -177,14 +182,17 @@ function parameterizeUnconstrained(mesh:CutMesh,options:Partial<SolverOptions>={
 
 /** Recognition is run on the cut surface before selecting its UV candidate.
  * Surface reflection remains separate from the old exact-cell grouping map. */
-export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={},work?:UVWork):Parameterization {
+export function parameterizeChart(mesh:CutMesh,options:Partial<SolverOptions>={},work?:UVWork,recognized?:SurfaceReflection):Parameterization {
   if(options.surfaceSymmetry!==undefined&&typeof options.surfaceSymmetry!=='boolean')throw Error('surfaceSymmetry must be boolean');
   const enabled=options.surfaceSymmetry!==false&&(options.uvObjective??'paint')==='paint'&&(options.method??'auto')==='auto';
   // Coincident cut lips require a branch-aware correspondence. Never glue them
   // through nearest-surface matching; nonmatching deliberate slits are reported
   // separately by the group planner rather than hallucinating a UV symmetry.
   const unslit=new Set(mesh.sourceVertices).size===mesh.sourceVertices.length;
-  const reflection=enabled&&unslit&&mesh.boundaryLoops>0?detectSurfaceReflection(mesh,{tolerance:options.symmetryTolerance??.018,fixedPlane:options.symmetryPlane,minimumCoverage:mesh.boundaryLoops>1?.88:.9},work):undefined;
+  // Reuse the geometry planner's actual surface quadrature after remapping
+  // face IDs. Sampling the same surface again in a different BFS face order can
+  // straddle a coverage threshold and silently drop a recognized constraint.
+  const reflection=enabled&&unslit&&mesh.boundaryLoops>0?(recognized??detectSurfaceReflection(mesh,{tolerance:options.symmetryTolerance??.018,fixedPlane:options.symmetryPlane},work)):undefined;
   const base=parameterizeUnconstrained(mesh,options,work);
   if(!reflection)return base;
   try {
