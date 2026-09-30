@@ -1,0 +1,27 @@
+{
+  "scope": "Real offline DOM + production Worker/WebGL. Not the complete React/Three importer.",
+  "tests": [
+    {
+      "name": "Profile setting is enabled on actual load",
+      "passed": true
+    },
+    {
+      "name": "Medium mechanical assembly through production load/solve",
+      "passed": true,
+      "detail": {
+        "islands": 16
+      }
+    },
+    {
+      "name": "Select the bore: whole rectangle report, no automatic triangle selection",
+      "passed": true
+    },
+    {
+      "name": "Current packed coordinates satisfy the full profile contract",
+      "passed": true
+    }
+  ],
+  "passed": 4,
+  "complete": false,
+  "error": "CDP stopped replying during the legacy-toggle check, while full-model QA was running concurrently. Aborted; not counted as a completed browser run. Serial retry required."
+}

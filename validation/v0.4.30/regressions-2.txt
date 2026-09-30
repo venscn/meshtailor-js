@@ -1,0 +1,59 @@
+PASS Whole base: 72 cap / 48 complete rim / 72 cap; no half-rims
+PASS Tangent side belt is one annulus, caps are whole disks
+PASS Actual generator: three charts, one intact long strip, all faces
+PASS Rim was cut once, not sliced along its circumference
+PASS All UV triangles valid and 3D untouched
+PASS Removing one side strip is rejected
+PASS Attaching side faces back to a cap is rejected
+PASS Independent arbitrary rotation and scale preserve rim membership
+PASS Original UV getters cannot affect cap/rim planning
+PASS Explicit user cut blocks automatic closed-solid regrouping
+PASS Smooth spherical shell is not assigned an arbitrary cap belt
+PASS Two-hole gear surfaces are not treated as solid caps
+PASS low: default geometry route yields rectangles, not tree/cotree ribbons
+PASS low: per-face metric does not collapse either direction
+PASS low: explicit five panels retain all sides and produce a denser tile without shearing
+PASS medium: default geometry route yields rectangles, not tree/cotree ribbons
+PASS medium: per-face metric does not collapse either direction
+PASS medium: explicit five panels retain all sides and produce a denser tile without shearing
+PASS high: default geometry route yields rectangles, not tree/cotree ribbons
+PASS high: per-face metric does not collapse either direction
+PASS high: explicit five panels retain all sides and produce a denser tile without shearing
+PASS original, removed, randomized, and throwing UV getters yield the identical full result
+PASS opposite quad diagonals retain tube coordinates from geometry
+PASS mixed quad diagonals retain tube coordinates from geometry
+PASS vertex/face reindexing and triangle cyclic permutations preserve rectangle recognition
+PASS proper rotation/translation and uniform scale preserve measured aspect and valid cuts
+PASS independent sweep: wavy=false, variable radius=false
+PASS independent sweep: wavy=true, variable radius=false
+PASS independent sweep: wavy=true, variable radius=true
+PASS open, nonmanifold, planar and noncircular gear inputs are not falsely forced to rectangles
+PASS explicit cut constraints and disabled/strict policy are honored
+PASS cancellation and parameter validation never return a partial tube
+PASS rectangle output validation catches shear, collapsed side and a lost seam
+PASS ALL 21
+PASS low: structured meridians are used before solver-budget partition
+PASS low: real seam edges keep a constant longitudinal plane
+PASS low: all faces, holes and input geometry retained
+PASS low: per-panel limit adds only ordered meridians
+PASS low: model labels and poisoned UV cannot affect the result
+PASS medium: structured meridians are used before solver-budget partition
+PASS medium: real seam edges keep a constant longitudinal plane
+PASS medium: all faces, holes and input geometry retained
+PASS medium: per-panel limit adds only ordered meridians
+PASS medium: model labels and poisoned UV cannot affect the result
+PASS Rigid rotation and uniform scale retain continuous two-panel plan
+PASS Opposite quad diagonals do not turn longitudinal cuts into a zipper
+PASS Recognize surface symmetry before splitting the whole closed component
+PASS Every face belongs to one complete open sheet
+PASS Default geometry generation commits two symmetry-verified sheets
+PASS Later packing and fill must retain each verified reflection
+PASS Asymmetric post-solve edit is rejected, not hidden in packing
+PASS A missing whole side is rejected
+PASS No geometry changed
+PASS Poisoned source UV, indices and names cannot change generated UV
+PASS Unseen closed shell with 5/13 unequal side subdivisions uses surface, not triangle identity
+PASS Rotated/scaled/renamed closed shell keeps the same face grouping
+PASS Explicit cuts disable the closed-sheet assumption
+PASS Known planar gear keeps holes and tooth outline
+PASSED 12

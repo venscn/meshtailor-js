@@ -1,0 +1,809 @@
+{
+  "tests": [
+    {
+      "name": "Mechanical assembly: real default load / optional merge retains rectangular bores",
+      "detail": {
+        "faces": 22528,
+        "islands": 16,
+        "metrics": [
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.061970249394247015,
+              "radiusRange": [
+                0.0782881002087682,
+                0.08698677800974235
+              ],
+              "referenceRadius": 0.08010619421501641,
+              "conformalHeight": 0.7736012177524008,
+              "radialResidual": 6.56161919382656e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0295767243796272,
+              "stripLength": 0.5033220625058655,
+              "stripWidth": 0.061970249394247015,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.059141065670891606,
+              "radiusRange": [
+                0.05636743215031329,
+                0.06263048016701446
+              ],
+              "referenceRadius": 0.05759453624886256,
+              "conformalHeight": 1.0268520162285288,
+              "radialResidual": 8.142385225736067e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0288824886781058,
+              "stripLength": 0.3618771439326753,
+              "stripWidth": 0.059141065670891606,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.05727974171385322,
+              "radiusRange": [
+                0.03757828810020867,
+                0.04175365344467627
+              ],
+              "referenceRadius": 0.038357577790583,
+              "conformalHeight": 1.4933096669080006,
+              "radialResidual": 6.0947641886184345e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0282627373753335,
+              "stripLength": 0.2410077691927891,
+              "stripWidth": 0.05727974171385322,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.2833705091679287,
+              "radiusRange": [
+                0.046972860125260994,
+                0.06263048016701458
+              ],
+              "referenceRadius": 0.058793883124334416,
+              "conformalHeight": 4.819727735429053,
+              "radialResidual": 4.364659455210406e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0501352892471312,
+              "stripLength": 0.3694128625988518,
+              "stripWidth": 0.2833705091679287,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.28337050916792866,
+              "radiusRange": [
+                0.0313152400835073,
+                0.046972860125261
+              ],
+              "referenceRadius": 0.0345456055182211,
+              "conformalHeight": 8.202794680164594,
+              "radialResidual": 5.8810906790865655e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0516388595041621,
+              "stripLength": 0.21705644101970883,
+              "stripWidth": 0.28337050916792866,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          }
+        ],
+        "occupancy": 0.4132198088622224
+      },
+      "passed": true
+    },
+    {
+      "name": "Baseline button is the same production path as default load",
+      "detail": {
+        "faces": 22528,
+        "islands": 16,
+        "metrics": [
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.061970249394247015,
+              "radiusRange": [
+                0.0782881002087682,
+                0.08698677800974235
+              ],
+              "referenceRadius": 0.08010619421501641,
+              "conformalHeight": 0.7736012177524008,
+              "radialResidual": 6.56161919382656e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0295767243796272,
+              "stripLength": 0.5033220625058655,
+              "stripWidth": 0.061970249394247015,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.059141065670891606,
+              "radiusRange": [
+                0.05636743215031329,
+                0.06263048016701446
+              ],
+              "referenceRadius": 0.05759453624886256,
+              "conformalHeight": 1.0268520162285288,
+              "radialResidual": 8.142385225736067e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0288824886781058,
+              "stripLength": 0.3618771439326753,
+              "stripWidth": 0.059141065670891606,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.05727974171385322,
+              "radiusRange": [
+                0.03757828810020867,
+                0.04175365344467627
+              ],
+              "referenceRadius": 0.038357577790583,
+              "conformalHeight": 1.4933096669080006,
+              "radialResidual": 6.0947641886184345e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0282627373753335,
+              "stripLength": 0.2410077691927891,
+              "stripWidth": 0.05727974171385322,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.2833705091679287,
+              "radiusRange": [
+                0.046972860125260994,
+                0.06263048016701458
+              ],
+              "referenceRadius": 0.058793883124334416,
+              "conformalHeight": 4.819727735429053,
+              "radialResidual": 4.364659455210406e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0501352892471312,
+              "stripLength": 0.3694128625988518,
+              "stripWidth": 0.2833705091679287,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.28337050916792866,
+              "radiusRange": [
+                0.0313152400835073,
+                0.046972860125261
+              ],
+              "referenceRadius": 0.0345456055182211,
+              "conformalHeight": 8.202794680164594,
+              "radialResidual": 5.8810906790865655e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0516388595041621,
+              "stripLength": 0.21705644101970883,
+              "stripWidth": 0.28337050916792866,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          }
+        ],
+        "occupancy": 0.4132198088622224
+      },
+      "passed": true
+    },
+    {
+      "name": "repack preserves repeated-profile metric and precise animation targets",
+      "detail": {
+        "faces": 22528,
+        "islands": 16,
+        "metrics": [
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.061970249394247015,
+              "radiusRange": [
+                0.0782881002087682,
+                0.08698677800974235
+              ],
+              "referenceRadius": 0.08010619421501641,
+              "conformalHeight": 0.7736012177524008,
+              "radialResidual": 6.56161919382656e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0295767243796272,
+              "stripLength": 0.5033220625058655,
+              "stripWidth": 0.061970249394247015,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.059141065670891606,
+              "radiusRange": [
+                0.05636743215031329,
+                0.06263048016701446
+              ],
+              "referenceRadius": 0.05759453624886256,
+              "conformalHeight": 1.0268520162285288,
+              "radialResidual": 8.142385225736067e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0288824886781058,
+              "stripLength": 0.3618771439326753,
+              "stripWidth": 0.059141065670891606,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.05727974171385322,
+              "radiusRange": [
+                0.03757828810020867,
+                0.04175365344467627
+              ],
+              "referenceRadius": 0.038357577790583,
+              "conformalHeight": 1.4933096669080006,
+              "radialResidual": 6.0947641886184345e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0282627373753335,
+              "stripLength": 0.2410077691927891,
+              "stripWidth": 0.05727974171385322,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.2833705091679287,
+              "radiusRange": [
+                0.046972860125260994,
+                0.06263048016701458
+              ],
+              "referenceRadius": 0.058793883124334416,
+              "conformalHeight": 4.819727735429053,
+              "radialResidual": 4.364659455210406e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0501352892471312,
+              "stripLength": 0.3694128625988518,
+              "stripWidth": 0.2833705091679287,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.28337050916792866,
+              "radiusRange": [
+                0.0313152400835073,
+                0.046972860125261
+              ],
+              "referenceRadius": 0.0345456055182211,
+              "conformalHeight": 8.202794680164594,
+              "radialResidual": 5.8810906790865655e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0516388595041621,
+              "stripLength": 0.21705644101970883,
+              "stripWidth": 0.28337050916792866,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          }
+        ],
+        "occupancy": 0.413219808862223
+      },
+      "passed": true
+    },
+    {
+      "name": "stitch preserves repeated-profile metric and precise animation targets",
+      "detail": {
+        "faces": 22528,
+        "islands": 16,
+        "metrics": [
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.061970249394247015,
+              "radiusRange": [
+                0.0782881002087682,
+                0.08698677800974235
+              ],
+              "referenceRadius": 0.08010619421501641,
+              "conformalHeight": 0.7736012177524008,
+              "radialResidual": 6.56161919382656e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0295767243796272,
+              "stripLength": 0.5033220625058655,
+              "stripWidth": 0.061970249394247015,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.059141065670891606,
+              "radiusRange": [
+                0.05636743215031329,
+                0.06263048016701446
+              ],
+              "referenceRadius": 0.05759453624886256,
+              "conformalHeight": 1.0268520162285288,
+              "radialResidual": 8.142385225736067e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0288824886781058,
+              "stripLength": 0.3618771439326753,
+              "stripWidth": 0.059141065670891606,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.05727974171385322,
+              "radiusRange": [
+                0.03757828810020867,
+                0.04175365344467627
+              ],
+              "referenceRadius": 0.038357577790583,
+              "conformalHeight": 1.4933096669080006,
+              "radialResidual": 6.0947641886184345e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0282627373753335,
+              "stripLength": 0.2410077691927891,
+              "stripWidth": 0.05727974171385322,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.2833705091679287,
+              "radiusRange": [
+                0.046972860125260994,
+                0.06263048016701458
+              ],
+              "referenceRadius": 0.058793883124334416,
+              "conformalHeight": 4.819727735429053,
+              "radialResidual": 4.364659455210406e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0501352892471312,
+              "stripLength": 0.3694128625988518,
+              "stripWidth": 0.2833705091679287,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.28337050916792866,
+              "radiusRange": [
+                0.0313152400835073,
+                0.046972860125261
+              ],
+              "referenceRadius": 0.0345456055182211,
+              "conformalHeight": 8.202794680164594,
+              "radialResidual": 5.8810906790865655e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0516388595041621,
+              "stripLength": 0.21705644101970883,
+              "stripWidth": 0.28337050916792866,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          }
+        ],
+        "occupancy": 0.42549168342404986
+      },
+      "passed": true
+    },
+    {
+      "name": "fill preserves repeated-profile metric and precise animation targets",
+      "detail": {
+        "faces": 22528,
+        "islands": 16,
+        "metrics": [
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.061970249394247015,
+              "radiusRange": [
+                0.0782881002087682,
+                0.08698677800974235
+              ],
+              "referenceRadius": 0.08010619421501641,
+              "conformalHeight": 0.7736012177524008,
+              "radialResidual": 6.56161919382656e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0295767243796272,
+              "stripLength": 0.5033220625058655,
+              "stripWidth": 0.061970249394247015,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.059141065670891606,
+              "radiusRange": [
+                0.05636743215031329,
+                0.06263048016701446
+              ],
+              "referenceRadius": 0.05759453624886256,
+              "conformalHeight": 1.0268520162285288,
+              "radialResidual": 8.142385225736067e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0288824886781058,
+              "stripLength": 0.3618771439326753,
+              "stripWidth": 0.059141065670891606,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.05727974171385322,
+              "radiusRange": [
+                0.03757828810020867,
+                0.04175365344467627
+              ],
+              "referenceRadius": 0.038357577790583,
+              "conformalHeight": 1.4933096669080006,
+              "radialResidual": 6.0947641886184345e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0282627373753335,
+              "stripLength": 0.2410077691927891,
+              "stripWidth": 0.05727974171385322,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.2833705091679287,
+              "radiusRange": [
+                0.046972860125260994,
+                0.06263048016701458
+              ],
+              "referenceRadius": 0.058793883124334416,
+              "conformalHeight": 4.819727735429053,
+              "radialResidual": 4.364659455210406e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0501352892471312,
+              "stripLength": 0.3694128625988518,
+              "stripWidth": 0.2833705091679287,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.28337050916792866,
+              "radiusRange": [
+                0.0313152400835073,
+                0.046972860125261
+              ],
+              "referenceRadius": 0.0345456055182211,
+              "conformalHeight": 8.202794680164594,
+              "radialResidual": 5.8810906790865655e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0516388595041621,
+              "stripLength": 0.21705644101970883,
+              "stripWidth": 0.28337050916792866,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          }
+        ],
+        "occupancy": 0.4925101160932162
+      },
+      "passed": true
+    },
+    {
+      "name": "Automatic fill is run once, after metric solving, without UV taper",
+      "detail": {
+        "faces": 22528,
+        "islands": 16,
+        "metrics": [
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.061970249394247015,
+              "radiusRange": [
+                0.0782881002087682,
+                0.08698677800974235
+              ],
+              "referenceRadius": 0.08010619421501641,
+              "conformalHeight": 0.7736012177524008,
+              "radialResidual": 6.56161919382656e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0295767243796272,
+              "stripLength": 0.5033220625058655,
+              "stripWidth": 0.061970249394247015,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.059141065670891606,
+              "radiusRange": [
+                0.05636743215031329,
+                0.06263048016701446
+              ],
+              "referenceRadius": 0.05759453624886256,
+              "conformalHeight": 1.0268520162285288,
+              "radialResidual": 8.142385225736067e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0288824886781058,
+              "stripLength": 0.3618771439326753,
+              "stripWidth": 0.059141065670891606,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2304,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 7,
+              "sourceMeridianLength": 0.05727974171385322,
+              "radiusRange": [
+                0.03757828810020867,
+                0.04175365344467627
+              ],
+              "referenceRadius": 0.038357577790583,
+              "conformalHeight": 1.4933096669080006,
+              "radialResidual": 6.0947641886184345e-15,
+              "seamSnapDegrees": -6.492229350048602e-14,
+              "maxStretch": 1.0282627373753335,
+              "stripLength": 0.2410077691927891,
+              "stripWidth": 0.05727974171385322,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.2833705091679287,
+              "radiusRange": [
+                0.046972860125260994,
+                0.06263048016701458
+              ],
+              "referenceRadius": 0.058793883124334416,
+              "conformalHeight": 4.819727735429053,
+              "radialResidual": 4.364659455210406e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0501352892471312,
+              "stripLength": 0.3694128625988518,
+              "stripWidth": 0.2833705091679287,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 2048,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 17,
+              "sourceMeridianLength": 0.28337050916792866,
+              "radiusRange": [
+                0.0313152400835073,
+                0.046972860125261
+              ],
+              "referenceRadius": 0.0345456055182211,
+              "conformalHeight": 8.202794680164594,
+              "radialResidual": 5.8810906790865655e-15,
+              "seamSnapDegrees": 5.088887490341627e-14,
+              "maxStretch": 1.0516388595041621,
+              "stripLength": 0.21705644101970883,
+              "stripWidth": 0.28337050916792866,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          }
+        ],
+        "occupancy": 0.4925101160932162,
+        "fillStarts": 1
+      },
+      "passed": true
+    },
+    {
+      "name": "OBJ re-read has all source triangles and the same cut topology",
+      "passed": true
+    },
+    {
+      "name": "Legacy option remains an explicit before-result control, not a fallback",
+      "detail": {
+        "islands": 16,
+        "firstMethod": "human-contour-band"
+      },
+      "passed": true
+    },
+    {
+      "name": "Verified Corset: previously spiralling shoulder rings now retain real inner holes",
+      "detail": {
+        "faces": 18324,
+        "islands": 80,
+        "metrics": [
+          {
+            "faces": 48,
+            "template": "revolved-strip",
+            "report": {
+              "mapping": "rectangle",
+              "sections": 2,
+              "sourceMeridianLength": 0.009011172031328448,
+              "radiusRange": [
+                0.33669351047129153,
+                0.336693511973646
+              ],
+              "referenceRadius": 0.33669351122246877,
+              "conformalHeight": 0.026763723478396218,
+              "radialResidual": 2.9552367825951214e-7,
+              "seamSnapDegrees": 0.0000055233525320514154,
+              "maxStretch": 1.0028617736702623,
+              "stripLength": 2.115507722735721,
+              "stripWidth": 0.009011172031328448,
+              "note": "Geometry-derived repeated meridian; equal width at every azimuth. Chamfers retained; metric ds/r, no forced bounding-box stretch."
+            }
+          },
+          {
+            "faces": 288,
+            "template": "revolved-annulus",
+            "report": {
+              "mapping": "annulus",
+              "sections": 10,
+              "sourceMeridianLength": 0.0755052891759364,
+              "radiusRange": [
+                0.011714622031588838,
+                0.054444088319787955
+              ],
+              "referenceRadius": 0.027815095792472645,
+              "conformalHeight": 2.7145435607800326,
+              "radialResidual": 0.0000014304039346248187,
+              "seamSnapDegrees": -0.03533738100965853,
+              "maxStretch": 2.2508379736454973,
+              "innerRadius": 0.011714622031588838,
+              "outerRadius": 0.08721991120752523,
+              "note": "Hole-preserving radial meridian length; no radial slit. Full triangle distortion and boundary checks required; not a claim of zero distortion."
+            }
+          },
+          {
+            "faces": 288,
+            "template": "revolved-annulus",
+            "report": {
+              "mapping": "annulus",
+              "sections": 10,
+              "sourceMeridianLength": 0.07550528169444982,
+              "radiusRange": [
+                0.011714622033127028,
+                0.05444408900679374
+              ],
+              "referenceRadius": 0.027815095697673063,
+              "conformalHeight": 2.7145433010595896,
+              "radialResidual": 0.0000013973859143212092,
+              "seamSnapDegrees": -0.03521561907216739,
+              "maxStretch": 2.250835758096069,
+              "innerRadius": 0.011714622033127028,
+              "outerRadius": 0.08721990372757685,
+              "note": "Hole-preserving radial meridian length; no radial slit. Full triangle distortion and boundary checks required; not a claim of zero distortion."
+            }
+          },
+          {
+            "faces": 288,
+            "template": "revolved-annulus",
+            "report": {
+              "mapping": "annulus",
+              "sections": 10,
+              "sourceMeridianLength": 0.07414497867725556,
+              "radiusRange": [
+                0.011714621355758703,
+                0.05444408442932519
+              ],
+              "referenceRadius": 0.027567716805424376,
+              "conformalHeight": 2.689558195935413,
+              "radialResidual": 5.901697896383654e-7,
+              "seamSnapDegrees": -0.00001288895094784329,
+              "maxStretch": 2.2508264503796696,
+              "innerRadius": 0.011714621355758703,
+              "outerRadius": 0.08585960003301427,
+              "note": "Hole-preserving radial meridian length; no radial slit. Full triangle distortion and boundary checks required; not a claim of zero distortion."
+            }
+          }
+        ],
+        "occupancy": 0.510402061561831
+      },
+      "passed": true
+    }
+  ],
+  "passed": 9
+}

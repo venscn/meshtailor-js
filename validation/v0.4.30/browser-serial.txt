@@ -1,0 +1,12 @@
+PASS Profile setting is enabled on actual load
+PASS Medium mechanical assembly through production load/solve
+PASS Select the bore: whole rectangle report, no automatic triangle selection
+PASS Current packed coordinates satisfy the full profile contract
+PASS Actual checkbox permits a legacy control, not a hidden data fallback
+PASS Re-enable and regenerate restores metric generation
+PASS Repacking cannot reintroduce taper
+PASS Actual fill keeps rectangular shape and exact animation target coordinates
+PASS Playback keeps manual camera at four times speed
+PASS Correct Corset fixture is also solved, not substituted by a demo ring
+PASS The actual shoulder annulus has two loops, no radial slit, all 288 faces
+PASS No DOM, Worker or WebGL errors

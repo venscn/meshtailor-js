@@ -1,0 +1,9 @@
+PASS Mechanical assembly: real default load / optional merge retains rectangular bores
+PASS Baseline button is the same production path as default load
+PASS repack preserves repeated-profile metric and precise animation targets
+PASS stitch preserves repeated-profile metric and precise animation targets
+PASS fill preserves repeated-profile metric and precise animation targets
+PASS Automatic fill is run once, after metric solving, without UV taper
+PASS OBJ re-read has all source triangles and the same cut topology
+PASS Legacy option remains an explicit before-result control, not a fallback
+PASS Verified Corset: previously spiralling shoulder rings now retain real inner holes

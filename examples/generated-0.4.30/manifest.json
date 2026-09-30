@@ -1,0 +1,21 @@
+{
+  "version": "0.4.30",
+  "scope": "Actual generated reference coordinates, not runtime fallback or authored UV. Profiles-off is an explicit legacy control.",
+  "files": [
+    {
+      "file": "Assembly-profile-off.obj",
+      "bytes": 1866370,
+      "sha256": "9d9e650077866688a2d2cd10e19b0362ef9d4a77064ebe27063ce94fcabe761f"
+    },
+    {
+      "file": "Assembly-profile-on.obj",
+      "bytes": 1866536,
+      "sha256": "ebd828d8a2a1df3b25eae47a785ecbbe7e187e7fc2b4ca1d6569b82d7f896d35"
+    },
+    {
+      "file": "Corset-profile-on.obj",
+      "bytes": 1693142,
+      "sha256": "1bb542bd9471c7834a4f6646ae6ac88f0249d8002e1c7a918f8a3f3f871efec9"
+    }
+  ]
+}

@@ -39,3 +39,6 @@ results/v0.4.18/
 
 # Current continuity reference output; compressed sources are versioned.
 /results/v0.4.29/
+
+# Optional metric-profile reference results; compressed originals are tracked.
+/results/v0.4.30/

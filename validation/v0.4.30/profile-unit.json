@@ -1,0 +1,182 @@
+{
+  "passed": 22,
+  "tests": [
+    {
+      "name": "beveled bore: identical meridians have equal UV widths",
+      "passed": true,
+      "detail": {
+        "crossSections": 192,
+        "sourceWidthRange": [
+          0.35620499351813306,
+          0.35620499351813306
+        ],
+        "generatedWidthRatio": 1,
+        "method": "human-profile-strip"
+      }
+    },
+    {
+      "name": "straight cylinder",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "rectangle",
+        "maxStretch": 1.0007143040434496,
+        "sections": 3
+      }
+    },
+    {
+      "name": "symmetric bevel",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "rectangle",
+        "maxStretch": 1.0516097778985039,
+        "sections": 7
+      }
+    },
+    {
+      "name": "opposite diagonals",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "rectangle",
+        "maxStretch": 1.0516097778985083,
+        "sections": 7
+      }
+    },
+    {
+      "name": "renumbered and reversed faces",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "rectangle",
+        "maxStretch": 1.0516097778984903,
+        "sections": 7
+      }
+    },
+    {
+      "name": "rotated, translated, seam not on a world axis",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "rectangle",
+        "maxStretch": 1.0516097778985039,
+        "sections": 7
+      }
+    },
+    {
+      "name": "uniform tiny scale",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "rectangle",
+        "maxStretch": 1.0516097779003855,
+        "sections": 7
+      }
+    },
+    {
+      "name": "uniform huge scale",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "rectangle",
+        "maxStretch": 1.0516097778985132,
+        "sections": 7
+      }
+    },
+    {
+      "name": "shifted azimuth samples",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "rectangle",
+        "maxStretch": 1.0426832536885504,
+        "sections": 7
+      }
+    },
+    {
+      "name": "low, medium and high default gear bores use the same metric",
+      "passed": true,
+      "detail": [
+        {
+          "detail": "low",
+          "faces": 576,
+          "maxStretch": 1.0589656406178973
+        },
+        {
+          "detail": "medium",
+          "faces": 2304,
+          "maxStretch": 1.0295767243796934
+        },
+        {
+          "detail": "high",
+          "faces": 9216,
+          "maxStretch": 1.014814905375563
+        }
+      ]
+    },
+    {
+      "name": "explicit two panels and per-panel budget still respected",
+      "passed": true,
+      "detail": {
+        "faces": 576
+      }
+    },
+    {
+      "name": "source UV getters cannot influence the metric",
+      "passed": true
+    },
+    {
+      "name": "turning off the policy reproduces legacy width drift",
+      "passed": true
+    },
+    {
+      "name": "steep cone remains a sector, not forced to a rectangle",
+      "passed": true
+    },
+    {
+      "name": "eccentric rings are not falsely labelled as repeated circular sections",
+      "passed": true
+    },
+    {
+      "name": "teeth and pleats are not collapsed into cylinders",
+      "passed": true
+    },
+    {
+      "name": "radial flange with return detail",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "annulus",
+        "maxStretch": 1.2411483541103394,
+        "sections": 7
+      }
+    },
+    {
+      "name": "rotated radial flange",
+      "passed": true,
+      "detail": {
+        "islands": 1,
+        "mode": "annulus",
+        "maxStretch": 1.2411483541103405,
+        "sections": 7
+      }
+    },
+    {
+      "name": "hole preservation never discards a protected internal edge",
+      "passed": true
+    },
+    {
+      "name": "similarity edits accepted; taper/shear and missing meridian rejected",
+      "passed": true
+    },
+    {
+      "name": "cancellation and option validation are not swallowed",
+      "passed": true
+    },
+    {
+      "name": "input geometry, indices and face order stay unchanged",
+      "passed": true
+    }
+  ]
+}

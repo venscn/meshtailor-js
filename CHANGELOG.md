@@ -1,3 +1,10 @@
+# 0.4.30
+
+- Repeated circular profiles now generate a geometry-metric rectangle instead of an unconstrained taper; retain all bevel triangles.
+- Shallow radial profiles preserve their inner holes with explicitly checked distortion.
+- Repack/stitch/fill validate every profile corner, topology, opening and proper similarity.
+- Actual assembly/Corset, analytic/rotated/index/diagonal variants, UV-isolation and real offline UI tests; full React build remains unverified.
+
 # 0.4.29
 
 - Intact annuli: test one complete chart before a second seam; explicit panel requests and budget/quality guards remain.

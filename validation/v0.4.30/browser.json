@@ -1,0 +1,57 @@
+{
+  "scope": "Real offline DOM + production Worker/WebGL. Not the complete React/Three importer.",
+  "tests": [
+    {
+      "name": "Profile setting is enabled on actual load",
+      "passed": true
+    },
+    {
+      "name": "Medium mechanical assembly through production load/solve",
+      "passed": true,
+      "detail": {
+        "islands": 16
+      }
+    },
+    {
+      "name": "Select the bore: whole rectangle report, no automatic triangle selection",
+      "passed": true
+    },
+    {
+      "name": "Current packed coordinates satisfy the full profile contract",
+      "passed": true
+    },
+    {
+      "name": "Actual checkbox permits a legacy control, not a hidden data fallback",
+      "passed": true
+    },
+    {
+      "name": "Re-enable and regenerate restores metric generation",
+      "passed": true
+    },
+    {
+      "name": "Repacking cannot reintroduce taper",
+      "passed": true
+    },
+    {
+      "name": "Actual fill keeps rectangular shape and exact animation target coordinates",
+      "passed": true
+    },
+    {
+      "name": "Playback keeps manual camera at four times speed",
+      "passed": true
+    },
+    {
+      "name": "Correct Corset fixture is also solved, not substituted by a demo ring",
+      "passed": true
+    },
+    {
+      "name": "The actual shoulder annulus has two loops, no radial slit, all 288 faces",
+      "passed": true
+    },
+    {
+      "name": "No DOM, Worker or WebGL errors",
+      "passed": true
+    }
+  ],
+  "passed": 12
+}

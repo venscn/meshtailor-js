@@ -1,0 +1,19 @@
+{
+  "node": "v22.16.0",
+  "fullBuildExit": 127,
+  "fullTypecheckExit": 2,
+  "npmInstallExit": 124,
+  "npmInstallLimitSeconds": 25,
+  "strictCoreAndGeometryExit": 0,
+  "profileTests": 22,
+  "workerTests": 9,
+  "browserTests": 12,
+  "browserScope": "Offline DOM, production Worker and WebGL; software Chromium, serial retry after concurrent incomplete run.",
+  "oldBrowserTests": {
+    "camera": 39,
+    "arrival": 28,
+    "selection": 39
+  },
+  "realUVVariants": 6,
+  "independentOverlapAreaTolerance": 1e-14
+}

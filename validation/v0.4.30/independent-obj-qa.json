@@ -1,0 +1,50 @@
+{
+  "engine": "GEOS/Shapely 2.1.2",
+  "toleranceUVArea": 1e-14,
+  "assets": {
+    "Assembly": {
+      "sha256": "ebd828d8a2a1df3b25eae47a785ecbbe7e187e7fc2b4ca1d6569b82d7f896d35",
+      "faces": 22528,
+      "candidatePairs": 197908,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "occupancy": 0.4132198088622224,
+      "positiveOrientation": true,
+      "unchanged3D": true,
+      "seconds": 1.4064419470000757
+    },
+    "AssemblyFill": {
+      "sha256": "808320e489384d18d0fc863e33d5eb88e291662e926e09c805135910bc7c2833",
+      "faces": 22528,
+      "candidatePairs": 198462,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "occupancy": 0.48197958505689625,
+      "positiveOrientation": true,
+      "unchanged3D": true,
+      "seconds": 1.4059065599999485
+    },
+    "Corset": {
+      "sha256": "994fc6fcb8ca240bd5fc85f5973167ea20d159e24215a6b037684ad7dc96619c",
+      "faces": 18324,
+      "candidatePairs": 109781,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "occupancy": 0.5104020645369705,
+      "positiveOrientation": true,
+      "unchanged3D": true,
+      "seconds": 0.8680102009998336
+    },
+    "FlightHelmet": {
+      "sha256": "c59824223798b7e546a46015eeb07b12220ed39761e1a323b5e1132bed4b62dd",
+      "faces": 94722,
+      "candidatePairs": 667220,
+      "positiveOverlapPairs": 0,
+      "maximumIntersectionArea": 0.0,
+      "occupancy": 0.4727512382629337,
+      "positiveOrientation": true,
+      "unchanged3D": true,
+      "seconds": 5.062199209000028
+    }
+  }
+}

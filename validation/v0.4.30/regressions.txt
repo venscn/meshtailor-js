@@ -1,0 +1,24 @@
+PASS Whole base: 72 cap / 48 complete rim / 72 cap; no half-rims
+PASS Tangent side belt is one annulus, caps are whole disks
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'human-profile-strip'
+- 'human-cylinder'
+         ^
+
+    at file:///mnt/data/dev-0430/meshtailor-js/scripts/cap-rim-smoke.mjs:14:368
+    at test (file:///mnt/data/dev-0430/meshtailor-js/scripts/cap-rim-smoke.mjs:6:67)
+    at file:///mnt/data/dev-0430/meshtailor-js/scripts/cap-rim-smoke.mjs:14:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'human-profile-strip',
+  expected: 'human-cylinder',
+  operator: 'strictEqual'
+}
+
+Node.js v22.16.0

@@ -1,0 +1,15 @@
+PASS Shoulder 1: default annular metric keeps all 288 faces and the hole
+PASS Shoulder 1: legacy one-opening control still has its original distortion bound
+PASS Shoulder 1: explicit two panels remain available
+PASS Shoulder 1: source fields are never read
+PASS Shoulder 1: all actual triangles and cut boundary valid
+PASS Shoulder 1: face budget records necessary parallel cuts
+PASS Shoulder 2: default annular metric keeps all 288 faces and the hole
+PASS Shoulder 2: legacy one-opening control still has its original distortion bound
+PASS Shoulder 2: explicit two panels remain available
+PASS Shoulder 2: source fields are never read
+PASS Shoulder 2: all actual triangles and cut boundary valid
+PASS Shoulder 2: face budget records necessary parallel cuts
+PASS Input geometry is unchanged
+PASS Automatic is a validated setting, not an undefined numeric value
+PASS Cancellation cannot be swallowed by the second candidate
