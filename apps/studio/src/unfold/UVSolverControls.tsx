@@ -41,6 +41,10 @@ export function UVSolverControls({value,onChange,snapshot,onAuto,onProcess,selec
     </details>
     <details open className="human-template-controls"><summary>结构模板 · 人工切缝思路</summary>
       <label className="check"><input aria-label="Structural UV templates" type="checkbox" checked={draft.structureTemplates!==false} onChange={e=>patch({structureTemplates:e.target.checked})}/>先识别环带，再规划侧缝（默认）</label>
+      <label className="check"><input aria-label="Closed tube strips" type="checkbox" checked={draft.closedTubeStrips!==false} onChange={e=>patch({closedTubeStrips:e.target.checked})}/>闭合管身：纵缝＋横断面 → 矩形条带（默认）</label>
+      <label>闭合管身横向分段<input aria-label="Closed tube panels" type="number" min="1" max="64" value={draft.closedTubePanels??1} onChange={e=>patch({closedTubePanels:+e.target.value})}/></label>
+      <small>1 保留一整条；增加分段会新增横向切缝，可更紧凑装入方形 UV 页。长宽来自真实管长/周长，不能把长管压成正方形。只处理完整、可验证的周期截面族；非管状区域不强制矩形化。修改后重新生成；填空不会新增这些切缝。</small>
+      <label>闭合管身最大方向拉伸比<input aria-label="Closed tube maximum stretch" type="number" min="1.05" max="8" step=".1" value={draft.closedTubeMaxStretch??4} onChange={e=>patch({closedTubeMaxStretch:+e.target.value})}/></label>
       <label>环带切法<select aria-label="Band panels" value={draft.humanTemplates?.panels??2} onChange={e=>patch({humanTemplates:{...draft.humanTemplates,panels:+e.target.value as 1|2}})}><option value="2">两侧切缝 · 两片自然轮廓</option><option value="1">单纵缝 · 整圈一片</option></select></label>
       <label>上下轴<select aria-label="Band axis" value={draft.humanTemplates?.axis??'auto'} onChange={e=>patch({humanTemplates:{...draft.humanTemplates,axis:e.target.value as typeof DEFAULT_HUMAN.axis}})}><option value="auto">自动：上下边界环</option><option value="x">X</option><option value="y">Y</option><option value="z">Z</option></select></label>
       <label>侧缝方向（度）<input aria-label="Band seam angle" type="number" min="-180" max="180" step="5" value={draft.humanTemplates?.seamAngleDegrees??0} onChange={e=>patch({humanTemplates:{...draft.humanTemplates,seamAngleDegrees:+e.target.value}})}/></label>
