@@ -1,0 +1,9 @@
+
+> meshtailor-js@0.4.29 results:continuity
+> node scripts/restore-continuity-results.mjs
+
+Verified: /mnt/data/dev-0429/meshtailor-js/results/v0.4.29/Corset-generated.obj
+Verified: /mnt/data/dev-0429/meshtailor-js/results/v0.4.29/FlightHelmet-generated.obj
+Verified: /mnt/data/dev-0429/meshtailor-js/results/v0.4.29/Corset-postmerge.obj
+Verified: /mnt/data/dev-0429/meshtailor-js/results/v0.4.29/Corset-base-part.obj
+These are exact reference results. Importing them into this app intentionally ignores their UV and generates a new atlas. Use an external UV viewer for an unchanged comparison.

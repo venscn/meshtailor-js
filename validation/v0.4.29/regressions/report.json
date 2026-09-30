@@ -1,0 +1,165 @@
+[
+  {
+    "name": "geometry-input",
+    "command": [
+      "node",
+      "scripts/geometry-input-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 2.93
+  },
+  {
+    "name": "geometry-boundaries",
+    "command": [
+      "node",
+      "scripts/boundary-regularization-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 2.99
+  },
+  {
+    "name": "candidates",
+    "command": [
+      "node",
+      "scripts/candidate-contract-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 2.99
+  },
+  {
+    "name": "geometry-topology",
+    "command": [
+      "node",
+      "scripts/geometry-topology-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 3.44
+  },
+  {
+    "name": "geometry-policy",
+    "command": [
+      "node",
+      "scripts/geometry-policy-smoke.mjs"
+    ],
+    "exit": 1,
+    "seconds": 3.54
+  },
+  {
+    "name": "two-longitudinal-panels",
+    "command": [
+      "node",
+      "scripts/longitudinal-budget-smoke.mjs",
+      "--include-high"
+    ],
+    "exit": 0,
+    "seconds": 21.43
+  },
+  {
+    "name": "surface-reflection",
+    "command": [
+      "node",
+      "scripts/surface-reflection-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 3.94
+  },
+  {
+    "name": "symmetry-metric",
+    "command": [
+      "node",
+      "scripts/symmetry-metric-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 3.28
+  },
+  {
+    "name": "symmetric-sheets",
+    "command": [
+      "node",
+      "scripts/symmetric-sheets-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 5.9
+  },
+  {
+    "name": "complete-structure",
+    "command": [
+      "node",
+      "scripts/complete-structure-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 61.27
+  },
+  {
+    "name": "structure-relax",
+    "command": [
+      "node",
+      "scripts/structure-relax-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 4.87
+  },
+  {
+    "name": "tube-strips",
+    "command": [
+      "node",
+      "scripts/tube-strips-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 14.97
+  },
+  {
+    "name": "tube-worker",
+    "command": [
+      "node",
+      "scripts/tube-worker-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 14.61
+  },
+  {
+    "name": "fill-growth",
+    "command": [
+      "node",
+      "scripts/fill-growth-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 2.88
+  },
+  {
+    "name": "camera-browser",
+    "command": [
+      "node",
+      "scripts/camera-browser-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 38.37
+  },
+  {
+    "name": "arrival-browser",
+    "command": [
+      "node",
+      "scripts/arrival-browser-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 10.13
+  },
+  {
+    "name": "selection-browser",
+    "command": [
+      "node",
+      "scripts/selection-browser-smoke.mjs"
+    ],
+    "exit": 0,
+    "seconds": 10.34
+  },
+  {
+    "name": "geometry-policy-revised",
+    "command": [
+      "node",
+      "scripts/geometry-policy-smoke.mjs"
+    ],
+    "exit": 0,
+    "explanation": "Initial expected 6 gear charts referred to forced two-panel inner band. Auto preserves inner band: 5. Added actual auto decision assertion; retained planar, valid geometry, baseline equality, UV isolation, CLI and invalid-source guards."
+  }
+]

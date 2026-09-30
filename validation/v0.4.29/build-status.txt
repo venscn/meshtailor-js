@@ -1,0 +1,2 @@
+build_exit=127
+typecheck_exit=2

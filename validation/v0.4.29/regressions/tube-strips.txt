@@ -1,0 +1,22 @@
+PASS low: default geometry route yields rectangles, not tree/cotree ribbons
+PASS low: per-face metric does not collapse either direction
+PASS low: explicit five panels retain all sides and produce a denser tile without shearing
+PASS medium: default geometry route yields rectangles, not tree/cotree ribbons
+PASS medium: per-face metric does not collapse either direction
+PASS medium: explicit five panels retain all sides and produce a denser tile without shearing
+PASS high: default geometry route yields rectangles, not tree/cotree ribbons
+PASS high: per-face metric does not collapse either direction
+PASS high: explicit five panels retain all sides and produce a denser tile without shearing
+PASS original, removed, randomized, and throwing UV getters yield the identical full result
+PASS opposite quad diagonals retain tube coordinates from geometry
+PASS mixed quad diagonals retain tube coordinates from geometry
+PASS vertex/face reindexing and triangle cyclic permutations preserve rectangle recognition
+PASS proper rotation/translation and uniform scale preserve measured aspect and valid cuts
+PASS independent sweep: wavy=false, variable radius=false
+PASS independent sweep: wavy=true, variable radius=false
+PASS independent sweep: wavy=true, variable radius=true
+PASS open, nonmanifold, planar and noncircular gear inputs are not falsely forced to rectangles
+PASS explicit cut constraints and disabled/strict policy are honored
+PASS cancellation and parameter validation never return a partial tube
+PASS rectangle output validation catches shear, collapsed side and a lost seam
+PASS ALL 21

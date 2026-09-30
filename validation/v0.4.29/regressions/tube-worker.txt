@@ -1,0 +1,9 @@
+PASS Medium original/absent/random UV: actual Worker outputs are byte-identical
+PASS Explicit five sections pass production Worker and preserve their physical aspect
+PASS repack: retains every strip, cut and post-packing rectangle contract
+PASS stitch: retains every strip, cut and post-packing rectangle contract
+PASS fill: retains every strip, cut and post-packing rectangle contract
+PASS Automatic load: fill executes exactly once after packing, before animation preparation
+PASS Export/reload preserves source positions, face order and one/five island identities
+PASS Source-derived edit requests and invalid tube controls are explicitly rejected
+PASS ALL 8

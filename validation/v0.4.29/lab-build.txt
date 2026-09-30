@@ -1,0 +1,5 @@
+
+> meshtailor-js@0.4.29 lab:build
+> node scripts/build-unfold-lab.mjs
+
+Built /mnt/data/dev-0429/meshtailor-js/unfold-lab.html (4229091 bytes)

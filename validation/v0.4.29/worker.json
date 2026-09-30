@@ -1,0 +1,95 @@
+{
+  "passed": 6,
+  "tests": [
+    {
+      "name": "User screenshot path: pure geometry load with shared-edge post-merge enabled",
+      "detail": {
+        "islands": 80,
+        "basePieces": [
+          48,
+          72,
+          72
+        ],
+        "shoulderPieces": [
+          288,
+          288
+        ],
+        "occupancy": 0.5104020604855874
+      },
+      "passed": true
+    },
+    {
+      "name": "repack: no cap swallowing or half-band resurrection",
+      "detail": {
+        "islands": 80,
+        "basePieces": [
+          48,
+          72,
+          72
+        ],
+        "shoulderPieces": [
+          288,
+          288
+        ],
+        "occupancy": 0.5104020604855874
+      },
+      "passed": true
+    },
+    {
+      "name": "stitch: no cap swallowing or half-band resurrection",
+      "detail": {
+        "islands": 80,
+        "basePieces": [
+          48,
+          72,
+          72
+        ],
+        "shoulderPieces": [
+          288,
+          288
+        ],
+        "occupancy": 0.5104020604855874
+      },
+      "passed": true
+    },
+    {
+      "name": "fill: no cap swallowing or half-band resurrection",
+      "detail": {
+        "islands": 80,
+        "basePieces": [
+          48,
+          72,
+          72
+        ],
+        "shoulderPieces": [
+          288,
+          288
+        ],
+        "occupancy": 0.5451637436365023
+      },
+      "passed": true
+    },
+    {
+      "name": "Automatic load fill executes once without changing continuity decisions",
+      "detail": {
+        "islands": 80,
+        "basePieces": [
+          48,
+          72,
+          72
+        ],
+        "shoulderPieces": [
+          288,
+          288
+        ],
+        "occupancy": 0.5451637436365023,
+        "fillStarts": 1
+      },
+      "passed": true
+    },
+    {
+      "name": "Actual exported OBJ has the same face set and island topology after reload",
+      "passed": true
+    }
+  ]
+}

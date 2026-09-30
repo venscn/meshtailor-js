@@ -1,0 +1,13 @@
+PASS Audit calculates area x4 and length x2 from real coordinates
+PASS Translation and identity do not masquerade as enlargement
+PASS Rollback is audited from baseline coordinates, not accepted trial count
+PASS Budget, untried and density limit are distinct
+PASS Missing or duplicated island identity fails audit
+PASS Largest blocked chart is kept; a smaller chart really grows
+PASS Capacity-directed enlargement is executed, not just relocation
+PASS New default has a finite 3x density limit, not unlimited growth
+PASS Explicit 1.6x cap is honoured and reported, never silently raised
+PASS Repeated fill cannot evade the density cap
+PASS Committed area summary agrees with independently summed triangle area
+PASS Vacancy enlargement has a working disable switch
+PASS Invalid capacity-fit parameter is rejected

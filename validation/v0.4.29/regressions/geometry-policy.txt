@@ -1,0 +1,24 @@
+PASS Old local-storage source mode cannot re-enable original UV
+PASS Old imported configuration is explicitly rejected
+PASS Every geometry task overrides obsolete source hints and normal-cone mode
+PASS Worker clone boundary does not invoke UV getters
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+5 !== 6
+
+    at file:///mnt/data/dev-0429/meshtailor-js/scripts/geometry-policy-smoke.mjs:11:335
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async test (file:///mnt/data/dev-0429/meshtailor-js/scripts/geometry-policy-smoke.mjs:2:79)
+    at async file:///mnt/data/dev-0429/meshtailor-js/scripts/geometry-policy-smoke.mjs:11:2 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 5,
+  expected: 6,
+  operator: 'strictEqual'
+}
+
+Node.js v22.16.0

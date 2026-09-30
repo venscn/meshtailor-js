@@ -1,0 +1,70 @@
+{
+  "passed": 12,
+  "tests": [
+    {
+      "name": "Whole base: 72 cap / 48 complete rim / 72 cap; no half-rims",
+      "passed": true,
+      "detail": {
+        "faces": 192,
+        "roles": [
+          "cap",
+          "cap",
+          "rim"
+        ],
+        "parts": [
+          72,
+          72,
+          48
+        ]
+      }
+    },
+    {
+      "name": "Tangent side belt is one annulus, caps are whole disks",
+      "passed": true
+    },
+    {
+      "name": "Actual generator: three charts, one intact long strip, all faces",
+      "passed": true,
+      "detail": {
+        "stripAspect": 234.76499121101318,
+        "stripStretch": 1.0028617736702625
+      }
+    },
+    {
+      "name": "Rim was cut once, not sliced along its circumference",
+      "passed": true
+    },
+    {
+      "name": "All UV triangles valid and 3D untouched",
+      "passed": true
+    },
+    {
+      "name": "Removing one side strip is rejected",
+      "passed": true
+    },
+    {
+      "name": "Attaching side faces back to a cap is rejected",
+      "passed": true
+    },
+    {
+      "name": "Independent arbitrary rotation and scale preserve rim membership",
+      "passed": true
+    },
+    {
+      "name": "Original UV getters cannot affect cap/rim planning",
+      "passed": true
+    },
+    {
+      "name": "Explicit user cut blocks automatic closed-solid regrouping",
+      "passed": true
+    },
+    {
+      "name": "Smooth spherical shell is not assigned an arbitrary cap belt",
+      "passed": true
+    },
+    {
+      "name": "Two-hole gear surfaces are not treated as solid caps",
+      "passed": true
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "passed": 13,
+  "tests": [
+    {
+      "name": "Shoulder 1: default one opening keeps all 288 faces",
+      "detail": {
+        "panels": 1,
+        "maxStretch": 1.9824495765348302
+      },
+      "passed": true
+    },
+    {
+      "name": "Shoulder 1: explicit two panels remain available",
+      "passed": true
+    },
+    {
+      "name": "Shoulder 1: source fields are never read",
+      "passed": true
+    },
+    {
+      "name": "Shoulder 1: all actual triangles and cut boundary valid",
+      "passed": true
+    },
+    {
+      "name": "Shoulder 1: face budget records necessary parallel cuts",
+      "passed": true
+    },
+    {
+      "name": "Shoulder 2: default one opening keeps all 288 faces",
+      "detail": {
+        "panels": 1,
+        "maxStretch": 1.9016280911227441
+      },
+      "passed": true
+    },
+    {
+      "name": "Shoulder 2: explicit two panels remain available",
+      "passed": true
+    },
+    {
+      "name": "Shoulder 2: source fields are never read",
+      "passed": true
+    },
+    {
+      "name": "Shoulder 2: all actual triangles and cut boundary valid",
+      "passed": true
+    },
+    {
+      "name": "Shoulder 2: face budget records necessary parallel cuts",
+      "passed": true
+    },
+    {
+      "name": "Input geometry is unchanged",
+      "passed": true
+    },
+    {
+      "name": "Automatic is a validated setting, not an undefined numeric value",
+      "passed": true
+    },
+    {
+      "name": "Cancellation cannot be swallowed by the second candidate",
+      "passed": true
+    }
+  ]
+}
