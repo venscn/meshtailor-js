@@ -24,11 +24,32 @@ export function partitionLongitudinalPanels(mesh:MeshData,faces:readonly number[
     work?.check();const cuts=new Set(hard),cos=Math.cos(degrees*Math.PI/180);
     for(const [k,e]of top.edges)if(e.faces.length===2&&e.faces.every(f=>members.has(f))&&dot3(ff.get(e.faces[0]!)!.normal,ff.get(e.faces[1]!)!.normal)<cos)cuts.add(k);
     const pieces=subsetComponents(mesh,faces,cuts,top);
-    const major=pieces.filter(p=>{if(p.length<8)return false;const area=p.reduce((s,f)=>s+ff.get(f)!.area,0),d=[...new Set(p.flatMap(f=>[...mesh.faces[f]!.vertices]))].map(i=>dot3(mesh.positions[i]!,axis)),length=Math.max(...d)-Math.min(...d);return area>=total*.035&&length>=extent[0]!*.72&&length*length/area>=5;});
+    let major=pieces.filter(p=>{if(p.length<8)return false;const area=p.reduce((s,f)=>s+ff.get(f)!.area,0),d=[...new Set(p.flatMap(f=>[...mesh.faces[f]!.vertices]))].map(i=>dot3(mesh.positions[i]!,axis)),length=Math.max(...d)-Math.min(...d);return area>=total*.035&&length>=extent[0]!*.72&&length*length/area>=5;});
     if(major.length<2||major.length>12)continue;
     let valid=true;
     for(const part of major){const local=cutLocalMesh(mesh,part,hard),v=[...new Set(part.flatMap(f=>[...mesh.faces[f]!.vertices]))],d=v.map(i=>dot3(mesh.positions[i]!,axis)),length=Math.max(...d)-Math.min(...d),area=part.reduce((s,f)=>s+ff.get(f)!.area,0);if(!local.disk||length<extent[0]!*.72||length*length/area<5){valid=false;break;}}
     if(!valid)continue;
+    // Narrow bevel facets are transitions, not a request for many hair-thin
+    // charts. Assign them to a directly adjacent broad longitudinal panel.
+    // Whole-disk and paired-family tests below validate the atomic proposal.
+    const areaOf=(p:readonly number[])=>p.reduce((sum,f)=>sum+ff.get(f)!.area,0);
+    const masses=major.map(areaOf),largest=Math.max(...masses);
+    const thin=new Set(major.map((p,i)=>i).filter(i=>masses[i]!<largest*.22&&masses[i]!<total*.055));
+    if(thin.size&&thin.size<major.length-1){
+      const owner=new Map<number,number>();major.forEach((p,i)=>p.forEach(f=>owner.set(f,i)));
+      const candidate=major.map(p=>p.slice());let moved=0;
+      for(const i of thin){
+        const adjacent=new Set<number>();
+        for(const f of major[i]!)for(const key of mesh.faces[f]!.vertices.map((v,k,t)=>edgeKey(v,t[(k+1)%3]!))){
+          if(hard.has(key))continue;
+          for(const other of top.edges.get(key)?.faces??[]){const j=owner.get(other);if(j!==undefined&&j!==i&&!thin.has(j))adjacent.add(j);}
+        }
+        const j=[...adjacent].sort((a,b)=>masses[b]!-masses[a]!)[0];
+        if(j!==undefined){candidate[j]!.push(...candidate[i]!);candidate[i]=[];moved++;}
+      }
+      const compact=candidate.filter(p=>p.length);
+      if(moved&&compact.every(p=>cutLocalMesh(mesh,p,hard).disk))major=compact;
+    }
     const selected=new Set(major.flat()),rest=faces.filter(f=>!selected.has(f));if(rest.reduce((s,f)=>s+ff.get(f)!.area,0)>total*.08)continue;
     const ends=subsetComponents(mesh,rest,hard,top);if(ends.length>2||ends.some(p=>!cutLocalMesh(mesh,p,hard).disk))continue;
     const parts=[...major,...ends],labels=new Map<number,number>();parts.forEach((p,i)=>p.forEach(f=>labels.set(f,i)));
