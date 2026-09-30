@@ -1,0 +1,159 @@
+START low 2304 {
+  surfaceSymmetry: true,
+  symmetryTolerance: 0.018,
+  symmetryStrength: 30,
+  symmetryIterations: 40,
+  chartPolicy: 'large',
+  uvObjective: 'paint',
+  method: 'auto',
+  iterations: 2000,
+  tolerance: 1e-9,
+  padding: 0.003,
+  rotate: true,
+  rotationSteps: 12,
+  autoCut: true,
+  maxChartFaces: 4608,
+  maxAspect: 24,
+  minFill: 0,
+  maxStretch: 30,
+  initialSegmentation: 'hierarchical',
+  peelSourceHints: false,
+  postMerge: false,
+  structureTemplates: true,
+  stretchAreaPercentile: 0.99,
+  regionOptions: {
+    normalConeDegrees: 84.16531673658238,
+    maxChartFaces: 4608,
+    minRegionFaces: 24,
+    minRegionAreaRatio: 0.01
+  },
+  projectionSeed: true,
+  featureFrame: undefined,
+  sourceRepairPolicy: 'reject',
+  sourceFeaturePolicy: 'preserve',
+  sourceAtlasMerge: false,
+  humanTemplates: undefined
+}
+RESULT low 1434.5995789999997 [
+  {
+    id: 0,
+    sourceChart: 0,
+    faces: 2304,
+    structuralRelaxation: undefined,
+    symmetry: undefined,
+    method: 'lscm',
+    aspect: 5.108158504915259,
+    fill: 0.4560896423449721,
+    areaStretch: 1.1323261872435293,
+    maxStretch: 1.149928411644398,
+    excessAreaRatio: 0,
+    iterations: 861,
+    residual: 7.697601136597555e-10
+  }
+] {
+  inputComponents: 1,
+  componentFaces: [ 2304 ],
+  initialCharts: 1,
+  outputCharts: 1,
+  tinyCharts: 0,
+  reasons: {},
+  events: [],
+  omittedEvents: 0
+} [
+  {
+    group: 0,
+    faces: 2304,
+    depth: 0,
+    action: 'unfold',
+    detail: 'lscm; 111 internal slit edges; aspect 5.11'
+  }
+] [
+  {
+    sourceChart: 0,
+    faces: 2304,
+    sourceAreaFraction: 0.9999999999999991,
+    status: 'skipped',
+    reason: 'not-two-ring-band',
+    boundaryLoops: 0
+  }
+]
+START medium 9216 {
+  surfaceSymmetry: true,
+  symmetryTolerance: 0.018,
+  symmetryStrength: 30,
+  symmetryIterations: 40,
+  chartPolicy: 'large',
+  uvObjective: 'paint',
+  method: 'auto',
+  iterations: 2000,
+  tolerance: 1e-9,
+  padding: 0.003,
+  rotate: true,
+  rotationSteps: 12,
+  autoCut: true,
+  maxChartFaces: 9216,
+  maxAspect: 24,
+  minFill: 0,
+  maxStretch: 30,
+  initialSegmentation: 'hierarchical',
+  peelSourceHints: false,
+  postMerge: false,
+  structureTemplates: true,
+  stretchAreaPercentile: 0.99,
+  regionOptions: {
+    normalConeDegrees: 82.08081319627209,
+    maxChartFaces: 9216,
+    minRegionFaces: 48,
+    minRegionAreaRatio: 0.01
+  },
+  projectionSeed: true,
+  featureFrame: undefined,
+  sourceRepairPolicy: 'reject',
+  sourceFeaturePolicy: 'preserve',
+  sourceAtlasMerge: false,
+  humanTemplates: undefined
+}
+RESULT medium 10704.879703999999 [
+  {
+    id: 0,
+    sourceChart: 0,
+    faces: 9216,
+    structuralRelaxation: undefined,
+    symmetry: undefined,
+    method: 'arap-free',
+    aspect: 1.3385751230115652,
+    fill: 0.05764300463016906,
+    areaStretch: 1.1432703547122005,
+    maxStretch: 1.2011642053243552,
+    excessAreaRatio: 0,
+    iterations: 25,
+    residual: 0.00002561533421022059,
+    fallbackReason: 'LSCM rejected: residual=1.25e-5, flips=0, degenerates=0, overlaps>=100; Free boundary ARAP energy 36.69 -> 0.005110 (24 accepted steps); no circle boundary is retained.'
+  }
+] {
+  inputComponents: 1,
+  componentFaces: [ 9216 ],
+  initialCharts: 1,
+  outputCharts: 1,
+  tinyCharts: 0,
+  reasons: {},
+  events: [],
+  omittedEvents: 0
+} [
+  {
+    group: 0,
+    faces: 9216,
+    depth: 0,
+    action: 'unfold',
+    detail: 'arap-free; 285 internal slit edges; aspect 1.34'
+  }
+] [
+  {
+    sourceChart: 0,
+    faces: 9216,
+    sourceAreaFraction: 1.0000000000000007,
+    status: 'skipped',
+    reason: 'not-two-ring-band',
+    boundaryLoops: 0
+  }
+]
