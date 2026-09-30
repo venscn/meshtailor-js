@@ -79,7 +79,7 @@ export function inspectClosedTube(mesh:MeshData,faces:readonly number[],cuts:Rea
  const seen=new Set<number>(),keys=new Set<string>(),candidates:Ring[]=[];
  for(const start of transitions.keys())if(!seen.has(start)){
   work?.check();let state=start;const path:number[]=[],index=new Map<number,number>();
-  while(!seen.has(state)&&!index.has(state)){index.set(state,path.length);path.push(state);const next=transitions.get(state);if(next===undefined)break;state=next;}
+  while(!seen.has(state)&&!index.has(state)){if((path.length&1023)===0)work?.check();index.set(state,path.length);path.push(state);const next=transitions.get(state);if(next===undefined)break;state=next;}
   const cycle=index.has(state)?path.slice(index.get(state)!):[];for(const p of path)seen.add(p);
   if(cycle.length<6||cycle.length>512)continue;const vs=cycle.map(k=>ids[Math.floor(k/n)]!);if(new Set(vs).size!==vs.length)continue;
   const key=[...vs].sort((a,b)=>a-b).join(':');if(keys.has(key))continue;keys.add(key);const ring=fitRing(mesh,vs);if(ring)candidates.push(ring);
