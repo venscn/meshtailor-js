@@ -17,7 +17,7 @@ export function parseFBX(data:ArrayBuffer,name:string,options:SceneImportOptions
     scene=new FBXLoader(manager).parse(data,'');
     const result=sceneToMesh(scene,name,options);
     if(scene.animations.length)result.report.warnings.push(`${scene.animations.length} animation clip(s) ignored; imported static initial pose only.`);
-    result.report.warnings.push('FBX materials/textures are not displayed. UV channel 0 is preserved as face-corner coordinates; original FBX UV index identities are not recoverable from FBXLoader.');
+    result.report.warnings.push('FBX materials/textures are not displayed. Original UV channels are discarded before geometry-only generation.');
     return result;
   }catch(error){throw new Error(`FBX import failed: ${error instanceof Error?error.message:String(error)}. Export FBX 7.4/7.5 (Binary recommended), with polygon meshes and applied modifiers.`);}
   finally{if(scene)disposeImportedScene(scene);placeholder.dispose();}

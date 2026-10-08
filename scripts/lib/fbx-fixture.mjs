@@ -28,7 +28,9 @@ export function writeASCII(mesh){
   const prop=x=>x.type==='S'?JSON.stringify(x.value):String(x.value);
   function node(x,depth=0){const pad='\t'.repeat(depth);if(x.props.length===1&&['d','i'].includes(x.props[0].type)){const values=x.props[0].value;return `${pad}${x.name}: *${values.length} {\n${pad}\ta: ${values.join(',')}\n${pad}}\n`;}
     if(x.children.length)return `${pad}${x.name}: ${x.props.map(prop).join(', ')} {\n${x.children.map(c=>node(c,depth+1)).join('')}${pad}}\n`;
-    return `${pad}${x.name}: ${x.props.map(prop).join(', ')}\n`;
+    // Three's ASCII Properties70 parser normalizes the first whitespace in a
+    // value. Keep numeric tuples compact so it cannot turn a component into NaN.
+    return `${pad}${x.name}: ${x.props.map(prop).join(x.name==='P'?',':', ')}\n`;
   }
   return '; FBX 7.4.0 project file\n; Generated synthetic MeshTailor-JS fixture (MIT), not downloaded model data.\n'+fixtureTree(mesh).map(x=>node(x)).join('');
 }
