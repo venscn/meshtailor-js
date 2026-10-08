@@ -13,32 +13,10 @@ validation/**/*-mesh.json
 validation/local*/
 *.zip.partial
 
-# Optional exported examples already stored once in the included Git history.
-results/v0.4.18/
+# Restored reference outputs are derived from tracked, checksum-verified sources.
+/results/v*/
 
-# Optional restored v0.4.20 reference OBJ files
-/results/v0.4.20/
-
-# Optional generated reference outputs restored locally
-/results/v0.4.21/
-
-# Optional current reference outputs, restored from compressed verified artifacts.
-/results/v0.4.22/
-
-# Optional current reference outputs (hash-verified offline restore).
-/results/v0.4.23/
-
-# Optional v0.4.25 reference OBJ restore output.
-/results/v0.4.25/
-
-# Optional verified outputs restored from current compressed references.
-/results/v0.4.27/
-
-# Optional actual tube comparison exports.
-/results/v0.4.28/
-
-# Current continuity reference output; compressed sources are versioned.
-/results/v0.4.29/
-
-# Optional metric-profile reference results; compressed originals are tracked.
-/results/v0.4.30/
+# Local credentials and environment overrides do not belong in the public tree.
+.env
+.env.*
+!.env.example

@@ -10,7 +10,7 @@
     },
     {
       "asset": "FlightHelmet",
-      "path": "examples/generated-0.4.22/FlightHelmet-geometry-only.obj.gz",
+      "path": "examples/generated-0.4.23/FlightHelmet-before-fill.obj.gz",
       "objSHA256": "78626c5536311d86ec2b4a7ca2289b6cecdfac72cc9d4fd35fc341f4e189b00b",
       "bytes": 8588617
     }
