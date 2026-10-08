@@ -1,76 +1,84 @@
 <p align="center">
-  <img src="assets/readme/hero.svg" width="100%" alt="MeshTailor-JS：从三维网格到可检查的 UV 展开；仅使用几何生成">
+  <a href="README.md"><strong>English</strong></a> &nbsp; | &nbsp; <a href="README.zh-CN.md">简体中文</a>
+</p>
+
+<p align="center">
+  <img src="assets/readme/hero.svg" width="100%" alt="MeshTailor-JS: from 3D meshes to inspectable UV layouts, generated from geometry only">
 </p>
 
 # MeshTailor-JS
 
-**在浏览器中生成 UV、检查切缝，并观察三维网格逐岛展开。**
+**Generate UVs, inspect seams, and watch 3D meshes unfold one island at a time in your browser.**
 
-TypeScript / JavaScript 几何工具，提供完整 Studio、免安装的离线工作台和 OBJ 命令行。自动生成只使用网格几何，导入模型的原 UV、切缝与岛划分不参与生成。
+A TypeScript / JavaScript geometry tool with a full Studio, a standalone offline workbench, and an OBJ CLI. Automatic generation uses mesh geometry only; imported UVs, seams, and island assignments never guide the generator.
 
-[快速开始](#快速开始) · [使用指南](START_HERE.md) · [文档](docs/README.md) · [更新记录](CHANGELOG.md) · [MIT 许可](LICENSE)
+[Quick start](#quick-start) · [User guide](START_HERE.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md) · [MIT license](LICENSE)
 
-![真实离线工作台：选择机械件孔壁，中间为三维部件，右侧显示同一部件的等宽矩形 UV](validation/v0.4.30/previews/assembly-rectangle.png)
+![Actual offline workbench: the selected mechanical bore appears in 3D alongside its corresponding rectangular UV island](validation/v0.4.30/previews/assembly-rectangle.png)
 
-*v0.4.30 实际界面：合成机械件的重复剖面侧壁生成等宽矩形，保留倒角与全部 2,304 个三角面。截图来自离线工作台。*
+*v0.4.30 offline workbench: a repeated-profile sidewall becomes a constant-width rectangle while retaining its bevels and all 2,304 triangles. The screenshot shows a project-generated mechanical fixture. The current interface includes Chinese labels.*
 
-## 能做什么
+## What you can do
 
-- **生成与编辑 UV**：沿真实网格边开缝，展开、面积感知排布，再对当前结果缝合、重排或填空。
-- **检查几何与布局**：查看 UV 岛、面角对应、切边、形变和重叠；符合条件的环件保孔、管身与重复剖面生成结构化展开。
-- **播放展开过程**：逐岛接力、倍速和进度拖动；3D 视图、UV 选择与导出共享同一份结果。
-- **导入与导出**：Studio 读取 OBJ / FBX / GLB / glTF，导出带新 UV 的 OBJ；离线工作台与 CLI 使用 OBJ。
+- **Generate and edit UVs:** cut along real mesh edges, parameterize and pack islands, then stitch, repack, or refine empty space in the generated result.
+- **Inspect geometry and layouts:** examine islands, face-corner correspondence, cuts, distortion, and overlaps. Eligible rings preserve holes; tubes and repeated profiles use structural mappings.
+- **Play the unfolding:** follow island relays, adjust playback speed, or scrub the timeline. 3D picking, UV selection, and export share the same result.
+- **Import and export:** Studio reads OBJ / FBX / GLB / glTF and exports OBJ with new UVs. The offline workbench and CLI accept OBJ.
 
-生成流程为 **几何输入 → 面分区与真实切边 → 参数化与质量检查 → Atlas 排布 → 预览 / OBJ 导出**。默认载入、Generate baseline 和 CLI 使用同一条生成路径。
+The shared generation path is **geometry → face partitioning and mesh-edge cuts → parameterization and quality checks → atlas packing → preview / OBJ export**. Default loading, Generate baseline, and the CLI use that same path.
 
-## 快速开始
+## Quick start
 
-### 免安装体验
+### Try the offline workbench
 
-用支持 WebGL2 的浏览器直接打开根目录的 **[unfold-lab.html](unfold-lab.html)**。如果本地 Worker 被浏览器限制，使用 Node.js 启动：
+Open **[unfold-lab.html](unfold-lab.html)** from your local checkout in a WebGL2-capable browser. No frontend dependencies are needed. If your browser blocks local Workers, start a local server with Node.js:
 
 ```bash
 npm run lab:serve
 ```
 
-然后打开 [http://127.0.0.1:4175](http://127.0.0.1:4175)，选择内置模型或导入 OBJ，生成后即可选岛、播放和导出。
+Visit [http://127.0.0.1:4175](http://127.0.0.1:4175), choose a built-in model or import OBJ, then select islands, play the unfolding, and export.
 
-### 本地开发
+### Develop locally
 
-需要 **Node.js 22.16+、npm** 和支持 WebGL2 的浏览器。在仓库目录执行：
+Use **Node.js 22.16+, npm**, and a WebGL2-capable browser. Run these commands from the repository root:
 
 ```bash
 npm ci
 npm run dev
 ```
 
-打开终端显示的 Vite 地址。glTF 导入需同时选择其 `.bin`；材质和贴图不显示。更多格式限制见 [导入指南](docs/IMPORT-FORMATS.md)。
+Open the Vite URL printed in your terminal. For glTF, select the companion `.bin` files with the model. Materials and textures are not displayed. See [import formats](docs/IMPORT-FORMATS.md) for the supported scope.
 
-### 命令行
+### Use the CLI
 
 ```bash
 npm run cli -- inspect examples/cylinder.obj
-npm run cli -- unwrap examples/cylinder.obj /tmp/cylinder-uv.obj
+npm run cli -- unwrap examples/cylinder.obj cylinder-uv.obj
 ```
 
-`baseline` 命令可导出切缝与链 JSON。CLI 当前仅接受 OBJ，详见 [使用指南](START_HERE.md#cli)。
+The `baseline` command exports seam and chain JSON. The CLI currently accepts OBJ only; see the [user guide](START_HERE.md#cli).
 
-## 验证与贡献
+## Validation and contributions
 
 ```bash
-npm run check:geometry   # 几何输入隔离、切边、拓扑与生成策略
-npm run check            # 单元测试、Studio 构建和完整类型检查
-npm run test:git         # 历史与标签维护工具的回归测试
+npm run check:geometry   # Input isolation, cuts, topology, and generation policy
+npm run check            # Unit tests, Studio build, and full type checking
+npm run test:git         # Git history and tag-checker regression tests
 ```
 
-修改生成策略时，还需运行 `npm run test:geometry:real`：两份固定真实模型分别携带原 UV、删除 UV 和随机 UV，比较全部实际切缝与面角坐标。浏览器专项测试需要 Chrome / Chromium / Edge，可用 `CHROME_PATH` 指定程序。详细流程见 [贡献指南](CONTRIBUTING.md)。
+When changing generation strategy, also run `npm run test:geometry:real`. Both pinned real-model fixtures are tested with original, absent, and randomized UVs; comparisons cover every actual seam and face-corner coordinate. Browser suites require Chrome / Chromium / Edge; set `CHROME_PATH` if needed. See [CONTRIBUTING](CONTRIBUTING.md).
 
-欢迎提交问题、修复和可复现的回归夹具。请保留已有历史与发布标签，按独立目的提交，并说明验证范围。
+Issues and contributions may be written in English or Chinese. Include a reproducible example and report what you tested. Preserve existing history and release tags, and keep commits focused.
 
-## 当前边界
+## Current limitations
 
-项目使用独立几何方法，**没有官方 MeshTailor 学习权重**。任意曲面可能出现形变或较多分片，不保证语义最优版型、零拉伸或全局最密排布。展开动画用于展示对应关系，不是布料物理模拟；新 UV 的贴图重绘与烘焙需自行完成。
+This is an independent geometry implementation with **no official MeshTailor learned weights**. Arbitrary surfaces can distort or fragment; the tool does not guarantee semantic pattern pieces, zero stretch, or globally optimal packing. The animation visualizes correspondence rather than cloth physics. Repainting or baking textures for the new UVs is a separate task.
 
-Studio 的导入器与离线工作台不同；离线截图不能替代完整 Studio 的浏览器验收。本次维护的通过项与环境限制见 [开源整理记录](docs/OPEN_SOURCE_PREPARATION.md)，具体算法与历史结果见 [文档索引](docs/README.md)。
+Studio importers differ from the offline workbench. Offline screenshots do not certify the full Studio browser workflow. See the [maintenance and validation record](docs/OPEN_SOURCE_PREPARATION.md) and the [documentation index](docs/README.md); historical records retain their original language.
 
-代码及自制资产采用 **[MIT](LICENSE)**。仓库内的 Corset / Flight Helmet 及其几何衍生文件沿用 **CC0-1.0**；来源、作者与许可边界见 [第三方资产说明](THIRD_PARTY_ASSETS.md)。
+## License
+
+Project code, original documentation, and project-created assets use the **[MIT License](LICENSE)**. Bundled Corset / Flight Helmet models and their geometry derivatives retain **CC0-1.0**. See [asset provenance](THIRD_PARTY_ASSETS.md) and the [licensing guide](docs/LICENSING.md) for scope and attribution.
+
+English and Chinese guides are available from their language links. Switching documentation language does not change the application interface language.

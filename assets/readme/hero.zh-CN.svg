@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
   <title id="title">MeshTailor-JS</title>
-  <desc id="desc">From 3D meshes to inspectable UV layouts. The cube mesh and unfolded net illustrate geometry input and UV output, not actual model results.</desc>
+  <desc id="desc">从三维网格到可检查的 UV 展开。右侧以立方体三角网格和展开平面网示意几何输入与 UV 输出，不表示实际模型结果。</desc>
   <rect width="1200" height="360" rx="12" fill="#1b1d1f"/>
   <g id="identity" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,sans-serif">
     <text x="58" y="76" fill="#ceaf7b" font-size="22" letter-spacing="3">GEOMETRY → UV</text>
     <text x="54" y="156" fill="#e0e2e4" font-size="72" font-weight="650" letter-spacing="-2">MeshTailor-JS</text>
-    <text x="58" y="213" fill="#e0e2e4" font-size="28">From 3D meshes to inspectable UV layouts</text>
+    <text x="58" y="213" fill="#e0e2e4" font-size="30">从三维网格到可检查的 UV 展开</text>
     <text x="58" y="296" fill="#a1a6aa" font-size="22">TypeScript · Browser · CLI</text>
   </g>
   <g id="mesh-input" stroke="#68b4cf" stroke-width="2" stroke-linejoin="round">
