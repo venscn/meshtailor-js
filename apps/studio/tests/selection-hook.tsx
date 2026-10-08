@@ -3,15 +3,17 @@
  */
 import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { buildCharts, sourceUVPreview, buildUnfoldGeometry } from '@meshtailor/uv';
+import { geometryOnlyMesh, GEOMETRY_INPUT_POLICY } from '@meshtailor/mesh-core';
+import { unwrapMesh, geometryGenerationOptions, buildUnfoldGeometry } from '@meshtailor/uv';
 import { makeUnfoldDemo } from '../src/unfold/demo';
 import { useUnfoldPlayer, type UnfoldPlayer } from '../src/unfold/useUnfoldPlayer';
 import type { UVSnapshot } from '../src/workers/uv.worker';
 
 function snapshot(): UVSnapshot {
   const demo=makeUnfoldDemo();
-  const packed=sourceUVPreview(demo.mesh,buildCharts(demo.mesh,demo.edges));
-  return {packed,geometry:buildUnfoldGeometry(demo.mesh,packed,demo.edges),seams:[...demo.edges],target:'source',warnings:[]};
+  const mesh=geometryOnlyMesh(demo.mesh);
+  const {packed,seams}=unwrapMesh(mesh,new Set(),geometryGenerationOptions(mesh));
+  return {inputPolicy:GEOMETRY_INPUT_POLICY,packed,geometry:buildUnfoldGeometry(mesh,packed,new Set(seams)),seams:[...seams],target:'generated',warnings:[]};
 }
 declare global {
   interface Window {selectionHarness?:{player:UnfoldPlayer;snapshot:UVSnapshot;reload:()=>void}}
