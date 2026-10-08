@@ -1,15 +1,22 @@
-name: mesh-core-and-imports
+name: geometry-and-studio
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install
+          cache: npm
+      - run: npm ci
+      - run: npm run check:geometry
       - run: npm run check
-      - run: npm run test:core
       - run: npm run test:complex
+      - run: npm run test:git
+      - run: npm run git:check
       # The browser suite additionally requires a Chromium executable.
