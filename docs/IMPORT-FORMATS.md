@@ -1,43 +1,45 @@
-# 导入格式与几何重建
+[**English**](IMPORT-FORMATS.md) | [简体中文](IMPORT-FORMATS.zh-CN.md)
 
-当前生产导入路径自 v0.4.20 起忽略原 UV，生成只使用几何。
+# Import formats and geometry reconstruction
 
-| 入口 | 接受格式 | 伴随文件 |
+Since v0.4.20, production import ignores original UVs and generation uses geometry only.
+
+| Entry point | Input formats | Companion files |
 | --- | --- | --- |
-| Studio | OBJ、FBX ASCII / Binary、GLB、glTF | glTF 需同时选择对应 `.bin` |
-| 离线工作台 | OBJ 与内置几何示例 | 不读取 MTL / 贴图 |
-| CLI | OBJ | 不读取 MTL / 贴图 |
+| Studio | OBJ, ASCII / Binary FBX, GLB, glTF | Select matching `.bin` files with glTF |
+| Offline workbench | OBJ and built-in geometry | MTL / textures are not loaded |
+| CLI | OBJ | MTL / textures are not loaded |
 
-每次选择一个主模型；glTF 与其多个几何缓冲可一起选择。材质与贴图不显示，不配置 Draco / Meshopt 解码器，推荐未压缩 GLB 或 FBX 7.4 / 7.5 Binary。
+Choose one main model per import. A glTF file and its geometry buffers can be selected together. Materials and textures are not displayed; Draco / Meshopt decoders are not configured. Prefer uncompressed GLB or FBX 7.4 / 7.5 Binary.
 
-## 导入器
+## Parsers
 
-OBJ 使用工程内的解析器；生产导入随后通过白名单构造纯几何。FBX 使用 Three.js FBXLoader，GLB / glTF 使用 Three.js GLTFLoader；glTF 在解码前移除材质、贴图与原 UV 属性。
+OBJ uses the project parser, followed by whitelist construction of geometry-only data. FBX uses Three.js FBXLoader; GLB / glTF use Three.js GLTFLoader. The glTF decode path removes materials, textures, and original UV attributes before decoding.
 
-FBXLoader 的官方格式范围是 ASCII 7.0+ / Binary 6400+，不代表本仓库测试了所有导出器组合。参见 [Three.js 文档](https://threejs.org/docs/pages/FBXLoader.html)。
+The official FBXLoader scope is ASCII 7.0+ / Binary 6400+. This does not mean every exporter combination has been tested here. See [Three.js documentation](https://threejs.org/docs/pages/FBXLoader.html).
 
-## 几何与连接性
+## Geometry and connectivity
 
-场景适配器提取可见网格及其世界/实例变换，在初始加载姿态采样蒙皮和 morph 几何。负缩放修正三角面绕序；不播放导入动画，也不保留场景层级为编辑结构。
+The scene adapter extracts visible meshes with world/instance transforms and samples skinning and morph geometry at the loaded initial pose. Negative scale corrects triangle winding. Imported animation is not played, and the scene hierarchy is not retained as an editable structure.
 
-几何焊接限定在同一源对象/实例内，不跨对象合并重叠部件。默认采用边界焊接；还提供精确、容差和关闭模式。坐标焊接可能连接有意重合的独立表面，应按模型选择策略。焊接后退化面会被丢弃并记录；这不是通用网格修复。
+Welding is scoped to a source object/instance; overlapping objects are not merged. Boundary welding is the default, with exact, tolerance, and off modes also available. Coordinate welding can connect intentionally coincident surfaces, so choose an appropriate policy. Degenerate faces after welding are dropped and reported; this is not general mesh repair.
 
-场景适配器不请求 UV 属性，输出报告的 `uvFaces` 为 0。材质/对象身份可作为几何元数据保留，但原 UV 坐标、索引、切缝和岛划分不进入生成。
+The scene adapter never requests UV attributes; its report has `uvFaces: 0`. Material/object identities may remain as geometry metadata, but original UV coordinates, indices, seams, and island assignments do not enter generation.
 
-默认输入限制为 300,000 个三角面、源顶点数不超过该预算的三倍，以及主文件不超过 256 MiB。限制不能保证任意压缩输入的解析内存有界。
+Default guards limit input to 300,000 triangles, no more than three times that budget in source vertices, and 256 MiB for the main file. These guards do not bound parser memory for every compressed input.
 
-## 资源与取消
+## Resources and cancellation
 
-FBX 贴图请求返回占位材质，避免缺失本地图片导致导入失败；glTF 在解码前移除材质/图片引用。提取完毕后释放原场景资源。
+FBX texture requests use a placeholder so missing local images do not block geometry import. The glTF path removes material/image references before decode. Imported scene resources are disposed after extraction.
 
-FBXLoader 解析在主线程同步执行，尚不能中途取消。Worker 计算和可选下载可取消；任务序号拒绝过时结果。
+FBXLoader parses synchronously on the main thread and cannot yet be interrupted mid-parse. Worker computation and optional downloads support cancellation; operation IDs reject stale results.
 
-## 回归验证
+## Regression scope
 
-`apps/studio/public/assets/fixtures/garment-ascii.fbx` 与 `garment-binary.fbx` 是本项目生成的低密度褶皱夹具，文件身份见 [manifest](../examples/manifest.json)。写入器仅用于回归，不是通用 FBX 导出器。
+`apps/studio/public/assets/fixtures/garment-ascii.fbx` and `garment-binary.fbx` are project-generated low-density pleated fixtures. Their identities are in the [manifest](../examples/manifest.json). The writer is a regression helper, not a general FBX exporter.
 
 ```bash
 npm run test:imports
 ```
 
-2026-10-08 已执行真实 Three.js 集成测试：两种 FBX 夹具、世界变换、镜像绕序、对象隔离、蒙皮 / morph、实例、GLB / glTF 伴随缓冲及原 UV 属性隔离均通过。此范围不等于任意第三方 FBX 兼容认证；当前完整验证与环境限制见 [开源整理记录](OPEN_SOURCE_PREPARATION.md)。
+The 2026-10-08 maintenance run executed the real Three.js integration suite: both FBX fixtures, world transforms, mirrored winding, object isolation, skin / morph geometry, instances, GLB / glTF companion buffers, and original-UV isolation passed. This is not a guarantee for arbitrary FBX files. See the [maintenance record (Chinese)](OPEN_SOURCE_PREPARATION.md) for the actual scope and environment limits.

@@ -1,17 +1,21 @@
-# 贡献指南
+[**English**](CONTRIBUTING.md) | [简体中文](CONTRIBUTING.zh-CN.md)
 
-## 本地开发
+# Contributing
 
-使用 Node.js 22.16+ 和 npm，先安装依赖：
+Issues, pull requests, and documentation improvements are welcome in English or Chinese.
+
+## Local development
+
+Use Node.js 22.16+ and npm:
 
 ```bash
 npm ci
 npm run dev
 ```
 
-目录分工：`apps/studio` 为 React/Vite 主界面，`apps/unfold-lab` 为离线工作台源码，`apps/cli` 为 OBJ CLI；`packages/mesh-core` 处理几何与拓扑，`packages/uv` 负责展开、排布与后处理。其余包提供切缝链、运行时与研究后端接口。
+`apps/studio` contains the React/Vite interface, `apps/unfold-lab` the offline workbench source, and `apps/cli` the OBJ CLI. `packages/mesh-core` handles geometry and topology; `packages/uv` handles unfolding, packing, and postprocessing. Other packages provide seam chains, runtime support, and research backend interfaces.
 
-## 提交前验证
+## Verify before submitting
 
 ```bash
 npm run check:geometry
@@ -19,20 +23,26 @@ npm run check
 npm run test:git
 ```
 
-按改动增加相关专项检查。修改生成策略时，必须执行两份真实夹具的 original / absent / random UV 三变体测试，并比较全部实际切缝和面角坐标：
+Choose additional checks for the behavior changed. A generation-strategy change must test both real fixtures with original / absent / randomized UVs and compare every actual seam and face-corner coordinate:
 
 ```bash
 npm run test:geometry:real
 ```
 
-离线工作台源码或生产模块变更后，用 `npm run lab:build` 更新 `unfold-lab.html`。浏览器回归需要 Chrome / Chromium / Edge，可设置 `CHROME_PATH`；例如 `npm run test:geometry:browser`。记录环境限制，不用离线验证冒充完整 Studio 的浏览器验证。
+After changing offline workbench source or production modules, rebuild `unfold-lab.html` with `npm run lab:build`. Browser suites require Chrome / Chromium / Edge; configure `CHROME_PATH` if needed. For example, run `npm run test:geometry:browser`. Report environment limits and distinguish offline tests from full Studio browser tests.
 
-旧 `source-atlas` / 原岛提示相关脚本属于历史实验，不是当前生成器的验收依据。请保留原断言与历史。
+Legacy `source-atlas` / source-island scripts are historical experiments, not acceptance tests for the current generator. Preserve their assertions and history.
 
-## 问题与补丁
+## Report issues and propose changes
 
-报告问题时提供复现步骤、预期与实际结果、应用版本、浏览器 / Node.js 版本、触发设置和最小模型。只有可公开再分发的模型才适合作为仓库夹具；同时提供来源与许可。
+Include reproduction steps, expected and actual behavior, application version, browser / Node.js version, relevant settings, and a minimal model. Repository fixtures need a source and license that permits redistribution.
 
-保持改动聚焦，保留已有提交和 tag，按独立目的提交实现与必要回归测试。不要覆盖他人未提交的修改。详细规范见 [AGENTS.md](AGENTS.md) 和 [Git 工作流](docs/GIT_WORKFLOW.md)。
+Keep changes focused. Preserve existing commits and tags, make small commits for independent changes with necessary regression coverage, and do not overwrite another contributor's uncommitted work. See [AGENTS.md](AGENTS.md) and the [Git workflow](docs/GIT_WORKFLOW.md).
 
-新增资产时更新 [第三方说明](THIRD_PARTY_ASSETS.md)，维护固定夹具的校验值；不要用同名下载替换已有真实模型。
+Update [asset provenance](THIRD_PARTY_ASSETS.md) when adding assets. Keep pinned fixture checksums; a same-name download must not replace an existing real model.
+
+## Documentation and licensing
+
+English is the default for maintained public entry documents. Keep the corresponding `.zh-CN.md` file, language links, commands, limitations, and license scope in sync. Historical reports remain in their original language; label any English summary clearly.
+
+Contributions to project-owned code and documentation are made under the project's [MIT License](LICENSE). Third-party assets and dependencies retain their own licenses; see the [licensing guide](docs/LICENSING.md). There is no separate CLA or DCO requirement in this repository.

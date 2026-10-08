@@ -1,28 +1,35 @@
-# 文档索引
+[**English**](README.md) | [简体中文](README.zh-CN.md)
 
-## 使用与协作
+# Documentation
 
-- [快速使用指南](../START_HERE.md)：离线工作台、Studio、CLI、参考输出。
-- [导入格式](IMPORT-FORMATS.md)：OBJ / FBX / GLB / glTF 的实际范围。
-- [贡献指南](../CONTRIBUTING.md)：开发检查、回归夹具与问题报告。
-- [Git 工作流](GIT_WORKFLOW.md)：保留历史、小步提交与新发布。
-- [资产来源与许可](../THIRD_PARTY_ASSETS.md)。
+## User and contributor guides
 
-## 当前生成器
+| Guide | English | 简体中文 |
+| --- | --- | --- |
+| Getting started | [User guide](../START_HERE.md) | [使用指南](../START_HERE.zh-CN.md) |
+| Import formats | [Formats and geometry](IMPORT-FORMATS.md) | [导入格式](IMPORT-FORMATS.zh-CN.md) |
+| Contributing | [Contribution guide](../CONTRIBUTING.md) | [贡献指南](../CONTRIBUTING.zh-CN.md) |
+| Git workflow | [History and releases](GIT_WORKFLOW.md) | [Git 工作流](GIT_WORKFLOW.zh-CN.md) |
+| Licensing | [MIT scope](LICENSING.md) | [许可范围](LICENSING.zh-CN.md) |
+| Asset provenance | [Sources and licenses](../THIRD_PARTY_ASSETS.md) | [资产说明](../THIRD_PARTY_ASSETS.zh-CN.md) |
+| Pinned fixtures | [Fixture guide](../examples/verified-models/README.md) | [固定夹具](../examples/verified-models/README.zh-CN.md) |
 
-自 v0.4.20 起，生产生成只接受几何输入，不使用模型原 UV、原切缝或岛提示。
+## Current generator
 
-- [纯几何路径与约束](releases/0.4.20.md)。
-- [连续结构与内在条片](releases/0.4.27.md)。
-- [闭合管身与矩形条带](releases/0.4.28.md)。
-- [完整环带与盖面边缘](releases/0.4.29.md)。
-- [重复剖面与环件保孔](releases/0.4.30.md)：当前版本变化与形变取舍。
-- [0.4.30 实际验证](../validation/v0.4.30/README.md)。
+Since v0.4.20, production generation accepts geometry only. It does not use imported UVs, original seams, or source-island hints.
 
-## 维护与历史
+- [v0.4.30 English summary](releases/0.4.30.en.md): repeated-profile rectangles, hole-preserving annuli, and distortion tradeoffs.
+- [v0.4.30 full release note (Chinese)](releases/0.4.30.md) and [actual validation record (Chinese)](../validation/v0.4.30/README.md).
+- Earlier algorithm notes, in their original Chinese: [geometry-only input](releases/0.4.20.md), [continuous structures](releases/0.4.27.md), [closed tube strips](releases/0.4.28.md), and [intact bands and cap rims](releases/0.4.29.md).
 
-- [开源整理与当前验证](OPEN_SOURCE_PREPARATION.md)。
-- [版本记录](../CHANGELOG.md)、[历史发布说明](releases/)。较早发布的说明文件为本目录的 `RELEASE-*.md`。
-- [历史验证目录](../validation/README.md)。记录表示当次执行范围，不等于当前环境已重新执行。
-- [早期架构背景](ARCHITECTURE.md)、[展开与 UV 背景](UNFOLDING_AND_UV.md)、[模型后端](MODEL_BACKEND.md)：包含原 UV 路径和研究接口的历史设计；以当前生产代码和 v0.4.20 之后的约束为准。
-- [损坏交付包恢复记录](../REPACK-NOTES.md)与 [0.4.26 恢复边界](repack/RECOVERY-0.4.26.md)：保留来源、哈希与真实历史缺失说明。
+## Maintenance and historical records
+
+- [Open-source preparation and validation (Chinese)](OPEN_SOURCE_PREPARATION.md).
+- [Changelog](../CHANGELOG.md) and [release notes](releases/) retain their original English/Chinese entries. Earlier release notes are `RELEASE-*.md` in this directory.
+- [Validation archive (Chinese)](../validation/README.md): a report describes its original run, not a fresh test in your environment.
+- [Early architecture](ARCHITECTURE.md), [UV/unfolding background](UNFOLDING_AND_UV.md), and [model backend](MODEL_BACKEND.md) contain historical source-UV paths and research interfaces. Current production code and the geometry-only constraints introduced in v0.4.20 take precedence.
+- [Damaged-package recovery (Chinese)](../REPACK-NOTES.md) and [v0.4.26 recovery boundaries (Chinese)](repack/RECOVERY-0.4.26.md) preserve source hashes and the limits of recoverable history.
+
+## Language coverage
+
+Maintained entry guides above have English and Chinese counterparts. Historical releases, raw logs, and one-off experiments retain their original language and bytes; English summaries are labeled as summaries. When updating a bilingual guide, update its counterpart and check relative links in both directions. Application UI language is independent of documentation language.
