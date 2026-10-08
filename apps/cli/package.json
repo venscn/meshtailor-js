@@ -1,6 +1,7 @@
 {
   "name": "@meshtailor/cli",
   "version": "0.4.30",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "scripts": {
