@@ -1,5 +1,7 @@
 # v0.4.18 重打包说明（repack-0.4.18-2）
 
+> 历史恢复记录，描述当次交付包及其验证边界。当前使用指南见 [START_HERE.md](START_HERE.md)，文档索引见 [docs/README.md](docs/README.md)。
+
 ## 原包确实未完成
 
 接收到的 `meshtailor-js-0.4.18.zip` 为 49,507,278 字节，SHA256 为 `34063a44ff7686a2b506a8483fa0231b3c1e0ad3ffd94de1827da2d4c0648ab8`。它没有 ZIP 中央目录及结束记录；最后停在 `validation/v0.4.18/real/FlightHelmet-generated-mesh.json` 的写入中，局部头中的压缩长度还是 0。不能把缺少目录的问题归因于你的解压软件。

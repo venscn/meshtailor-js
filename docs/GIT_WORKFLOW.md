@@ -21,7 +21,7 @@
 
 ```bash
 git status --short
-git switch -c feat/your-task
+git switch -c feature/your-task
 # 修改一个可独立审查的功能或修复，运行相关检查。
 git diff --check
 git diff
@@ -56,7 +56,7 @@ npm run git:check -- --release vX.Y.Z
 **应用发布包**必须对应一个不可变版本 tag，源码从干净的该 tag/HEAD 导出。
 
 **Git 仓库交接包**用于继续开发，允许 HEAD 包含发布 tag 之后已提交的维护变更，必须明确写出 HEAD，工作区必须干净，不能把它冒称为旧 tag 原版源码。
-本次 Git 交接包属于后者：应用代码仍基于 v0.2.0，之后仅有 Git 规则、校验、测试与交付说明变更，没有创建 v0.2.1，也没有移动 v0.2.0。
+早期 v0.2.0 Git 交接包属于后者：当时只有 Git 规则、校验、测试与交付说明变更，没有创建 v0.2.1，也没有移动 v0.2.0。这是历史示例；当前应用版本以根目录 package.json 为准，维护提交可以位于最新发布 tag 之后。
 
 包含 `.git/` 的仓库解压后直接使用，不要再次 `git init`。bundle 可作为异地/离线备份：
 
@@ -77,8 +77,8 @@ git rev-parse 'v0.1.0^{commit}'
 git rev-parse 'v0.2.0^{commit}'
 git diff --stat v0.1.0 v0.2.0
 git switch --detach v0.1.0
-# 查看后回到默认维护分支：
-git switch master
+# 查看后回到此前所在分支：
+git switch -
 ```
 
-旧 tag 中没有后来添加的工具文件，因此切到旧版后不能假定 `git:check` 等新命令仍存在。Windows PowerShell、macOS Terminal、Git Bash 可使用以上 Git 命令；本次执行环境为 Linux，未宣称运行过 macOS/Windows 原生测试。
+旧 tag 中没有后来添加的工具文件，因此切到旧版后不能假定 `git:check` 等新命令仍存在。Git 命令可在 Windows PowerShell、macOS Terminal、Git Bash 使用；各次实际验证的平台与范围以对应记录为准。

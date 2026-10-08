@@ -1,30 +1,30 @@
-# 0.4.30
+# Changelog
+
+## 0.4.30
 
 - Repeated circular profiles now generate a geometry-metric rectangle instead of an unconstrained taper; retain all bevel triangles.
 - Shallow radial profiles preserve their inner holes with explicitly checked distortion.
 - Repack/stitch/fill validate every profile corner, topology, opening and proper similarity.
 - Actual assembly/Corset, analytic/rotated/index/diagonal variants, UV-isolation and real offline UI tests; full React build remains unverified.
 
-# 0.4.29
+## 0.4.29
 
 - Intact annuli: test one complete chart before a second seam; explicit panel requests and budget/quality guards remain.
 - Closed caps with a clear side belt: retain a complete rim instead of assigning tangent wall faces to both caps.
 - Actual component/decision diagnostics in both UIs; validated through post-merge, repack and fill.
 - Real Corset/FlightHelmet UV-isolation, complete geometry, export and offline browser checks. Ordinary atlas occupancy may decrease for longer unbroken strips; not a packing improvement.
 
-# v0.4.28
+## 0.4.28
 
 闭合截面环几何识别、纵缝＋横向开口、带度量的矩形条带；主动选择横向分段而不是为填方形拉宽。后处理保持真实切缝与四边关系。实际变体/Worker/浏览器及六条真实模型隔离回归；未使用源UV。详见docs/releases/0.4.28.md。
 
-# v0.4.27
+## 0.4.27
 
 完整双层壳与纵向面组优先，修复细长结构镜像筛选和识别对应丢失；内在条片展开、后处理约束复验；修正重复自动填空。结果和边界见 docs/releases/0.4.27.md。
 
-# v0.4.25
+## 0.4.25
 
 表面重心对应、完整对称层片、带反射约束的内在松弛及后处理输出复验。真实人台/头盔生成不读原UV；完整结果与限制见 docs/releases/0.4.25.md。
-
-# 0.4.24
 
 ## 0.4.24
 
@@ -34,15 +34,15 @@
 - 四模型实际结果与同上限消融如实记录；头盔限时下无提升，不宣称全局最优。
 - 详见 docs/releases/0.4.24.md。
 
-# v0.4.23
+## 0.4.23
 
 修复纵向片预算提前触发曲折分割；一般开缝比较方向候选；真实空洞精排、等面积搬移、连续小步增长和预算修正。完整说明与实际四模型结果见 `docs/releases/0.4.23.md`、`validation/v0.4.23/`。不使用原 UV，不宣称填满全部空白。
 
-# 0.4.22
+## 0.4.22
 
 完整厚壳主片/回折壁共同切图；几何镜像及异对角线单元联合分组；成对壁面开缝；人台结构片内在尺寸松弛；完整输出契约、原UV隔离及真实工作台回归。详见 docs/releases/0.4.22.md。
 
-# v0.4.19 · 修复默认源 UV 路径的可辨识性检查
+## 0.4.19 · 修复默认源 UV 路径的可辨识性检查
 
 - 先复现默认载入保留一张有效矩形UV，再修复；不再只测generated。
 - 检查主要平面轮廓/孔洞与源UV的相容性，冲突原岛按真实几何重组，非冲突岛保持。
@@ -51,8 +51,6 @@
 - 保留真实repack历史，新增独立v0.4.19，不伪造丢失的v0.4.18 tag。
 
 ---
-
-# Changelog
 
 ## 0.4.8 — 2026-09-15
 

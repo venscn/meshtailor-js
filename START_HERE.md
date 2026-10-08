@@ -1,44 +1,60 @@
-# MeshTailor-JS 0.4.30
+# 开始使用 MeshTailor-JS
 
-解压到新目录，直接打开 **unfold-lab.html**。浏览器限制本地Worker时执行：
+当前应用版本：**0.4.30**。项目概览见 [README](README.md)，版本变化见 [发布说明](docs/releases/0.4.30.md)。
+
+## 离线工作台
+
+直接用浏览器打开仓库根目录的 `unfold-lab.html`。它已包含生产 Worker、几何示例和工作台，不需要安装前端依赖。
+
+如果浏览器限制本地 Worker，用 Node.js 启动本地服务：
 
 ```bash
-node scripts/serve-unfold-lab.mjs
+npm run lab:serve
 ```
 
-## 修复的现象
+打开 [http://127.0.0.1:4175](http://127.0.0.1:4175)。可设置 `PORT` 更改端口。
 
-机械件的直壁＋两端倒角沿周向具有完全重复的剖面，旧自由边界LSCM却将它拉成一边粗、一边细。现在先从几何恢复剖面，按真实剖面度量展开为**等宽矩形**。Medium中央孔壁长宽比约8.122:1，全部2,304面保留；缝合、重排和填空不能再把它拉歪。
+1. 在“模型”中选择内置示例，或导入自己的 OBJ。
+2. 加载后自动从几何生成 UV；修改设置后点击 **Generate baseline** 重新生成。
+3. 在“动画”中先选 UV 岛，再选三角面；拖动进度条观察 3D 到 UV 的对应关系。
+4. 按需缝合、重排或填空，然后导出 **OBJ + UV**。
 
-同时，正确人台的三个288面浅径向环件优先保留内孔，成为**完整环形**而不是先开径向缝。保孔具有形变取舍，不表示任意曲面都能无拉伸展开。
+默认开启“重复剖面度量展开”，可将符合条件的周期侧壁展开为等宽矩形，并让浅径向环件保留内孔。识别依据为几何，不是模型名称或原 UV。详细选项和形变取舍见 [0.4.30 发布说明](docs/releases/0.4.30.md)。
 
-## 开关
+## 完整 Studio
 
-**UV → 结构模板 → 重复剖面度量展开（等宽侧壁 / 保孔环件）**：默认开启。
+需要 Node.js **22.16+** 和 npm；支持 WebGL2 的浏览器。
 
-保持“手绘轮廓优先＋自动”，重新加载模型或点击Generate baseline。更改设置本身不会覆盖已有结果。Inspector会显示实际方法、层数、长宽和方向拉伸，不需要用隐藏预设。
+```bash
+npm ci
+npm run dev
+```
 
-关闭该项是显式旧算法对照；生成始终不使用模型原UV。
+打开终端打印的 Vite 地址。Studio 支持 OBJ、FBX、GLB 和 glTF；glTF 需同时选择对应的 `.bin`。贴图不会显示，Draco/Meshopt 压缩不在当前导入范围。见 [导入格式说明](docs/IMPORT-FORMATS.md)。
 
-## 离线参考结果
+```bash
+npm run check:geometry
+npm run check
+```
+
+`check` 执行单元测试、Studio 生产构建与完整类型检查。历史版本的构建环境限制保留在原记录中；本次维护验证见 [开源整理记录](docs/OPEN_SOURCE_PREPARATION.md)。
+
+## CLI
+
+CLI 仅接受 OBJ，适合几何检查、切缝生成与新 UV 导出：
+
+```bash
+npm run cli -- inspect examples/cylinder.obj
+npm run cli -- baseline examples/cylinder.obj /tmp/cylinder-seams.json
+npm run cli -- unwrap examples/cylinder.obj /tmp/cylinder-uv.obj
+```
+
+## 参考输出与使用边界
 
 ```bash
 npm run results:profiles
 ```
 
-在 `results/v0.4.30/` 恢复机械件关闭剖面选项、开启选项和正确人台的新图。使用外部UV查看器比较精确坐标；本工具导入OBJ后会按要求忽略原UV重新生成。没有贴图，布局改变需要重绘或烘焙。
+此命令将经过 SHA256 校验的参考 OBJ 恢复至 `results/v0.4.30/`。用外部 UV 编辑器查看原样布局；本工具导入模型后会忽略其原 UV 并重新生成。
 
-## 验证
-
-```bash
-npm run test:revolved-profile
-npm run test:revolved-profile:worker
-npm run lab:build
-npm run test:revolved-profile:browser
-```
-
-新度量、角点/切口检查、生产Worker、真实模型UV隔离与离线浏览器已经执行；结果、失败记录及范围见 `validation/v0.4.30/README.md`。最终ZIP独立解压验收见随下载提供的验收报告。
-
-完整Studio仍为 `npm install`、`npm run dev`。制作环境npm安装在25秒限制内未完成，实际主构建缺Vite，全量类型检查缺Node类型；已通过的严格核心编译/Worker/WebGL不等于完整React或通用FBX/GLTF导入认证。
-
-识别针对完整圆周剖面族，不保证缺失截面边、偏心或分叉的任意网格都得到矩形；不能为了轮廓好看破坏真实齿形和褶皱。本版不修改填空算法或动画时钟。详见 `docs/releases/0.4.30.md`。
+生成不使用原 UV、切缝、岛划分或恢复提示。展开存在形变，不保证语义最优版型或全局最密排布；动画用于展示对应关系，不是布料物理模拟。新 UV 需要自行重绘或烘焙贴图。

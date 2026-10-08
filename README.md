@@ -1,36 +1,76 @@
-> 当前交付：**v0.4.27**。请先阅读 [START_HERE.md](START_HERE.md) 和 [当前修复说明](docs/releases/0.4.27.md)。自动生成仅使用几何，不读取原UV；离线工作台已构建。
+<p align="center">
+  <img src="assets/readme/hero.svg" width="100%" alt="MeshTailor-JS：从三维网格到可检查的 UV 展开；仅使用几何生成">
+</p>
 
-# MeshTailor-JS · 0.4.24
+# MeshTailor-JS
 
-TypeScript / JavaScript 自动展 UV 工程。先读 [START_HERE.md](START_HERE.md)，本轮改动与实际结果见 [v0.4.24 发布说明](docs/releases/0.4.24.md)。
+**在浏览器中生成 UV、检查切缝，并观察三维网格逐岛展开。**
 
-**生产生成只使用几何，不读取模型原 UV、原切线、原岛划分或恢复提示。** 默认载入和 Generate baseline 使用同一流程。已有原始夹具只供 UV 隔离与参考审计，不是生成回退。
+TypeScript / JavaScript 几何工具，提供完整 Studio、免安装的离线工作台和 OBJ 命令行。自动生成只使用网格几何，导入模型的原 UV、切缝与岛划分不参与生成。
+
+[快速开始](#快速开始) · [使用指南](START_HERE.md) · [文档](docs/README.md) · [更新记录](CHANGELOG.md) · [MIT 许可](LICENSE)
+
+![真实离线工作台：选择机械件孔壁，中间为三维部件，右侧显示同一部件的等宽矩形 UV](validation/v0.4.30/previews/assembly-rectangle.png)
+
+*v0.4.30 实际界面：合成机械件的重复剖面侧壁生成等宽矩形，保留倒角与全部 2,304 个三角面。截图来自离线工作台。*
+
+## 能做什么
+
+- **生成与编辑 UV**：沿真实网格边开缝，展开、面积感知排布，再对当前结果缝合、重排或填空。
+- **检查几何与布局**：查看 UV 岛、面角对应、切边、形变和重叠；符合条件的环件保孔、管身与重复剖面生成结构化展开。
+- **播放展开过程**：逐岛接力、倍速和进度拖动；3D 视图、UV 选择与导出共享同一份结果。
+- **导入与导出**：Studio 读取 OBJ / FBX / GLB / glTF，导出带新 UV 的 OBJ；离线工作台与 CLI 使用 OBJ。
+
+生成流程为 **几何输入 → 面分区与真实切边 → 参数化与质量检查 → Atlas 排布 → 预览 / OBJ 导出**。默认载入、Generate baseline 和 CLI 使用同一条生成路径。
+
+## 快速开始
+
+### 免安装体验
+
+用支持 WebGL2 的浏览器直接打开根目录的 **[unfold-lab.html](unfold-lab.html)**。如果本地 Worker 被浏览器限制，使用 Node.js 启动：
 
 ```bash
-# 离线工作台，无需下载前端依赖
-node scripts/serve-unfold-lab.mjs
-# 或直接打开 unfold-lab.html
+npm run lab:serve
+```
 
-# 完整 Studio（需要安装真实依赖）
-npm install
+然后打开 [http://127.0.0.1:4175](http://127.0.0.1:4175)，选择内置模型或导入 OBJ，生成后即可选岛、播放和导出。
+
+### 本地开发
+
+需要 **Node.js 22.16+、npm** 和支持 WebGL2 的浏览器。在仓库目录执行：
+
+```bash
+npm ci
 npm run dev
 ```
 
-空间分组、真实网格边开缝、保孔与自由边界展开、面积感知排布、可选多轮空洞精排。保留面积优先的逐岛接力、倍速、随动画时间的落位亮显/渐隐、自由相机、框选、先岛后面的两级选择及重叠显示。
+打开终端显示的 Vite 地址。glTF 导入需同时选择其 `.bin`；材质和贴图不显示。更多格式限制见 [导入指南](docs/IMPORT-FORMATS.md)。
+
+### 命令行
 
 ```bash
-npm run check:geometry
-npm run test:longitudinal-budget
-npm run test:raster-window
-npm run test:cavity-fill
-npm run test:cavity-load
-npm run test:seams-fill:real
-npm run lab:build
-npm run test:cavity-fill:browser
-npm run results:restore
-npm run git:check -- --release v0.4.24
+npm run cli -- inspect examples/cylinder.obj
+npm run cli -- unwrap examples/cylinder.obj /tmp/cylinder-uv.obj
 ```
 
-实际执行记录在 `validation/v0.4.24/`。核心 TypeScript、生产 Worker、正确模型及离线 WebGL 已执行；完整 React/Vite 主入口在制作环境未构建成功，不能将离线测试当作完整入口认证。旧 source-UV 测试是历史审计，不应作为当前生产路径的验收命令。
+`baseline` 命令可导出切缝与链 JSON。CLI 当前仅接受 OBJ，详见 [使用指南](START_HERE.md#cli)。
 
-没有官方 MeshTailor 学习权重。几何方法不保证任意曲面的语义最优版型或全局最密排布。新 UV 需要相应重绘/烘焙贴图；本项目不自动烘焙。完整 Git 历史和旧 tag 保留，恢复历史的边界仍见 `REPACK-NOTES.md`。
+## 验证与贡献
+
+```bash
+npm run check:geometry   # 几何输入隔离、切边、拓扑与生成策略
+npm run check            # 单元测试、Studio 构建和完整类型检查
+npm run test:git         # 历史与标签维护工具的回归测试
+```
+
+修改生成策略时，还需运行 `npm run test:geometry:real`：两份固定真实模型分别携带原 UV、删除 UV 和随机 UV，比较全部实际切缝与面角坐标。浏览器专项测试需要 Chrome / Chromium / Edge，可用 `CHROME_PATH` 指定程序。详细流程见 [贡献指南](CONTRIBUTING.md)。
+
+欢迎提交问题、修复和可复现的回归夹具。请保留已有历史与发布标签，按独立目的提交，并说明验证范围。
+
+## 当前边界
+
+项目使用独立几何方法，**没有官方 MeshTailor 学习权重**。任意曲面可能出现形变或较多分片，不保证语义最优版型、零拉伸或全局最密排布。展开动画用于展示对应关系，不是布料物理模拟；新 UV 的贴图重绘与烘焙需自行完成。
+
+Studio 的导入器与离线工作台不同；离线截图不能替代完整 Studio 的浏览器验收。本次维护的通过项与环境限制见 [开源整理记录](docs/OPEN_SOURCE_PREPARATION.md)，具体算法与历史结果见 [文档索引](docs/README.md)。
+
+代码及自制资产采用 **[MIT](LICENSE)**。仓库内的 Corset / Flight Helmet 及其几何衍生文件沿用 **CC0-1.0**；来源、作者与许可边界见 [第三方资产说明](THIRD_PARTY_ASSETS.md)。

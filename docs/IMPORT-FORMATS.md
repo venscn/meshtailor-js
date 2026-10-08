@@ -1,46 +1,43 @@
-# Import formats and topology reconstruction — 0.2.0
+# 导入格式与几何重建
 
-## Format scope
+当前生产导入路径自 v0.4.20 起忽略原 UV，生成只使用几何。
 
-| Input | Parser | Companion files | Result |
-|---|---|---|---|
-| OBJ | custom TypeScript parser | no MTL/image required | source position identities + per-corner UV and UV identities |
-| FBX ASCII/Binary | Three.js FBXLoader | images not required | static geometry, initial skin/morph pose, UV0 coordinates |
-| GLB | Three.js GLTFLoader | self-contained recommended | static geometry, transforms, UV0 |
-| glTF | Three.js GLTFLoader | select matching `.bin` alongside `.gltf` | same scene-to-mesh path |
+| 入口 | 接受格式 | 伴随文件 |
+| --- | --- | --- |
+| Studio | OBJ、FBX ASCII / Binary、GLB、glTF | glTF 需同时选择对应 `.bin` |
+| 离线工作台 | OBJ 与内置几何示例 | 不读取 MTL / 贴图 |
+| CLI | OBJ | 不读取 MTL / 贴图 |
 
-Select exactly one main mesh file per import. `.gltf` and its `.bin` companions may be selected together. Multiple main files are rejected rather than silently choosing one. Local external buffers must match a selected companion. Materials/images are omitted; this is not a textured asset viewer. Draco/Meshopt decoders are not configured; export uncompressed geometry.
+每次选择一个主模型；glTF 与其多个几何缓冲可一起选择。材质与贴图不显示，不配置 Draco / Meshopt 解码器，推荐未压缩 GLB 或 FBX 7.4 / 7.5 Binary。
 
-Three's official current documentation describes ASCII >=7.0 and Binary >=6400, and `parse(ArrayBuffer,path)` returning a Group. This is a parser-level statement, not a claim that every exporter/version combination was tested here. This release retains the existing Three `^0.179.1` dependency range and recommends polygon FBX 7.4/7.5 Binary. Modern docs may include features absent in this pinned major/minor range.
+## 导入器
 
-Reference: https://threejs.org/docs/pages/FBXLoader.html (checked 2026-09-11).
+OBJ 使用工程内的解析器；生产导入随后通过白名单构造纯几何。FBX 使用 Three.js FBXLoader，GLB / glTF 使用 Three.js GLTFLoader；glTF 在解码前移除材质、贴图与原 UV 属性。
 
-## Geometry extraction
+FBXLoader 的官方格式范围是 ASCII 7.0+ / Binary 6400+，不代表本仓库测试了所有导出器组合。参见 [Three.js 文档](https://threejs.org/docs/pages/FBXLoader.html)。
 
-`sceneToMesh` updates world transforms and skeleton matrices, walks visible Mesh objects, reads indexed or non-indexed triangles, and uses `getVertexPosition` for the loaded initial pose. World and per-instance transforms are applied before combining geometry. A negative determinant reverses triangle corner order and UV corner order together. Animations are not evaluated over time; scene nodes/materials are not retained as editable hierarchy. Current InstancedMesh geometry transforms are supported, not separate per-instance animation/morph evaluation.
+## 几何与连接性
 
-Primitive draw ranges and finite coordinates are validated. Default input guards are 300,000 triangles, aggregate source vertex count <= three times that budget, and 256 MiB for the selected main file. The file size/triangle guards do not sandbox the upstream parser or guarantee bounded parse memory for adversarial compressed data; import trusted assets.
+场景适配器提取可见网格及其世界/实例变换，在初始加载姿态采样蒙皮和 morph 几何。负缩放修正三角面绕序；不播放导入动画，也不保留场景层级为编辑结构。
 
-## Welding versus UV topology
+几何焊接限定在同一源对象/实例内，不跨对象合并重叠部件。默认采用边界焊接；还提供精确、容差和关闭模式。坐标焊接可能连接有意重合的独立表面，应按模型选择策略。焊接后退化面会被丢弃并记录；这不是通用网格修复。
 
-A render buffer can duplicate a geometric vertex at a hard normal or UV boundary. Using those indices directly as topology can make adjacent triangles appear disconnected. `assembleMeshParts` reconstructs geometry within each source object/instance:
+场景适配器不请求 UV 属性，输出报告的 `uvFaces` 为 0。材质/对象身份可作为几何元数据保留，但原 UV 坐标、索引、切缝和岛划分不进入生成。
 
-- Exact: equal xyz values share a topology vertex.
-- Tolerance: search neighboring spatial buckets within `relativeTolerance × part bounding-box diagonal` (default 1e-7).
-- Off: keep the source render vertex identities.
+默认输入限制为 300,000 个三角面、源顶点数不超过该预算的三倍，以及主文件不超过 256 MiB。限制不能保证任意压缩输入的解析内存有界。
 
-No welding across source objects or instances occurs. Within one object, any coordinate-only welding can join intentionally disconnected coincident surfaces; choose Off in that case. Tolerance welding is not a generic mesh repair algorithm. Degenerate triangles after welding are dropped and counted in the import report.
+## 资源与取消
 
-UV remains on face corners, independently of geometric indices. Thus position welding does not discard ordinary UV discontinuities. FBXLoader and GLTFLoader do not expose complete original UV index identities; two UV islands with identical coordinates may be indistinguishable. OBJ source UV indices remain the stronger option for such data.
+FBX 贴图请求返回占位材质，避免缺失本地图片导致导入失败；glTF 在解码前移除材质/图片引用。提取完毕后释放原场景资源。
 
-## Materials, animation and resource cleanup
+FBXLoader 解析在主线程同步执行，尚不能中途取消。Worker 计算和可选下载可取消；任务序号拒绝过时结果。
 
-FBX material texture requests return a placeholder instead of requesting absent local images. glTF material/image references are removed from a cloned JSON document before decode. Geometry, UVs, transforms, accessors, skins and morph data are retained. An imported scene is disposed after extraction. This intentionally favors topology analysis over visual/material fidelity.
+## 回归验证
 
-FBXLoader parsing is synchronous on the main browser thread and is not yet interruptible. Worker-based seam/UV computation and online downloads are cancellable. Operation sequence IDs prevent late results from replacing a newly selected mesh.
+`apps/studio/public/assets/fixtures/garment-ascii.fbx` 与 `garment-binary.fbx` 是本项目生成的低密度褶皱夹具，文件身份见 [manifest](../examples/manifest.json)。写入器仅用于回归，不是通用 FBX 导出器。
 
-## Regression fixtures and limits of testing
+```bash
+npm run test:imports
+```
 
-The ZIP contains `garment-ascii.fbx` and `garment-binary.fbx`, generated by `scripts/lib/fbx-fixture.mjs` using a low-resolution pleated mesh. Binary data uses FBX 7400 nodes and compressed arrays. The writer is only a regression fixture producer, not a public/general FBX exporter.
-
-Executed tests check node lengths/offsets, zlib arrays, polygon and UV counts, SHA256 and all pure topology operations. **The official FBXLoader has not run in this environment.** The genuine integration suite `apps/studio/src/__tests__/importers.test.ts` is supplied for execution after `npm install`; it tests both fixtures, transformations, mirrored winding, object isolation, skin/morph geometry and glTF buffers. Passing structural tests alone is not evidence of full FBX compatibility.
+2026-10-08 已执行真实 Three.js 集成测试：两种 FBX 夹具、世界变换、镜像绕序、对象隔离、蒙皮 / morph、实例、GLB / glTF 伴随缓冲及原 UV 属性隔离均通过。此范围不等于任意第三方 FBX 兼容认证；当前完整验证与环境限制见 [开源整理记录](OPEN_SOURCE_PREPARATION.md)。
