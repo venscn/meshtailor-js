@@ -12,7 +12,7 @@
     "build": "npm --workspace @meshtailor/studio run build && npm run typecheck",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "cli": "npm --workspace @meshtailor/cli run start",
+    "cli": "tsx apps/cli/src/index.ts",
     "check": "npm run test && npm run build",
     "test:core": "node scripts/core-smoke.mjs",
     "test:layout": "node scripts/layout-smoke.mjs",
