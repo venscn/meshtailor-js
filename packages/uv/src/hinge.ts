@@ -72,7 +72,7 @@ const scratch=new WeakMap<HingeRig,Float64Array>();
 function treePose(g:UnfoldGeometry,rig:HingeRig,island:HingeIsland,fold:number,wave:boolean,out:Float32Array){
   let transforms=scratch.get(rig);if(!transforms){transforms=new Float64Array(g.faceChart.length*12);scratch.set(rig,transforms);}
   for(const fi of island.order){
-    const offset=fi*12,parent=rig.parent[fi]!;let r=identity(),translation:Vec3=[0,0,0];
+    const offset=fi*12,parent=rig.parent[fi]!;let r:Float64Array=identity(),translation:Vec3=[0,0,0];
     if(parent>=0){
       const local=wave?smooth(fold*1.6-(rig.depth[fi]!/Math.max(1,island.maxDepth))*.6):smooth(fold);
       const rot=rotation(rig.axis.subarray(fi*3,fi*3+3),rig.angle[fi]!*local),pivot=rig.pivot.subarray(fi*3,fi*3+3),p=parent*12,pr=transforms.subarray(p,p+9);
