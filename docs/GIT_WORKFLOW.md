@@ -17,6 +17,14 @@ There are 6 commits in `v0.1.0..v0.1.1` and 11 commits in `v0.1.1..v0.2.0`.
 
 Continue all subsequent work on this history. Both the referenced object and the resolved commit of every existing tag must remain unchanged.
 
+## Branch model
+
+Use `main` as the public integration branch and GitHub default branch. It contains the latest reviewed source and may include maintenance commits after a release tag; a tagged release remains an immutable snapshot.
+
+Create short-lived `feature/<topic>` or `fix/<topic>` branches from `main` for an independent change. Open a pull request, run the applicable CI checks, and integrate the completed work. A permanent `develop` branch is not needed for the current workflow. Create a release maintenance branch only when actually supporting a separate version line.
+
+The existing local `master`, `fix/*`, and `recovery/*` pointers are historical checkpoints, not active parallel development. Their commits are already ancestors of the public history. They are retained locally for recovery; initial GitHub publication needs `main` and the existing tags, not every local branch. Select refs explicitly instead of using `git push --all` or `git push --mirror`.
+
 ## Develop in small steps
 
 Inspect existing changes before starting, then work on a task branch with one independent purpose at a time. An implementation, its necessary dependencies, and its tests may share a commit. Separate unrelated UI changes, import fixes, performance improvements, additional tests, and documentation.
@@ -33,6 +41,10 @@ git commit -m "fix(scope): explain one logical change"
 ```
 
 Recommended commit prefixes include `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, and `chore`. Group commits by logical purpose, rather than file count, so each change can be reviewed and reverted. Do not squash published history into a new baseline.
+
+Use one scope and a concrete reason, for example `fix(uv): preserve the inner boundary of a ring`. For AI-assisted work, retain the AI marker inside that same scope: `fix(uv-AI): preserve the inner boundary of a ring`. Do not use the two-scope form `fix(AI)(uv): ...`. State meaningful verification or constraints in the body, and avoid messages that claim a broader result than the files and checks demonstrate.
+
+Before first publication, a local maintenance tail can have its messages normalized in a separate branch after a full backup. Keep the original branch and an old-to-new commit map, and preserve file trees, authors, timestamps, order, and existing tags. Published or tagged history is not rewritten for presentation. Do not invent merges, dates, or development steps to make the graph look busier.
 
 ## Publish a new version
 

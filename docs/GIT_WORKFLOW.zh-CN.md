@@ -17,6 +17,14 @@
 
 之后的工作必须在这条历史上继续；旧 tag 的引用对象与最终提交均不得变化。
 
+## 分支模型
+
+使用 `main` 作为公开集成分支与 GitHub 默认分支。它包含最新已审查源码，可以存在发布 tag 之后的维护提交；已有 tag 始终表示不可变发布快照。
+
+从 `main` 创建短期 `feature/<topic>` 或 `fix/<topic>` 分支处理独立改动，提交 PR、运行适用 CI 后集成。本项目当前流程不需要常驻 `develop` 分支；只有确实同时维护独立版本线时才建立发布维护分支。
+
+现有本地 `master`、`fix/*` 和 `recovery/*` 指针是历史检查点，不代表仍在并行开发。其提交都已包含在公开历史祖先链中。本地保留供恢复，首次上传 GitHub 只需要 `main` 与既有 tag，无需上传每个旧分支。明确选择 ref，不使用 `git push --all` 或 `git push --mirror`。
+
 ## 小步开发
 
 开始前先检查已有修改，在任务分支上围绕独立目的开发。实现必要依赖和测试可以放在同一提交；独立 UI 改动、导入修复、性能改进、测试补充、文档应拆开。
@@ -33,6 +41,10 @@ git commit -m "fix(scope): explain one logical change"
 ```
 
 提交消息推荐 `feat`、`fix`、`refactor`、`perf`、`test`、`docs`、`chore` 等前缀。不以文件数机械切分；目标是可审查与可回退的逻辑变更。禁止把已经发布的历史 squash 成一个新基线。
+
+标题只使用一个 scope，并说明具体目的，例如 `fix(uv): preserve the inner boundary of a ring`。AI 辅助提交把标记放在同一个 scope 内：`fix(uv-AI): preserve the inner boundary of a ring`，不使用 `fix(AI)(uv): ...` 这种双 scope 格式。正文记录有意义的验证和约束，不宣称超出实际变更与检查的结果。
+
+首次公开前，可在完整备份后，用独立分支规范本地维护段的消息。保留原分支和新旧提交映射，并保持文件树、作者、时间、顺序及已有 tag。已公开或已打 tag 的历史不因外观而改写；不为让图形复杂而补造合并、日期或开发步骤。
 
 ## 新版本发布
 
