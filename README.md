@@ -14,9 +14,9 @@ A TypeScript / JavaScript geometry tool with a full Studio, a standalone offline
 
 [Quick start](#quick-start) · [User guide](START_HERE.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md) · [MIT license](LICENSE)
 
-![Actual offline workbench: the selected mechanical bore appears in 3D alongside its corresponding rectangular UV island](validation/v0.4.30/previews/assembly-rectangle.png)
+![Current Studio: the selected gear island is highlighted in the mechanical assembly and its generated UV atlas](assets/readme/studio-v0.4.30.jpg)
 
-*v0.4.30 offline workbench: a repeated-profile sidewall becomes a constant-width rectangle while retaining its bevels and all 2,304 triangles. The screenshot shows a project-generated mechanical fixture. The current interface includes Chinese labels.*
+*Studio v0.4.30, captured locally on October 8, 2026. The built-in mechanical assembly has 22,528 triangles and 16 generated UV islands; the selected gear island (#5) is highlighted in both 3D and UV views. The current interface includes Chinese labels.*
 
 ## What you can do
 

@@ -14,9 +14,9 @@ TypeScript / JavaScript 几何工具，提供完整 Studio、免安装的离线�
 
 [快速开始](#快速开始) · [使用指南](START_HERE.zh-CN.md) · [文档](docs/README.zh-CN.md) · [更新记录](CHANGELOG.md) · [MIT 许可](LICENSE)
 
-![真实离线工作台：选择机械件孔壁，中间为三维部件，右侧显示同一部件的等宽矩形 UV](validation/v0.4.30/previews/assembly-rectangle.png)
+![当前 Studio：机械组合中选中的齿轮 UV 岛与右侧生成的 UV Atlas 同步高亮](assets/readme/studio-v0.4.30.jpg)
 
-*v0.4.30 实际界面：合成机械件的重复剖面侧壁生成等宽矩形，保留倒角与全部 2,304 个三角面。截图来自离线工作台。*
+*Studio v0.4.30 本地运行实拍（2026-10-08）：内置机械组合包含 22,528 个三角面，生成 16 个 UV 岛；选中的齿轮岛（#5）在三维视图与 UV 编辑器中同步高亮。当前界面包含中文标签。*
 
 ## 能做什么
 
