@@ -14,9 +14,8 @@ import { buildGenerationFrames, type GenerationFrame } from '@meshtailor/runtime
 import { MeshViewport } from './MeshViewport';
 import { UVCanvas } from './UVCanvas';
 import { importMeshFiles, type SceneImportOptions } from './importers';
-import type { SeamJob, SeamResult } from './workers/seam.worker';
 import { prepareViewportMesh } from './viewport-math';
-import { meshWithPreviewUV, geometryGenerationOptions, recommendUnwrap, DEFAULT_UNWRAP, type UnwrapOptions, type PackedChart } from '@meshtailor/uv';
+import { meshWithPreviewUV, geometryGenerationOptions, recommendUnwrap, type UnwrapOptions, type PackedChart } from '@meshtailor/uv';
 import { makeUnfoldDemo, makeHingeDemo, makeFragmentationDemo, makeOverlapDemo } from './unfold/demo';
 import { useUVSnapshot } from './unfold/useUVSnapshot';
 import { useUnfoldPlayer } from './unfold/useUnfoldPlayer';
@@ -28,7 +27,8 @@ import { UnfoldViewport } from './unfold/UnfoldViewport';
 import { CorrespondenceInspector } from './unfold/CorrespondenceInspector';
 import type { UVTarget } from './workers/uv.worker';
 import './styles.css';
-import { previewEdges, seamTarget } from './unfold/preview-policy';
+
+type GeometryPreset = 'baseline' | 'large' | 'balanced';
 
 function describeMesh(mesh:MeshData){
   const t=buildTopology(mesh);
@@ -48,19 +48,17 @@ export default function App(){
   const [loadError,setLoadError]=useState<string|null>(null),[importReport,setImportReport]=useState<MeshImportReport|null>(null);
   const [seamEdges,setSeamEdges]=useState<Set<string>>(new Set()),[chains,setChains]=useState<SeamChain[]>([]),[frames,setFrames]=useState<GenerationFrame[]>([]),[step,setStep]=useState(-1);
   const [wireframe,setWireframe]=useState(false),[xray,setXray]=useState(true),[showAllSeams,setShowAllSeams]=useState(false),[cameraResetKey,setCameraResetKey]=useState(0);
-  const [curvature,setCurvature]=useState(.82),[rings,setRings]=useState(2),[maxEdges,setMaxEdges]=useState(1500),[playing,setPlaying]=useState(false);
+  const [playing,setPlaying]=useState(false);
   const [detail,setDetail]=useState<MeshDetail>('medium'),[exampleId,setExampleId]=useState<ComplexExampleId>('garment');
   const [weld,setWeld]=useState<SceneImportOptions['weld']>('boundary'),[tolerance,setTolerance]=useState(5e-7);
   const [busy,setBusy]=useState<string|MessageDescriptor|null>(null),[notice,setNotice]=useState<string|MessageDescriptor>(()=>descriptor('Ready. Choose an offline mesh or import OBJ / FBX / GLB / GLTF.'));
-  const [liveUV,setLiveUV]=useState(false);
   const [toolTab,setToolTab]=useState<'mesh'|'uv'|'animation'>('mesh');
   const importInput=useRef<HTMLInputElement>(null);
   const [viewMode,setViewMode]=useState<'traversal'|'unfold'>('unfold'),[uvTarget,setUVTarget]=useState<UVTarget>('generated');
-  const operation=useRef(0),seamWorker=useRef<Worker|null>(null),abortDownload=useRef<AbortController|null>(null);
+  const operation=useRef(0),abortDownload=useRef<AbortController|null>(null);
   const frame=step>=0?frames[step]:undefined;
   const activeEdges=useMemo(()=>showAllSeams?seamEdges:frame?new Set(frame.revealedEdges):seamEdges,[frame,seamEdges,showAllSeams]);
   const stats=useMemo(()=>describeMesh(mesh),[mesh]);
-  const uvEdges=liveUV?activeEdges:seamEdges;
   // Unfolding always freezes the COMPLETE seam set. Traversal progress must not repack its target mid-animation.
   const snapshotTarget = uvTarget;
   const snapshotEdges = seamEdges;
@@ -78,13 +76,13 @@ export default function App(){
   const timelineStart=Math.max(0,Math.min(Math.max(0,frames.length-100),step-35));
   const timelineFrames=frames.slice(timelineStart,timelineStart+100);
 
-  useEffect(()=>()=>{operation.current++;seamWorker.current?.terminate();abortDownload.current?.abort();},[]);
+  useEffect(()=>()=>{operation.current++;abortDownload.current?.abort();},[]);
   useEffect(()=>{
     if(!playing||!frames.length)return;
     if(step>=frames.length-1){setPlaying(false);return;}
     const timer=setTimeout(()=>setStep(s=>Math.min(frames.length-1,s+1)),420);return()=>clearTimeout(timer);
   },[playing,step,frames.length]);
-  const cancel=()=>{uvState.cancel();operation.current++;seamWorker.current?.terminate();seamWorker.current=null;abortDownload.current?.abort();abortDownload.current=null;setBusy(null);setPlaying(false);};
+  const cancel=()=>{uvState.cancel();operation.current++;abortDownload.current?.abort();abortDownload.current=null;setBusy(null);setPlaying(false);};
   const begin=(status:string|MessageDescriptor)=>{cancel();setLoadError(null);setBusy(status);return operation.current;};
   const changeLoadPlan=(plan:LoadPipelineConfig)=>{setLoadPlan(plan);try{window.localStorage.setItem(PIPELINE_STORAGE_KEY,JSON.stringify(plan));}catch{setNotice(descriptor("浏览器不允许保存设置，本次会话仍生效。"));}};
   const rerunLoadPlan=()=>{try{const resolved=resolveLoadPipeline(mesh,loadPlan,uvConfig);cancel();player.pause();setUVSeed(undefined);setSeamEdges(new Set());setUVTarget(resolved.target);setUVConfig({...uvConfig,...resolved.config});setTaskPlan({...loadPlan});setLoadError(null);}catch(error){setLoadError(String(error));}};
@@ -129,11 +127,9 @@ export default function App(){
     finally{if(id===operation.current)setBusy(null);}
   };
   // Default load and this button resolve exactly the same geometry-only task.
-  const runSeams=(kind:SeamJob['kind'],_unused=false)=>{
+  const generateGeometry=(preset:GeometryPreset)=>{
     cancel();player.pause();setLoadError(null);setBusy(null);
-    const base=kind==='auto-large'||kind==='auto-balanced'
-      ?{...uvConfig,...recommendUnwrap(mesh,kind==='auto-balanced'?'balanced':'large').options}
-      :uvConfig;
+    const base=preset==='baseline'?uvConfig:{...uvConfig,...recommendUnwrap(mesh,preset).options};
     const resolved=resolveLoadPipeline(mesh,loadPlan,base);
     setTaskPlan({...loadPlan});setUVSeed(undefined);setUVTarget('generated');
     setUVConfig({...base,...resolved.config});setSeamEdges(new Set());setShowAllSeams(true);
@@ -201,8 +197,8 @@ export default function App(){
         {importReport&&<section className="import-report"><h3>{message("Import report")}</h3><p>{importReport.parts}{" "+message("parts ·")+" "}{importReport.sourceVertices.toLocaleString()}{" "+message("source vertices →")+" "}{importReport.vertices.toLocaleString()}{" "+message("topology vertices")}</p><p>{importReport.weldedVertices.toLocaleString()}{" "+message("welded ·")+" "}{importReport.uvFaces.toLocaleString()}{" "+message("source UV faces used（应为 0）")}</p><details><summary>{message("导入说明 / Warnings")}</summary>{importReport.warnings.map((w,i)=><p key={i}>{w}</p>)}</details></section>}
           </div>
           <div id="tools-uv" role="tabpanel" aria-labelledby="tool-uv" hidden={toolTab!=='uv'}>
-        <section><h3>{message("纯几何展开")}</h3><p>{message("模型原 UV、原切缝与原岛划分不会参与计算。")}</p><button className="primary" disabled={!!busy||uvState.loading} onClick={()=>runSeams('baseline')}>{message("Generate baseline · 从几何重生成")}</button><small>{message("与默认加载共用当前自动流程。原 UV 提取、恢复与旧切缝实验已移除。")}</small></section>
-            <UVSolverControls selectedCharts={player.selection} value={uvConfig} onChange={v=>{setTaskPlan(undefined);setUVConfig(v);}} snapshot={snapshot} onProcess={processUV} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
+        <section><h3>{message("纯几何展开")}</h3><p>{message("模型原 UV、原切缝与原岛划分不会参与计算。")}</p><button className="primary" disabled={!!busy||uvState.loading} onClick={()=>generateGeometry('baseline')}>{message("Generate baseline · 从几何重生成")}</button><small>{message("与默认加载共用当前自动流程。原 UV 提取、恢复与旧切缝实验已移除。")}</small></section>
+            <UVSolverControls selectedCharts={player.selection} value={uvConfig} onChange={v=>{setTaskPlan(undefined);setUVConfig(v);}} snapshot={snapshot} onProcess={processUV} onAuto={goal=>generateGeometry(goal)}/>
             <UVJobStatus state={uvState}/>
             <section><h3>{message("诊断")}</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.30',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,features:snapshot?.features,peel:snapshot?.peel,human:snapshot?.human,fragmentation:snapshot?.fragmentation,repair:snapshot?.repair,sourceAudit:snapshot?.sourceAudit,areaAudit:snapshot?.areaAudit,sourceAreaAudit:snapshot?.sourceAreaAudit,spatialReport:snapshot?.spatialReport,packingReport:snapshot?.packingReport,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>{message("导出分割诊断")}</button><small>{message("只包含参数与统计，不包含模型几何。")}</small></section>
           </div>
@@ -227,7 +223,7 @@ export default function App(){
         {viewMode==='traversal'&&frames.length>0&&<div className="operation-summary">{renderMessage(notice)}</div>}
       </section>
       <aside className="rightbar">
-        <div className="panel uv-panel"><div className="panel-title"><span>{viewMode==='unfold'?message("UV 编辑器"):message("UV 预览")}</span><span>{liveUV&&viewMode==='traversal'?message('current step'):message('生成 UV')}</span></div><UVCanvas snapshot={snapshot} status={uvStatus} selected={viewMode==='unfold'?player.active:uvAll} focusFace={viewMode==='unfold'?player.focusFace:null} checker={viewMode==='unfold'&&player.checker} wireframe={wireframe} onBox={viewMode==='unfold'?player.boxSelect:undefined} onPick={viewMode==='unfold'?player.pick:undefined}/></div>
+        <div className="panel uv-panel"><div className="panel-title"><span>{viewMode==='unfold'?message("UV 编辑器"):message("UV 预览")}</span><span>{message('生成 UV')}</span></div><UVCanvas snapshot={snapshot} status={uvStatus} selected={viewMode==='unfold'?player.active:uvAll} focusFace={viewMode==='unfold'?player.focusFace:null} checker={viewMode==='unfold'&&player.checker} wireframe={wireframe} onBox={viewMode==='unfold'?player.boxSelect:undefined} onPick={viewMode==='unfold'?player.pick:undefined}/></div>
         {viewMode==='unfold'?<CorrespondenceInspector mesh={mesh} snapshot={snapshot} player={player}/>:<div className="panel timeline"><div className="panel-title"><span>{message("Decode timeline")}</span><span>{chains.length}{" "+message("chains")}</span></div>{frames.length>100&&<small className="timeline-window">{message("Showing")+" "}{timelineStart+1}–{timelineStart+timelineFrames.length}{" "+message("of")+" "}{frames.length}{message(". Use slider to seek.")}</small>}<div className="timeline-scroll">{frames.length?timelineFrames.map((f,j)=>{const i=j+timelineStart;return <button key={i} className={i===step?'active':''} onClick={()=>seek(i)}><span>{String(i+1).padStart(3,'0')}</span><b>{f.tokenLabel}</b><em>{f.message}</em></button>;}):<p className="empty">{message("Generate seams to inspect mesh-native pointer traversal.")}</p>}</div></div>}
       </aside>
     </main>
