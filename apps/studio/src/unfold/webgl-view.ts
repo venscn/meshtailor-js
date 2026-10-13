@@ -9,6 +9,8 @@ import { OverlapPass } from './overlap-pass.js';
 import { overlapSettings, overlapLegend, sourceModelScale, type OverlapSettings } from './overlap-policy.js';
 import {bilingual as b,displayPreferences} from '../../../../packages/ui-platform/src/index';
 
+interface CameraPointer {id:number;x:number;y:number;startX:number;startY:number;button:number;dragged:boolean}
+
 export interface UnfoldDisplay extends UnfoldOptions, OverlapSettings, FocusSettings, ArrivalSettings {
   showHinges?:boolean; showTemporaryCuts?:boolean;
   /** Opt-in only. A camera gesture disables following until explicitly re-enabled. */
@@ -106,7 +108,8 @@ export class UnfoldWebGLView {
   private raf=0; private disposed=false; private lost=false;
   private size={width:0,height:0,dpr:0};
   private lastSelection='';
-  private pointer: {id:number;x:number;y:number;startX:number;startY:number;button:number;dragged:boolean}|null=null;
+  private pointer: CameraPointer|null=null;
+  private readonly touchPointers=new Map<number,CameraPointer>();
   private labels: {id:number;el:HTMLButtonElement;faces:number[]}[]=[];
 
   constructor(private host:HTMLDivElement, private onPick:(id:number,face:number|null,additive:boolean)=>void, private onError:(error:string|null)=>void, private onCameraManual:()=>void=()=>{}){
@@ -429,29 +432,72 @@ export class UnfoldWebGLView {
     // Held scrub gestures may produce no input events; the fade still renders.
     // Arrival colour is evaluated on animation progress; stationary scrubs need no RAF loop.
   };
-  private readonly pointerDown=(e:PointerEvent)=>{if(this.pointer||(e.button!==0&&e.button!==2))return;this.pointer={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,button:e.button,dragged:false};this.canvas.setPointerCapture(e.pointerId);};
+  private readonly pointerDown=(e:PointerEvent)=>{
+    if((e.button!==0&&e.button!==2)||!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY))return;
+    const touch=e.pointerType==='touch';
+    if(this.pointer&&(!touch||!this.touchPointers.has(this.pointer.id)))return;
+    if(this.touchPointers.has(e.pointerId))return;
+    const p:CameraPointer={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,button:e.button,dragged:false};
+    if(touch){
+      this.touchPointers.set(e.pointerId,p);
+      // Every finger in this gesture stays in navigation mode until released,
+      // including the last finger after a pinch or a cancelled companion.
+      if(this.touchPointers.size>1)for(const finger of this.touchPointers.values())finger.dragged=true;
+    }
+    this.pointer??=p;this.canvas.setPointerCapture(e.pointerId);
+  };
+  private touchFrame(){
+    const [a,b]=this.touchPointers.values();
+    return a&&b?{x:(a.x+b.x)/2,y:(a.y+b.y)/2,distance:Math.hypot(a.x-b.x,a.y-b.y)}:null;
+  }
+  private panCamera(dx:number,dy:number){
+    if(this.host.clientWidth<=0||this.host.clientHeight<=0)return;
+    const b=cameraBasis(this.camera),scale=this.camera.distance*.7/this.host.clientHeight;
+    for(let i=0;i<3;i++)this.camera.target[i]+=(-dx*b.right[i]!+dy*b.up[i]!)*scale;
+  }
   private readonly pointerMove=(e:PointerEvent)=>{
+    if(!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY))return;
+    const finger=this.touchPointers.get(e.pointerId);
+    if(finger&&this.touchPointers.size>1){
+      const before=this.touchFrame()!;finger.x=e.clientX;finger.y=e.clientY;
+      const after=this.touchFrame()!;
+      // Rebase input while hidden without a large pan on the next visible frame.
+      if(this.host.clientWidth<=0||this.host.clientHeight<=0)return;
+      const dx=after.x-before.x,dy=after.y-before.y;
+      if(dx===0&&dy===0&&after.distance===before.distance)return;
+      this.takeCameraControl();this.panCamera(dx,dy);
+      // Coincident contacts have no usable zoom ratio; their center still pans.
+      if(before.distance>=1&&after.distance>=1)this.camera.distance=Math.max(.2,Math.min(200,this.camera.distance*before.distance/after.distance));
+      this.invalidate();return;
+    }
     const p=this.pointer;if(!p||p.id!==e.pointerId)return;
     const dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;
     p.dragged ||= Math.hypot(e.clientX-p.startX,e.clientY-p.startY)>4;
     if(!p.dragged)return;
     this.takeCameraControl();
-    if(p.button===2){const b=cameraBasis(this.camera),scale=this.camera.distance*.7/Math.max(1,this.host.clientHeight);for(let i=0;i<3;i++)this.camera.target[i]+=(-dx*b.right[i]!+dy*b.up[i]!)*scale;}
+    if(p.button===2)this.panCamera(dx,dy);
     else{this.camera.yaw-=dx*.007;this.camera.pitch=Math.max(-1.48,Math.min(1.48,this.camera.pitch+dy*.007));}
     this.invalidate();
   };
+  private endPointer(id:number){
+    const p=this.touchPointers.get(id)??(this.pointer?.id===id?this.pointer:null);
+    if(!p)return null;
+    this.touchPointers.delete(id);
+    if(this.pointer?.id===id)this.pointer=this.touchPointers.values().next().value??null;
+    // Remove the ended pointer before releasing capture. A later capture-loss
+    // event must never clear a different finger's capture/state.
+    if(this.canvas.hasPointerCapture(id))this.canvas.releasePointerCapture(id);
+    return p;
+  }
   private readonly pointerUp=(e:PointerEvent)=>{
-    const p=this.pointer;if(!p||p.id!==e.pointerId)return;this.pointer=null;
-    if(this.canvas.hasPointerCapture(e.pointerId))this.canvas.releasePointerCapture(e.pointerId);
-    if(!p.dragged&&p.button===0&&this.data){
-      const r=this.canvas.getBoundingClientRect(),fi=pickFace(this.positions,this.camera,r.width/r.height,(e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2,fi=>this.options.context!=='hidden'||this.active.has(this.data!.faceChart[fi]!));
+    const p=this.endPointer(e.pointerId);if(!p)return;
+    if(!p.dragged&&p.button===0&&this.data&&Number.isFinite(e.clientX)&&Number.isFinite(e.clientY)){
+      const r=this.canvas.getBoundingClientRect();if(r.width<=0||r.height<=0)return;
+      const fi=pickFace(this.positions,this.camera,r.width/r.height,(e.clientX-r.left)/r.width*2-1,1-(e.clientY-r.top)/r.height*2,fi=>this.options.context!=='hidden'||this.active.has(this.data!.faceChart[fi]!));
       if(fi!==null)this.onPick(this.data.faceChart[fi]!,fi,e.shiftKey||e.ctrlKey||e.metaKey);
     }
   };
-  private readonly pointerCancel=(e:PointerEvent)=>{
-    if(this.pointer?.id!==e.pointerId)return;this.pointer=null;
-    if(this.canvas.hasPointerCapture(e.pointerId))this.canvas.releasePointerCapture(e.pointerId);
-  };
+  private readonly pointerCancel=(e:PointerEvent)=>{this.endPointer(e.pointerId);};
   private readonly wheel=(e:WheelEvent)=>{e.preventDefault();if(!Number.isFinite(e.deltaY)||e.deltaY===0)return;this.takeCameraControl();this.camera.distance=Math.max(.2,Math.min(200,this.camera.distance*Math.exp(Math.max(-300,Math.min(300,e.deltaY))*.0015)));this.invalidate();};
   private readonly contextMenu=(e:Event)=>e.preventDefault();
   private readonly contextLost=(e:Event)=>{e.preventDefault();this.lost=true;this.overlapPass=null;this.overlapFailure=null;this.onError('Unfold WebGL context lost. Wait for browser recovery or use Retry.');};
@@ -460,6 +506,8 @@ export class UnfoldWebGLView {
     if(this.disposed)return;this.disposed=true;this.unsubscribeDisplay();this.arrival.reset();cancelAnimationFrame(this.raf);this.observer.disconnect();window.removeEventListener('resize',this.invalidate);
     this.canvas.removeEventListener('pointerdown',this.pointerDown);this.canvas.removeEventListener('pointermove',this.pointerMove);this.canvas.removeEventListener('pointerup',this.pointerUp);this.canvas.removeEventListener('pointercancel',this.pointerCancel);
     this.canvas.removeEventListener('lostpointercapture',this.pointerCancel);
+    for(const id of this.touchPointers.keys())this.endPointer(id);
+    if(this.pointer)this.endPointer(this.pointer.id);
     this.canvas.removeEventListener('wheel',this.wheel);this.canvas.removeEventListener('contextmenu',this.contextMenu);this.canvas.removeEventListener('webglcontextlost',this.contextLost);this.canvas.removeEventListener('webglcontextrestored',this.contextRestored);
     this.overlapPass?.dispose();this.overlapPass=null;this.buffers.forEach(b=>this.gl.deleteBuffer(b));this.gl.deleteVertexArray(this.vao);this.gl.deleteVertexArray(this.atlasVAO);this.gl.deleteProgram(this.program);this.gl.getExtension('WEBGL_lose_context')?.loseContext();
     this.canvas.remove();this.labelHost.remove();this.diagnosticNotice.remove();this.data=null;
