@@ -1,5 +1,6 @@
 import {geometryOnlyMesh} from '@meshtailor/mesh-core';
 import type { UVJob, UVJobProgress, UVMessage, UVSnapshot } from '../workers/uv.worker.js';
+import {message,displayLabel,displayPreferences} from '../../../../packages/ui-platform/src/index';
 export type UVFailureCode='cancelled'|'timeout'|'startup'|'worker'|'invalid';
 export class UVJobFailure extends Error {
   constructor(public readonly code:UVFailureCode,message:string){super(message);this.name='UVJobFailure';}
@@ -49,8 +50,10 @@ export function startUVJob(job:UVJob,options:UVJobClientOptions):{result:Promise
   return{result,cancel};
 }
 export function describeUVProgress(progress:UVJobProgress|null,elapsedMs:number):string{
-  const detail=progress?.detail??'启动 UV Worker';
-  const count=progress?.current!==undefined&&progress.total!==undefined?` · ${progress.current}/${progress.total} ${progress.unit??''}`:'';
-  const faces=progress?.facesDone!==undefined&&progress.facesTotal!==undefined?` · 已接受 ${progress.facesDone.toLocaleString()}/${progress.facesTotal.toLocaleString()} 面`:'';
-  return `${detail}${count}${faces} · 已用 ${(elapsedMs/1000).toFixed(1)} 秒`;
+  // Worker detail remains raw diagnostic evidence. Structured stages are the
+  // primary localized status, so language changes never require restarting a job.
+  const detail=displayPreferences.getSnapshot().locale==='zh-CN'?(progress?.detail??'启动 UV Worker'):message(progress?.stage??'validate');
+  const count=progress?.current!==undefined&&progress.total!==undefined?` · ${progress.current}/${progress.total} ${displayLabel(progress.unit??'')}`:'';
+  if(progress?.facesDone!==undefined&&progress.facesTotal!==undefined)return message('UV progress: {0}{1} · accepted {2}/{3} faces · {4} s elapsed',[detail,count,progress.facesDone.toLocaleString(),progress.facesTotal.toLocaleString(),(elapsedMs/1000).toFixed(1)]);
+  return message('UV progress: {0}{1} · {2} s elapsed',[detail,count,(elapsedMs/1000).toFixed(1)]);
 }

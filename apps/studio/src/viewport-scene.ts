@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { MeshData } from '@meshtailor/mesh-core';
 import type { GenerationFrame } from '@meshtailor/runtime';
 import { fitDistance, prepareViewportMesh, viewportSize, type ViewportMesh } from './viewport-math';
+import {bilingual as b,displayPreferences} from '../../../packages/ui-platform/src/index';
 
 /** Dispose every geometry/material in a subtree, including traversal overlays. */
 function disposeGroup(group: THREE.Group): void {
@@ -38,6 +39,7 @@ export class ViewportScene {
   private width = 0;
   private height = 0;
   private dpr = 0;
+  private unsubscribeDisplay=()=>{};
 
   constructor(private readonly host: HTMLDivElement, private readonly report: (error: string | null) => void) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -45,7 +47,7 @@ export class ViewportScene {
     // The CSS pixels and GPU drawing-buffer pixels MUST remain independent.
     // Also set inline styles so a missing stylesheet cannot restart the feedback loop.
     Object.assign(canvas.style, { position: 'absolute', inset: '0', display: 'block', width: '100%', height: '100%' });
-    canvas.setAttribute('aria-label', '3D mesh traversal canvas');
+    canvas.setAttribute('aria-label', b('3D mesh traversal canvas','3D 网格遍历画布'));
     canvas.dataset.testid = 'mesh-canvas';
     this.host.appendChild(canvas);
     this.scene.background = new THREE.Color(0x1b1d1f);
@@ -63,6 +65,7 @@ export class ViewportScene {
     window.addEventListener('resize', this.resize);
     this.resize();
     this.report(null);
+    this.unsubscribeDisplay=displayPreferences.subscribe(()=>canvas.setAttribute('aria-label',b('3D mesh traversal canvas','3D 网格遍历画布')));
     this.animation = requestAnimationFrame(this.tick);
   }
 
@@ -242,6 +245,7 @@ export class ViewportScene {
   };
 
   dispose(): void {
+    this.unsubscribeDisplay();
     if (this.disposed) return;
     this.disposed = true;
     cancelAnimationFrame(this.animation);

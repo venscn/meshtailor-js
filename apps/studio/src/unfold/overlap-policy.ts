@@ -1,3 +1,4 @@
+import {message} from '../../../../packages/ui-platform/src/index';
 /** Render-only diagnostics. These settings must never enter UV solving or motion timing. */
 export type OverlapMode = 'off' | 'auto' | 'coplanar' | 'projected';
 export const DEFAULT_OVERLAP_MODE: OverlapMode = 'auto';
@@ -41,8 +42,8 @@ export function overlapWorldTolerance(scale: number, relative: number, far: numb
   return Math.max(scale * relative, 2 * far / 16777215);
 }
 export function overlapLegend(mode: OverlapMode) {
-  if (mode === 'auto') return '自动叠层：运动岛视线叠层（非几何相交），静止时近共面检查';
-  if (mode === 'off') return '重叠提示已关闭';
-  const kind = mode === 'projected' ? '视线叠层（含前后遮挡，非几何相交）' : '同岛近共面重叠（当前可见表层）';
-  return `${kind} · 橙色斜纹：2 层 · 玫红交叉纹：3 层及以上`;
+  if (mode === 'auto') return message("自动叠层：运动岛视线叠层（非几何相交），静止时近共面检查");
+  if (mode === 'off') return message("重叠提示已关闭");
+  const kind = mode === 'projected' ? message("视线叠层（含前后遮挡，非几何相交）") : message("同岛近共面重叠（当前可见表层）");
+  return message("{0} · 橙色斜纹：2 层 · 玫红交叉纹：3 层及以上",[kind]);
 }
