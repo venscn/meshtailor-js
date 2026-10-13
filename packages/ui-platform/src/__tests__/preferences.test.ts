@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createDisplayPreferenceStore, readDisplayPreferences, DEFAULT_DISPLAY, message, messages, descriptor, renderMessage } from '../index';
+import { createDisplayPreferenceStore, readDisplayPreferences, DEFAULT_DISPLAY, message, messages, descriptor, renderMessage, getPalette } from '../index';
 
 describe('display preferences are isolated from computation', () => {
   it('accepts supported display values and discards foreign persisted fields', () => {
@@ -25,6 +25,32 @@ describe('display preferences are isolated from computation', () => {
     unsubscribe();
     store.set({ theme: 'light' });
     expect(calls).toBe(1);
+  });
+});
+
+describe('one theme palette drives all rendering surfaces', () => {
+  it('uses identical token contracts and background colors in CSS and GL', () => {
+    const dark = getPalette('dark'), light = getPalette('light');
+    expect(Object.keys(dark.tokens).sort()).toEqual(Object.keys(light.tokens).sort());
+    for (const palette of [dark, light]) {
+      expect(palette.background).toBe(palette.tokens['--app-bg']);
+      expect(palette.clearColor.map(channel => Math.round(channel*255))).toEqual([1,3,5].map(index => Number.parseInt(palette.background.slice(index,index+2),16)));
+    }
+    expect(light.background).not.toBe(dark.background);
+  });
+
+  it('keeps small UI text readable on both application and panel surfaces', () => {
+    const luminance = (hex: string) => {
+      const rgb = [1,3,5].map(index => Number.parseInt(hex.slice(index,index+2),16)/255).map(value => value <= .04045 ? value/12.92 : ((value+.055)/1.055)**2.4);
+      return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722;
+    };
+    for (const theme of ['dark','light'] as const) {
+      const {tokens} = getPalette(theme);
+      for (const foreground of ['--text','--muted','--quiet'] as const) for (const background of ['--app-bg','--panel-bg','--raised-bg'] as const) {
+        const a = luminance(tokens[foreground]), b = luminance(tokens[background]);
+        expect((Math.max(a,b)+.05)/(Math.min(a,b)+.05)).toBeGreaterThanOrEqual(4.5);
+      }
+    }
   });
 });
 
