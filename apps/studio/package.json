@@ -13,6 +13,7 @@
     "@meshtailor/chaining-seams": "*",
     "@meshtailor/runtime": "*",
     "@meshtailor/uv": "*",
+    "@meshtailor/ui-platform": "*",
     "@vitejs/plugin-react": "^5.0.2",
     "vite": "^7.1.3",
     "react": "^19.1.1",

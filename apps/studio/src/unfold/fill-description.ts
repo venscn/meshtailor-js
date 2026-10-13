@@ -1,5 +1,5 @@
 import { describeFill, describeGrowthStop, type FillReport, type FillGrowthStop } from '@meshtailor/uv';
-import { displayPreferences, type Locale } from '../../../../packages/ui-platform/src/index.js';
+import { displayPreferences, type Locale } from '@meshtailor/ui-platform';
 
 /** Present measured report fields without localizing machine-readable stop codes
  * or changing the report. The algorithm package remains display-independent. */

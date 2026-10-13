@@ -1,4 +1,4 @@
-import { message } from '../../../../packages/ui-platform/src/index.js';
+import { message } from '@meshtailor/ui-platform';
 import {describeSymmetrySummary} from './symmetry-description';
 import {renderFillGrowth} from './fill-growth-panel';
 import { useState, useEffect, useRef } from 'react';
