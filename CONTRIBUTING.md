@@ -39,6 +39,10 @@ Include reproduction steps, expected and actual behavior, application version, b
 
 Keep changes focused. Preserve existing commits and tags, make small commits for independent changes with necessary regression coverage, and do not overwrite another contributor's uncommitted work. See [AGENTS.md](AGENTS.md) and the [Git workflow](docs/GIT_WORKFLOW.md).
 
+Create normal task branches from `develop`; `main` and existing release tags remain the published baseline. Every push, including a feature branch, requires the maintainer's explicit approval of that batch. Work may be committed, reviewed, and integrated into develop locally while approval is pending.
+
+See [continuous maintenance](docs/MAINTENANCE.md) for evidence-based audits and natural issue batches, and [test classification](docs/TESTING.md) for current acceptance, offline QA, and historical experiments. Run meaningful checks for the actual change; no issue means no speculative cleanup or empty branch. This project needs no business backend or operations frontend.
+
 Update [asset provenance](THIRD_PARTY_ASSETS.md) when adding assets. Keep pinned fixture checksums; a same-name download must not replace an existing real model.
 
 ## Documentation and licensing

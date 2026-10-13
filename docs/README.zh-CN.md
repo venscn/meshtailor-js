@@ -9,6 +9,8 @@
 - [导入格式](IMPORT-FORMATS.zh-CN.md)：OBJ / FBX / GLB / glTF 的实际范围。
 - [贡献指南](../CONTRIBUTING.zh-CN.md)：开发检查、回归夹具与问题报告。
 - [Git 工作流](GIT_WORKFLOW.zh-CN.md)：保留历史、小步提交与新发布。
+- [持续维护](MAINTENANCE.zh-CN.md)：周期审计、自然合批与推送确认。
+- [测试分类](TESTING.zh-CN.md)：现行验收、离线 QA 与历史试验。
 - [资产来源与许可](../THIRD_PARTY_ASSETS.zh-CN.md)。
 
 ## 当前生成器

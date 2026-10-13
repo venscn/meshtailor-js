@@ -37,6 +37,10 @@ npm run test:geometry:real
 
 保持改动聚焦，保留已有提交和 tag，按独立目的提交实现与必要回归测试。不要覆盖他人未提交的修改。详细规范见 [AGENTS.md](AGENTS.md) 和 [Git 工作流](docs/GIT_WORKFLOW.zh-CN.md)。
 
+常规任务分支从 `develop` 创建，`main` 和已有发布 tag 保持公开基线。每次 push（包括功能分支）都需维护者对该批次明确确认；等待确认期间可以本地提交、审查和集成到 develop。
+
+[持续维护](docs/MAINTENANCE.zh-CN.md)说明按证据审计与自然合批，[测试分类](docs/TESTING.zh-CN.md)区分现行验收、离线 QA 和历史试验。只对实际改动运行有意义的检查；没有问题则不做推测性清理或空分支。本项目不需要业务后端和运维端。
+
 新增资产时更新 [第三方说明](THIRD_PARTY_ASSETS.zh-CN.md)，维护固定夹具的校验值；不要用同名下载替换已有真实模型。
 
 ## 文档与许可
