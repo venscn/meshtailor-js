@@ -19,9 +19,20 @@
 
 ## 分支模型
 
-使用 `main` 作为公开集成分支与 GitHub 默认分支。它包含最新已审查源码，可以存在发布 tag 之后的维护提交；已有 tag 始终表示不可变发布快照。
+分支职责和提交格式参考[用户指定的 Git 规范](https://developer.aliyun.com/article/1706933)，用已有 `main` 对应文中的 master；不为采用新流程而更名公开分支或改写历史。
 
-从 `main` 创建短期 `feature/<topic>` 或 `fix/<topic>` 分支处理独立改动，提交 PR、运行适用 CI 后集成。本项目当前流程不需要常驻 `develop` 分支；只有确实同时维护独立版本线时才建立发布维护分支。
+| 分支 | 创建来源 | 职责与去向 |
+| --- | --- | --- |
+| `main` | 已发布历史 | 已审查、可发布源码和 GitHub 默认分支；已有 tag 保持不可变。 |
+| `develop` | `main` | 已验证开发批次的本地集成线；进入此分支不代表批准发布。 |
+| `feature/<topic>` | `develop` | 一个功能或自然关联的问题批次；验证后集成到 develop。 |
+| `fix/<topic>` | `develop` | 常规缺陷修复；验证后集成到 develop。 |
+| `release/vX.Y.Z` | `develop` | 只用于真实发布准备、修复和文档；审查后回流 main 和 develop。 |
+| `hotfix/<topic>` | `main` | 紧急修复已发布版本；审查后回流 main 和 develop。 |
+
+集成完成且没有恢复需求时清理短期分支，不预建空的 release/hotfix 分支。审查实际差异、记录验证；获得发布授权后使用 PR 审查。同步时使用 merge 或快进；参考文章中的强推示例不构成本仓库改写已发布历史的授权。
+
+**每次 push 都必须获得用户对具体分支、提交和 tag 的明确确认。** 此规则覆盖以前的发布授权。确认前仅在本地开发、提交和验证；不推送功能分支、不创建远端 PR、不更改 remote 或托管保护规则。申请发布确认前，展示可审查的差异、提交列表、验证及限制。本地集成到 develop 已获授权，但不移动 main 或已发布 tag。
 
 现有本地 `master`、`fix/*` 和 `recovery/*` 指针是历史检查点，不代表仍在并行开发。其提交都已包含在公开历史祖先链中。本地保留供恢复，首次上传 GitHub 只需要 `main` 与既有 tag，无需上传每个旧分支。明确选择 ref，不使用 `git push --all` 或 `git push --mirror`。
 
@@ -31,6 +42,7 @@
 
 ```bash
 git status --short
+git switch develop
 git switch -c feature/your-task
 # 修改一个可独立审查的功能或修复，运行相关检查。
 git diff --check

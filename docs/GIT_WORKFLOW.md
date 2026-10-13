@@ -19,9 +19,20 @@ Continue all subsequent work on this history. Both the referenced object and the
 
 ## Branch model
 
-Use `main` as the public integration branch and GitHub default branch. It contains the latest reviewed source and may include maintenance commits after a release tag; a tagged release remains an immutable snapshot.
+The maintenance workflow follows the branch roles and commit format in the [referenced Git guide](https://developer.aliyun.com/article/1706933), with the existing `main` retained in place of `master`. Do not rename the published branch or rewrite history to adopt this workflow.
 
-Create short-lived `feature/<topic>` or `fix/<topic>` branches from `main` for an independent change. Open a pull request, run the applicable CI checks, and integrate the completed work. A permanent `develop` branch is not needed for the current workflow. Create a release maintenance branch only when actually supporting a separate version line.
+| Branch | Base | Responsibility and destination |
+| --- | --- | --- |
+| `main` | Existing published history | Reviewed, publishable source; GitHub default branch. Existing release tags remain immutable. |
+| `develop` | `main` | Local integration of verified development batches; readiness here is not publication approval. |
+| `feature/<topic>` | `develop` | One feature or naturally related issue batch; integrate into develop after focused verification. |
+| `fix/<topic>` | `develop` | An ordinary defect correction; integrate into develop after verification. |
+| `release/vX.Y.Z` | `develop` | Only actual release preparation, fixes and documentation; integrate into main and develop after review. |
+| `hotfix/<topic>` | `main` | An urgent published-version correction; integrate into main and develop after review. |
+
+Keep branches short-lived when their work is integrated and no recovery need remains. Do not create empty release/hotfix branches in advance. Review the actual diff, document validation and use PR review after publication is authorized. Synchronize with merge or a fast-forward; the guide's force-push example does not authorize rewriting this repository's published history.
+
+**Every push requires the user's explicit confirmation of the particular branches, commits and tags to upload.** This supersedes earlier publication authorization. Until then, commit and verify locally; do not push feature branches, open a remote PR, change remotes or configure hosting protections. Show the concrete diff, commit list, checks and remaining limitations before requesting publication approval. Local integration into develop is allowed; it does not move main or any published tag.
 
 The existing local `master`, `fix/*`, and `recovery/*` pointers are historical checkpoints, not active parallel development. Their commits are already ancestors of the public history. They are retained locally for recovery; initial GitHub publication needs `main` and the existing tags, not every local branch. Select refs explicitly instead of using `git push --all` or `git push --mirror`.
 
@@ -31,6 +42,7 @@ Inspect existing changes before starting, then work on a task branch with one in
 
 ```bash
 git status --short
+git switch develop
 git switch -c feature/your-task
 # Make one independently reviewable change and run its relevant checks.
 git diff --check
