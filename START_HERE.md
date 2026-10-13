@@ -23,7 +23,13 @@ Visit [http://127.0.0.1:4175](http://127.0.0.1:4175). Set `PORT` to change the p
 
 Repeated-profile metric unfolding is enabled by default. Eligible periodic sidewalls become constant-width rectangles, while shallow radial rings can preserve their inner holes. Recognition depends on geometry, not model names or original UVs. Settings and distortion tradeoffs are covered in the [release summary](docs/releases/0.4.30.en.md).
 
-The current interface includes Chinese labels; documentation switching does not localize the application.
+## Language, theme, and small screens
+
+Studio and the offline workbench start in **English / Dark**. Use **Language** and **Theme** in the header to select simplified Chinese or Light. Display preferences are saved separately from generation settings; switching them redraws the interface without rerunning the solver or resetting the current result and camera. Blocked browser storage falls back to session preferences. Raw technical diagnostics, model names, and machine identifiers retain their original text.
+
+On narrow or short screens, scroll the page to reach the stacked controls, 3D view, UV editor, and inspector. Resize or rotate the same running page: canvases follow their available space. In the unfolding view, drag one finger to orbit, use two fingers to pan or pinch, and tap to select. Desktop mouse controls remain available.
+
+The CLI retains its documented commands and machine-readable output; language and theme are browser presentation preferences. Documentation has its own English / Chinese links.
 
 ## Full Studio
 
@@ -41,7 +47,7 @@ npm run check:geometry
 npm run check
 ```
 
-`check` runs unit tests, the Studio production build, and full type checking. Historical environment limits remain in their original reports; this maintenance round is recorded in [OPEN_SOURCE_PREPARATION](docs/OPEN_SOURCE_PREPARATION.md).
+`check` runs unit tests, the Studio production build, and full type checking. See [test classification](docs/TESTING.md) before selecting additional browser, QA, or historical suites. Historical environment limits remain in their original reports; current local maintenance evidence is recorded in [the audit](docs/audits/2026-10-13.md).
 
 ## CLI
 

@@ -18,11 +18,12 @@ This document describes the current geometry-only production boundary. The [unch
 | `packages/uv` | Geometry-driven partitioning/cuts, parameterization, quality checks, packing, generated-result editing, and unfolding correspondence. |
 | `packages/runtime` | Geometry baseline adapter, lazy traversal/debugger frames, and research candidate masks. |
 | `packages/model` | Research specification, training-sample utilities, and model adapter contracts; no learned weights are bundled or used by production generation. |
+| `packages/ui-platform` | Typed English/Chinese messages, immutable display preferences, and accessible light/dark palettes; no geometry or browser dependency. |
 | `scripts` | Builds, Git checks, focused regressions, fixture tooling, and classified historical experiments. |
 | `docs` / `validation` | Maintained bilingual guides and versioned design/validation evidence; saved reports describe their original run. |
 | `unfold-lab.html` | Offline deliverable rebuilt from source with `npm run lab:build`. |
 
-Shared language, theme, and preference utilities are being consolidated in `packages/ui-platform`. This integration and its cross-client coverage must be confirmed against integrated source and browser checks before being described as complete. Display preferences stay outside geometry generation settings.
+Studio and the offline workbench share `packages/ui-platform`. Each client binds its own controls and redraw lifecycle; preferences stay outside geometry generation settings. Known interface copy and drawn labels are bilingual; raw technical diagnostics and machine identifiers retain their original text. The CLI keeps stable commands and machine-readable output.
 
 ## Production flow
 
@@ -45,13 +46,14 @@ Stitch, repack, fill, and template edits consume the current generated snapshot.
 ## Dependency boundaries
 
 ```text
-Studio ───────→ mesh-core / chaining-seams / runtime / uv
+Studio ───────→ mesh-core / chaining-seams / runtime / uv / ui-platform
 CLI ──────────→ mesh-core / chaining-seams / uv
 runtime ──────→ mesh-core / chaining-seams / uv
 uv ───────────→ mesh-core / chaining-seams
 chaining-seams → mesh-core
 model ────────→ mesh-core / chaining-seams / runtime (research)
 mesh-core ────→ no other project package
+ui-platform ──→ no other project package
 ```
 
 Each workspace declares direct internal imports, including type-only imports. Cross-workspace consumers use package entry points instead of relative imports into another package's `src`. Production geometry packages do not import React, DOM controls, client preferences, or application implementations.
@@ -67,6 +69,8 @@ Studio's `useUVSnapshot` owns cancellation and stale-result rejection. `startUVJ
 UV drawing, current morphed 3D picking, and export consume that snapshot. Playback never changes the solver seam set or silently repacks its target. Unfolding is deterministic correspondence visualization; intermediate poses may overlap and are not cloth simulation or a zero-distortion proof.
 
 Traversal frames stay on the client with lazy edge-history accessors. Structured-cloning these frames across Workers would eagerly materialize histories. Browser importers and renderers own Three.js/WebGL resources and dispose them at lifecycle boundaries.
+
+Display preferences use their own versioned storage key and an immutable subscribed snapshot. React and native DOM controls consume the same locale/theme state. Canvas and WebGL repaint using shared palette tokens without changing geometry, correspondence, island identity colors, camera, selection, or solver configuration. A blocked/corrupt browser store uses safe session defaults. Narrow and short layouts scroll rather than clipping controls; renderer buffers resize to their hosts with a bounded device pixel ratio.
 
 ## Maintenance and checks
 

@@ -18,11 +18,12 @@ MeshTailor-JS 在本机以浏览器 Studio、离线工作台或 OBJ CLI 运行�
 | `packages/uv` | 几何驱动的分区/开缝、参数化、质量检查、排布、生成结果编辑与展开对应。 |
 | `packages/runtime` | 几何 baseline 适配、惰性遍历/调试帧与研究候选遮罩。 |
 | `packages/model` | 研究规范、训练样本工具和模型适配契约；生产生成不包含或使用学习权重。 |
+| `packages/ui-platform` | 类型化英中消息、不可变展示偏好和满足对比度要求的昼夜调色板；不依赖几何或浏览器。 |
 | `scripts` | 构建、Git 检查、聚焦回归、夹具工具与已分类的历史实验。 |
 | `docs` / `validation` | 维护中的双语指南和按版本记录的设计/验证证据；保存的报告表示原执行范围。 |
 | `unfold-lab.html` | 从源码用 `npm run lab:build` 重建的离线交付物。 |
 
-共享语言、主题与偏好工具正在整合到 `packages/ui-platform`。只有集成源码和浏览器检查确认后，才可将整合及跨客户端覆盖描述为完成。展示偏好不得进入几何生成设置。
+Studio 与离线工作台共用 `packages/ui-platform`，各客户端负责自己的控件绑定与重绘生命周期。展示偏好不进入几何生成设置。已知界面文案和绘制标签提供双语；原始技术诊断与机器标识保留原文。CLI 保持稳定命令与机器可读输出。
 
 ## 生产流程
 
@@ -45,13 +46,14 @@ glTF 工具移除原 `TEXCOORD_*`/`TANGENT` 属性引用和贴图依赖，保留
 ## 依赖边界
 
 ```text
-Studio ───────→ mesh-core / chaining-seams / runtime / uv
+Studio ───────→ mesh-core / chaining-seams / runtime / uv / ui-platform
 CLI ──────────→ mesh-core / chaining-seams / uv
 runtime ──────→ mesh-core / chaining-seams / uv
 uv ───────────→ mesh-core / chaining-seams
 chaining-seams → mesh-core
 model ────────→ mesh-core / chaining-seams / runtime（研究）
 mesh-core ────→ 不依赖其他项目包
+ui-platform ──→ 不依赖其他项目包
 ```
 
 每个工作区声明直接内部导入，包括纯类型导入。跨工作区消费者通过包入口访问，不用相对路径深入其他包的 `src`。生产几何包不导入 React、DOM 控件、客户端偏好或应用实现。
@@ -67,6 +69,8 @@ Studio 的 `useUVSnapshot` 负责取消任务和拒绝过时结果。`startUVJob
 UV 绘制、当前变形 3D 拾取和导出消费同一快照。播放不会改变求解器切缝集或静默重排目标。展开是对应关系的确定性可视化，中间状态可能交叠，不是布料仿真或零形变证明。
 
 遍历帧与惰性边历史访问器留在客户端；通过 Worker 结构克隆传输会提前实体化历史。浏览器导入器和绘制器拥有 Three.js/WebGL 资源，并在生命周期边界释放。
+
+展示偏好使用独立版本化存储键和不可变订阅快照；React 与原生 DOM 控件消费同一语言/主题状态。Canvas 和 WebGL 根据共享色板重绘，不改变几何、对应关系、岛身份颜色、相机、选择或求解配置。存储损坏或被禁止时采用安全会话默认值。窄屏与短屏通过滚动访问控件，绘制缓冲区随宿主尺寸和有上限的设备像素比调整。
 
 ## 维护与检查
 

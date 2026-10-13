@@ -14,6 +14,10 @@
 | `npm run check:geometry` | 严格核心编译；几何输入隔离、边界、候选契约、拓扑、统一生成策略和核心回归 | 修改几何流程或生成器 |
 | `npm run check` | 单元测试、Studio 生产构建与完整类型检查 | 应用或代码变更 |
 | `npm run typecheck` | 完整 TypeScript 检查 | 类型与模块边界变更 |
+| `npm run test:layout` | CSS 可访问性、窄屏/短屏网格、动态 resize 与有界 HiDPI 缓冲区；使用布局夹具 | 修改布局/CSS；另需实际客户端验收 |
+| `npm run test:display:browser` | 真实生产 DOM 控件、Canvas 文字/颜色、WebGL 显示四组合，保留快照/相机并检查释放 | 修改共享展示或绘制器；此 harness 不挂载 React |
+| `npm run test:touch:browser` | 生产展开绘制器在 DPR 1/2 下接受真实捕获触摸；平移/捏合、抬指/取消、选择与鼠标行为 | 修改相机/输入；真实设备 Safari 另行检查 |
+| `npm run test:offline-display:browser` | 真实重建离线页面、展示四组合、持久化、活动播放隔离与内置资产无原 UV | 修改离线入口、共享展示或打包器 |
 | `npm run test:git` / `npm run git:check` | Git 工具回归 / 实际发布身份不可变和仓库干净状态 | Git 工具变更 / 维护批次提交后 |
 | `npm run test:geometry:real` | 两份 SHA 固定真实模型；原有、缺失、随机 UV 三变体；全部切缝/面角签名及 OBJ 一致 | 每次修改生成策略 |
 
