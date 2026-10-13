@@ -1,4 +1,4 @@
-import {message} from '../../../../packages/ui-platform/src/index.js';
+import {message} from '@meshtailor/ui-platform';
 import type {PeelGroup,HumanTemplateEntry} from '@meshtailor/uv';
 /** Shared wording for the React inspector and the offline production workbench. */
 export function describeStructure(group:PeelGroup|undefined):string {

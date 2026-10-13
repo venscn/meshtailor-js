@@ -7,7 +7,7 @@ import {FOCUS_GLSL,playbackEmphasis,focusSettings,playbackFocusSpheres,uploadFoc
 import { ArrivalPresentation, type ArrivalSettings, type ArrivalState } from './arrival-presentation.js';
 import { OverlapPass } from './overlap-pass.js';
 import { overlapSettings, overlapLegend, sourceModelScale, type OverlapSettings } from './overlap-policy.js';
-import {bilingual as b,displayPreferences,getPalette} from '../../../../packages/ui-platform/src/index.js';
+import {bilingual as b,displayPreferences,getPalette} from '@meshtailor/ui-platform';
 
 interface CameraPointer {id:number;x:number;y:number;startX:number;startY:number;button:number;dragged:boolean}
 

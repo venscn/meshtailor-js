@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { MeshData } from '@meshtailor/mesh-core';
 import type { GenerationFrame } from '@meshtailor/runtime';
 import { fitDistance, prepareViewportMesh, viewportSize, type ViewportMesh } from './viewport-math';
-import {bilingual as b,displayPreferences,getPalette} from '../../../packages/ui-platform/src/index.js';
+import {bilingual as b,displayPreferences,getPalette} from '@meshtailor/ui-platform';
 
 /** Dispose every geometry/material in a subtree, including traversal overlays. */
 function disposeGroup(group: THREE.Group): void {

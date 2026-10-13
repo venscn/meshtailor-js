@@ -1,4 +1,4 @@
-import { message } from '../../../../packages/ui-platform/src/index.js';
+import { message } from '@meshtailor/ui-platform';
 import {describeTube} from './tube-description';
 import {describeSurfaceSymmetry} from './symmetry-description';
 import {describeGrowthStopPresentation as describeGrowthStop} from './fill-description';

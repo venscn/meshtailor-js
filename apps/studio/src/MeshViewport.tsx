@@ -1,4 +1,4 @@
-import { message } from '../../../packages/ui-platform/src/index.js';
+import { message } from '@meshtailor/ui-platform';
 import { useEffect, useRef, useState } from 'react';
 import type { MeshData } from '@meshtailor/mesh-core';
 import type { GenerationFrame } from '@meshtailor/runtime';

@@ -1,4 +1,4 @@
-import { message,getPalette } from '../../../packages/ui-platform/src/index.js';
+import { message,getPalette } from '@meshtailor/ui-platform';
 import { useEffect, useRef } from 'react';
 import type { UVSnapshot } from './workers/uv.worker';
 import { attachUVSelection, type BoxMode } from './unfold/uv-box-selection';

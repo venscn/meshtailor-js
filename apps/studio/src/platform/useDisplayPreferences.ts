@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { displayPreferences, readDisplayPreferences, DISPLAY_STORAGE_KEY, getPalette, type PreferenceStorage } from '../../../../packages/ui-platform/src/index.js';
+import { displayPreferences, readDisplayPreferences, DISPLAY_STORAGE_KEY, getPalette, type PreferenceStorage } from '@meshtailor/ui-platform';
 
 export function useDisplayPreferences() {
   return useSyncExternalStore(displayPreferences.subscribe, displayPreferences.getSnapshot, displayPreferences.getSnapshot);

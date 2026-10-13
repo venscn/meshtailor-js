@@ -1,6 +1,6 @@
 import { displayUV, islandColor, type AtlasFrame } from '@meshtailor/uv';
 import type { UVSnapshot } from '../workers/uv.worker';
-import {bilingual as b,getPalette,displayPreferences} from '../../../../packages/ui-platform/src/index.js';
+import {bilingual as b,getPalette,displayPreferences} from '@meshtailor/ui-platform';
 export interface UVDisplay { selected:readonly number[]; focusFace:number|null; checker:boolean; wireframe:boolean }
 export function uvScreenFrame(atlas:AtlasFrame,width:number,height:number){
   const sx=atlas.max[0]-atlas.min[0],sy=atlas.max[1]-atlas.min[1];

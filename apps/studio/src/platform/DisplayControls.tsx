@@ -1,4 +1,4 @@
-import { displayPreferences, message, type Locale, type Theme } from '../../../../packages/ui-platform/src/index.js';
+import { displayPreferences, message, type Locale, type Theme } from '@meshtailor/ui-platform';
 import { useDisplayPreferences } from './useDisplayPreferences';
 
 export function DisplayControls() {
