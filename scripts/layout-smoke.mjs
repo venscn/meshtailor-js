@@ -116,6 +116,26 @@ try {
     assert.ok(state.sceneHeight>200);assert.ok(state.barBottom<=state.centerBottom+1);assert.ok(state.listHeight<=280&&state.listScroll>state.listHeight);assert.ok(state.contentBottom<=state.panelBottom+1&&state.contentScroll>state.contentHeight);assert.equal(state.canvasWidth,state.hostWidth);
     report.cases.push({name:`unfold transport, island list and correspondence inspector stay bounded at ${width}x${height}`,state});
   }
+  // These sizes exposed clipped tablet grid tracks and a nonwrapping phone header.
+  // This checks CSS access and drawing-buffer stability, not a substitute for Studio E2E.
+  for (const [width,height] of [[320,568],[390,844],[800,480],[844,390],[1280,280]]) {
+    await load(current,2,width,height);
+    await page.evaluate(`(() => {
+      document.querySelector('.topbar').innerHTML='<div class="brand">MeshTailor</div><button class="pipeline-shortcut">Processing pipeline</button><div class="header-actions"><button>Import mesh</button><button>Export OBJ + UV</button></div>';
+    })()`);
+    await page.evaluate('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+    const state=await page.evaluate(`(() => {
+      const work=document.querySelector('.workspace'),host=document.querySelector('.viewport'),canvas=host.querySelector('canvas');
+      return {pageWidth:document.documentElement.scrollWidth,pageHeight:document.documentElement.scrollHeight,workBottom:work.getBoundingClientRect().bottom,workScroll:work.scrollHeight,workHeight:work.clientHeight,hostW:host.clientWidth,hostH:host.clientHeight,canvasW:canvas.clientWidth,canvasH:canvas.clientHeight,bufferW:canvas.width,bufferH:canvas.height};
+    })()`);
+    assert.ok(state.pageWidth<=width+1,`${width}x${height}: controls must not widen the document`);
+    assert.ok(state.workScroll<=state.workHeight+1,`${width}x${height}: grid tracks must not be clipped inside workspace`);
+    assert.ok(state.workBottom<=state.pageHeight+1,`${width}x${height}: document scrolling must reach the whole workspace`);
+    assert.ok(state.hostW>0&&state.hostH>0,'resizing must preserve a drawable viewport');
+    assert.equal(state.canvasW,state.hostW);assert.equal(state.canvasH,state.hostH);
+    assert.equal(state.bufferW,state.hostW*2);assert.equal(state.bufferH,state.hostH*2);
+    report.cases.push({name:`narrow and short CSS workspace remains reachable at ${width}x${height}`,state});
+  }
   report.passed = report.cases.length;
   const output = process.argv.indexOf('--report');
   if (output !== -1) await writeFile(process.argv[output + 1], JSON.stringify(report, null, 2) + '\n');
