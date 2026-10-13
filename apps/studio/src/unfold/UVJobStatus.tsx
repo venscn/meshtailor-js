@@ -1,7 +1,7 @@
 import type { useUVSnapshot } from './useUVSnapshot';
 import { describeUVProgress } from './uv-job-client';
 type UVState=ReturnType<typeof useUVSnapshot>;
-export function UVJobStatus({state,hasSource,onUseSource}:{state:UVState;hasSource:boolean;onUseSource:()=>void}){
+export function UVJobStatus({state}:{state:UVState}){
   const p=state.progress;
   return <section className="uv-job-panel" data-testid="uv-job-status" data-phase={state.phase}>
     <h3>UV 计算任务</h3>
@@ -14,8 +14,7 @@ export function UVJobStatus({state,hasSource,onUseSource}:{state:UVState;hasSour
     </label>}
     <div className="button-grid two">
       {state.loading?<button onClick={state.cancel}>取消 UV 计算</button>:<button onClick={state.retry}>重新计算 UV</button>}
-      <button disabled={!hasSource} onClick={onUseSource}>使用网格原始 UV</button>
     </div>
-    <small>原始 UV 仅保留已有布局，不修复重叠，也不是重新求解的结果。取消不会改变输入模型。</small>
+    <small>仅从几何生成 UV，不读取原始 UV 或用其回退。取消不会改变输入模型。</small>
   </section>;
 }

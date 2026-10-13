@@ -67,7 +67,6 @@ export default function App(){
   const player = useUnfoldPlayer(snapshot);
   const chartCount = snapshot?.packed.length??null;
   const uvStatus=uvState.loading?describeUVProgress(uvState.progress,uvState.elapsedMs):uvState.error;
-  const hasSourceUV=false;
   const uvAll = useMemo(()=>snapshot?.geometry.islands.map(c=>c.id)??[],[snapshot]);
   useEffect(()=>{if(viewMode==='unfold')setPlaying(false);else player.pause();},[viewMode]);
   const exportTargetUV=()=>{if(!snapshot)return;try{saveFile('meshtailor-target-uv.obj',meshToOBJ(meshWithPreviewUV(mesh,snapshot.packed)),'text/plain');}catch(error){setLoadError(String(error));}};
@@ -176,7 +175,7 @@ export default function App(){
           <details><summary>导入设置</summary>
             <label>位置焊接（FBX / glTF）<select aria-label="Weld mode" value={weld} onChange={e=>setWeld(e.target.value as SceneImportOptions['weld'])}><option value="boundary">Boundary · 微小断边配对（默认）</option><option value="exact">Exact · 仅精确同坐标</option><option value="tolerance">Tolerance · 容差</option><option value="off">Off · 保留渲染顶点索引</option></select></label>
             {(weld==='tolerance'||weld==='boundary')&&<label>相对包围盒容差<input aria-label="Weld tolerance" type="number" min="1e-12" max="0.001" step="0.0000001" value={tolerance} onChange={e=>{const v=+e.target.value;if(v>0&&v<=.001)setTolerance(v);}}/></label>}
-            <small>不跨对象焊接；同一对象内重合但独立的表面可能被连接。UV 保存在面角，不随位置焊接丢失。设置在下次导入生效。</small>
+            <small>不跨对象焊接；同一对象内重合但独立的表面可能被连接。原 UV 在导入时丢弃，新的 UV 从几何生成。设置在下次导入生效。</small>
           </details>
         </section>
         <section><h3>内置样例</h3>
@@ -188,7 +187,7 @@ export default function App(){
           <button onClick={()=>{resetForMesh(makeFragmentationDemo(2).mesh);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');setToolTab('uv');}}>重叠碎岛测试片（非真实资产）</button>
           <button onClick={()=>saveFile('meshtailor-mesh.obj',meshToOBJ(mesh),'text/plain')}>导出当前网格</button>
         </section>
-        <section><h3>在线模型</h3><small>CC0；优先使用已下载的本地副本，否则从原站获取几何和 UV，不下载贴图。</small>
+        <section><h3>在线模型</h3><small>CC0；优先使用已下载的本地副本，否则从原站获取几何。原 UV 会丢弃，不下载贴图。</small>
           {REMOTE_MESH_ASSETS.map(asset=><div className="asset-card" key={asset.id}><button disabled={!!busy} onClick={()=>void loadRemote(asset)}>{asset.name}</button><small>{asset.description} <a href={asset.source} target="_blank" rel="noreferrer">来源与许可</a></small></div>)}
         </section>
             <section><h3>展开示例</h3><div className="button-grid two"><button onClick={loadHingeDemo}>三块折角带</button><button onClick={loadUnfoldDemo}>六岛立方体</button></div></section>
@@ -198,7 +197,7 @@ export default function App(){
           <div id="tools-uv" role="tabpanel" aria-labelledby="tool-uv" hidden={toolTab!=='uv'}>
         <section><h3>纯几何展开</h3><p>模型原 UV、原切缝与原岛划分不会参与计算。</p><button className="primary" disabled={!!busy||uvState.loading} onClick={()=>runSeams('baseline')}>Generate baseline · 从几何重生成</button><small>与默认加载共用当前自动流程。原 UV 提取、恢复与旧切缝实验已移除。</small></section>
             <UVSolverControls selectedCharts={player.selection} value={uvConfig} onChange={v=>{setTaskPlan(undefined);setUVConfig(v);}} snapshot={snapshot} onProcess={processUV} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
-            <UVJobStatus state={uvState} hasSource={false} onUseSource={()=>{}}/>
+            <UVJobStatus state={uvState}/>
             <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.30',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,features:snapshot?.features,peel:snapshot?.peel,human:snapshot?.human,fragmentation:snapshot?.fragmentation,repair:snapshot?.repair,sourceAudit:snapshot?.sourceAudit,areaAudit:snapshot?.areaAudit,sourceAreaAudit:snapshot?.sourceAreaAudit,spatialReport:snapshot?.spatialReport,packingReport:snapshot?.packingReport,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
           </div>
           <div id="tools-animation" role="tabpanel" aria-labelledby="tool-animation" hidden={toolTab!=='animation'}>
@@ -222,7 +221,7 @@ export default function App(){
         {viewMode==='traversal'&&frames.length>0&&<div className="operation-summary">{notice}</div>}
       </section>
       <aside className="rightbar">
-        <div className="panel uv-panel"><div className="panel-title"><span>{viewMode==='unfold'?'UV 编辑器':'UV 预览'}</span><span>{snapshotTarget==='source'?'原始 UV':liveUV&&viewMode==='traversal'?'current step':'生成 UV'}</span></div><UVCanvas snapshot={snapshot} status={uvStatus} selected={viewMode==='unfold'?player.active:uvAll} focusFace={viewMode==='unfold'?player.focusFace:null} checker={viewMode==='unfold'&&player.checker} wireframe={wireframe} onBox={viewMode==='unfold'?player.boxSelect:undefined} onPick={viewMode==='unfold'?player.pick:undefined}/></div>
+        <div className="panel uv-panel"><div className="panel-title"><span>{viewMode==='unfold'?'UV 编辑器':'UV 预览'}</span><span>{liveUV&&viewMode==='traversal'?'current step':'生成 UV'}</span></div><UVCanvas snapshot={snapshot} status={uvStatus} selected={viewMode==='unfold'?player.active:uvAll} focusFace={viewMode==='unfold'?player.focusFace:null} checker={viewMode==='unfold'&&player.checker} wireframe={wireframe} onBox={viewMode==='unfold'?player.boxSelect:undefined} onPick={viewMode==='unfold'?player.pick:undefined}/></div>
         {viewMode==='unfold'?<CorrespondenceInspector mesh={mesh} snapshot={snapshot} player={player}/>:<div className="panel timeline"><div className="panel-title"><span>Decode timeline</span><span>{chains.length} chains</span></div>{frames.length>100&&<small className="timeline-window">Showing {timelineStart+1}–{timelineStart+timelineFrames.length} of {frames.length}. Use slider to seek.</small>}<div className="timeline-scroll">{frames.length?timelineFrames.map((f,j)=>{const i=j+timelineStart;return <button key={i} className={i===step?'active':''} onClick={()=>seek(i)}><span>{String(i+1).padStart(3,'0')}</span><b>{f.tokenLabel}</b><em>{f.message}</em></button>;}):<p className="empty">Generate seams to inspect mesh-native pointer traversal.</p>}</div></div>}
       </aside>
     </main>
