@@ -17,9 +17,15 @@ try {
     import {UnfoldWebGLView} from '/apps/studio/src/unfold/webgl-view.js';
     import {drawUVSnapshot} from '/apps/studio/src/unfold/uv-drawing.js';
     import {PipelinePanel} from '/apps/studio/src/unfold/pipeline-panel.js';
+    import {renderFillGrowth} from '/apps/studio/src/unfold/fill-growth-panel.js';
+    import {describeFillPresentation} from '/apps/studio/src/unfold/fill-description.js';
     import {DEFAULT_LOAD_PIPELINE} from '/apps/studio/src/unfold/load-pipeline.js';
     window.errors=[];window.addEventListener('error',e=>errors.push(e.message));
     window.display=displayPreferences;window.palette=getPalette;
+    // Exercise the actual public formatter dependency chain used by the offline
+    // entry; compiling alone does not detect an extensionless runtime import.
+    renderFillGrowth(document.querySelector('#fill'),undefined);
+    window.fillFormatterReady=typeof describeFillPresentation==='function';
     const mesh=core.geometryOnlyMesh(core.makeCube());
     const options=uv.geometryGenerationOptions(mesh);
     const result=uv.unwrapMesh(mesh,new Set(),options);
@@ -46,10 +52,11 @@ try {
   const css=(await readFile(join(compiled.root,'apps/studio/src/workspace-theme.css'),'utf8'))+(await readFile(join(compiled.root,'apps/studio/src/styles.css'),'utf8')).replace(/@import[^;]+;/g,'');
   browser=await startChrome();const page=await browser.page();
   const tree=await page.send('Page.getFrameTree');
-  await page.send('Page.setDocumentContent',{frameId:tree.frameTree.frame.id,html:`<!doctype html><meta charset="utf-8"><style>${css}</style><main style="display:flex;gap:12px"><div id="panel" style="width:300px"></div><div id="view" style="position:relative;width:600px;height:480px"></div><canvas id="uv"></canvas></main>`});
+  await page.send('Page.setDocumentContent',{frameId:tree.frameTree.frame.id,html:`<!doctype html><meta charset="utf-8"><style>${css}</style><main style="display:flex;gap:12px"><div id="panel" style="width:300px"></div><div id="view" style="position:relative;width:600px;height:480px"></div><canvas id="uv"></canvas><div id="fill"></div></main>`});
   await page.evaluate(moduleBootstrap(modules));
   await page.evaluate("import(moduleURL('/display-test.js')).then(()=>true)");
   await page.waitFor('window.ready&&view.canvas.dataset.draws>0',15000);
+  assert.equal(await page.evaluate('fillFormatterReady'),true);
   for(const [locale,theme]of [['en','dark'],['zh-CN','light'],['en','light'],['zh-CN','dark']]){
     const prior=await page.evaluate('Number(view.canvas.dataset.draws)');
     await page.evaluate(`display.set({locale:${JSON.stringify(locale)},theme:${JSON.stringify(theme)}})`);

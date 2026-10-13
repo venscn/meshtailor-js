@@ -1,5 +1,5 @@
 import { displayPreferences, message, type Locale, type Theme } from '@meshtailor/ui-platform';
-import { useDisplayPreferences } from './useDisplayPreferences';
+import { useDisplayPreferences } from './useDisplayPreferences.js';
 
 export function DisplayControls() {
   const preferences = useDisplayPreferences();

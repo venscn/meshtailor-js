@@ -1,7 +1,7 @@
 import { message } from '@meshtailor/ui-platform';
 import {describeTube} from './tube-description';
 import {describeSurfaceSymmetry} from './symmetry-description';
-import {describeGrowthStopPresentation as describeGrowthStop} from './fill-description';
+import {describeGrowthStopPresentation as describeGrowthStop} from './fill-description.js';
 import {describeStructure,describeBandPartition} from './structure-description';
 import type { MeshData } from '@meshtailor/mesh-core';
 import type { UVSnapshot } from '../workers/uv.worker';

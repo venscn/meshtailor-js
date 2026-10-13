@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import type { UVSnapshot } from './workers/uv.worker';
 import { attachUVSelection, type BoxMode } from './unfold/uv-box-selection';
 import { drawUVSnapshot } from './unfold/uv-drawing';
-import {useDisplayPreferences} from './platform/useDisplayPreferences';
+import {useDisplayPreferences} from './platform/useDisplayPreferences.js';
 interface Props {
   snapshot:UVSnapshot|null;
   status:string|null;
