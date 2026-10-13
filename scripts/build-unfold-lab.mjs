@@ -7,6 +7,7 @@ import {browserModuleSources,moduleBootstrap} from './lib/browser-modules.mjs';
 const c=await compileCore();try{
   const modules=await browserModuleSources(c.output);
   modules['/lab-entry.js']=await readFile(join(c.root,'apps/unfold-lab/main.mjs'),'utf8');
+  modules['/lab-messages.js']=await readFile(join(c.root,'apps/unfold-lab/messages.mjs'),'utf8');
   const worker=classicWorkerBundle(modules,'/apps/studio/src/workers/uv.worker.js');
   const verified={};
   for(const id of ['corset','flight-helmet'])verified[id]=(await readFile(join(c.root,`apps/studio/public/assets/verified/${id}-geometry.json.gz`))).toString('base64');

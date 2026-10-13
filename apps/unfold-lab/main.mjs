@@ -1,4 +1,7 @@
 import {describeTube} from '/apps/studio/src/unfold/tube-description.js';
+import {displayPreferences,readDisplayPreferences,DISPLAY_STORAGE_KEY,bilingual,getPalette} from '/packages/ui-platform/src/index.js';
+import {offlineMessage as t,offlineMetadata as metadata,bindOfflineMessages} from '/lab-messages.js';
+import {describeFillPresentation} from '/apps/studio/src/unfold/fill-description.js';
 import {describeSurfaceSymmetry,describeSymmetrySummary} from '/apps/studio/src/unfold/symmetry-description.js';
 import {renderFillGrowth} from '/apps/studio/src/unfold/fill-growth-panel.js';
 import {describeStructure,describeBandPartition} from '/apps/studio/src/unfold/structure-description.js';
@@ -17,6 +20,14 @@ import {startUVJob,describeUVProgress} from '/apps/studio/src/unfold/uv-job-clie
 import { EMPTY_INSPECTION, selectInspectionIsland, resolveInspectionPick } from '/apps/studio/src/unfold/selection-policy.js';
 let inspection=EMPTY_INSPECTION;
 const $=id=>document.getElementById(id);
+try{displayPreferences.set(readDisplayPreferences(window.localStorage));}catch{displayPreferences.set(readDisplayPreferences());}
+function applyDisplayRoot(){
+  const {locale,theme}=displayPreferences.getSnapshot(),root=document.documentElement;
+  root.lang=locale;root.dataset.theme=theme;root.style.colorScheme=theme;
+  for(const [name,value]of Object.entries(getPalette(theme).tokens))root.style.setProperty(name,value);
+}
+applyDisplayRoot();
+let statusMode='starting',progressDisplay=null,lastFailure='';
 let inspectionIndex=null, timelineGeometry=null, timelineKey='';
 let chartConfig={...uv.DEFAULT_UNWRAP};
 let postSeed,postHuman,postPeel,postFeatures,templateSelection;
@@ -24,18 +35,25 @@ let loadPlan;try{loadPlan=readLoadPipeline(window.localStorage);}catch{loadPlan=
 let pipelineTrace=null,pipelineRunning=false,pipelineStarted=0,committedMesh=null,jobBackup=null;
 const pipelinePanel=new PipelinePanel(plan=>{loadPlan=plan;try{localStorage.setItem(PIPELINE_STORAGE_KEY,JSON.stringify(plan));}catch{}renderPipeline();},()=>solve(loadPlan),()=>{cancel();pause();});
 $('pipeline-host').append(pipelinePanel.element);
-function renderPipeline(){if(mesh)pipelinePanel.update({config:loadPlan,mesh,options:chartConfig,trace:pipelineTrace,loading:pipelineRunning,inputStatus:`已读取 ${mesh.name} · ${mesh.faces.length.toLocaleString()} 面 · 离线 OBJ / 内置样例入口`});}
+function renderPipeline(){if(mesh)pipelinePanel.update({config:loadPlan,mesh,options:chartConfig,trace:pipelineTrace,loading:pipelineRunning,inputStatus:bilingual(`Read ${metadata(mesh.name)} · ${mesh.faces.length.toLocaleString()} faces · offline OBJ / bundled examples`,`已读取 ${metadata(mesh.name)} · ${mesh.faces.length.toLocaleString()} 面 · 离线 OBJ / 内置样例入口`)});}
 
 let mesh,seams,framedMesh=null,snapshot=null,jobHandle=null,playing=false,sequence=0;
 let scrubbing=false;
 const options={...ARRIVAL_DEFAULTS,interactionActive:false,focusOpacity:.18,focusMode:'ghost',focusRadius:1.2,focusRetained:.12,overlapMode:'auto',overlapTolerance:.0001,overlapOpacity:.72,faceTones:true,skipStatic:uv.DEFAULT_SKIP_STATIC,motionTolerance:uv.DEFAULT_MOTION_RELATIVE_EPSILON,progress:0,selected:[],order:uv.DEFAULT_UNFOLD_ORDER,handoff:uv.DEFAULT_HANDOFF,holdNet:false,path:'hinge',separation:uv.DEFAULT_SEPARATION,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:null,hingeWave:true,showHinges:true,showTemporaryCuts:true,autoFrame:DEFAULT_AUTO_FRAME};
 const errors=[];window.addEventListener('error',e=>errors.push(e.message));window.addEventListener('unhandledrejection',e=>errors.push(String(e.reason)));
 const view=new UnfoldWebGLView($('view'),(id,face,add)=>pick(id,face,add),e=>{if(e)fail(e);},()=>{options.autoFrame=false;$('frame').checked=false;view.setOptions(options);cameraStatus();});
-function cameraStatus(){$('frame').checked=options.autoFrame;$('camera-status').textContent=options.autoFrame?'自动跟随中；操作相机会立即关闭跟随，动画继续。':'手动相机：动画不改变视角。适配按钮只执行一次。';}
-function fail(message){$('error').hidden=false;$('error').textContent=String(message);}
-function pause(){playing=false;scrubbing=false;clockLast=null;options.interactionActive=false;view.setOptions(options);$('play').textContent='播放展开';}
+function renderCameraText(){$('camera-status').textContent=t(options.autoFrame?'自动跟随中；操作相机会立即关闭跟随，动画继续。':'手动相机：动画不改变视角。适配按钮只执行一次。');}
+function cameraStatus(){$('frame').checked=options.autoFrame;renderCameraText();}
+function fail(message){lastFailure=String(message);$('error').hidden=false;renderFailure();}
+function renderFailure(){$('error').textContent=lastFailure?bilingual('Technical detail (as reported): ','原始技术详情：')+metadata(lastFailure):'';}
+function pause(){playing=false;scrubbing=false;clockLast=null;options.interactionActive=false;view.setOptions(options);$('play').textContent=t('播放展开');}
 function drawUV(){if(!snapshot)return;const host=$('uvhost'),c=$('uv'),d=Math.min(devicePixelRatio,2),ctx=c.getContext('2d');c.width=Math.max(1,Math.round(host.clientWidth*d));c.height=Math.max(1,Math.round(host.clientHeight*d));ctx.setTransform(d,0,0,d,0,0);drawUVSnapshot(ctx,snapshot,host.clientWidth,host.clientHeight,options);}
-function list(){if(!snapshot)return;$('islands').replaceChildren();for(const island of snapshot.geometry.islands.slice(0,100)){const row=document.createElement('div');row.className='island'+(inspection.islands.includes(island.id)?' selected':'');const box=document.createElement('input');box.type='checkbox';box.checked=options.selected.includes(island.id);box.setAttribute('aria-label','选中岛 '+(island.id+1));box.onchange=()=>select(island.id,null,true);const b=document.createElement('button');b.innerHTML=`<i style="background:rgb(${uv.islandColor(island.id).map(x=>Math.round(x*255)).join(',')})"></i>#${island.id+1} · ${island.faces.length} 面`;b.onclick=()=>select(island.id,null,false);row.append(box,b);$('islands').append(row);}}
+function list(){if(!snapshot)return;$('islands').replaceChildren();for(const island of snapshot.geometry.islands.slice(0,100)){const row=document.createElement('div');row.className='island'+(inspection.islands.includes(island.id)?' selected':'');const box=document.createElement('input');box.type='checkbox';box.checked=options.selected.includes(island.id);box.dataset.includeIsland=island.id;box.setAttribute('aria-label',t('Include island {0}',[island.id+1]));box.onchange=()=>select(island.id,null,true);const b=document.createElement('button');b.innerHTML=`<i style="background:rgb(${uv.islandColor(island.id).map(x=>Math.round(x*255)).join(',')})"></i><span data-island-label="${island.id}"></span>`;b.onclick=()=>select(island.id,null,false);row.append(box,b);$('islands').append(row);}renderIslandLabels();}
+function renderIslandLabels(){
+  if(!snapshot)return;
+  for(const el of $('islands').querySelectorAll('[data-island-label]')){const island=snapshot.geometry.islands.find(i=>i.id===Number(el.dataset.islandLabel));if(island)el.textContent=bilingual(`#${island.id+1} · ${island.faces.length} faces`,`#${island.id+1} · ${island.faces.length} 面`);}
+  for(const el of $('islands').querySelectorAll('[data-include-island]'))el.setAttribute('aria-label',t('Include island {0}',[Number(el.dataset.includeIsland)+1]));
+}
 function clearFace(){inspection={...inspection,face:null};options.focusFace=null;update();}
 function select(id,_face=null,add=false){
   if(!snapshot)return;
@@ -55,19 +73,20 @@ function pick(id,face=null,add=false){
 function selectionStatus(){
   const el=$('selection-status');if(!el)return;
   el.textContent=inspection.islands.length
-    ? `UV 岛 ${inspection.islands.map(id=>'#'+(id+1)).join(', ')} · ${options.focusFace===null?'未选择三角形':`三角形 ${options.focusFace}`}`
-    : '未选择 UV 岛 · 先点选岛，再点选三角形';
+    ? bilingual(`UV islands ${inspection.islands.map(id=>'#'+(id+1)).join(', ')} · ${options.focusFace===null?t('未选择三角形'):'triangle '+options.focusFace}`,`UV 岛 ${inspection.islands.map(id=>'#'+(id+1)).join(', ')} · ${options.focusFace===null?t('未选择三角形'):'三角形 '+options.focusFace}`)
+    : t('未选择 UV 岛 · 先点选岛，再点选三角形');
   el.dataset.islands=JSON.stringify(inspection.islands);el.dataset.face=String(options.focusFace??'');
   if($('clear-face'))$('clear-face').disabled=options.focusFace===null;
   if($('human-selected'))$('human-selected').disabled=!snapshot||!inspection.islands.length;
   const selected=inspection.islands[0],area=snapshot?.areaAudit?.islands.find(r=>r.id===selected);
-  $('selection-area').textContent=area?`3D 面积占比 ${(area.share3D*100).toFixed(4)}% / UV 占比 ${(area.shareUV*100).toFixed(4)}% · 密度 ${area.densityRatio?.toFixed(3)??'无效'}×（同域）`:'';
+  $('selection-area').textContent=area?bilingual(`3D area share ${(area.share3D*100).toFixed(4)}% / UV share ${(area.shareUV*100).toFixed(4)}% · density ${area.densityRatio?.toFixed(3)??t('无效')}× (same domain)`,`3D 面积占比 ${(area.share3D*100).toFixed(4)}% / UV 占比 ${(area.shareUV*100).toFixed(4)}% · 密度 ${area.densityRatio?.toFixed(3)??t('无效')}×（同域）`):'';
   const neighbors=snapshot?.spatialReport?.links.filter(l=>l.a===selected||l.b===selected)??[];
-  $('selection-neighbors').textContent=selected===undefined?'':`3D 邻居：${neighbors.map(l=>'#'+((l.a===selected?l.b:l.a)+1)+(l.stitchable?' 共享边':' 空间关联')).join(' · ')||'采样范围内未找到'}。关联不改变真实岛数。`;
+  const neighborNames=neighbors.map(l=>'#'+((l.a===selected?l.b:l.a)+1)+' '+t(l.stitchable?'共享边':'空间关联')).join(' · ')||t('采样范围内未找到');
+  $('selection-neighbors').textContent=selected===undefined?'':bilingual(`3D neighbors: ${neighborNames}. Association does not change the actual island count.`,`3D 邻居：${neighborNames}。关联不改变真实岛数。`);
   const human=snapshot?.human?.entries.find(e=>e.status==='applied'&&e.charts?.includes(selected));
-  $('selection-template').textContent=human?describeBandPartition(human)+` 结构：${human.template} · 原区域 #${human.sourceChart+1} → ${human.charts.map(i=>'#'+(i+1)).join(' / ')}。上下边界：${human.lowerBoundary.length} / ${human.upperBoundary.length} 顶点 · ${human.seamEdges.length} 条真实侧缝边。` : '';
+  $('selection-template').textContent=human?describeBandPartition(human)+bilingual(` Structure: ${metadata(human.template)} · input region #${human.sourceChart+1} → ${human.charts.map(i=>'#'+(i+1)).join(' / ')}. Boundary vertices: ${human.lowerBoundary.length} / ${human.upperBoundary.length} · ${human.seamEdges.length} real side-seam edges.`,` 结构：${metadata(human.template)} · 原区域 #${human.sourceChart+1} → ${human.charts.map(i=>'#'+(i+1)).join(' / ')}。上下边界：${human.lowerBoundary.length} / ${human.upperBoundary.length} 顶点 · ${human.seamEdges.length} 条真实侧缝边。`) : '';
   const feature=snapshot?.diagnostics?.find(d=>d.id===selected)?.feature;
-  $('selection-feature').textContent=feature?`几何特征保护：透孔主面 · 保留 ${feature.holes} 个孔。边界最大变化 ${(100*feature.boundaryMax).toFixed(2)}% 参考轮廓直径；孔面积比例 ${feature.holeAreaRatios.map(x=>x.toFixed(3)+'×').join(' / ')}。相对源几何投影，不使用原 UV，也不是人工语义评分。`:'';
+  $('selection-feature').textContent=feature?bilingual(`Geometry feature protection: perforated main face · ${feature.holes} holes preserved. Maximum boundary change ${(100*feature.boundaryMax).toFixed(2)}% of reference outline diameter; hole area ratios ${feature.holeAreaRatios.map(x=>x.toFixed(3)+'×').join(' / ')}. Compared with source geometry projection, without original UVs or a semantic score.`,`几何特征保护：透孔主面 · 保留 ${feature.holes} 个孔。边界最大变化 ${(100*feature.boundaryMax).toFixed(2)}% 参考轮廓直径；孔面积比例 ${feature.holeAreaRatios.map(x=>x.toFixed(3)+'×').join(' / ')}。相对源几何投影，不使用原 UV，也不是人工语义评分。`):'';
   const structure=snapshot?.peel?.groups.find(g=>g.charts.includes(selected));
   $('selection-tube').textContent=describeTube(snapshot?.peel,snapshot?.packed.find(c=>c.id===selected));
   $('selection-structure').textContent=describeStructure(structure);
@@ -77,7 +96,7 @@ function selectionStatus(){
     const fi=options.focusFace,chart=fi===null?null:snapshot?.packed.find(c=>c.faceUVs.has(fi));
     const uvs=fi===null?null:chart?.faceUVs.get(fi),face=fi===null?null:mesh?.faces[fi];
     coordinates.hidden=!face||!uvs;
-    coordinates.textContent=face&&uvs?face.vertices.map((vi,k)=>`角 ${k+1} · 顶点 ${vi}\n3D  ${mesh.positions[vi].map(x=>Number(x.toPrecision(5))).join(', ')}\nUV  ${uvs[k].map(x=>Number(x.toPrecision(5))).join(', ')}`).join('\n\n'):'';
+    coordinates.textContent=face&&uvs?face.vertices.map((vi,k)=>bilingual(`Corner ${k+1} · vertex ${vi}`,`角 ${k+1} · 顶点 ${vi}`)+`\n3D  ${mesh.positions[vi].map(x=>Number(x.toPrecision(5))).join(', ')}\nUV  ${uvs[k].map(x=>Number(x.toPrecision(5))).join(', ')}`).join('\n\n'):'';
   }
 }
 window.addEventListener('keydown',e=>{
@@ -104,19 +123,27 @@ function update(patch={},focus=null){
   $('overlap-mode').value=options.overlapMode;$('overlap-opacity').value=options.overlapOpacity;$('face-tones').checked=options.faceTones;$('overlap-tolerance').value=options.overlapTolerance*100;
   view.setOptions(options);cameraStatus();drawUV();selectionStatus();
   $('progress').value=options.progress;$('percent').textContent=(options.progress*100).toFixed(1)+'%';
+  $('skip-static').checked=options.skipStatic;
+  renderPlaybackText();
+}
+/** Preference changes call this reader instead of update(), so the timeline,
+ * playback clock, input values, camera and UV snapshot remain untouched. */
+function renderPlaybackText(){
+  $('play').textContent=t(playing?'Pause':'播放展开');
+  $('handoff-label').textContent=bilingual(`Relay after at least ${Math.round(options.handoff*100)}% of the previous island's effective motion`,`前岛有效进度至少 ${Math.round(options.handoff*100)}% 时接力`);
+  if(!snapshot){$('phase').textContent=t('没有选择岛');return;}
   const reverse=$('reverse').checked,schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,reverse,options.timeline);
   const focusIndex=!playing&&inspectionIndex!==null&&inspectionIndex<options.selected.length?inspectionIndex:schedule.focusIndex;
-  const local=uv.islandProgress(options.progress,focusIndex,options.selected.length,options.order,options.handoff,options.timeline);
   const pose=uv.unfoldIslandPose(options,focusIndex);
-  $('phase').textContent=(focusIndex<0?'没有选择岛':`#${options.selected[focusIndex]+1} · `)+(pose<.18?'分离面片':pose<.28?'转向观察':pose<.70?'沿边铰链旋转':pose<.80?'刚性平面网':pose<.92?'UV 参数化形变':pose<1?'面积感知排布':'目标 UV');
+  $('phase').textContent=(focusIndex<0?t('没有选择岛'):`#${options.selected[focusIndex]+1} · `)+t(pose<.18?'分离面片':pose<.28?'转向观察':pose<.70?'沿边铰链旋转':pose<.80?'刚性平面网':pose<.92?'UV 参数化形变':pose<1?'面积感知排布':'目标 UV');
   const seconds=Math.max(.5,Math.min(60,Number($('seconds').value)||12));
   const duration=uv.unfoldDuration(seconds,options.selected.length,options.order,options.handoff,options.timeline);
-  $('queue-status').textContent=`${reverse?'已折回':'已完成'} ${reverse?schedule.waiting:schedule.completed} / ${options.selected.length} · ${reverse?'待折回':'等待'} ${reverse?schedule.completed:schedule.waiting} · ${schedule.active.length?'播放中 '+schedule.active.map(a=>`#${options.selected[a.index]+1} (${(a.progress*100).toFixed(1)}%)`).join(' → '):'无活动岛'}\n${$('rate').value}× 总时长 ${(duration/Number($('rate').value)).toFixed(1)} 秒（1× ${duration.toFixed(1)} 秒） · 剩余 ${(duration/Number($('rate').value)*(reverse?options.progress:1-options.progress)).toFixed(1)} 秒`;
+  const active=schedule.active.length?bilingual('Playing ','播放中 ')+schedule.active.map(a=>`#${options.selected[a.index]+1} (${(a.progress*100).toFixed(1)}%)`).join(' → '):t('无活动岛');
+  $('queue-status').textContent=`${t(reverse?'已折回':'已完成')} ${reverse?schedule.waiting:schedule.completed} / ${options.selected.length} · ${t(reverse?'待折回':'等待')} ${reverse?schedule.completed:schedule.waiting} · ${active}\n`+bilingual(`${$('rate').value}× total ${(duration/Number($('rate').value)).toFixed(1)} s (1× ${duration.toFixed(1)} s) · remaining ${(duration/Number($('rate').value)*(reverse?options.progress:1-options.progress)).toFixed(1)} s`,`${$('rate').value}× 总时长 ${(duration/Number($('rate').value)).toFixed(1)} 秒（1× ${duration.toFixed(1)} 秒） · 剩余 ${(duration/Number($('rate').value)*(reverse?options.progress:1-options.progress)).toFixed(1)} 秒`);
   const nominal=uv.unfoldDuration(seconds,options.selected.length,options.order,options.handoff);
   const profile=options.timeline?.entries[focusIndex]?.profile;
-  $('skip-static').checked=options.skipStatic;
-  $('motion-status').textContent=`自动跳过${options.skipStatic?'已开启':'已关闭'} · 1× 原队列 ${nominal.toFixed(1)} 秒 → 有效动作 ${duration.toFixed(1)} 秒 · 缩短 ${Math.max(0,nominal-duration).toFixed(1)} 秒\n`+(profile?`当前岛 ${ (profile.duration*seconds).toFixed(1)} 秒 · 已跳过：${profile.segments.filter(s=>!s.keep&&s.stage!=='主动观察停留').map(s=>s.stage).join('、')||'无'} `:'');
-  $('handoff-label').textContent=`前岛有效进度至少 ${Math.round(options.handoff*100)}% 时接力`;
+  const skipped=profile?.segments.filter(s=>!s.keep&&s.stage!=='主动观察停留').map(s=>metadata(s.stage)).join(' · ')||t('无');
+  $('motion-status').textContent=bilingual(`Automatic skipping ${t(options.skipStatic?'已开启':'已关闭')} · original queue ${nominal.toFixed(1)} s → effective motion ${duration.toFixed(1)} s · saved ${Math.max(0,nominal-duration).toFixed(1)} s\n`,`自动跳过${t(options.skipStatic?'已开启':'已关闭')} · 1× 原队列 ${nominal.toFixed(1)} 秒 → 有效动作 ${duration.toFixed(1)} 秒 · 缩短 ${Math.max(0,nominal-duration).toFixed(1)} 秒\n`)+(profile?bilingual(`Current island ${(profile.duration*seconds).toFixed(1)} s · skipped: ${skipped}`,`当前岛 ${(profile.duration*seconds).toFixed(1)} 秒 · 已跳过：${skipped}`):'');
   $('handoff').disabled=options.order==='sequential';
   $('queue-prev').disabled=focusIndex<=0;$('queue-next').disabled=focusIndex<0||focusIndex>=options.selected.length-1;
 }
@@ -135,28 +162,48 @@ async function solve(plan){
   jobBackup=backup?{mesh,snapshot:backup,selected:[...options.selected],progress:options.progress,inspection}:null;
   $('error').hidden=true;snapshot=null;inspection=EMPTY_INSPECTION;options.focusFace=null;selectionStatus();view.setGeometry(null);$('islands').replaceChildren();
   const c=$('uv'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);
-  $('status').textContent='启动 UV Worker…';$('solve').disabled=true;$('cancel').disabled=false;
+  statusMode='starting';progressDisplay={progress:null,startedAt:start};renderJobStatus();$('solve').disabled=true;$('cancel').disabled=false;
   try{
     jobHandle=startUVJob({pipeline:plan,mesh,edges:[...seams],target:$('target').value,seedCharts:postSeed,seedPolicy:postSeed?backup?.inputPolicy:undefined,seedHuman:postHuman,seedPeel:postPeel,seedFeatures:postFeatures,config:{...chartConfig,closedTubeStrips:$('closed-tube-strips').checked,closedTubePanels:Number($('closed-tube-panels').value),closedTubeMaxStretch:Number($('closed-tube-stretch').value),surfaceSymmetry:$('surface-symmetry').checked,symmetryTolerance:Number($('symmetry-tolerance').value)/100,symmetryStrength:Number($('symmetry-strength').value),symmetryIterations:Number($('symmetry-iterations').value),structureGroups:$('structure-groups').checked,structuralRelaxIterations:Number($('structure-relax').value),structureTemplates:$('structure-templates').checked,preserveRimBands:$('preserve-rim-bands').checked,humanTemplates:{revolvedProfiles:$('revolved-profiles').checked,panels:$('human-panels').value==='auto'?'auto':Number($('human-panels').value),axis:$('human-axis').value,seamAngleDegrees:Number($('human-angle').value),minAreaFraction:Number($('human-area').value)/100,maxAnisotropy:Number($('human-stretch').value),...($('target').value==='templates'?{selectedCharts:templateSelection}:{})},uvObjective:$('uv-objective').value,paintIterations:Number($('paint-iterations').value),fillMode:$('target').value==='fill'?$('fill-mode').value:'off',fillStep:Number($('fill-step').value)/100,peelSourceHints:false,groupFeatureDegrees:Number($('group-feature-degrees').value),seamBandRings:Number($('seam-band').value),peelFeatureArea:Number($('peel-feature').value)/100,fillFitVacancies:$('fill-fit-vacancies').checked,fillCavitySearch:$('fill-cavities').checked,fillGrowthSteps:Number($('fill-growth').value),fillCommonGainLimit:Number($('fill-common').value),fillRotationStep:Number($('fill-angle').value),fillReflowBudget:Number($('fill-reflow').value),fillMaxAreaGain:Number($('fill-cap').value),fillRecutLarge:false,fillMinStep:Number($('fill-min-step').value)/100,fillRounds:Number($('fill-rounds').value),fillResolution:Number($('fill-resolution').value),fillTimeBudgetMs:Number($('fill-budget').value)*1000,sourceFeaturePolicy:'preserve',sourceRepairPolicy:'reject',sourceAtlasMerge:false,packingOrder:$('packing-order').value,tinyIslandAreaFraction:Number($('tiny-fraction').value)/100,maxTinyAreaBoost:Number($('tiny-cap').value),spatialNeighbors:$('spatial-neighbors').checked,neighborDistanceRatio:Number($('neighbor-distance').value)/100,initialSegmentation:'hierarchical',postMerge:$('post-merge').checked,mergeOptions:{maxShapeChange:Number($('merge-shape-limit').value),reuseValidUV:$('reuse-uv-shape').checked,maxAttempts:$('merge-attempts').value===''?undefined:Number($('merge-attempts').value),targetCharts:Number($('merge-target').value),respectMaterials:$('merge-materials').checked},atlasPageMode:$('atlas-page-mode').value,atlasPageCount:Number($('atlas-page-count').value),maxChartFaces:Number($('chart-faces').value),maxStretch:Number($('chart-stretch').value),regionOptions:chartConfig.regionOptions,method:$('solver').value,padding:Number($('padding').value),autoCut:$('autocut').checked,rotate:$('rotate').checked,packing:$('packing')?.value??'auto',timeBudgetMs:Number($('budget')?.value??120)*1000}},{
       createWorker:()=>{const url=window.labWorkerURL();try{return new Worker(url);}finally{URL.revokeObjectURL(url);}},
-      onProgress:p=>{if(token!==sequence)return;lastProgress=p;pipelineTrace=p.pipeline??pipelineTrace;renderPipeline();window.lab.progressEvents.push(p);$('status').textContent=describeUVProgress(p,performance.now()-start);}
+      onProgress:p=>{if(token!==sequence)return;lastProgress=p;progressDisplay={progress:p,startedAt:start};statusMode='progress';pipelineTrace=p.pipeline??pipelineTrace;renderPipeline();window.lab.progressEvents.push(p);renderJobStatus();}
     });
-    clock=setInterval(()=>{if(token===sequence)$('status').textContent=describeUVProgress(lastProgress,performance.now()-start);},500);
+    clock=setInterval(()=>{if(token===sequence){progressDisplay={progress:lastProgress,startedAt:start};renderJobStatus();}},500);
     const result=await jobHandle.result;if(token!==sequence)return;
     snapshot=result;committedMesh=mesh;jobBackup=null;pipelineTrace=snapshot.pipeline??pipelineTrace;inspection=EMPTY_INSPECTION;jobHandle=null;options.selected=snapshot.geometry.islands.map(i=>i.id);options.progress=0;options.focusFace=null;
-    rebuildTimeline();view.setOptions(options);view.setGeometry(snapshot.geometry,{resetCamera:framedMesh!==mesh});framedMesh=mesh;list();update();const m=snapshot.metrics;
-    $('title').textContent=`${mesh.name} · ${mesh.faces.length.toLocaleString()} 三角面 · ${snapshot.packed.length} 岛`;
-    $('status').textContent=(m?`生成 UV：翻面 / 退化 / 正面积重叠检查通过\n有效面积占用 ${(m.occupancy*100).toFixed(1)}% · 包围盒面积总和（可覆盖） ${(m.boxOccupancy*100).toFixed(1)}%\n${m.packingMethod} 排布 · 新增 ${snapshot.addedSeams.length} 条 UV 补切\n`:'生成结果：见验证状态\n')+`Worker 完成 · ${(snapshot.timing.elapsedMs/1000).toFixed(2)} 秒\n`+snapshot.warnings.join('\n')+(snapshot.fragmentation?`\n分割诊断：${snapshot.fragmentation.inputComponents} 个源分量 → ${snapshot.fragmentation.initialCharts} 个初始区域 → ${snapshot.fragmentation.outputCharts} 岛；小于16面的岛 ${snapshot.fragmentation.tinyCharts}\n补切原因：${JSON.stringify(snapshot.fragmentation.reasons)}`:'');
-    $('surface-symmetry-summary').textContent=describeSymmetrySummary(snapshot.diagnostics,snapshot.peel);
-    $('shape-methods').textContent=snapshot.diagnostics?'实际方法：'+Object.entries(snapshot.diagnostics.reduce((s,d)=>(s[d.method]=(s[d.method]??0)+1,s),{})).map(([m,n])=>m+': '+n).join(' · '):'';
-    const fr=snapshot.packingReport?.refinement;renderFillGrowth($('fill-growth-report'),fr);$('fill-summary').textContent=fr?uv.describeFill(fr):'';$('fill-shapes').textContent=fr?'建议检查轮廓/切缝（不是自动补切）：'+fr.shapeWaste.slice(0,5).map(c=>`#${c.id+1} 轮廓/框 ${(c.shapeFill*100).toFixed(0)}%`).join('、'):'';
+    rebuildTimeline();view.setOptions(options);view.setGeometry(snapshot.geometry,{resetCamera:framedMesh!==mesh});framedMesh=mesh;list();update();
+    statusMode='complete';renderTitle();renderJobStatus();renderSolveReports();
     reportUV();window.lab.ready=true;
-  }catch(e){if(token===sequence){pipelineTrace=terminalPipeline(pipelineTrace,e.code==='cancelled'?'cancelled':e.code==='timeout'?'timeout':'error',performance.now()-pipelineStarted,e.message);fail(e.message);$('status').textContent='未生成新结果，原网格未修改。';if(backup){snapshot=backup;view.setGeometry(snapshot.geometry,{resetCamera:false});rebuildTimeline();view.setOptions(options);list();update();reportUV();window.lab.ready=true;$('status').textContent+='已恢复上一份 UV 快照。';}}}
+  }catch(e){if(token===sequence){pipelineTrace=terminalPipeline(pipelineTrace,e.code==='cancelled'?'cancelled':e.code==='timeout'?'timeout':'error',performance.now()-pipelineStarted,e.message);fail(e.message);statusMode='failure';if(backup){snapshot=backup;view.setGeometry(snapshot.geometry,{resetCamera:false});rebuildTimeline();view.setOptions(options);list();update();reportUV();window.lab.ready=true;statusMode='restored';}renderJobStatus();}}
   finally{clearInterval(clock);if(token===sequence){pipelineRunning=false;renderPipeline();jobHandle=null;$('solve').disabled=false;$('cancel').disabled=true;}}
+}
+function renderTitle(){$('title').textContent=snapshot?bilingual(`${metadata(mesh.name)} · ${mesh.faces.length.toLocaleString()} triangles · ${snapshot.packed.length} islands`,`${metadata(mesh.name)} · ${mesh.faces.length.toLocaleString()} 三角面 · ${snapshot.packed.length} 岛`):t('正在载入');}
+function renderJobStatus(){
+  if(statusMode==='starting'){$('status').textContent=t('启动 UV Worker…');return;}
+  if(statusMode==='progress'&&progressDisplay){$('status').textContent=describeUVProgress(progressDisplay.progress,performance.now()-progressDisplay.startedAt);return;}
+  if(statusMode==='cancelled'){$('status').textContent=t('已取消本次求解。');return;}
+  if(statusMode==='failure'||statusMode==='restored'){$('status').textContent=t('未生成新结果，原网格未修改。')+(statusMode==='restored'?t('已恢复上一份 UV 快照。'):'');return;}
+  if(!snapshot)return;
+  const m=snapshot.metrics,f=snapshot.fragmentation;
+  $('status').textContent=(m?bilingual(`Generated UVs passed flip / degeneracy / positive-area overlap checks\nValid UV area ${(m.occupancy*100).toFixed(1)}% · summed bounding-box area (may overlap) ${(m.boxOccupancy*100).toFixed(1)}%\n${m.packingMethod} packing · ${snapshot.addedSeams.length} additional UV cuts\n`,`生成 UV：翻面 / 退化 / 正面积重叠检查通过\n有效面积占用 ${(m.occupancy*100).toFixed(1)}% · 包围盒面积总和（可覆盖） ${(m.boxOccupancy*100).toFixed(1)}%\n${m.packingMethod} 排布 · 新增 ${snapshot.addedSeams.length} 条 UV 补切\n`):bilingual('Generated result: see validation state\n','生成结果：见验证状态\n'))+
+    bilingual(`Worker completed · ${(snapshot.timing.elapsedMs/1000).toFixed(2)} s\n`,`Worker 完成 · ${(snapshot.timing.elapsedMs/1000).toFixed(2)} 秒\n`)+
+    (f?bilingual(`Segmentation: ${f.inputComponents} input components → ${f.initialCharts} initial regions → ${f.outputCharts} islands; ${f.tinyCharts} islands below 16 faces\nCut reason codes: ${JSON.stringify(f.reasons)}\n`,`分割诊断：${f.inputComponents} 个源分量 → ${f.initialCharts} 个初始区域 → ${f.outputCharts} 岛；小于16面的岛 ${f.tinyCharts}\n补切原因：${JSON.stringify(f.reasons)}\n`):'')+
+    (snapshot.warnings.length?bilingual('Solver evidence (unregistered details retain their original language):\n','求解器详情（未登记翻译保留原文）：\n')+snapshot.warnings.map(metadata).join('\n'):'');
+}
+function renderSolveReports(){
+  $('surface-symmetry-summary').textContent=describeSymmetrySummary(snapshot?.diagnostics,snapshot?.peel);
+  $('shape-methods').textContent=snapshot?.diagnostics?bilingual('Actual methods: ','实际方法：')+Object.entries(snapshot.diagnostics.reduce((s,d)=>(s[d.method]=(s[d.method]??0)+1,s),{})).map(([m,n])=>metadata(m)+': '+n).join(' · '):'';
+  const fr=snapshot?.packingReport?.refinement;renderFillGrowth($('fill-growth-report'),fr);$('fill-summary').textContent=fr?describeFillPresentation(fr):'';
+  $('fill-shapes').textContent=fr?bilingual('Inspect outlines/seams (no automatic recut): ','建议检查轮廓/切缝（不是自动补切）：')+fr.shapeWaste.slice(0,5).map(c=>bilingual(`#${c.id+1} outline/box ${(c.shapeFill*100).toFixed(0)}%`,`#${c.id+1} 轮廓/框 ${(c.shapeFill*100).toFixed(0)}%`)).join(' · '):'';
 }
 function tune(goal='large'){
  const r=uv.recommendUnwrap(mesh,goal);chartConfig=r.options;$('chart-faces').value=chartConfig.maxChartFaces;$('chart-stretch').value=chartConfig.maxStretch;
- $('auto-config').textContent=`自动填写：${goal==='large'?'大块优先':'均衡'} · ${r.analysis.components} 个连通分量 · 小区域面积比 ${chartConfig.regionOptions.minRegionAreaRatio} · 不为填充率补切`;
+ renderAutoConfig(goal,r.analysis.components);
+}
+let autoDisplay=null;
+function renderAutoConfig(goal=autoDisplay?.goal,components=autoDisplay?.components){
+  if(goal===undefined)return;autoDisplay={goal,components};
+  $('auto-config').textContent=bilingual(`Automatic settings: ${goal==='large'?'large charts':'balanced'} · ${components} connected components · small-region area ratio ${chartConfig.regionOptions.minRegionAreaRatio} · no cuts solely for occupancy`,`自动填写：${goal==='large'?'大块优先':'均衡'} · ${components} 个连通分量 · 小区域面积比 ${chartConfig.regionOptions.minRegionAreaRatio} · 不为填充率补切`);
 }
 function load(demo,automatic=false){
  postSeed=undefined;postHuman=undefined;postPeel=undefined;postFeatures=undefined;templateSelection=undefined;
@@ -166,16 +213,17 @@ function load(demo,automatic=false){
 }
 function autoCharts(goal){postSeed=undefined;postHuman=undefined;postPeel=undefined;postFeatures=undefined;templateSelection=undefined;tune(goal);seams=new Set();$('target').value='generated';return solve();}
 function reportUV(){
- $('peel-summary').textContent=snapshot?.peel?`${snapshot.peel.groups.length} 个空间组 → ${snapshot.peel.totalIslands} 个 UV 岛；反馈二分 ${snapshot.peel.feedbackSplits} 次，原 UV 使用为 0；切缝全部来自几何。`:'选择通用剥展后显示组 / 岛和失败反馈记录。';
- const h=snapshot?.human;$('human-summary').textContent=h?`已识别 / 保留 ${h.applied} 个结构区域。`+h.entries.filter(e=>e.status!=='skipped').map(e=>` 原 #${e.sourceChart+1}：${e.status==='applied'?e.template+' → '+e.charts.map(id=>'#'+(id+1)).join(' / '):'未应用 · '+e.reason}`).join('；'):'纯几何结构报告；普通重排不改变结构。';
-  const features=snapshot?.features;$('features-summary').textContent=features?`已生成 UV 可辨识性：检查 ${features.detectedPanels} 个主要平面特征，重展 ${features.changedCharts} 个原岛；${features.before} → ${features.after} 岛。保留实际凹口/孔洞轮廓，其他区域仍按空间组开缝剥展。`:'';
-  const repair=snapshot?.repair;$('repair-summary').textContent=repair?`当前生成结果验证 ${repair.repaired}/${repair.inspected} 岛：${repair.islands.map(i=>'#'+(i.id+1)+' '+i.method).join('、')||'无需修复'}；其余 ${repair.preserved} 岛通过有效性检查（仍须检查轮廓）。`:'';
+ $('peel-summary').textContent=snapshot?.peel?bilingual(`${snapshot.peel.groups.length} spatial groups → ${snapshot.peel.totalIslands} UV islands; ${snapshot.peel.feedbackSplits} feedback splits. Original UV use: 0; all seams come from geometry.`,`${snapshot.peel.groups.length} 个空间组 → ${snapshot.peel.totalIslands} 个 UV 岛；反馈二分 ${snapshot.peel.feedbackSplits} 次，原 UV 使用为 0；切缝全部来自几何。`):t('选择通用剥展后显示组 / 岛和失败反馈记录。');
+ const h=snapshot?.human;$('human-summary').textContent=h?bilingual(`${h.applied} structure regions recognized / preserved. `,`已识别 / 保留 ${h.applied} 个结构区域。`)+h.entries.filter(e=>e.status!=='skipped').map(e=>bilingual(`Input #${e.sourceChart+1}: `,`原 #${e.sourceChart+1}：`)+(e.status==='applied'?metadata(e.template)+' → '+e.charts.map(id=>'#'+(id+1)).join(' / '):bilingual('Not applied · ','未应用 · ')+metadata(e.reason))).join(' · '):t('纯几何结构报告；普通重排不改变结构。');
+  const features=snapshot?.features;$('features-summary').textContent=features?bilingual(`Generated UV features: ${features.detectedPanels} major planar features inspected, ${features.changedCharts} input islands re-unfolded; ${features.before} → ${features.after} islands. Actual concavities and holes are preserved; other regions use spatial grouping and seams.`,`已生成 UV 可辨识性：检查 ${features.detectedPanels} 个主要平面特征，重展 ${features.changedCharts} 个原岛；${features.before} → ${features.after} 岛。保留实际凹口/孔洞轮廓，其他区域仍按空间组开缝剥展。`):'';
+  const repair=snapshot?.repair;$('repair-summary').textContent=repair?bilingual(`Current generated result: ${repair.repaired}/${repair.inspected} islands checked: ${repair.islands.map(i=>'#'+(i.id+1)+' '+metadata(i.method)).join(' · ')||t('无需修复')}; ${repair.preserved} others passed validity checks (inspect outlines separately).`,`当前生成结果验证 ${repair.repaired}/${repair.inspected} 岛：${repair.islands.map(i=>'#'+(i.id+1)+' '+metadata(i.method)).join('、')||t('无需修复')}；其余 ${repair.preserved} 岛通过有效性检查（仍须检查轮廓）。`):'';
   const a=snapshot?.areaAudit;
-  $('area-summary').textContent=a?`当前 ${snapshot.packed.length} 岛；面积密度偏大 ${a.oversized.length} / 偏小 ${a.undersized.length}。新 atlas：平均密度可在精排中有界调整。`:'';
+  $('area-summary').textContent=a?bilingual(`${snapshot.packed.length} current islands; ${a.oversized.length} high-density / ${a.undersized.length} low-density. New atlas: refinement can adjust mean density within limits.`,`当前 ${snapshot.packed.length} 岛；面积密度偏大 ${a.oversized.length} / 偏小 ${a.undersized.length}。新 atlas：平均密度可在精排中有界调整。`):'';
   const n=snapshot?.spatialReport;
-  $('neighbor-summary').textContent=n?`${n.islandCount} 个真实岛，${n.groups.length} 个空间关联组；${n.links.filter(l=>!l.stitchable).length} 条空间邻近关系（不是缝合）。${n.truncated?'采样比较已达预算。':''}`:'';
-  $('audit-summary').textContent=snapshot?.sourceAudit?`原输入真实岛数 ${snapshot.sourceAudit.domains.reduce((n,d)=>n+d.islands,0)}；`+snapshot.sourceAudit.domains.map(d=>`${d.name}：${d.islands} 岛，${d.overlapCountCapped?'至少 ':''}${d.overlapPairs} 对重叠、${d.degenerate} 个退化面`).join('；'):'';
-  $('post-summary').textContent=(snapshot?.merge?`缝合：${snapshot.merge.before} → ${snapshot.merge.after} 岛；接受 ${snapshot.merge.accepted} 次（保留开缝连接 ${snapshot.merge.partialJoins??0} 次 / 保留形状缝合 ${snapshot.merge.rigidJoins??0} 次），移除 ${snapshot.merge.removedSeams.length} 条边。${snapshot.merge.budgetExhausted?'达到尝试预算。':''}`:'')+(snapshot?.pageReport?` 按连接关系分配 ${snapshot.pageReport.actual} 页，同页共享边界 ${(snapshot.pageReport.retainedSharedBoundaryRatio*100).toFixed(1)}%。`:'');
+  $('neighbor-summary').textContent=n?bilingual(`${n.islandCount} actual islands, ${n.groups.length} spatial association groups; ${n.links.filter(l=>!l.stitchable).length} proximity links (not stitching).`,`${n.islandCount} 个真实岛，${n.groups.length} 个空间关联组；${n.links.filter(l=>!l.stitchable).length} 条空间邻近关系（不是缝合）。`)+(n.truncated?t('采样比较已达预算。'):''):'';
+  $('audit-summary').textContent=snapshot?.sourceAudit?bilingual(`Original input islands: ${snapshot.sourceAudit.domains.reduce((n,d)=>n+d.islands,0)}; `,`原输入真实岛数 ${snapshot.sourceAudit.domains.reduce((n,d)=>n+d.islands,0)}；`)+snapshot.sourceAudit.domains.map(d=>bilingual(`${metadata(d.name)}: ${d.islands} islands, ${d.overlapCountCapped?'at least ':''}${d.overlapPairs} overlap pairs, ${d.degenerate} degenerate faces`,`${metadata(d.name)}：${d.islands} 岛，${d.overlapCountCapped?'至少 ':''}${d.overlapPairs} 对重叠、${d.degenerate} 个退化面`)).join(' · '):'';
+  const merged=snapshot?.merge,pages=snapshot?.pageReport;
+  $('post-summary').textContent=(merged?bilingual(`Stitching: ${merged.before} → ${merged.after} islands; ${merged.accepted} accepted (${merged.partialJoins??0} partial-cut joins / ${merged.rigidJoins??0} shape-preserving joins), ${merged.removedSeams.length} edges removed.`,`缝合：${merged.before} → ${merged.after} 岛；接受 ${merged.accepted} 次（保留开缝连接 ${merged.partialJoins??0} 次 / 保留形状缝合 ${merged.rigidJoins??0} 次），移除 ${merged.removedSeams.length} 条边。`)+(merged.budgetExhausted?t('达到尝试预算。'):''):'')+(pages?bilingual(` ${pages.actual} pages assigned by connectivity; ${(pages.retainedSharedBoundaryRatio*100).toFixed(1)}% shared boundaries kept on one page.`,` 按连接关系分配 ${pages.actual} 页，同页共享边界 ${(pages.retainedSharedBoundaryRatio*100).toFixed(1)}%。`):'');
 }
 function postprocess(operation){if(!snapshot)return;if(operation==='templates'){if(!inspection.islands.length)return;templateSelection=[...inspection.islands];$('structure-templates').checked=true;$('uv-objective').value='paint';$('solver').value='auto';$('autocut').checked=true;}postSeed=snapshot.packed;postHuman=snapshot.human;postPeel=snapshot.peel;postFeatures=snapshot.features;seams=new Set(snapshot.seams);$('target').value=operation;return solve();}
 $('human-selected').onclick=()=>postprocess('templates');
@@ -183,7 +231,7 @@ $('post-stitch').onclick=()=>postprocess('stitch');$('post-repack').onclick=()=>
 $('peel-groups').onclick=()=>{postSeed=undefined;postHuman=undefined;postPeel=undefined;postFeatures=undefined;templateSelection=undefined;seams=new Set();$('target').value='generated';$('post-merge').checked=false;$('initial-segmentation').value='hierarchical';$('uv-objective').value='paint';$('solver').value='auto';$('autocut').checked=true;return solve();};
 $('pre-connected').onclick=()=>{postSeed=undefined;postHuman=undefined;postPeel=undefined;postFeatures=undefined;templateSelection=undefined;seams=new Set();$('target').value='generated';$('post-merge').checked=true;$('initial-segmentation').value='connected';return solve();};
 async function loadVerified(id){
- try{const data=window.LAB_GEOMETRY?.[id];if(!data)throw Error('缺少纯几何样例');
+ try{const data=window.LAB_GEOMETRY?.[id];if(!data)throw Error(t('缺少纯几何样例'));
  const bytes=Uint8Array.from(atob(data),c=>c.charCodeAt(0));
  const text=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
  return await load({mesh:JSON.parse(text),edges:new Set()},true);
@@ -193,10 +241,10 @@ $('verified-corset').onclick=()=>loadVerified('corset');$('verified-helmet').onc
 $('fragment-demo').onclick=()=>{$('target').value='generated';return load(makeFragmentationDemo(2));};
 $('auto-large').onclick=()=>autoCharts('large');$('auto-balanced').onclick=()=>autoCharts('balanced');
 $('extract-uv').onclick=()=>{postSeed=undefined;postHuman=undefined;postPeel=undefined;postFeatures=undefined;templateSelection=undefined;seams=new Set();$('target').value='generated';return solve(loadPlan);};
-for(const stage of uv.HINGE_STAGES){const b=document.createElement('button');b.textContent=stage.label;b.dataset.stage=stage.t;b.onclick=()=>{pause();const schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,$('reverse').checked,options.timeline),index=inspectionIndex??schedule.focusIndex;update({progress:uv.islandTimelineProgress((options.timeline?.entries[index]?uv.motionLocal(options.timeline.entries[index].profile,stage.t):uv.hingePlaybackProgress(stage.t,options.holdNet)),index,options.selected.length,options.order,options.handoff,options.timeline)},index);};$('stages').append(b);}
+for(const stage of uv.HINGE_STAGES){const b=document.createElement('button');b.textContent=metadata(stage.label);b.dataset.message=stage.label;b.dataset.stage=stage.t;b.onclick=()=>{pause();const schedule=uv.sampleUnfoldSchedule(options.progress,options.selected.length,options.order,options.handoff,$('reverse').checked,options.timeline),index=inspectionIndex??schedule.focusIndex;update({progress:uv.islandTimelineProgress((options.timeline?.entries[index]?uv.motionLocal(options.timeline.entries[index].profile,stage.t):uv.hingePlaybackProgress(stage.t,options.holdNet)),index,options.selected.length,options.order,options.handoff,options.timeline)},index);};$('stages').append(b);}
 $('ribbon').onclick=()=>load(makeHingeDemo());$('cube').onclick=()=>load(makeUnfoldDemo());$('complex').onclick=()=>{const m=core.makeComplexExample($('example').value,'low');load({mesh:m,edges:new Set()},true);};
 $('file').onchange=async e=>{try{const f=e.target.files?.[0];if(f){const m=core.parseOBJ(await f.text(),f.name);await load({mesh:m,edges:new Set()},true);}}catch(e){fail(e.message);}};
-$('solve').onclick=solve;$('cancel').onclick=()=>{cancel();$('status').textContent='已取消本次求解。';};$('target').onchange=solve;
+$('solve').onclick=solve;$('cancel').onclick=()=>{cancel();statusMode='cancelled';renderJobStatus();};$('target').onchange=solve;
 $('all').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=snapshot?.geometry.islands.map(i=>i.id)??[];list();update({progress:0});};$('none').onclick=()=>{pause();inspection=EMPTY_INSPECTION;options.focusFace=null;options.selected=[];list();update({progress:0});};
 $('separation').oninput=()=>{pause();update({separation:Number($('separation').value),progress:0});};$('in-place').onclick=()=>{pause();$('separation').value='0';update({separation:0,progress:0});};
 $('focus-dissolve').onchange=()=>{$('focus-mode').value=$('focus-dissolve').checked?'ghost':'off';update({focusMode:$('focus-mode').value});};$('focus-mode').onchange=()=>{$('focus-dissolve').checked=$('focus-mode').value!=='off';update({focusMode:$('focus-mode').value});};for(const [id,key] of [['arrival-hold','arrivalHoldSeconds'],['arrival-fade','arrivalFadeSeconds']])$(id).oninput=()=>{const n=$(id).valueAsNumber;if(!Number.isFinite(n))return;const values=arrivalSettings({[key]:n});update({[key]:id==='arrival-hold'?values.hold:values.fade});};
@@ -209,8 +257,8 @@ $('wave').onchange=()=>{pause();update({hingeWave:$('wave').checked,progress:0})
 for(const [id,key]of [['face-tones','faceTones'],['frame','autoFrame'],['hinges','showHinges'],['temporary','showTemporaryCuts'],['checker','checker']])$(id).onchange=()=>update({[key]:$(id).checked});
 $('handoff').oninput=()=>{pause();update({handoff:Number($('handoff').value),progress:0});};$('skip-static').onchange=()=>{pause();update({skipStatic:$('skip-static').checked,progress:0});};$('motion-tolerance').onchange=()=>{const v=Number($('motion-tolerance').value);if(Number.isFinite(v)&&v>=0&&v<=.001){pause();update({motionTolerance:v,progress:0});}};$('hold-net').onchange=()=>{pause();update({holdNet:$('hold-net').checked,progress:0});};$('queue-prev').onclick=()=>seekQueue(-1);$('queue-next').onclick=()=>seekQueue(1);$('seconds').onchange=()=>update();$('rate').onchange=()=>update();$('reverse').onchange=()=>update();
 $('order').onchange=()=>{pause();update({order:$('order').value,progress:0});};$('context').onchange=()=>update({context:$('context').value});$('fit-current').onclick=()=>view.fitCurrent();$('orbit').onclick=()=>view.fit('orbit');$('front').onclick=()=>view.fit('uv');
-attachScrubSession($('progress'),active=>{playing=false;scrubbing=active;clockLast=null;$('play').textContent='播放展开';update();});
-$('progress').oninput=()=>{playing=false;clockLast=null;$('play').textContent='播放展开';update({progress:Number($('progress').value)});};$('play').onclick=()=>{if(playing){pause();return;}if(!snapshot||!options.selected.length)return;scrubbing=false;playing=true;inspectionIndex=null;clockLast=null;const reverse=$('reverse').checked;if((!reverse&&options.progress===1)||(reverse&&options.progress===0))update({progress:reverse?1:0});$('play').textContent='暂停';update();};
+attachScrubSession($('progress'),active=>{playing=false;scrubbing=active;clockLast=null;$('play').textContent=t('播放展开');update();});
+$('progress').oninput=()=>{playing=false;clockLast=null;$('play').textContent=t('播放展开');update({progress:Number($('progress').value)});};$('play').onclick=()=>{if(playing){pause();return;}if(!snapshot||!options.selected.length)return;scrubbing=false;playing=true;inspectionIndex=null;clockLast=null;const reverse=$('reverse').checked;if((!reverse&&options.progress===1)||(reverse&&options.progress===0))update({progress:reverse?1:0});$('play').textContent=t('Pause');update();};
 // Visibility resets the timestamp so time spent in a hidden tab is not replayed.
 let clockLast=null;document.addEventListener('visibilitychange',()=>{clockLast=null;});
 function tick(now){
@@ -239,6 +287,23 @@ for(const button of document.querySelectorAll('[data-tool]'))button.onclick=()=>
 if($('header-import'))$('header-import').onclick=()=>$('file').click();
 if($('header-export'))$('header-export').onclick=()=>$('export').click();
 if($('clear-inspection'))$('clear-inspection').onclick=()=>$('none').click();
+/** Appearance is a separate namespace. Redraw only known presentation fields;
+ * never route these events through solver controls or the playback update path. */
+function redrawDisplay(){
+  const preferences=displayPreferences.getSnapshot();applyDisplayRoot();bindOfflineMessages();
+  $('display-locale').value=preferences.locale;$('display-theme').value=preferences.theme;
+  document.title=t('MeshTailor · 离线展开实验页');
+  renderCameraText();renderIslandLabels();selectionStatus();renderPlaybackText();
+  renderTitle();renderJobStatus();renderFailure();renderAutoConfig();renderPipeline();
+  renderSolveReports();reportUV();drawUV();
+}
+displayPreferences.subscribe(()=>{
+  try{localStorage.setItem(DISPLAY_STORAGE_KEY,JSON.stringify(displayPreferences.getSnapshot()));}catch{/* Session preferences remain usable when storage is denied. */}
+  redrawDisplay();
+});
+$('display-locale').onchange=()=>displayPreferences.set({locale:$('display-locale').value});
+$('display-theme').onchange=()=>displayPreferences.set({theme:$('display-theme').value});
+redrawDisplay();
 await load(makeHingeDemo());
 
 for(const id of ['inspect-source','peel-source','peel-panels','source-merge','source-repair','source-features','source-feature-tolerance','source-layout','fill-recut']){const el=$(id);if(el){el.disabled=true;const label=el.closest('label');(label??el).hidden=true;}}
