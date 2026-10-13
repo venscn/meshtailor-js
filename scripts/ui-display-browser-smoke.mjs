@@ -24,8 +24,8 @@ try {
     const options=uv.geometryGenerationOptions(mesh);
     const result=uv.unwrapMesh(mesh,new Set(),options);
     window.snapshot={...result,geometry:uv.buildUnfoldGeometry(mesh,result.packed,new Set(result.seams))};
-    window.callbacks=0;
-    window.panel=new PipelinePanel(()=>callbacks++,()=>callbacks++,()=>callbacks++);
+    window.callbacks=0;window.configChanges=[];
+    window.panel=new PipelinePanel(plan=>{callbacks++;configChanges.push(plan)},()=>callbacks++,()=>callbacks++);
     document.querySelector('#panel').append(panel.element);
     panel.update({mesh,options,config:{...DEFAULT_LOAD_PIPELINE,fill:true,fillBudgetSeconds:17},trace:null,loading:false});
     window.view=new UnfoldWebGLView(document.querySelector('#view'),()=>{},error=>{if(error)errors.push(error)});
@@ -62,16 +62,23 @@ try {
       return {gpu:Array.from(pixel),expected:colors.clearColor,uv:Array.from(uvcanvas.getContext('2d').getImageData(0,0,1,1).data),
         caption:panel.element.querySelector('h3').textContent,lang:document.documentElement.lang,background:getComputedStyle(document.body).backgroundColor,
         stable:snapshot===before.snapshot&&snapshot.geometry===before.geometry&&view.canvas===before.canvas&&JSON.stringify(Array.from(view.getPositions()))===JSON.stringify(before.positions)&&JSON.stringify(view.getCamera())===before.camera,
-        callbacks,glError:gl.getError(),budget:panel.element.querySelector('[data-pipeline="fillBudgetSeconds"]').value,errors};
+        callbacks,glError:gl.getError(),budget:panel.element.querySelector('[data-pipeline="fillBudgetSeconds"]').value,
+        obsoleteRepair:!!panel.element.querySelector('[data-pipeline="repairInvalid"]'),errors};
     })()`);
     assert.equal(actual.lang,locale);assert.equal(actual.stable,true,'display changes must preserve geometry, canvas, positions, and camera');
     assert.equal(actual.callbacks,0,'a language/theme change must not dispatch a pipeline edit/run/cancel');
     assert.equal(actual.glError,0);assert.deepEqual(actual.errors,[]);assert.equal(actual.budget,'17');
-    assert.deepEqual(actual.gpu.slice(0,3),actual.expected.map(channel=>Math.round(channel*255)));
-    assert.deepEqual(actual.uv.slice(0,3),actual.expected.map(channel=>Math.round(channel*255)));
+    assert.equal(actual.obsoleteRepair,false,'geometry-only UI must not expose original-UV repair');
+    const rgb=actual.expected.map(channel=>Math.round(channel*255));
+    assert.deepEqual(actual.gpu.slice(0,3),rgb);
+    assert.deepEqual(actual.uv.slice(0,3),rgb);
+    assert.equal(actual.background,`rgb(${rgb.join(', ')})`);
     assert.equal(actual.caption,locale==='en'?'Model loading · automatic pipeline':'载入模型 · 自动处理流程');
     console.log('PASS',locale,theme,'actual DOM/Canvas/GL appearance, stable geometry/camera, zero task callbacks');
   }
+  const edited=await page.evaluate(`(()=>{const input=panel.element.querySelector('[data-pipeline="fill"]');input.checked=false;input.dispatchEvent(new Event('change'));return configChanges.at(-1)})()`);
+  assert.equal(edited.source,'geometry');assert.equal(edited.repairInvalid,false);assert.equal(edited.fill,false);
+  console.log('PASS editing a real surviving control never reads or enables original-UV repair');
   await page.evaluate('view.dispose();panel.dispose();display.set({locale:"en",theme:"light"})');
   assert.equal(await page.evaluate('document.querySelectorAll("#view canvas,#panel .pipeline-panel").length'),0);
   assert.deepEqual(await page.evaluate('errors'),[]);

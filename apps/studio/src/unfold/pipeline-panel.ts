@@ -36,7 +36,6 @@ export class PipelinePanel {
       <div class="pipeline-presets"><button type="button" data-pipeline="standard">${b('Standard','标准整理')}</button><button type="button" data-pipeline="filled">${b('Standard + fill','整理＋填空')}</button></div>
       <label>${b('Input policy','输入策略')}<select aria-label="${b('Load pipeline source','载入流程输入策略')}" data-pipeline="source"><option value="geometry">${b('Geometry only: group → cut → flatten (ignore original UVs)','仅几何：分组 → 开缝 → 展平（不使用原 UV）')}</option></select></label>
       <div class="pipeline-track">
-        <label class="pipeline-toggle" hidden><input aria-label="Pipeline repair" data-pipeline="repairInvalid" type="checkbox"><span>检查原岛 · 允许局部修复<small>只修无效原岛；关闭后遇到无效岛会报错</small></span></label>
         <label class="pipeline-toggle"><input aria-label="${b('Pipeline merge','流程邻岛缝合')}" data-pipeline="mergeAdjacent" type="checkbox"><span>${b('Validate shared-edge joins','共享边验证缝合')}<small>${b('Join only after quality checks; proximity never implies welding','通过质量检查后才连接，不按空间接近强焊')}</small></span></label>
         <div class="pipeline-fixed">${b('Normalize area → pack large islands first','面积归一 → 大岛优先排布')}<small>${b('Required for a new atlas; separate from vacancy refinement','新 atlas 的必需步骤，不与“填空”混用')}</small></div>
         <label class="pipeline-toggle"><input aria-label="${b('Pipeline fill','流程填空')}" data-pipeline="fill" type="checkbox"><span>${b('Fill vacancies · multiple contour-refinement rounds','填补空白 · 多轮轮廓精排')}<small data-pipeline="fill-note"></small></span></label>
@@ -50,13 +49,12 @@ export class PipelinePanel {
       <details><summary>${b('Pipeline files and reports','流程文件与执行报告')}</summary><div class="pipeline-presets"><button data-pipeline="export">${b('Export configuration','导出配置')}</button><button data-pipeline="import-button">${b('Import configuration','导入配置')}</button><button data-pipeline="report">${b('Export execution report','导出执行报告')}</button></div><input data-pipeline="import" type="file" accept=".json,application/json" hidden><small>${b('Pipeline, parameters, mesh names, and statistics only; no geometry. Names may need redacting.','只包含流程和参数、模型名称与统计，不包含几何；报告里的名称可能需要脱敏。')}</small></details>`;
     const change=()=>{
       if(!this.state)return;
-      const raw={...this.state.config,source:this.get('source').value,repairInvalid:this.get('repairInvalid').checked,mergeAdjacent:this.get('mergeAdjacent').checked,fill:this.get('fill').checked,fillBudgetSeconds:Number(this.get('fillBudgetSeconds').value),fillRounds:Number(this.get('fillRounds').value)};
-      // Choosing inspection explicitly turns off mutation. Persisted/imported
-      // contradictory configs are still rejected by the resolver, not ignored.
-      raw.source='geometry';raw.repairInvalid=false;
+      // Keep the compatibility field fixed; this UI never offers source-UV
+      // inspection/repair, including after loading an older configuration.
+      const raw={...this.state.config,source:'geometry',repairInvalid:false,mergeAdjacent:this.get('mergeAdjacent').checked,fill:this.get('fill').checked,fillBudgetSeconds:Number(this.get('fillBudgetSeconds').value),fillRounds:Number(this.get('fillRounds').value)};
       try{this.onChange(validateLoadPipeline(raw));}catch(e){this.showError(String(e));}
     };
-    for(const k of ['source','repairInvalid','mergeAdjacent','fill','fillBudgetSeconds','fillRounds'])this.get(k).addEventListener('change',change);
+    for(const k of ['mergeAdjacent','fill','fillBudgetSeconds','fillRounds'])this.get(k).addEventListener('change',change);
     this.get('standard').onclick=()=>this.onChange({...DEFAULT_LOAD_PIPELINE});
     this.get('filled').onclick=()=>this.onChange({...DEFAULT_LOAD_PIPELINE,fill:true});
     this.get('run').onclick=()=>this.onRun();this.get('cancel').onclick=()=>this.onCancel();
@@ -70,8 +68,8 @@ export class PipelinePanel {
   private save(name:string,data:unknown){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   update(state:PipelinePanelState){
     const changed=JSON.stringify(this.state?.config)!==JSON.stringify(state.config);this.state=state;
-    if(changed){this.get('source').value=state.config.source;for(const k of ['repairInvalid','mergeAdjacent','fill'] as const)this.get(k).checked=state.config[k];for(const k of ['fillBudgetSeconds','fillRounds'] as const)this.get(k).value=String(state.config[k]);}
-    const raw=false;for(const k of ['repairInvalid','mergeAdjacent','fill'])this.get(k).disabled=raw;
+    if(changed){this.get('source').value=state.config.source;for(const k of ['mergeAdjacent','fill'] as const)this.get(k).checked=state.config[k];for(const k of ['fillBudgetSeconds','fillRounds'] as const)this.get(k).value=String(state.config[k]);}
+    for(const k of ['mergeAdjacent','fill'])this.get(k).disabled=false;
     this.get('budget').hidden=!state.config.fill;this.get('fill-note').textContent=state.config.fill?b(`Enabled · ${state.config.fillBudgetSeconds}s / ${state.config.fillRounds} rounds, then full validation; never splits islands automatically`,`已启用 · 搜索 ${state.config.fillBudgetSeconds}s / ${state.config.fillRounds} 轮，随后全量验证；不自动拆岛`):b('Disabled · no automatic fill after loading','未启用 · 加载后不会自动执行填空');
     this.get('run').disabled=state.loading;this.get('cancel').disabled=!state.loading;this.get('report').disabled=!state.trace;
     this.get('input').textContent=state.inputStatus??b('Input ready · see import report for reading / parsing / topology preparation','输入准备完成 · 读取 / 解析 / 拓扑处理见模型导入报告');
