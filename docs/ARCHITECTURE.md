@@ -1,103 +1,82 @@
-> v0.4.0 更新：UV 生产流程现为面角拓扑 → LSCM/Tutte → 检查 → 面积感知 MaxRects；动画独立使用边铰链。当前模块和限制见 [展开与 UV 架构说明](UNFOLDING_AND_UV.md)，下文保留早期工程背景。
+[**English**](ARCHITECTURE.md) | [简体中文](ARCHITECTURE.zh-CN.md)
 
-# Architecture mapping
+# Current architecture
 
-## 1. Data path
+MeshTailor-JS runs locally as a browser Studio, an offline workbench, or an OBJ CLI. It does not require a business HTTP backend or an operations frontend. Vite and `lab:serve` serve frontend files; they do not own generation jobs or model storage.
 
-```text
-OBJ / GLB / GLTF
-      |
-      v
- MeshData (V,F, per-corner UV)
-      |
-      +--> topology / 1-ring
-      |
-      +--> existing UV -> seam edge extraction
-                         |
-                         v
-                   ChainingSeams
-                         |
-                         v
-                 Canonical ordering
-                         |
-                         v
-              vertex stream + EOC/EOS
-```
+This document describes the current geometry-only production boundary. The [unchanged early architecture](ARCHITECTURE-HISTORICAL-0.1-0.3.md) preserves the v0.1–v0.3 research and source-UV design as historical context.
 
-For learned inference, the same `MeshData` also supplies vertex `(xyz, normal)` features and 2048 sampled surface `(xyz, normal)` points.
+## Applications and modules
 
-## 2. Paper model mapping
+| Location | Responsibility |
+| --- | --- |
+| `apps/studio` | React/Vite client; OBJ/FBX/GLB/glTF import adapters, browser Workers, controls, rendering, picking, and export. |
+| `apps/unfold-lab` | Standalone offline workbench source; accepts OBJ and built-in meshes. |
+| `apps/cli` | Local Node.js OBJ inspection, seam/chain JSON output, and generated-UV OBJ export. |
+| `packages/mesh-core` | Geometry types, topology, OBJ/glTF helpers, input isolation, examples, and bounded opt-in downloads. |
+| `packages/chaining-seams` | Mesh-edge chain tracing, canonical ordering, and serialization; historical source-UV extraction remains a research/QA utility. |
+| `packages/uv` | Geometry-driven partitioning/cuts, parameterization, quality checks, packing, generated-result editing, and unfolding correspondence. |
+| `packages/runtime` | Geometry baseline adapter, lazy traversal/debugger frames, and research candidate masks. |
+| `packages/model` | Research specification, training-sample utilities, and model adapter contracts; no learned weights are bundled or used by production generation. |
+| `scripts` | Builds, Git checks, focused regressions, fixture tooling, and classified historical experiments. |
+| `docs` / `validation` | Maintained bilingual guides and versioned design/validation evidence; saved reports describe their original run. |
+| `unfold-lab.html` | Offline deliverable rebuilt from source with `npm run lab:build`. |
 
-MeshTailor v2 Appendix B.3 is represented in `packages/model/src/spec.ts`.
+Shared language, theme, and preference utilities are being consolidated in `packages/ui-platform`. This integration and its cross-client coverage must be confirmed against integrated source and browser checks before being described as complete. Display preferences stay outside geometry generation settings.
+
+## Production flow
 
 ```text
-vertex xyz+normal
-  -> Fourier features + raw values
-  -> MLP, dp=384
-  -> GraphSAGE widths 64/128/256/512
-  -> concatenate graph feature + point feature
-  -> projection d=512
-
-surface 2048 x (xyz+normal)
-  -> pretrained frozen point-cloud encoder
-  -> shape tokens Z, width=512
-
-vertex tokens query Z
-  -> cross attention x2
-  -> enhanced vertex tokens
-
-previous candidate embeddings
-  -> chain-local positional embedding
-  -> RoPE
-  -> decoder-only Transformer x6, d=512, conditioned on Z
-  -> pointer projection against [EOC], [EOS], enhanced vertices
-  -> dynamic neighbor mask
+local import / built-in geometry
+  → geometryOnlyMesh (whitelisted positions, topology, geometry metadata)
+  → geometryGenerationOptions
+  → unwrapMesh
+  → generated cuts + parameterized/checked/packed face-corner UVs
+  → UVSnapshot
+  → 3D preview + UV view + picking + generated-UV OBJ export
 ```
 
-The repository does not fabricate unspecified paper details such as exact Fourier band count, head count, FFN ratio, or author checkpoint tensor names. Those should be filled from official code/checkpoints when released or selected explicitly for an independent reimplementation.
+Default loading, Generate baseline, and CLI generation share the geometry policy and generator. Original UV coordinates, UV indices, seams, source islands, and recovery hints cannot choose partitions or guide automatic generation. Import boundaries, Worker transfer, and generator entry each enforce the whitelist; do not enumerate an entire input face and then delete UV fields.
 
-## 3. Mesh-native inference
+The glTF helper removes original `TEXCOORD_*`/`TANGENT` attribute references and texture dependencies while preserving geometry, transforms, skins, morphs, and lightweight material-domain identity. It does not promise to rewrite unused bytes in the original binary buffer. Material identity is import metadata, not an original UV layout hint.
 
-`packages/runtime/src/candidate-mask.ts` is the key structural guarantee.
+Stitch, repack, fill, and template edits consume the current generated snapshot. They do not restore model UVs. The Worker explicitly rejects legacy `source` and `source-atlas` targets.
 
-- At chain start, candidates are valid mesh vertices.
-- From a vertex, candidates are only its 1-ring neighbors plus EOC/EOS.
-- The immediately previous vertex is removed to avoid one-step backtracking.
-- EOS terminates generation.
-
-The Studio debugger uses exactly this same mask to visualize candidate points.
-
-## 4. Canonical ordering
-
-`packages/chaining-seams/src/canonical-order.ts` tracks patches as face sets. For each closed seam loop it blocks the loop edges in the current face adjacency graph and tests whether the patch splits into exactly two components. The area balance is:
+## Dependency boundaries
 
 ```text
-min(A1,A2) / max(A1,A2)
+Studio ───────→ mesh-core / chaining-seams / runtime / uv
+CLI ──────────→ mesh-core / chaining-seams / uv
+runtime ──────→ mesh-core / chaining-seams / uv
+uv ───────────→ mesh-core / chaining-seams
+chaining-seams → mesh-core
+model ────────→ mesh-core / chaining-seams / runtime (research)
+mesh-core ────→ no other project package
 ```
 
-The largest patch is refined first; its most balanced valid internal loop is appended next. Remaining open chains are sorted by decreasing geometric length.
+Each workspace declares direct internal imports, including type-only imports. Cross-workspace consumers use package entry points instead of relative imports into another package's `src`. Production geometry packages do not import React, DOM controls, client preferences, or application implementations.
 
-## 5. Current UV stage
+The offline workbench currently reuses Studio's Worker, drawing modules, and CSS through the local bundler. This avoids a second generator, but source paths are a real coupling: moving them requires updating offline builds and regressions together. Extract shared protocols and rendering policies only with a concrete consumer and preserved behavior.
 
-`buildCharts()` is real topology cutting: face adjacency cannot cross a seam edge. `planarPackPreview()` is only the parameterization preview. This distinction is intentional because MeshTailor predicts seams; ABF++ is a downstream solver in the paper.
+`MeshTailorBackend` is a research inference adapter, not a web service. Candidate masks, training labels extracted from existing UVs, and old source-layout utilities do not define production generation.
 
+## Jobs and presentation
 
-## 0.2.0 additions
+Studio's `useUVSnapshot` owns cancellation and stale-result rejection. `startUVJob` constructs geometry-only input, enforces startup and wall-clock limits, and terminates busy Workers on cancellation. One returned snapshot contains packed face-corner UVs, actual seams, correspondence geometry, warnings, and diagnostics.
 
-The browser import boundary is `apps/studio/src/importers/`: OBJ retains source topology; FBX/glTF pass a Three scene through `sceneToMesh` and pure `assembleMeshParts`. Position welding is scoped per object/instance while UV lives on face corners. Imported source scenes are disposed after extraction. FBXLoader parse remains synchronous.
+UV drawing, current morphed 3D picking, and export consume that snapshot. Playback never changes the solver seam set or silently repacks its target. Unfolding is deterministic correspondence visualization; intermediate poses may overlap and are not cloth simulation or a zero-distortion proof.
 
-Complex mesh generators, the remote asset catalog, bounded geometry downloads and GLB repack helpers live in `packages/mesh-core`. They are independent of React/Three except for the later browser scene decoder. Remote download is opt-in and source/credit/hash are retained.
+Traversal frames stay on the client with lazy edge-history accessors. Structured-cloning these frames across Workers would eagerly materialize histories. Browser importers and renderers own Three.js/WebGL resources and dispose them at lifecycle boundaries.
 
-`seam.worker.ts` returns seam edges and ordered chains, not pre-expanded debugger frames. The main thread constructs frames with lazy edge-history getters. Structured-cloning those frames would eagerly invoke getters and negate the memory optimization; do not move frame arrays across the worker boundary. `uv.worker.ts` returns chart/preview data. Operation sequence IDs reject stale replies.
+## Maintenance and checks
 
-The timeline renders at most 100 nearby rows. Above 20,000 triangles, UV defaults to complete seam data rather than playback-frame updates. None of these changes replace the geometric baseline with a learned model or the planar preview with ABF++.
+Comments explain invariants, ownership, constraints, and decisions. Domain algorithms stay independent of UI text and theme tokens. Keep current behavior separate from historical experiments, preserving release tags and original evidence.
 
-## v0.3.0 — Shared correspondence and unfolding
+- Imports/manifests: audit dependencies, run `npm run typecheck`, build Studio, and check affected CLI behavior.
+- Generation strategy: run `npm run check:geometry` and both pinned real-model fixtures under original/absent/random UV variants, comparing every seam and face-corner coordinate.
+- Shared Worker/drawing/workbench source: rebuild offline HTML and run relevant browser regressions.
+- Language/theme/layout: check actual controls and Canvas/WebGL in both languages/themes, representative narrow/short screens, and resizing within the same page.
 
-`packages/uv/src/unfold.ts` derives a per-face-corner source/target geometry from the same PackedChart faceUVs drawn by the UV view and used by target-UV export. Render corners are not welded across seams. Each face retains its source face index and chart ID. A deterministic pure function writes simultaneous/sequential, single/multi/all selected-island positions; source, target and unselected positions remain immutable.
+Legacy source-UV suites retain their assertions and classification; they are not acceptance tests for the geometry-only generator. Avoid tests that merely repeat a static literal or mirror implementation code.
 
-The UV worker now returns a single UVSnapshot (packed atlas + geometry + seam set + target + warnings). `useUVSnapshot` owns cancellation and stale-result rejection; UVCanvas no longer creates its own independent worker. Generated targets use the full seam set during unfolding, never a changing traversal prefix; source targets derive seams from existing UVs and fail explicitly when UVs are incomplete.
-
-`useUnfoldPlayer` separates scope, selection, ordering and timeline controls. `UnfoldWebGLView` updates native WebGL2 buffers and picks current morphed triangles; `uv-drawing.ts` draws/picks the shared atlas; CorrespondenceInspector displays original source and target corner coordinates. The original Three.js MeshViewport remains the traversal renderer. Both modes use consistent normalization, but they do not share a renderer instance across a mode switch.
-
-This is presentation interpolation, not ABF++/LSCM iteration or physical cloth motion. Solver replacement must preserve the face/corner contract so preview, picking and export stay identical. See UNFOLD_PREVIEW.md and VALIDATION.md.
+See [contributing](../CONTRIBUTING.md), [Git workflow](GIT_WORKFLOW.md), and the [documentation index](README.md). [Earlier unfolding/UV notes](UNFOLDING_AND_UV.md) and [model adapter notes](MODEL_BACKEND.md) retain their historical algorithm/research scope.

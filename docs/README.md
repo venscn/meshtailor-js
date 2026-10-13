@@ -7,6 +7,7 @@
 | Guide | English | 简体中文 |
 | --- | --- | --- |
 | Getting started | [User guide](../START_HERE.md) | [使用指南](../START_HERE.zh-CN.md) |
+| Architecture | [Current module boundaries](ARCHITECTURE.md) | [当前模块边界](ARCHITECTURE.zh-CN.md) |
 | Import formats | [Formats and geometry](IMPORT-FORMATS.md) | [导入格式](IMPORT-FORMATS.zh-CN.md) |
 | Contributing | [Contribution guide](../CONTRIBUTING.md) | [贡献指南](../CONTRIBUTING.zh-CN.md) |
 | Git workflow | [History and releases](GIT_WORKFLOW.md) | [Git 工作流](GIT_WORKFLOW.zh-CN.md) |
@@ -27,7 +28,7 @@ Since v0.4.20, production generation accepts geometry only. It does not use impo
 - [Open-source preparation and validation (Chinese)](OPEN_SOURCE_PREPARATION.md).
 - [Changelog](../CHANGELOG.md) and [release notes](releases/) retain their original English/Chinese entries. Earlier release notes are `RELEASE-*.md` in this directory.
 - [Validation archive (Chinese)](../validation/README.md): a report describes its original run, not a fresh test in your environment.
-- [Early architecture](ARCHITECTURE.md), [UV/unfolding background](UNFOLDING_AND_UV.md), and [model backend](MODEL_BACKEND.md) contain historical source-UV paths and research interfaces. Current production code and the geometry-only constraints introduced in v0.4.20 take precedence.
+- [Unchanged early architecture](ARCHITECTURE-HISTORICAL-0.1-0.3.md), [UV/unfolding background](UNFOLDING_AND_UV.md), and [research model adapter](MODEL_BACKEND.md) contain historical source-UV paths and research interfaces. The [current architecture](ARCHITECTURE.md), production code, and geometry-only constraints introduced in v0.4.20 take precedence.
 - [Damaged-package recovery (Chinese)](../REPACK-NOTES.md) and [v0.4.26 recovery boundaries (Chinese)](repack/RECOVERY-0.4.26.md) preserve source hashes and the limits of recoverable history.
 
 ## Language coverage
