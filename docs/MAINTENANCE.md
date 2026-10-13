@@ -23,6 +23,6 @@ Priority: P0 for data loss/security or a broken core contract, P1 for unavailabl
 
 ## Module requirements
 
-Separate browser client, operations frontend and HTTP backend responsibilities. Keep geometry generation, CLI and offline use independent of the service. Shared contracts expose data, and shared presentation utilities expose localization/theme policy without making pure geometry depend on React, the DOM or HTTP.
+The user confirmed that this project needs neither an HTTP backend nor an operations frontend. Keep the Studio client, offline workbench, CLI and shared domain packages distinct; do not add an artificial server, operations page or empty directory to satisfy a generic architecture convention. If a service is explicitly requested later, separate its responsibilities and use clear contracts. Shared presentation utilities expose localization/theme policy without making pure geometry depend on React, the DOM or HTTP.
 
 User-facing modules must support English and simplified Chinese, light and dark themes, narrow and short screens, and resizing the same running page. Include displayed diagnostics and drawn views in verification. Preferences must never alter generator inputs, seams or face-corner output. Architecture documents describe implemented capabilities and label future work explicitly.
