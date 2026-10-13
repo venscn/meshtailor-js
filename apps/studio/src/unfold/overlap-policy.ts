@@ -1,4 +1,4 @@
-import {message} from '../../../../packages/ui-platform/src/index';
+import {message} from '../../../../packages/ui-platform/src/index.js';
 /** Render-only diagnostics. These settings must never enter UV solving or motion timing. */
 export type OverlapMode = 'off' | 'auto' | 'coplanar' | 'projected';
 export const DEFAULT_OVERLAP_MODE: OverlapMode = 'auto';

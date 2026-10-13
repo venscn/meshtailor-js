@@ -1,4 +1,4 @@
-import {message} from '../../../../packages/ui-platform/src/index';
+import {message} from '../../../../packages/ui-platform/src/index.js';
 import {type FillReport} from '@meshtailor/uv';
 import {describeGrowthStopPresentation as describeGrowthStop} from './fill-description';
 

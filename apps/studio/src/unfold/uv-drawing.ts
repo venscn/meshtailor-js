@@ -1,6 +1,6 @@
 import { displayUV, islandColor, type AtlasFrame } from '@meshtailor/uv';
 import type { UVSnapshot } from '../workers/uv.worker';
-import {bilingual as b} from '../../../../packages/ui-platform/src/index';
+import {bilingual as b,getPalette,displayPreferences} from '../../../../packages/ui-platform/src/index.js';
 export interface UVDisplay { selected:readonly number[]; focusFace:number|null; checker:boolean; wireframe:boolean }
 export function uvScreenFrame(atlas:AtlasFrame,width:number,height:number){
   const sx=atlas.max[0]-atlas.min[0],sy=atlas.max[1]-atlas.min[1];
@@ -9,10 +9,11 @@ export function uvScreenFrame(atlas:AtlasFrame,width:number,height:number){
 }
 export function drawUVSnapshot(ctx:CanvasRenderingContext2D,snapshot:UVSnapshot,width:number,height:number,options:UVDisplay){
   const {packed,geometry}=snapshot,{scale,ox,oy}=uvScreenFrame(geometry.atlas,width,height);
+  const palette=getPalette(displayPreferences.getSnapshot().theme);
   const active=new Set(options.selected);
-  ctx.fillStyle='#1b1d1f';ctx.fillRect(0,0,width,height);
+  ctx.fillStyle=palette.background;ctx.fillRect(0,0,width,height);
   const point=(u:number,v:number)=>[ox+u*scale,oy-v*scale];
-  ctx.strokeStyle='#344352';ctx.lineWidth=1;
+  ctx.strokeStyle=palette.atlasBorder;ctx.lineWidth=1;
   ctx.strokeRect(ox+geometry.atlas.min[0]*scale,oy-geometry.atlas.max[1]*scale,(geometry.atlas.max[0]-geometry.atlas.min[0])*scale,(geometry.atlas.max[1]-geometry.atlas.min[1])*scale);
   const ordered=[...packed.filter(c=>!active.has(c.id)),...packed.filter(c=>active.has(c.id))];
   for(const chart of ordered){
@@ -21,7 +22,7 @@ export function drawUVSnapshot(ctx:CanvasRenderingContext2D,snapshot:UVSnapshot,
       ctx.beginPath();uvs.forEach((raw,k)=>{const [u,v]=displayUV(chart,raw),[x,y]=point(u,v);if(k)ctx.lineTo(x!,y!);else ctx.moveTo(x!,y!);});ctx.closePath();
       ctx.fillStyle=`rgba(${color.join(',')},${selected?.86:.16})`;ctx.fill();
       if(options.wireframe){ctx.lineWidth=.5;ctx.strokeStyle=`rgba(${color.join(',')},${selected?.7:.2})`;ctx.stroke();}
-      if(fi===options.focusFace){ctx.lineWidth=2;ctx.strokeStyle='#ffffff';ctx.fillStyle='#ffffff55';ctx.fill();ctx.stroke();}
+      if(fi===options.focusFace){ctx.lineWidth=2;ctx.strokeStyle=palette.focusedFace;ctx.fillStyle=palette.focusedFace+'55';ctx.fill();ctx.stroke();}
     }
   }
   if(options.checker){
@@ -33,21 +34,21 @@ export function drawUVSnapshot(ctx:CanvasRenderingContext2D,snapshot:UVSnapshot,
     if(pattern){pattern.setTransform(new DOMMatrix().translate(ox,oy).scale(tile/16,-tile/16));
       ctx.save();ctx.beginPath();for(const chart of ordered)for(const raw of chart.faceUVs.values()){const uvs=raw.map(p=>displayUV(chart,p));const [a,b,c]=uvs as [[number,number],[number,number],[number,number]];const area=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);const points=area<0?[a,c,b]:uvs;points.forEach(([u,v],k)=>{const [x,y]=point(u,v);if(k)ctx.lineTo(x!,y!);else ctx.moveTo(x!,y!);});ctx.closePath();}ctx.clip();ctx.fillStyle=pattern;ctx.fillRect(0,0,width,height);ctx.restore();}
   }
-  ctx.beginPath();ctx.strokeStyle='#ffca71';ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.strokeStyle=palette.seam;ctx.lineWidth=1.3;
   for(let i=0;i<geometry.boundaries.length;i+=2){const a=geometry.boundaries[i]!,b=geometry.boundaries[i+1]!;if(!active.has(geometry.faceChart[Math.floor(a/3)]!))continue;ctx.moveTo(ox+(geometry.displayUV??geometry.uv)[a*2]!*scale,oy-(geometry.displayUV??geometry.uv)[a*2+1]!*scale);ctx.lineTo(ox+(geometry.displayUV??geometry.uv)[b*2]!*scale,oy-(geometry.displayUV??geometry.uv)[b*2+1]!*scale);}
   ctx.stroke();
   ctx.font='11px ui-monospace, monospace';ctx.textAlign='center';ctx.textBaseline='middle';
   for(const chart of packed.filter(c=>active.has(c.id)).slice(0,48)){
     const x=ox+((chart.bounds[0]+chart.bounds[2])/2+(chart.displayOffset?.[0]??0))*scale,y=oy-((chart.bounds[1]+chart.bounds[3])/2+(chart.displayOffset?.[1]??0))*scale;
     const label='#'+(chart.id+1),w=ctx.measureText(label).width+8;
-    ctx.fillStyle='#242628e8';ctx.fillRect(x-w/2,y-8,w,16);ctx.fillStyle='#e0edff';ctx.fillText(label,x,y);
+    ctx.fillStyle=palette.labelBackground;ctx.fillRect(x-w/2,y-8,w,16);ctx.fillStyle=palette.labelText;ctx.fillText(label,x,y);
   }
   for(const space of geometry.atlas.spaces??[]){
-    ctx.strokeStyle='#8498b4';ctx.lineWidth=1;ctx.strokeRect(ox+space.min[0]*scale,oy-space.max[1]*scale,(space.max[0]-space.min[0])*scale,(space.max[1]-space.min[1])*scale);
-    ctx.font='10px sans-serif';ctx.textAlign='left';ctx.fillStyle='#e0edff';ctx.fillText(space.name,ox+space.min[0]*scale+3,oy-space.max[1]*scale-8);
+    ctx.strokeStyle=palette.atlasBorder;ctx.lineWidth=1;ctx.strokeRect(ox+space.min[0]*scale,oy-space.max[1]*scale,(space.max[0]-space.min[0])*scale,(space.max[1]-space.min[1])*scale);
+    ctx.font='10px sans-serif';ctx.textAlign='left';ctx.fillStyle=palette.labelText;ctx.fillText(space.name,ox+space.min[0]*scale+3,oy-space.max[1]*scale-8);
   }
-  ctx.textAlign='left';ctx.fillStyle='#bac7db';ctx.fillText(b(`${packed.length} UV islands · matching colors and IDs`,`${packed.length} 个 UV 岛 · 同色同编号`),12,17);
-  ctx.fillStyle='#73849a';ctx.font='10px ui-monospace, monospace';ctx.fillText(b('U →  ·  V ↑  ·  select island, then face / click again to clear','U →  ·  V ↑  ·  先选岛，再选面 / 重复点击取消'),12,height-12);
+  ctx.textAlign='left';ctx.fillStyle=palette.caption;ctx.fillText(b(`${packed.length} UV islands · matching colors and IDs`,`${packed.length} 个 UV 岛 · 同色同编号`),12,17);
+  ctx.fillStyle=palette.quiet;ctx.font='10px ui-monospace, monospace';ctx.fillText(b('U →  ·  V ↑  ·  select island, then face / click again to clear','U →  ·  V ↑  ·  先选岛，再选面 / 重复点击取消'),12,height-12);
 }
 /** Match draw ordering (selected charts are on top); list selection handles overlapping islands. */
 export function pickUVFace(snapshot:UVSnapshot,width:number,height:number,x:number,y:number,selected:readonly number[]):{id:number;face:number}|null{

@@ -1,4 +1,4 @@
-import { message } from '../../../../packages/ui-platform/src/index';
+import { message } from '../../../../packages/ui-platform/src/index.js';
 import {describeTube} from './tube-description';
 import {describeSurfaceSymmetry} from './symmetry-description';
 import {describeGrowthStopPresentation as describeGrowthStop} from './fill-description';

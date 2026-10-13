@@ -1,7 +1,7 @@
 import {DEFAULT_LOAD_PIPELINE,validateLoadPipeline,type LoadPipelineConfig,type PipelineTrace,pipelineSteps,resolveLoadPipeline} from './load-pipeline.js';
 import type {MeshData} from '@meshtailor/mesh-core';
 import type {UnwrapOptions} from '@meshtailor/uv';
-import {bilingual as b,displayPreferences,displayLabel} from '../../../../packages/ui-platform/src/index';
+import {bilingual as b,displayPreferences,displayLabel} from '../../../../packages/ui-platform/src/index.js';
 export interface PipelinePanelState {config:LoadPipelineConfig;mesh:MeshData;options:Partial<UnwrapOptions>;trace:PipelineTrace|null;loading:boolean;acquiring?:boolean;inputStatus?:string;error?:string|null}
 const names={pending:['Pending','等待'],running:['Running','进行中'],completed:['Completed','完成'],skipped:['Skipped','跳过'],error:['Failed','失败'],cancelled:['Cancelled','已取消']} as const;
 const translatePair=(pair:readonly[string,string])=>b(pair[0],pair[1]);

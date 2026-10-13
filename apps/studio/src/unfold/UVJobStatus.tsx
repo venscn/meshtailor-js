@@ -1,4 +1,4 @@
-import { message } from '../../../../packages/ui-platform/src/index';
+import { message } from '../../../../packages/ui-platform/src/index.js';
 import type { useUVSnapshot } from './useUVSnapshot';
 import { describeUVProgress } from './uv-job-client';
 type UVState=ReturnType<typeof useUVSnapshot>;

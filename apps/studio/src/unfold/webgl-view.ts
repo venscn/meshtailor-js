@@ -7,7 +7,7 @@ import {FOCUS_GLSL,playbackEmphasis,focusSettings,playbackFocusSpheres,uploadFoc
 import { ArrivalPresentation, type ArrivalSettings, type ArrivalState } from './arrival-presentation.js';
 import { OverlapPass } from './overlap-pass.js';
 import { overlapSettings, overlapLegend, sourceModelScale, type OverlapSettings } from './overlap-policy.js';
-import {bilingual as b,displayPreferences} from '../../../../packages/ui-platform/src/index';
+import {bilingual as b,displayPreferences,getPalette} from '../../../../packages/ui-platform/src/index.js';
 
 interface CameraPointer {id:number;x:number;y:number;startX:number;startY:number;button:number;dragged:boolean}
 
@@ -43,7 +43,7 @@ precision highp float;
 precision highp int;
 in vec3 vColor; in vec3 vWorld; in vec2 vUV; in vec3 bary; flat in int face;
 uniform float opacity; uniform float desaturate; uniform bool wire; uniform bool checker; uniform bool lineMode;
-uniform vec3 lineColor; uniform int focus; uniform bool dashed; uniform bool faceTones; uniform bool edgeOnly;
+uniform vec3 lineColor; uniform vec3 focusColor; uniform int focus; uniform bool dashed; uniform bool faceTones; uniform bool edgeOnly;
 flat in float vChart;
 ${FOCUS_GLSL}
 out vec4 result;
@@ -57,8 +57,8 @@ void main(){
   vec3 n=surfaceNormal;float len=length(n);
   c*=len>1e-10?.78+.22*abs(n.z/len):1.0;
   c=mix(c,vec3(.34,.39,.48),desaturate);
-  if(face==focus)c=mix(c,vec3(1.0),.4);
-  if(wire||face==focus||edgeOnly){vec3 e=smoothstep(vec3(0.0),baryWidth*1.1,bary);float edge=1.0-min(min(e.x,e.y),e.z);if(edgeOnly){if(edge<.05)discard;result=vec4(1,1,1,edge);return;}c=mix(c,face==focus?vec3(1.0):c*.42,edge*.82);}
+  if(face==focus)c=mix(c,focusColor,.4);
+  if(wire||face==focus||edgeOnly){vec3 e=smoothstep(vec3(0.0),baryWidth*1.1,bary);float edge=1.0-min(min(e.x,e.y),e.z);if(edgeOnly){if(edge<.05)discard;result=vec4(focusColor,edge);return;}c=mix(c,face==focus?focusColor:c*.42,edge*.82);}
   result=vec4(c,opacity);
 }`;
 
@@ -143,7 +143,7 @@ export class UnfoldWebGLView {
     gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);gl.deleteShader(vs);gl.deleteShader(fs);
     if(!gl.getProgramParameter(program,gl.LINK_STATUS)){const error=gl.getProgramInfoLog(program);gl.deleteProgram(program);throw new Error('Unfold program: '+error);}
     this.program=program;this.uniforms.clear();
-    for(const name of ['mvp','opacity','desaturate','wire','checker','lineMode','lineColor','focus','dashed','faceTones','edgeOnly'])this.uniforms.set(name,gl.getUniformLocation(program,name)!);
+    for(const name of ['mvp','opacity','desaturate','wire','checker','lineMode','lineColor','focusColor','focus','dashed','faceTones','edgeOnly'])this.uniforms.set(name,gl.getUniformLocation(program,name)!);
     this.vao=gl.createVertexArray()!;this.atlasVAO=gl.createVertexArray()!;
     this.buffers=[];
     this.positionBuffer=this.buffer();this.activeBuffer=this.buffer();this.contextBuffer=this.buffer();this.seamBuffer=this.buffer();this.hingeBuffer=this.buffer();this.temporaryBuffer=this.buffer();this.motionBuffer=this.buffer();this.arrivalBuffer=this.buffer();this.arrivalEdgeBuffer=this.buffer();
@@ -361,14 +361,17 @@ export class UnfoldWebGLView {
     const size=viewportSize(this.host.clientWidth,this.host.clientHeight,window.devicePixelRatio);if(!size.visible)return;
     const gl=this.gl;
     if(size.width!==this.size.width||size.height!==this.size.height||size.dpr!==this.size.dpr){this.canvas.width=Math.max(1,Math.round(size.width*size.dpr));this.canvas.height=Math.max(1,Math.round(size.height*size.dpr));this.size=size;}
-    gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.clearColor(.106,.114,.122,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    // Display palettes alter only uniforms/clear color, never geometry or poses.
+    const palette=getPalette(displayPreferences.getSnapshot().theme);
+    gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.clearColor(...palette.clearColor,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
     if(!this.data)return;
     this.syncPresentation();
     const mvp=cameraMatrix(this.camera,size.width/size.height);
     gl.useProgram(this.program);gl.uniform1f(this.uniform('desaturate'),0);gl.uniform1i(this.uniform('edgeOnly'),0);gl.uniform1i(this.uniform('faceTones'),Number(overlapSettings(this.options).faceTones));gl.uniform1i(this.uniform('dashed'),0);gl.uniformMatrix4fv(this.uniform('mvp'),false,mvp);
     gl.uniform1i(this.uniform('checker'),Number(this.options.checker));gl.uniform1i(this.uniform('wire'),Number(this.options.wireframe));gl.uniform1i(this.uniform('focus'),this.options.focusFace??-1);
+    gl.uniform3f(this.uniform('focusColor'),...palette.focusColor);
     gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.disable(gl.CULL_FACE);
-    gl.uniform1i(this.uniform('lineMode'),1);gl.uniform3f(this.uniform('lineColor'),.23,.31,.39);gl.uniform1f(this.uniform('opacity'),.8);
+    gl.uniform1i(this.uniform('lineMode'),1);gl.uniform3f(this.uniform('lineColor'),...palette.atlasLine);gl.uniform1f(this.uniform('opacity'),.8);
     gl.uniform1i(gl.getUniformLocation(this.program,'focusCount'),0);
     gl.disable(gl.DEPTH_TEST);gl.bindVertexArray(this.atlasVAO);gl.drawArrays(gl.LINES,0,this.atlasLineCount);
     uploadFocusUniforms(gl,this.program,this.focusSpheres,focusSettings(this.options).retained);
@@ -396,7 +399,7 @@ export class UnfoldWebGLView {
       gl.uniform1i(this.uniform('edgeOnly'),1);gl.uniform1f(this.uniform('opacity'),1);gl.depthMask(false);
       gl.drawArrays(gl.TRIANGLES,focused*3,3);gl.uniform1i(this.uniform('edgeOnly'),0);
     }
-    gl.uniform1i(this.uniform('lineMode'),1);gl.uniform3f(this.uniform('lineColor'),1,.79,.44);
+    gl.uniform1i(this.uniform('lineMode'),1);gl.uniform3f(this.uniform('lineColor'),...palette.seamColor);
     if(this.options.xray)gl.disable(gl.DEPTH_TEST);gl.depthMask(false);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.seamBuffer);gl.drawElements(gl.LINES,this.seamCount,gl.UNSIGNED_INT,0);
     for(const range of this.arrivalRanges){
@@ -405,8 +408,8 @@ export class UnfoldWebGLView {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.arrivalEdgeBuffer);gl.drawElements(gl.LINES,range.edgeCount,gl.UNSIGNED_INT,range.edgeOffset);
     }
     gl.uniform1f(this.uniform('opacity'),1);
-    if(this.hingeCount){gl.uniform3f(this.uniform('lineColor'),.2,.9,1);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.hingeBuffer);gl.drawElements(gl.LINES,this.hingeCount,gl.UNSIGNED_INT,0);}
-    if(this.temporaryCount){gl.uniform1i(this.uniform('dashed'),1);gl.uniform3f(this.uniform('lineColor'),.92,.45,1);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.temporaryBuffer);gl.drawElements(gl.LINES,this.temporaryCount,gl.UNSIGNED_INT,0);gl.uniform1i(this.uniform('dashed'),0);}
+    if(this.hingeCount){gl.uniform3f(this.uniform('lineColor'),...palette.hingeColor);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.hingeBuffer);gl.drawElements(gl.LINES,this.hingeCount,gl.UNSIGNED_INT,0);}
+    if(this.temporaryCount){gl.uniform1i(this.uniform('dashed'),1);gl.uniform3f(this.uniform('lineColor'),...palette.temporaryColor);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,this.temporaryBuffer);gl.drawElements(gl.LINES,this.temporaryCount,gl.UNSIGNED_INT,0);gl.uniform1i(this.uniform('dashed'),0);}
     gl.depthMask(true);gl.bindVertexArray(null);
     this.labelHost.hidden=!this.options.labels&&this.options.showHinges===false;
     if(!this.options.labels)for(const label of this.labels)label.el.hidden=true;

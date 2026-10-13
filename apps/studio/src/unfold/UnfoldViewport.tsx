@@ -1,4 +1,4 @@
-import { message } from '../../../../packages/ui-platform/src/index';
+import { message } from '../../../../packages/ui-platform/src/index.js';
 import { useEffect, useRef, useState } from 'react';
 import type { UnfoldGeometry } from '@meshtailor/uv';
 import { UnfoldWebGLView, type UnfoldDisplay } from './webgl-view';
