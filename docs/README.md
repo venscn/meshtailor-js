@@ -11,6 +11,8 @@
 | Import formats | [Formats and geometry](IMPORT-FORMATS.md) | [导入格式](IMPORT-FORMATS.zh-CN.md) |
 | Contributing | [Contribution guide](../CONTRIBUTING.md) | [贡献指南](../CONTRIBUTING.zh-CN.md) |
 | Git workflow | [History and releases](GIT_WORKFLOW.md) | [Git 工作流](GIT_WORKFLOW.zh-CN.md) |
+| Continuous maintenance | [Audit and local batches](MAINTENANCE.md) | [周期审计与本地批次](MAINTENANCE.zh-CN.md) |
+| Test classification | [Acceptance, QA and history](TESTING.md) | [验收、QA 与历史试验](TESTING.zh-CN.md) |
 | Licensing | [MIT scope](LICENSING.md) | [许可范围](LICENSING.zh-CN.md) |
 | Asset provenance | [Sources and licenses](../THIRD_PARTY_ASSETS.md) | [资产说明](../THIRD_PARTY_ASSETS.zh-CN.md) |
 | Pinned fixtures | [Fixture guide](../examples/verified-models/README.md) | [固定夹具](../examples/verified-models/README.zh-CN.md) |
