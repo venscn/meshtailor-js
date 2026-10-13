@@ -1,6 +1,5 @@
 import type {MeshData} from '@meshtailor/mesh-core';
-import {geometryGenerationOptions,type UnwrapOptions} from '@meshtailor/uv';
-import type {UVOperationStep} from '../../../../packages/uv/src/work.js';
+import {geometryGenerationOptions,type UnwrapOptions,type UVOperationStep} from '@meshtailor/uv';
 export const PIPELINE_STORAGE_KEY='meshtailor.load-pipeline.v2';
 export interface LoadPipelineConfig {
   version:2; source:'geometry';
