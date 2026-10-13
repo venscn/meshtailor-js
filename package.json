@@ -19,6 +19,7 @@
     "test:layout": "node scripts/layout-smoke.mjs",
     "test:display:browser": "node scripts/ui-display-browser-smoke.mjs",
     "test:touch:browser": "node scripts/touch-navigation-browser-smoke.mjs",
+    "test:offline-display:browser": "node scripts/offline-display-browser-smoke.mjs",
     "history:browser": "node scripts/studio-smoke.mjs",
     "check:full": "npm run check && npm run check:geometry && npm run lab:build && npm run test:geometry:browser && npm run test:geometry:real",
     "assets:generate": "node scripts/generate-examples.mjs",
