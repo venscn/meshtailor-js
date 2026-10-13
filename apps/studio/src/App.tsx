@@ -1,3 +1,6 @@
+import { message, displayLabel, bilingual as b, descriptor, renderMessage, type MessageDescriptor } from '../../../packages/ui-platform/src/index';
+import { useDisplayPreferences } from './platform/useDisplayPreferences';
+import { DisplayControls } from './platform/DisplayControls';
 import {LoadPipelinePanel} from './unfold/LoadPipelinePanel';
 import {DEFAULT_LOAD_PIPELINE,readLoadPipeline,PIPELINE_STORAGE_KEY,resolveLoadPipeline,type LoadPipelineConfig} from './unfold/load-pipeline';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -37,6 +40,8 @@ function saveFile(name:string,data:BlobPart,type:string){
 }
 
 export default function App(){
+  // Subscribe only presentation; these preferences never enter useUVSnapshot inputs.
+  useDisplayPreferences();
   const [loadPlan,setLoadPlan]=useState<LoadPipelineConfig>(()=>{try{return readLoadPipeline(window.localStorage);}catch{return readLoadPipeline();}});
   const [taskPlan,setTaskPlan]=useState<LoadPipelineConfig|undefined>(()=>loadPlan);
   const [mesh,setMesh]=useState<MeshData>(()=>geometryOnlyMesh(makeTorsoGrid()));
@@ -46,7 +51,7 @@ export default function App(){
   const [curvature,setCurvature]=useState(.82),[rings,setRings]=useState(2),[maxEdges,setMaxEdges]=useState(1500),[playing,setPlaying]=useState(false);
   const [detail,setDetail]=useState<MeshDetail>('medium'),[exampleId,setExampleId]=useState<ComplexExampleId>('garment');
   const [weld,setWeld]=useState<SceneImportOptions['weld']>('boundary'),[tolerance,setTolerance]=useState(5e-7);
-  const [busy,setBusy]=useState<string|null>(null),[notice,setNotice]=useState('Ready. Choose an offline mesh or import OBJ / FBX / GLB / GLTF.');
+  const [busy,setBusy]=useState<string|MessageDescriptor|null>(null),[notice,setNotice]=useState<string|MessageDescriptor>(()=>descriptor('Ready. Choose an offline mesh or import OBJ / FBX / GLB / GLTF.'));
   const [liveUV,setLiveUV]=useState(false);
   const [toolTab,setToolTab]=useState<'mesh'|'uv'|'animation'>('mesh');
   const importInput=useRef<HTMLInputElement>(null);
@@ -80,27 +85,27 @@ export default function App(){
     const timer=setTimeout(()=>setStep(s=>Math.min(frames.length-1,s+1)),420);return()=>clearTimeout(timer);
   },[playing,step,frames.length]);
   const cancel=()=>{uvState.cancel();operation.current++;seamWorker.current?.terminate();seamWorker.current=null;abortDownload.current?.abort();abortDownload.current=null;setBusy(null);setPlaying(false);};
-  const begin=(message:string)=>{cancel();setLoadError(null);setBusy(message);return operation.current;};
-  const changeLoadPlan=(plan:LoadPipelineConfig)=>{setLoadPlan(plan);try{window.localStorage.setItem(PIPELINE_STORAGE_KEY,JSON.stringify(plan));}catch{setNotice('浏览器不允许保存设置，本次会话仍生效。');}};
+  const begin=(status:string|MessageDescriptor)=>{cancel();setLoadError(null);setBusy(status);return operation.current;};
+  const changeLoadPlan=(plan:LoadPipelineConfig)=>{setLoadPlan(plan);try{window.localStorage.setItem(PIPELINE_STORAGE_KEY,JSON.stringify(plan));}catch{setNotice(descriptor("浏览器不允许保存设置，本次会话仍生效。"));}};
   const rerunLoadPlan=()=>{try{const resolved=resolveLoadPipeline(mesh,loadPlan,uvConfig);cancel();player.pause();setUVSeed(undefined);setSeamEdges(new Set());setUVTarget(resolved.target);setUVConfig({...uvConfig,...resolved.config});setTaskPlan({...loadPlan});setLoadError(null);}catch(error){setLoadError(String(error));}};
   const replaceMesh=(m:MeshData,report:MeshImportReport|null=null,plan=loadPlan)=>{
     m=geometryOnlyMesh(m);
     prepareViewportMesh(m); // Reject malformed input before React/topology/Three see it.
     const recommended=recommendUnwrap(m).options,resolved=resolveLoadPipeline(m,plan,recommended);
-    setTaskPlan({...plan});setUVSeed(undefined);setMesh(m);setImportReport(report);setUVConfig({...recommended,...resolved.config});setUVTarget(resolved.target);setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(`Loaded ${m.name}: ${m.faces.length.toLocaleString()} triangles.`);
+    setTaskPlan({...plan});setUVSeed(undefined);setMesh(m);setImportReport(report);setUVConfig({...recommended,...resolved.config});setUVTarget(resolved.target);setSeamEdges(new Set());setChains([]);setFrames([]);setShowAllSeams(false);setStep(-1);setPlaying(false);setNotice(descriptor('Loaded {0}: {1} triangles.',[m.name,m.faces.length.toLocaleString()]));
   };
-  const loadUnfoldDemo=()=>{cancel();setLoadError(null);try{const demo=makeUnfoldDemo();replaceMesh(demo.mesh,null,{...DEFAULT_LOAD_PIPELINE});setSeamEdges(new Set());setChains([]);setFrames([]);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');setToolTab('animation');setNotice('六岛立方体：拖动 0–100% 进度，观察同色编号的面片移入对应 UV 岛。');}catch(error){setLoadError(String(error));}};
-  const loadHingeDemo=()=>{cancel();setLoadError(null);try{const demo=makeHingeDemo();replaceMesh(demo.mesh,null,{...DEFAULT_LOAD_PIPELINE});setSeamEdges(new Set());setChains([]);setFrames([]);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice('三块折角带：点“分块陈列”，再缓慢拖动 28–70%，看各铰链真实转动。');}catch(error){setLoadError(String(error));}};
-  const loadOverlapDemo=()=>{cancel();setLoadError(null);try{const demo=makeOverlapDemo();replaceMesh(demo.mesh,null,{...DEFAULT_LOAD_PIPELINE});setSeamEdges(new Set());setChains([]);setFrames([]);setStep(-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice('合成马鞍：在“刚性平面网”阶段看同岛重叠条纹；目标 UV 来自纯几何重新求解。');}catch(error){setLoadError(String(error));}};
+  const loadUnfoldDemo=()=>{cancel();setLoadError(null);try{const demo=makeUnfoldDemo();replaceMesh(demo.mesh,null,{...DEFAULT_LOAD_PIPELINE});setSeamEdges(new Set());setChains([]);setFrames([]);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');setToolTab('animation');setNotice(descriptor("六岛立方体：拖动 0–100% 进度，观察同色编号的面片移入对应 UV 岛。"));}catch(error){setLoadError(String(error));}};
+  const loadHingeDemo=()=>{cancel();setLoadError(null);try{const demo=makeHingeDemo();replaceMesh(demo.mesh,null,{...DEFAULT_LOAD_PIPELINE});setSeamEdges(new Set());setChains([]);setFrames([]);setStep(demo.frames.length-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice(descriptor("三块折角带：点“分块陈列”，再缓慢拖动 28–70%，看各铰链真实转动。"));}catch(error){setLoadError(String(error));}};
+  const loadOverlapDemo=()=>{cancel();setLoadError(null);try{const demo=makeOverlapDemo();replaceMesh(demo.mesh,null,{...DEFAULT_LOAD_PIPELINE});setSeamEdges(new Set());setChains([]);setFrames([]);setStep(-1);setShowAllSeams(true);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');player.setPath('hinge');setToolTab('animation');setNotice(descriptor("合成马鞍：在“刚性平面网”阶段看同岛重叠条纹；目标 UV 来自纯几何重新求解。"));}catch(error){setLoadError(String(error));}};
   const resetForMesh=(m:MeshData)=>{cancel();setLoadError(null);try{replaceMesh(m);}catch(error){setLoadError(String(error));}};
   const loadFiles=async(files:File[])=>{
-    const id=begin('Importing mesh…');
+    const id=begin(descriptor('Importing mesh…'));
     try{const result=await importMeshFiles(files,{weld,relativeTolerance:tolerance});if(id!==operation.current)return;replaceMesh(result.mesh,result.report);}
     catch(error){if(id===operation.current)setLoadError(error instanceof Error?error.message:String(error));}
     finally{if(id===operation.current)setBusy(null);}
   };
   const loadRemote=async(asset:RemoteMeshAsset)=>{
-    const id=begin(`Loading ${asset.name}…`),controller=new AbortController();abortDownload.current=controller;
+    const id=begin(descriptor('Loading {0}…',[displayLabel(asset.name)])),controller=new AbortController();abortDownload.current=controller;
     const signal=AbortSignal.any([controller.signal,AbortSignal.timeout(120_000)]);
     try{
       let data:ArrayBuffer;
@@ -111,13 +116,13 @@ export default function App(){
       if(id!==operation.current)return;
       const result=await importMeshFiles([new File([data],asset.id+'.glb')],{weld,relativeTolerance:tolerance});
       if(id!==operation.current)return;
-      result.report.warnings.push(`${asset.name} — ${asset.license}; ${asset.credit}. Geometry-only import; original UV is discarded.`);
+      result.report.warnings.push(`${displayLabel(asset.name)} — ${asset.license}; ${asset.credit}. Geometry-only import; original UV is discarded.`);
       replaceMesh(result.mesh,result.report);
     }catch(error){if(id===operation.current)setLoadError(`Example load failed: ${error instanceof Error?error.message:String(error)}. Bundled examples are available; verify public/assets/verified is intact.`);}
     finally{if(id===operation.current){setBusy(null);abortDownload.current=null;}}
   };
   const loadFBXExample=async(kind:'ascii'|'binary')=>{
-    const id=begin('Loading bundled FBX example…');
+    const id=begin(descriptor('Loading bundled FBX example…'));
     try{const fileName=`garment-${kind}.fbx`,response=await fetch(`${import.meta.env.BASE_URL}assets/fixtures/${fileName}`);if(!response.ok)throw new Error(`HTTP ${response.status}`);const data=await response.arrayBuffer();if(id!==operation.current)return;
       const result=await importMeshFiles([new File([data],fileName)],{weld,relativeTolerance:tolerance});if(id!==operation.current)return;replaceMesh(result.mesh,result.report);
     }catch(error){if(id===operation.current)setLoadError(error instanceof Error?error.message:String(error));}
@@ -132,7 +137,7 @@ export default function App(){
     const resolved=resolveLoadPipeline(mesh,loadPlan,base);
     setTaskPlan({...loadPlan});setUVSeed(undefined);setUVTarget('generated');
     setUVConfig({...base,...resolved.config});setSeamEdges(new Set());setShowAllSeams(true);
-    setNotice('纯几何生成：不读取原 UV / 原切缝；结构分组、规则开缝、验证后展开。');
+    setNotice(descriptor("纯几何生成：不读取原 UV / 原切缝；结构分组、规则开缝、验证后展开。"));
   };
   useEffect(()=>{
     if(!snapshot||uvState.loading)return;
@@ -146,10 +151,10 @@ export default function App(){
     cancel();setLoadError(null);setViewMode('unfold');setShowAllSeams(true);setPlaying(false);
     if(operation==='connected'){
       setUVSeed(undefined);setUVConfig(geometryGenerationOptions(mesh,config));setSeamEdges(new Set());setChains([]);setFrames([]);setStep(-1);setUVTarget('generated');
-      setNotice('前处理：从连通块开始，仅在必要时补切，再执行验证式邻岛缝合。生成不读取模型原 UV；新 UV 需要绘制或烘焙。');
+      setNotice(descriptor("前处理：从连通块开始，仅在必要时补切，再执行验证式邻岛缝合。生成不读取模型原 UV；新 UV 需要绘制或烘焙。"));
     }else{
       setUVSeed(snapshot!.packed);setSeamEdges(new Set(snapshot!.seams));setUVConfig({...config});setUVTarget(operation);
-      setNotice(operation==='templates'?'按明确侧缝重展所选结构；未匹配区域保留，原网格未修改。':operation==='fill'?'按3D表面积从大到小精排当前UV；保持全部岛与切缝，预算停止后可继续。':operation==='stitch'?'后处理：基于当前岛和共享接缝尝试缝合，不重新运行 baseline。':'只重排当前岛；不改变岛数，不把同页摆放冒充缝合。');
+      setNotice(operation==='templates'?descriptor("按明确侧缝重展所选结构；未匹配区域保留，原网格未修改。"):operation==='fill'?descriptor("按3D表面积从大到小精排当前UV；保持全部岛与切缝，预算停止后可继续。"):operation==='stitch'?descriptor("后处理：基于当前岛和共享接缝尝试缝合，不重新运行 baseline。"):descriptor("只重排当前岛；不改变岛数，不把同页摆放冒充缝合。"));
     }
   };
   const seek=(next:number)=>{setPlaying(false);setStep(Math.max(0,Math.min(frames.length-1,next)));};
@@ -157,74 +162,75 @@ export default function App(){
 
   return <div className="app-shell" onDragOver={e=>{e.preventDefault();}} onDrop={e=>{e.preventDefault();if(e.dataTransfer.files.length)void loadFiles(Array.from(e.dataTransfer.files));}}>
     <header className="topbar">
-      <div className="brand"><span className="brand-mark" aria-hidden="true">M</span>MeshTailor <span className="version">0.4.30</span></div>
-      <button className="pipeline-shortcut" onClick={()=>setToolTab('mesh')} title="查看自动流程与每步执行状态">流程 · {busy?'读取输入':uvState.loading?'执行中':uvState.error?'未完成':'已完成'}</button><div className="document-name" title={mesh.name}>{mesh.name}<span>{stats.triangles.toLocaleString()} 面</span></div>
-      <div className="header-actions"><button onClick={()=>importInput.current?.click()}>导入网格</button><button disabled={!snapshot} onClick={exportTargetUV}>导出 OBJ + UV</button></div>
+      <div className="brand"><span className="brand-mark" aria-hidden="true">{message("M")}</span>{message("MeshTailor")+" "}<span className="version">0.4.30</span></div>
+      <DisplayControls/>
+      <button className="pipeline-shortcut" onClick={()=>setToolTab('mesh')} title={message("查看自动流程与每步执行状态")}>{message("流程 ·")+" "}{busy?message("读取输入"):uvState.loading?message("执行中"):uvState.error?message("未完成"):message("已完成")}</button><div className="document-name" title={mesh.name}>{mesh.name}<span>{stats.triangles.toLocaleString()}{" "+message("面")}</span></div>
+      <div className="header-actions"><button onClick={()=>importInput.current?.click()}>{message("导入网格")}</button><button disabled={!snapshot} onClick={exportTargetUV}>{message("导出 OBJ + UV")}</button></div>
     </header>
     <main className="workspace">
-      <aside className="sidebar" aria-label="工具与属性">
-        <nav className="tool-tabs" role="tablist" aria-label="工具分类">
-          {([['mesh','模型'],['uv','UV'],['animation','动画']] as const).map(([id,label])=><button key={id} id={`tool-${id}`} role="tab" aria-selected={toolTab===id} aria-controls={`tools-${id}`} onClick={()=>{setToolTab(id);if(id==='animation')setViewMode('unfold');}}>{label}</button>)}
+      <aside className="sidebar" aria-label={message("工具与属性")}>
+        <nav className="tool-tabs" role="tablist" aria-label={message("工具分类")}>
+          {([['mesh',message("模型")],['uv','UV'],['animation',message("动画")]] as const).map(([id,label])=><button key={id} id={`tool-${id}`} role="tab" aria-selected={toolTab===id} aria-controls={`tools-${id}`} onClick={()=>{setToolTab(id);if(id==='animation')setViewMode('unfold');}}>{label}</button>)}
         </nav>
         <div className="sidebar-scroll">
           <div id="tools-mesh" role="tabpanel" aria-labelledby="tool-mesh" hidden={toolTab!=='mesh'}>
-        <LoadPipelinePanel state={{config:loadPlan,mesh,options:uvConfig,trace:uvState.trace,loading:!!busy||uvState.loading,acquiring:!!busy,inputStatus:busy??`输入已就绪 · ${mesh.name} · ${stats.triangles.toLocaleString()} 面 · FBX/glTF 焊接 ${weld}（参数在导入设置）`,error:loadError??uvState.error}} onChange={changeLoadPlan} onRun={rerunLoadPlan} onCancel={cancel}/>
-        <section><h3>本地模型</h3><div className="button-grid"><button onClick={()=>resetForMesh(makeCube())}>Cube</button><button onClick={()=>resetForMesh(makeCylinder(20))}>Cylinder</button><button onClick={()=>resetForMesh(makeTorsoGrid())}>Torso</button></div>
-          <label className="file-label">选择 OBJ / FBX / GLB / GLTF<input ref={importInput} type="file" multiple accept=".obj,.fbx,.glb,.gltf,.bin" onChange={e=>{const files=Array.from(e.target.files??[]);if(files.length)void loadFiles(files);e.target.value='';}}/></label>
-          <small>可拖入文件。glTF 与配套 .bin 请一起选择。只导入网格，不显示材质贴图。</small>
-          <details><summary>导入设置</summary>
-            <label>位置焊接（FBX / glTF）<select aria-label="Weld mode" value={weld} onChange={e=>setWeld(e.target.value as SceneImportOptions['weld'])}><option value="boundary">Boundary · 微小断边配对（默认）</option><option value="exact">Exact · 仅精确同坐标</option><option value="tolerance">Tolerance · 容差</option><option value="off">Off · 保留渲染顶点索引</option></select></label>
-            {(weld==='tolerance'||weld==='boundary')&&<label>相对包围盒容差<input aria-label="Weld tolerance" type="number" min="1e-12" max="0.001" step="0.0000001" value={tolerance} onChange={e=>{const v=+e.target.value;if(v>0&&v<=.001)setTolerance(v);}}/></label>}
-            <small>不跨对象焊接；同一对象内重合但独立的表面可能被连接。原 UV 在导入时丢弃，新的 UV 从几何生成。设置在下次导入生效。</small>
+        <LoadPipelinePanel state={{config:loadPlan,mesh,options:uvConfig,trace:uvState.trace,loading:!!busy||uvState.loading,acquiring:!!busy,inputStatus:busy?renderMessage(busy):message("输入已就绪 · {0} · {1} 面 · FBX/glTF 焊接 {2}（参数在导入设置）",[mesh.name,stats.triangles.toLocaleString(),weld??'boundary']),error:loadError??uvState.error}} onChange={changeLoadPlan} onRun={rerunLoadPlan} onCancel={cancel}/>
+        <section><h3>{message("本地模型")}</h3><div className="button-grid"><button onClick={()=>resetForMesh(makeCube())}>{message("Cube")}</button><button onClick={()=>resetForMesh(makeCylinder(20))}>{message("Cylinder")}</button><button onClick={()=>resetForMesh(makeTorsoGrid())}>{message("Torso")}</button></div>
+          <label className="file-label">{message("选择 OBJ / FBX / GLB / GLTF")}<input ref={importInput} type="file" multiple accept=".obj,.fbx,.glb,.gltf,.bin" onChange={e=>{const files=Array.from(e.target.files??[]);if(files.length)void loadFiles(files);e.target.value='';}}/></label>
+          <small>{message("可拖入文件。glTF 与配套 .bin 请一起选择。只导入网格，不显示材质贴图。")}</small>
+          <details><summary>{message("导入设置")}</summary>
+            <label>{message("位置焊接（FBX / glTF）")}<select aria-label={message("Weld mode")} value={weld} onChange={e=>setWeld(e.target.value as SceneImportOptions['weld'])}><option value="boundary">{message("Boundary · 微小断边配对（默认）")}</option><option value="exact">{message("Exact · 仅精确同坐标")}</option><option value="tolerance">{message("Tolerance · 容差")}</option><option value="off">{message("Off · 保留渲染顶点索引")}</option></select></label>
+            {(weld==='tolerance'||weld==='boundary')&&<label>{message("相对包围盒容差")}<input aria-label={message("Weld tolerance")} type="number" min="1e-12" max="0.001" step="0.0000001" value={tolerance} onChange={e=>{const v=+e.target.value;if(v>0&&v<=.001)setTolerance(v);}}/></label>}
+            <small>{message("不跨对象焊接；同一对象内重合但独立的表面可能被连接。原 UV 在导入时丢弃，新的 UV 从几何生成。设置在下次导入生效。")}</small>
           </details>
         </section>
-        <section><h3>内置样例</h3>
-          <label>模型<select aria-label="Complex mesh" value={exampleId} onChange={e=>setExampleId(e.target.value as ComplexExampleId)}>{COMPLEX_EXAMPLES.map(m=><option key={m.id} value={m.id}>{m.label}</option>)}</select></label>
-          <label>密度<select aria-label="Mesh detail" value={detail} onChange={e=>setDetail(e.target.value as MeshDetail)}><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
-          <small>{COMPLEX_EXAMPLES.find(m=>m.id===exampleId)?.description}</small>
-          <button onClick={()=>resetForMesh(makeComplexExample(exampleId,detail))}>载入样例</button>
-          <div className="button-grid two"><button disabled={!!busy} onClick={()=>void loadFBXExample('ascii')}>FBX ASCII</button><button disabled={!!busy} onClick={()=>void loadFBXExample('binary')}>FBX Binary</button></div>
-          <button onClick={()=>{resetForMesh(makeFragmentationDemo(2).mesh);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');setToolTab('uv');}}>重叠碎岛测试片（非真实资产）</button>
-          <button onClick={()=>saveFile('meshtailor-mesh.obj',meshToOBJ(mesh),'text/plain')}>导出当前网格</button>
+        <section><h3>{message("内置样例")}</h3>
+          <label>{message("模型")}<select aria-label={message("Complex mesh")} value={exampleId} onChange={e=>setExampleId(e.target.value as ComplexExampleId)}>{COMPLEX_EXAMPLES.map(m=><option key={m.id} value={m.id}>{displayLabel(m.label)}</option>)}</select></label>
+          <label>{message("密度")}<select aria-label={message("Mesh detail")} value={detail} onChange={e=>setDetail(e.target.value as MeshDetail)}><option value="low">{message("Low")}</option><option value="medium">{message("Medium")}</option><option value="high">{message("High")}</option></select></label>
+          <small>{displayLabel(COMPLEX_EXAMPLES.find(m=>m.id===exampleId)?.description??'')}</small>
+          <button onClick={()=>resetForMesh(makeComplexExample(exampleId,detail))}>{message("载入样例")}</button>
+          <div className="button-grid two"><button disabled={!!busy} onClick={()=>void loadFBXExample('ascii')}>{message("FBX ASCII")}</button><button disabled={!!busy} onClick={()=>void loadFBXExample('binary')}>{message("FBX Binary")}</button></div>
+          <button onClick={()=>{resetForMesh(makeFragmentationDemo(2).mesh);setTaskPlan(undefined);setUVTarget('generated');setViewMode('unfold');setToolTab('uv');}}>{message("重叠碎岛测试片（非真实资产）")}</button>
+          <button onClick={()=>saveFile('meshtailor-mesh.obj',meshToOBJ(mesh),'text/plain')}>{message("导出当前网格")}</button>
         </section>
-        <section><h3>在线模型</h3><small>CC0；优先使用已下载的本地副本，否则从原站获取几何。原 UV 会丢弃，不下载贴图。</small>
-          {REMOTE_MESH_ASSETS.map(asset=><div className="asset-card" key={asset.id}><button disabled={!!busy} onClick={()=>void loadRemote(asset)}>{asset.name}</button><small>{asset.description} <a href={asset.source} target="_blank" rel="noreferrer">来源与许可</a></small></div>)}
+        <section><h3>{message("在线模型")}</h3><small>{message("CC0；优先使用已下载的本地副本，否则从原站获取几何。原 UV 会丢弃，不下载贴图。")}</small>
+          {REMOTE_MESH_ASSETS.map(asset=><div className="asset-card" key={asset.id}><button disabled={!!busy} onClick={()=>void loadRemote(asset)}>{displayLabel(asset.name)}</button><small>{displayLabel(asset.description)} <a href={asset.source} target="_blank" rel="noreferrer">{message("来源与许可")}</a></small></div>)}
         </section>
-            <section><h3>展开示例</h3><div className="button-grid two"><button onClick={loadHingeDemo}>三块折角带</button><button onClick={loadUnfoldDemo}>六岛立方体</button></div></section>
-        <section className="stats"><h3>Topology</h3><dl><dt>Vertices</dt><dd>{stats.vertices.toLocaleString()}</dd><dt>Triangles</dt><dd>{stats.triangles.toLocaleString()}</dd><dt>Edges</dt><dd>{stats.edges.toLocaleString()}</dd><dt>Boundary</dt><dd>{stats.boundary.toLocaleString()}</dd><dt>Manifold*</dt><dd>{stats.manifold?'yes':'no'}</dd><dt>UV charts</dt><dd>{chartCount??'…'}</dd></dl><small>* edge-manifold check, not a repair guarantee</small></section>
-        {importReport&&<section className="import-report"><h3>Import report</h3><p>{importReport.parts} parts · {importReport.sourceVertices.toLocaleString()} source vertices → {importReport.vertices.toLocaleString()} topology vertices</p><p>{importReport.weldedVertices.toLocaleString()} welded · {importReport.uvFaces.toLocaleString()} source UV faces used（应为 0）</p><details><summary>导入说明 / Warnings</summary>{importReport.warnings.map((w,i)=><p key={i}>{w}</p>)}</details></section>}
+            <section><h3>{message("展开示例")}</h3><div className="button-grid two"><button onClick={loadHingeDemo}>{message("三块折角带")}</button><button onClick={loadUnfoldDemo}>{message("六岛立方体")}</button></div></section>
+        <section className="stats"><h3>{message("Topology")}</h3><dl><dt>{message("Vertices")}</dt><dd>{stats.vertices.toLocaleString()}</dd><dt>{message("Triangles")}</dt><dd>{stats.triangles.toLocaleString()}</dd><dt>{message("Edges")}</dt><dd>{stats.edges.toLocaleString()}</dd><dt>{message("Boundary")}</dt><dd>{stats.boundary.toLocaleString()}</dd><dt>{message("Manifold*")}</dt><dd>{stats.manifold?message('yes'):message('no')}</dd><dt>{message("UV charts")}</dt><dd>{chartCount??'…'}</dd></dl><small>{message("* edge-manifold check, not a repair guarantee")}</small></section>
+        {importReport&&<section className="import-report"><h3>{message("Import report")}</h3><p>{importReport.parts}{" "+message("parts ·")+" "}{importReport.sourceVertices.toLocaleString()}{" "+message("source vertices →")+" "}{importReport.vertices.toLocaleString()}{" "+message("topology vertices")}</p><p>{importReport.weldedVertices.toLocaleString()}{" "+message("welded ·")+" "}{importReport.uvFaces.toLocaleString()}{" "+message("source UV faces used（应为 0）")}</p><details><summary>{message("导入说明 / Warnings")}</summary>{importReport.warnings.map((w,i)=><p key={i}>{w}</p>)}</details></section>}
           </div>
           <div id="tools-uv" role="tabpanel" aria-labelledby="tool-uv" hidden={toolTab!=='uv'}>
-        <section><h3>纯几何展开</h3><p>模型原 UV、原切缝与原岛划分不会参与计算。</p><button className="primary" disabled={!!busy||uvState.loading} onClick={()=>runSeams('baseline')}>Generate baseline · 从几何重生成</button><small>与默认加载共用当前自动流程。原 UV 提取、恢复与旧切缝实验已移除。</small></section>
+        <section><h3>{message("纯几何展开")}</h3><p>{message("模型原 UV、原切缝与原岛划分不会参与计算。")}</p><button className="primary" disabled={!!busy||uvState.loading} onClick={()=>runSeams('baseline')}>{message("Generate baseline · 从几何重生成")}</button><small>{message("与默认加载共用当前自动流程。原 UV 提取、恢复与旧切缝实验已移除。")}</small></section>
             <UVSolverControls selectedCharts={player.selection} value={uvConfig} onChange={v=>{setTaskPlan(undefined);setUVConfig(v);}} snapshot={snapshot} onProcess={processUV} onAuto={goal=>runSeams(goal==='large'?'auto-large':'auto-balanced')}/>
             <UVJobStatus state={uvState}/>
-            <section><h3>诊断</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.30',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,features:snapshot?.features,peel:snapshot?.peel,human:snapshot?.human,fragmentation:snapshot?.fragmentation,repair:snapshot?.repair,sourceAudit:snapshot?.sourceAudit,areaAudit:snapshot?.areaAudit,sourceAreaAudit:snapshot?.sourceAreaAudit,spatialReport:snapshot?.spatialReport,packingReport:snapshot?.packingReport,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>导出分割诊断</button><small>只包含参数与统计，不包含模型几何。</small></section>
+            <section><h3>{message("诊断")}</h3><button onClick={()=>saveFile('meshtailor-diagnostic.json',JSON.stringify({version:'0.4.30',mesh:{name:mesh.name,vertices:mesh.positions.length,faces:mesh.faces.length},importReport,settings:uvConfig,target:uvTarget,uvSpaces:snapshot?.geometry.atlas.spaces,features:snapshot?.features,peel:snapshot?.peel,human:snapshot?.human,fragmentation:snapshot?.fragmentation,repair:snapshot?.repair,sourceAudit:snapshot?.sourceAudit,areaAudit:snapshot?.areaAudit,sourceAreaAudit:snapshot?.sourceAreaAudit,spatialReport:snapshot?.spatialReport,packingReport:snapshot?.packingReport,merge:snapshot?.merge,pageReport:snapshot?.pageReport,charts:snapshot?.diagnostics,warnings:snapshot?.warnings,timing:snapshot?.timing},null,2),'application/json')}>{message("导出分割诊断")}</button><small>{message("只包含参数与统计，不包含模型几何。")}</small></section>
           </div>
           <div id="tools-animation" role="tabpanel" aria-labelledby="tool-animation" hidden={toolTab!=='animation'}>
             <UnfoldControls player={player} snapshot={snapshot} target={uvTarget} onTarget={target=>{setTaskPlan(undefined);setUVTarget(target);}} onExport={exportTargetUV} onDemo={loadUnfoldDemo} onHingeDemo={loadHingeDemo} onOverlapDemo={loadOverlapDemo}/>
-        <section><h3>视图选项</h3><button onClick={()=>{setCameraResetKey(n=>n+1);if(viewMode==='unfold')player.fit('orbit');}}>Reset camera</button>
-          <label className="check"><input type="checkbox" checked={wireframe} onChange={e=>setWireframe(e.target.checked)}/> wireframe</label>
-          <label className="check"><input type="checkbox" checked={xray} onChange={e=>setXray(e.target.checked)}/> X-ray traversal</label>
-          <label className="check"><input type="checkbox" checked={showAllSeams} onChange={e=>setShowAllSeams(e.target.checked)}/> Show all seams</label>
-          <small>遍历使用本次已验证的实际切缝；播放不重新计算 UV。</small>
-          <div className="legend"><span><i className="dot seam"/>seam</span><span><i className="dot candidate"/>candidates</span><span><i className="dot current"/>current</span><span><i className="dot previous"/>previous</span></div>
+        <section><h3>{message("视图选项")}</h3><button onClick={()=>{setCameraResetKey(n=>n+1);if(viewMode==='unfold')player.fit('orbit');}}>{message("Reset camera")}</button>
+          <label className="check"><input type="checkbox" checked={wireframe} onChange={e=>setWireframe(e.target.checked)}/>{" "+message("wireframe")}</label>
+          <label className="check"><input type="checkbox" checked={xray} onChange={e=>setXray(e.target.checked)}/>{" "+message("X-ray traversal")}</label>
+          <label className="check"><input type="checkbox" checked={showAllSeams} onChange={e=>setShowAllSeams(e.target.checked)}/>{" "+message("Show all seams")}</label>
+          <small>{message("遍历使用本次已验证的实际切缝；播放不重新计算 UV。")}</small>
+          <div className="legend"><span><i className="dot seam"/>{message("seam")}</span><span><i className="dot candidate"/>{message("candidates")}</span><span><i className="dot current"/>{message("current")}</span><span><i className="dot previous"/>{message("previous")}</span></div>
         </section>
           </div>
         </div>
-        <div className="sidebar-foot"><span className={`status-dot ${uvState.loading?'working':''}`}/>{uvState.loading?'UV 计算中':chartCount===null?'暂无 UV':`${chartCount} 个 UV 岛`}<button onClick={()=>setToolTab('uv')}>查看任务</button></div>
+        <div className="sidebar-foot"><span className={`status-dot ${uvState.loading?'working':''}`}/>{uvState.loading?message("UV 计算中"):chartCount===null?message("暂无 UV"):message("{0} 个 UV 岛",[chartCount])}<button onClick={()=>setToolTab('uv')}>{message("查看任务")}</button></div>
       </aside>
       <section className="center">
-        <div className="view-tabs" role="tablist" aria-label="3D preview mode"><button role="tab" aria-selected={viewMode==='traversal'} onClick={()=>setViewMode('traversal')}>裁切线遍历</button><button role="tab" aria-selected={viewMode==='unfold'} onClick={()=>{setViewMode('unfold');setToolTab('animation');}}>3D ↔ UV 展开动画</button><span className="view-tools"><button aria-label="Toggle wireframe" aria-pressed={wireframe} onClick={()=>setWireframe(!wireframe)}>线框</button><button onClick={()=>{setCameraResetKey(n=>n+1);if(viewMode==='unfold')player.fit('current');}}>适配视图</button></span></div>
-        <div className="panel scene-panel"><div className="panel-title"><span>{viewMode==='unfold'?'展开视图':'3D traversal'}</span><span>{mesh.name} · {viewMode==='unfold'?`${chartCount??'…'} UV islands`:`${activeEdges.size}/${seamEdges.size} seams + ${snapshot?.addedSeams?.length??0} UV cuts`}</span></div>{viewMode==='unfold'?<UnfoldViewport geometry={snapshot?.geometry??null} options={{animationDurationSeconds:player.duration,arrivalHoldSeconds:player.arrivalHoldSeconds,arrivalFadeSeconds:player.arrivalFadeSeconds,playbackReverse:player.playing&&player.reverse,interactionActive:player.interactionActive,focusOpacity:player.focusOpacity,focusMode:player.focusMode,focusRadius:player.focusRadius,focusRetained:player.focusRetained,overlapMode:player.overlapMode,overlapTolerance:player.overlapTolerance,overlapOpacity:player.overlapOpacity,faceTones:player.faceTones,timeline:player.timeline,progress:player.progress,selected:player.active,order:player.order,handoff:player.handoff,holdNet:player.holdNet,path:player.path,separation:player.separation,context:player.context,wireframe,checker:player.checker,labels:player.labels,xray,focusFace:player.focusFace,hingeWave:player.hingeWave,showHinges:player.showHinges,showTemporaryCuts:player.showTemporaryCuts,autoFrame:player.autoFrame}} cameraCommand={player.cameraCommand} sceneKey={mesh} onCameraManual={()=>player.setAutoFrame(false)} onPick={player.pick} status={uvStatus}/>:<MeshViewport mesh={mesh} seamEdges={displaySeams} frame={frame} wireframe={wireframe} xray={xray} cameraResetKey={cameraResetKey}/>}</div>
-        {viewMode==='unfold'?<UnfoldTransport player={player} disabled={!snapshot}/>:<div className="debugbar"><button aria-label="First step" onClick={()=>seek(0)} disabled={!frames.length}>⏮</button><button aria-label="Previous step" onClick={()=>seek(step-1)} disabled={!frames.length}>◀</button><button className="primary" onClick={togglePlayback} disabled={!frames.length||!!busy}>{playing?'Pause':'Play'}</button><button aria-label="Next step" onClick={()=>seek(step+1)} disabled={!frames.length}>▶</button><button aria-label="Last step" onClick={()=>seek(frames.length-1)} disabled={!frames.length}>⏭</button><input aria-label="Traversal step" type="range" min="0" max={Math.max(0,frames.length-1)} value={Math.max(0,step)} onChange={e=>seek(+e.target.value)} disabled={!frames.length}/><span className="step-label">{frames.length?`${step+1}/${frames.length}`:'0/0'}</span></div>}
-        <div className="notice">{loadError?<span role="alert">{loadError}</span>:busy?<span role="status">{busy} <button onClick={()=>{cancel();setNotice('Operation cancelled.');}}>Cancel</button></span>:viewMode==='unfold'?<>{uvState.error?<><span role="alert">{uvState.error}</span> <button onClick={uvState.retry}>重试 UV</button></>:snapshot?`动画终点 = 右侧 UV = 导出 UV。${snapshot.addedSeams?.length??0} 条 UV 补切已显式叠加；紫色临时断边仅用于铰链演示。`:uvStatus}</>:frame?<><b>{frame.tokenLabel}</b> · {frame.message} · candidates {frame.mask.vertices.length}{frame.mask.allowEOC?' + EOC':''}{frame.mask.allowEOS?' + EOS':''}</>:notice}</div>
-        {viewMode==='traversal'&&frames.length>0&&<div className="operation-summary">{notice}</div>}
+        <div className="view-tabs" role="tablist" aria-label={message("3D preview mode")}><button role="tab" aria-selected={viewMode==='traversal'} onClick={()=>setViewMode('traversal')}>{message("裁切线遍历")}</button><button role="tab" aria-selected={viewMode==='unfold'} onClick={()=>{setViewMode('unfold');setToolTab('animation');}}>{message("3D ↔ UV 展开动画")}</button><span className="view-tools"><button aria-label={message("Toggle wireframe")} aria-pressed={wireframe} onClick={()=>setWireframe(!wireframe)}>{message("线框")}</button><button onClick={()=>{setCameraResetKey(n=>n+1);if(viewMode==='unfold')player.fit('current');}}>{message("适配视图")}</button></span></div>
+        <div className="panel scene-panel"><div className="panel-title"><span>{viewMode==='unfold'?message('展开视图'):message('3D traversal')}</span><span>{mesh.name} · {viewMode==='unfold'?b(`${chartCount??'…'} UV islands`,`${chartCount??'…'} 个 UV 岛`):b(`${activeEdges.size}/${seamEdges.size} seams + ${snapshot?.addedSeams?.length??0} UV cuts`,`${activeEdges.size}/${seamEdges.size} 条切缝 + ${snapshot?.addedSeams?.length??0} 条 UV 补切`)}</span></div>{viewMode==='unfold'?<UnfoldViewport geometry={snapshot?.geometry??null} options={{animationDurationSeconds:player.duration,arrivalHoldSeconds:player.arrivalHoldSeconds,arrivalFadeSeconds:player.arrivalFadeSeconds,playbackReverse:player.playing&&player.reverse,interactionActive:player.interactionActive,focusOpacity:player.focusOpacity,focusMode:player.focusMode,focusRadius:player.focusRadius,focusRetained:player.focusRetained,overlapMode:player.overlapMode,overlapTolerance:player.overlapTolerance,overlapOpacity:player.overlapOpacity,faceTones:player.faceTones,timeline:player.timeline,progress:player.progress,selected:player.active,order:player.order,handoff:player.handoff,holdNet:player.holdNet,path:player.path,separation:player.separation,context:player.context,wireframe,checker:player.checker,labels:player.labels,xray,focusFace:player.focusFace,hingeWave:player.hingeWave,showHinges:player.showHinges,showTemporaryCuts:player.showTemporaryCuts,autoFrame:player.autoFrame}} cameraCommand={player.cameraCommand} sceneKey={mesh} onCameraManual={()=>player.setAutoFrame(false)} onPick={player.pick} status={uvStatus}/>:<MeshViewport mesh={mesh} seamEdges={displaySeams} frame={frame} wireframe={wireframe} xray={xray} cameraResetKey={cameraResetKey}/>}</div>
+        {viewMode==='unfold'?<UnfoldTransport player={player} disabled={!snapshot}/>:<div className="debugbar"><button aria-label={message("First step")} onClick={()=>seek(0)} disabled={!frames.length}>⏮</button><button aria-label={message("Previous step")} onClick={()=>seek(step-1)} disabled={!frames.length}>◀</button><button className="primary" onClick={togglePlayback} disabled={!frames.length||!!busy}>{playing?message('Pause'):message('Play')}</button><button aria-label={message("Next step")} onClick={()=>seek(step+1)} disabled={!frames.length}>▶</button><button aria-label={message("Last step")} onClick={()=>seek(frames.length-1)} disabled={!frames.length}>⏭</button><input aria-label={message("Traversal step")} type="range" min="0" max={Math.max(0,frames.length-1)} value={Math.max(0,step)} onChange={e=>seek(+e.target.value)} disabled={!frames.length}/><span className="step-label">{frames.length?`${step+1}/${frames.length}`:'0/0'}</span></div>}
+        <div className="notice">{loadError?<span role="alert">{loadError}</span>:busy?<span role="status">{renderMessage(busy)} <button onClick={()=>{cancel();setNotice(descriptor('Operation cancelled.'));}}>{message("Cancel")}</button></span>:viewMode==='unfold'?<>{uvState.error?<><span role="alert">{uvState.error}</span> <button onClick={uvState.retry}>{message("重试 UV")}</button></>:snapshot?message("动画终点 = 右侧 UV = 导出 UV。{0} 条 UV 补切已显式叠加；紫色临时断边仅用于铰链演示。",[snapshot.addedSeams?.length??0]):uvStatus}</>:frame?<><b>{frame.tokenLabel}</b> · {frame.message}{" "+message("· candidates")+" "}{frame.mask.vertices.length}{frame.mask.allowEOC?' + EOC':''}{frame.mask.allowEOS?' + EOS':''}</>:renderMessage(notice)}</div>
+        {viewMode==='traversal'&&frames.length>0&&<div className="operation-summary">{renderMessage(notice)}</div>}
       </section>
       <aside className="rightbar">
-        <div className="panel uv-panel"><div className="panel-title"><span>{viewMode==='unfold'?'UV 编辑器':'UV 预览'}</span><span>{liveUV&&viewMode==='traversal'?'current step':'生成 UV'}</span></div><UVCanvas snapshot={snapshot} status={uvStatus} selected={viewMode==='unfold'?player.active:uvAll} focusFace={viewMode==='unfold'?player.focusFace:null} checker={viewMode==='unfold'&&player.checker} wireframe={wireframe} onBox={viewMode==='unfold'?player.boxSelect:undefined} onPick={viewMode==='unfold'?player.pick:undefined}/></div>
-        {viewMode==='unfold'?<CorrespondenceInspector mesh={mesh} snapshot={snapshot} player={player}/>:<div className="panel timeline"><div className="panel-title"><span>Decode timeline</span><span>{chains.length} chains</span></div>{frames.length>100&&<small className="timeline-window">Showing {timelineStart+1}–{timelineStart+timelineFrames.length} of {frames.length}. Use slider to seek.</small>}<div className="timeline-scroll">{frames.length?timelineFrames.map((f,j)=>{const i=j+timelineStart;return <button key={i} className={i===step?'active':''} onClick={()=>seek(i)}><span>{String(i+1).padStart(3,'0')}</span><b>{f.tokenLabel}</b><em>{f.message}</em></button>;}):<p className="empty">Generate seams to inspect mesh-native pointer traversal.</p>}</div></div>}
+        <div className="panel uv-panel"><div className="panel-title"><span>{viewMode==='unfold'?message("UV 编辑器"):message("UV 预览")}</span><span>{liveUV&&viewMode==='traversal'?message('current step'):message('生成 UV')}</span></div><UVCanvas snapshot={snapshot} status={uvStatus} selected={viewMode==='unfold'?player.active:uvAll} focusFace={viewMode==='unfold'?player.focusFace:null} checker={viewMode==='unfold'&&player.checker} wireframe={wireframe} onBox={viewMode==='unfold'?player.boxSelect:undefined} onPick={viewMode==='unfold'?player.pick:undefined}/></div>
+        {viewMode==='unfold'?<CorrespondenceInspector mesh={mesh} snapshot={snapshot} player={player}/>:<div className="panel timeline"><div className="panel-title"><span>{message("Decode timeline")}</span><span>{chains.length}{" "+message("chains")}</span></div>{frames.length>100&&<small className="timeline-window">{message("Showing")+" "}{timelineStart+1}–{timelineStart+timelineFrames.length}{" "+message("of")+" "}{frames.length}{message(". Use slider to seek.")}</small>}<div className="timeline-scroll">{frames.length?timelineFrames.map((f,j)=>{const i=j+timelineStart;return <button key={i} className={i===step?'active':''} onClick={()=>seek(i)}><span>{String(i+1).padStart(3,'0')}</span><b>{f.tokenLabel}</b><em>{f.message}</em></button>;}):<p className="empty">{message("Generate seams to inspect mesh-native pointer traversal.")}</p>}</div></div>}
       </aside>
     </main>
-    <footer><span>MeshTailor-JS · 几何研究工作台</span><span>左键旋转 · 右键平移 · 滚轮缩放</span><span>先选 UV 岛，再选三角形 · Esc 取消</span></footer>
+    <footer><span>{message("MeshTailor-JS · 几何研究工作台")}</span><span>{message("左键旋转 · 右键平移 · 滚轮缩放")}</span><span>{message("先选 UV 岛，再选三角形 · Esc 取消")}</span></footer>
   </div>;
 }

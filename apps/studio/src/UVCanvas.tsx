@@ -1,7 +1,9 @@
+import { message } from '../../../packages/ui-platform/src/index';
 import { useEffect, useRef } from 'react';
 import type { UVSnapshot } from './workers/uv.worker';
 import { attachUVSelection, type BoxMode } from './unfold/uv-box-selection';
 import { drawUVSnapshot } from './unfold/uv-drawing';
+import {useDisplayPreferences} from './platform/useDisplayPreferences';
 interface Props {
   snapshot:UVSnapshot|null;
   status:string|null;
@@ -14,6 +16,7 @@ interface Props {
 }
 /** This view ONLY draws a shared snapshot; it must never run its own UV worker. */
 export function UVCanvas({snapshot,status,selected,focusFace=null,checker=false,wireframe=false,onPick,onBox}:Props){
+  const {locale}=useDisplayPreferences();
   const host=useRef<HTMLDivElement>(null),canvas=useRef<HTMLCanvasElement>(null);
   const state=useRef({snapshot,selected,onPick,onBox});state.current={snapshot,selected,onPick,onBox};
   useEffect(()=>{if(!canvas.current)return;return attachUVSelection(canvas.current,()=>state.current,(ids,mode)=>state.current.onBox?.(ids,mode),(...args)=>state.current.onPick?.(...args));},[]);
@@ -30,6 +33,6 @@ export function UVCanvas({snapshot,status,selected,focusFace=null,checker=false,
     };
     const observer=new ResizeObserver(draw);observer.observe(el);window.addEventListener('resize',draw);draw();
     return()=>{observer.disconnect();window.removeEventListener('resize',draw);};
-  },[snapshot,selected,focusFace,checker,wireframe]);
-  return <div ref={host} className="uv-viewport"><canvas ref={canvas} className="uv-canvas" aria-label="UV chart preview"/><div className="uv-box-hint">拖拽框选 · Shift 加选 · Alt 反选 · Ctrl/⌘ 减选</div>{status&&<div className="uv-status" role="status">{status}</div>}</div>;
+  },[snapshot,selected,focusFace,checker,wireframe,locale]);
+  return <div ref={host} className="uv-viewport"><canvas ref={canvas} className="uv-canvas" aria-label={message("UV chart preview")}/><div className="uv-box-hint">{message("拖拽框选 · Shift 加选 · Alt 反选 · Ctrl/⌘ 减选")}</div>{status&&<div className="uv-status" role="status">{status}</div>}</div>;
 }

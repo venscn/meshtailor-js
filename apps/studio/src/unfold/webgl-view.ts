@@ -7,6 +7,7 @@ import {FOCUS_GLSL,playbackEmphasis,focusSettings,playbackFocusSpheres,uploadFoc
 import { ArrivalPresentation, type ArrivalSettings, type ArrivalState } from './arrival-presentation.js';
 import { OverlapPass } from './overlap-pass.js';
 import { overlapSettings, overlapLegend, sourceModelScale, type OverlapSettings } from './overlap-policy.js';
+import {bilingual as b,displayPreferences} from '../../../../packages/ui-platform/src/index';
 
 export interface UnfoldDisplay extends UnfoldOptions, OverlapSettings, FocusSettings, ArrivalSettings {
   showHinges?:boolean; showTemporaryCuts?:boolean;
@@ -73,6 +74,7 @@ export class UnfoldWebGLView {
   private modelScale = 1;
   private focusSpheres:FocusSphere[]=[];
   private readonly observer: ResizeObserver;
+  private unsubscribeDisplay=()=>{};
   private program!: WebGLProgram;
   private vao!: WebGLVertexArrayObject;
   private positionBuffer!: WebGLBuffer;
@@ -109,7 +111,7 @@ export class UnfoldWebGLView {
 
   constructor(private host:HTMLDivElement, private onPick:(id:number,face:number|null,additive:boolean)=>void, private onError:(error:string|null)=>void, private onCameraManual:()=>void=()=>{}){
     this.canvas=document.createElement('canvas');
-    this.canvas.dataset.testid='unfold-canvas';this.canvas.setAttribute('aria-label','3D to UV unfolding canvas');
+    this.canvas.dataset.testid='unfold-canvas';this.canvas.setAttribute('aria-label',b('3D to UV unfolding canvas','3D 到 UV 展开画布'));
     Object.assign(this.canvas.style,{position:'absolute',inset:'0',width:'100%',height:'100%',display:'block',touchAction:'none'});
     const gl=this.canvas.getContext('webgl2',{antialias:true,alpha:false});
     if(!gl)throw new Error('WebGL 2 is unavailable. Enable browser hardware acceleration, then Retry.');
@@ -123,6 +125,11 @@ export class UnfoldWebGLView {
     this.canvas.addEventListener('webglcontextlost',this.contextLost);this.canvas.addEventListener('webglcontextrestored',this.contextRestored);
     this.observer=new ResizeObserver(this.invalidate);this.observer.observe(host);
     window.addEventListener('resize',this.invalidate);
+    this.unsubscribeDisplay=displayPreferences.subscribe(()=>{
+      this.canvas.setAttribute('aria-label',b('3D to UV unfolding canvas','3D 到 UV 展开画布'));
+      for(const label of this.labels)label.el.setAttribute('aria-label',b(`Select island ${label.id+1}`,`选择 UV 岛 ${label.id+1}`));
+      this.invalidate();
+    });
     
     this.onError(null);this.invalidate();
   }
@@ -265,7 +272,7 @@ export class UnfoldWebGLView {
     const all=this.data.islands.filter(i=>this.active.has(i.id)),chosen=new Set(priority);
     const islands=[...all.filter(i=>chosen.has(i.id)),...all.filter(i=>!chosen.has(i.id))].slice(0,48);
     for(const island of islands){
-      const el=document.createElement('button');el.type='button';el.textContent=`#${island.id+1}`;el.setAttribute('aria-label',`Select island ${island.id+1}`);
+      const el=document.createElement('button');el.type='button';el.textContent=`#${island.id+1}`;el.setAttribute('aria-label',b(`Select island ${island.id+1}`,`选择 UV 岛 ${island.id+1}`));
       el.style.borderColor=`rgb(${islandColor(island.id).map(x=>Math.round(x*255)).join(',')})`;
       el.addEventListener('click',e=>this.onPick(island.id,null,e.shiftKey||e.ctrlKey||e.metaKey));this.labelHost.append(el);
       this.labels.push({id:island.id,el,faces:island.faces});
@@ -340,7 +347,7 @@ export class UnfoldWebGLView {
       gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,this.canvas.width,this.canvas.height);gl.useProgram(this.program);gl.bindVertexArray(this.vao);
       gl.enable(gl.DEPTH_TEST);gl.depthMask(true);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
     }
-    const text=this.overlapFailure?'重叠提示不可用（基础视图仍可操作）：'+this.overlapFailure:(settings.mode==='auto'?`自动 · ${autoMoving?'仅当前运动岛 · ':''}`:'')+overlapLegend(effectiveMode);
+    const text=this.overlapFailure?b('Overlap hints unavailable (base view still works): ','重叠提示不可用（基础视图仍可操作）：')+this.overlapFailure:(settings.mode==='auto'?b(`Auto · ${autoMoving?'current moving island only · ':''}`,`自动 · ${autoMoving?'仅当前运动岛 · ':''}`):'')+overlapLegend(effectiveMode);
     if(this.diagnosticNotice.textContent!==text)this.diagnosticNotice.textContent=text;
     this.diagnosticNotice.dataset.mode=this.overlapFailure?'unavailable':settings.mode;
     this.canvas.dataset.overlapMode=this.diagnosticNotice.dataset.mode;
@@ -450,7 +457,7 @@ export class UnfoldWebGLView {
   private readonly contextLost=(e:Event)=>{e.preventDefault();this.lost=true;this.overlapPass=null;this.overlapFailure=null;this.onError('Unfold WebGL context lost. Wait for browser recovery or use Retry.');};
   private readonly contextRestored=()=>{try{this.initialize();this.lost=false;this.setGeometry(this.data,{resetCamera:false});this.onError(null);}catch(error){this.onError(String(error));}};
   dispose(){
-    if(this.disposed)return;this.disposed=true;this.arrival.reset();cancelAnimationFrame(this.raf);this.observer.disconnect();window.removeEventListener('resize',this.invalidate);
+    if(this.disposed)return;this.disposed=true;this.unsubscribeDisplay();this.arrival.reset();cancelAnimationFrame(this.raf);this.observer.disconnect();window.removeEventListener('resize',this.invalidate);
     this.canvas.removeEventListener('pointerdown',this.pointerDown);this.canvas.removeEventListener('pointermove',this.pointerMove);this.canvas.removeEventListener('pointerup',this.pointerUp);this.canvas.removeEventListener('pointercancel',this.pointerCancel);
     this.canvas.removeEventListener('lostpointercapture',this.pointerCancel);
     this.canvas.removeEventListener('wheel',this.wheel);this.canvas.removeEventListener('contextmenu',this.contextMenu);this.canvas.removeEventListener('webglcontextlost',this.contextLost);this.canvas.removeEventListener('webglcontextrestored',this.contextRestored);

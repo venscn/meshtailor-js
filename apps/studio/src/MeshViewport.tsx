@@ -1,3 +1,4 @@
+import { message } from '../../../packages/ui-platform/src/index';
 import { useEffect, useRef, useState } from 'react';
 import type { MeshData } from '@meshtailor/mesh-core';
 import type { GenerationFrame } from '@meshtailor/runtime';
@@ -44,9 +45,9 @@ export function MeshViewport({ mesh, seamEdges, frame, wireframe, xray = true, c
   const error = meshError || rendererError;
   return <div ref={host} className="viewport" data-testid="mesh-viewport">
     {error && <div className="viewport-error" role="alert">
-      <strong>3D view unavailable</strong><p>{error}</p>
-      <p>Check browser hardware acceleration and WebGL 2 support. The rest of Studio remains available.</p>
-      <button onClick={() => setRetry((n) => n + 1)}>Retry 3D</button>
+      <strong>{message("3D view unavailable")}</strong><p>{error}</p>
+      <p>{message("Check browser hardware acceleration and WebGL 2 support. The rest of Studio remains available.")}</p>
+      <button onClick={() => setRetry((n) => n + 1)}>{message("Retry 3D")}</button>
     </div>}
     {!error && <div className="viewport-hint">
       {frame && frame.token >= 0 && frame.revealedEdges.length === 0
