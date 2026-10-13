@@ -14,9 +14,9 @@ A TypeScript / JavaScript geometry tool with a full Studio, a standalone offline
 
 [Quick start](#quick-start) · [User guide](START_HERE.md) · [Documentation](docs/README.md) · [Changelog](CHANGELOG.md) · [MIT license](LICENSE)
 
-![Current Studio: the selected gear island is highlighted in the mechanical assembly and its generated UV atlas](assets/readme/studio-v0.4.30.jpg)
+![Current Studio: English and dark theme controls, with the selected gear island highlighted in the mechanical assembly and generated UV atlas](assets/readme/studio-display-2026-10-13.png)
 
-*Studio v0.4.30, captured locally on October 8, 2026. The built-in mechanical assembly has 22,528 triangles and 16 generated UV islands; the selected gear island (#5) is highlighted in both 3D and UV views. The current interface includes Chinese labels.*
+*Local maintenance build, captured on October 13, 2026 in English / Dark. The built-in mechanical assembly has 22,528 triangles and 16 generated UV islands; selected gear island #5 is highlighted in both views. Language and theme controls are visible in the header.*
 
 ## What you can do
 
@@ -24,6 +24,7 @@ A TypeScript / JavaScript geometry tool with a full Studio, a standalone offline
 - **Inspect geometry and layouts:** examine islands, face-corner correspondence, cuts, distortion, and overlaps. Eligible rings preserve holes; tubes and repeated profiles use structural mappings.
 - **Play the unfolding:** follow island relays, adjust playback speed, or scrub the timeline. 3D picking, UV selection, and export share the same result.
 - **Import and export:** Studio reads OBJ / FBX / GLB / glTF and exports OBJ with new UVs. The offline workbench and CLI accept OBJ.
+- **Choose your display:** Studio and the offline workbench offer English / Chinese and light / dark themes, responsive layouts, and touch navigation. Display changes keep the current geometry result.
 
 The shared generation path is **geometry → face partitioning and mesh-edge cuts → parameterization and quality checks → atlas packing → preview / OBJ export**. Default loading, Generate baseline, and the CLI use that same path.
 
@@ -81,4 +82,4 @@ Studio importers differ from the offline workbench. Offline screenshots do not c
 
 Project code, original documentation, and project-created assets use the **[MIT License](LICENSE)**. Bundled Corset / Flight Helmet models and their geometry derivatives retain **CC0-1.0**. See [asset provenance](THIRD_PARTY_ASSETS.md) and the [licensing guide](docs/LICENSING.md) for scope and attribution.
 
-English and Chinese guides are available from their language links. Switching documentation language does not change the application interface language.
+English and Chinese guides are available from their language links. Use the application's **Language** selector for interface language; documentation links have their own language selection.

@@ -14,9 +14,9 @@ TypeScript / JavaScript 几何工具，提供完整 Studio、免安装的离线�
 
 [快速开始](#快速开始) · [使用指南](START_HERE.zh-CN.md) · [文档](docs/README.zh-CN.md) · [更新记录](CHANGELOG.md) · [MIT 许可](LICENSE)
 
-![当前 Studio：机械组合中选中的齿轮 UV 岛与右侧生成的 UV Atlas 同步高亮](assets/readme/studio-v0.4.30.jpg)
+![当前 Studio：英文和黑夜主题控件，以及机械组合中选中的齿轮 UV 岛与右侧生成 Atlas 的同步高亮](assets/readme/studio-display-2026-10-13.png)
 
-*Studio v0.4.30 本地运行实拍（2026-10-08）：内置机械组合包含 22,528 个三角面，生成 16 个 UV 岛；选中的齿轮岛（#5）在三维视图与 UV 编辑器中同步高亮。当前界面包含中文标签。*
+*本地维护构建实拍（2026-10-13，English / Dark）：内置机械组合包含 22,528 个三角面，生成 16 个 UV 岛；选中的齿轮岛 #5 在两个视图中同步高亮。页头可见语言与主题控件。*
 
 ## 能做什么
 
@@ -24,6 +24,7 @@ TypeScript / JavaScript 几何工具，提供完整 Studio、免安装的离线�
 - **检查几何与布局**：查看 UV 岛、面角对应、切边、形变和重叠；符合条件的环件保孔、管身与重复剖面生成结构化展开。
 - **播放展开过程**：逐岛接力、倍速和进度拖动；3D 视图、UV 选择与导出共享同一份结果。
 - **导入与导出**：Studio 读取 OBJ / FBX / GLB / glTF，导出带新 UV 的 OBJ；离线工作台与 CLI 使用 OBJ。
+- **选择显示方式**：Studio 与离线工作台支持英中语言、昼夜主题、响应式布局和触屏操作；展示切换保留当前几何结果。
 
 生成流程为 **几何输入 → 面分区与真实切边 → 参数化与质量检查 → Atlas 排布 → 预览 / OBJ 导出**。默认载入、Generate baseline 和 CLI 使用同一条生成路径。
 
@@ -79,4 +80,4 @@ Studio 的导入器与离线工作台不同；离线截图不能替代完整 Stu
 
 代码、原创文档及自制资产采用 **[MIT](LICENSE)**。仓库内的 Corset / Flight Helmet 及其几何衍生文件沿用 **CC0-1.0**；来源、作者与许可边界见 [第三方资产说明](THIRD_PARTY_ASSETS.zh-CN.md)。
 
-双语许可范围见 [许可指南](docs/LICENSING.zh-CN.md)。文档语言切换不会改变应用界面的语言；当前界面包含中文标签。
+双语许可范围见 [许可指南](docs/LICENSING.zh-CN.md)。界面语言通过应用的 **Language / 语言** 选项切换；文档链接独立选择语言。
