@@ -30,6 +30,7 @@ try {
     const options=uv.geometryGenerationOptions(mesh);
     const result=uv.unwrapMesh(mesh,new Set(),options);
     window.snapshot={...result,geometry:uv.buildUnfoldGeometry(mesh,result.packed,new Set(result.seams))};
+    window.originalSpaceNames=snapshot.geometry.atlas.spaces.map(space=>space.name);
     window.callbacks=0;window.configChanges=[];
     window.panel=new PipelinePanel(plan=>{callbacks++;configChanges.push(plan)},()=>callbacks++,()=>callbacks++);
     document.querySelector('#panel').append(panel.element);
@@ -38,12 +39,16 @@ try {
     view.setGeometry(snapshot.geometry);
     view.setOptions({progress:.37,selected:snapshot.geometry.islands.map(i=>i.id),order:'sequential',path:'hinge',separation:0,context:'dim',wireframe:true,checker:false,labels:true,xray:false,focusFace:0});
     window.uvcanvas=document.querySelector('#uv');uvcanvas.width=400;uvcanvas.height=300;
+    const ctx=uvcanvas.getContext('2d'),fillText=ctx.fillText.bind(ctx);
+    window.uvText=[];
+    ctx.fillText=(text,...args)=>{uvText.push(text);return fillText(text,...args)};
     const redraw=()=>{
       const preferences=display.getSnapshot(),colors=palette(preferences.theme);
       document.documentElement.lang=preferences.locale;
       document.documentElement.style.colorScheme=preferences.theme;
       for(const [key,value]of Object.entries(colors.tokens))document.documentElement.style.setProperty(key,value);
-      drawUVSnapshot(uvcanvas.getContext('2d'),snapshot,400,300,{selected:snapshot.geometry.islands.map(i=>i.id),focusFace:0,checker:false,wireframe:true});
+      window.uvText=[];
+      drawUVSnapshot(ctx,snapshot,400,300,{selected:snapshot.geometry.islands.map(i=>i.id),focusFace:0,checker:false,wireframe:true});
     };
     display.subscribe(redraw);redraw();
     window.before={snapshot,geometry:snapshot.geometry,canvas:view.canvas,positions:Array.from(view.getPositions()),camera:JSON.stringify(view.getCamera())};
@@ -70,12 +75,15 @@ try {
         caption:panel.element.querySelector('h3').textContent,lang:document.documentElement.lang,background:getComputedStyle(document.body).backgroundColor,
         stable:snapshot===before.snapshot&&snapshot.geometry===before.geometry&&view.canvas===before.canvas&&JSON.stringify(Array.from(view.getPositions()))===JSON.stringify(before.positions)&&JSON.stringify(view.getCamera())===before.camera,
         callbacks,glError:gl.getError(),budget:panel.element.querySelector('[data-pipeline="fillBudgetSeconds"]').value,
-        obsoleteRepair:!!panel.element.querySelector('[data-pipeline="repairInvalid"]'),errors};
+        obsoleteRepair:!!panel.element.querySelector('[data-pipeline="repairInvalid"]'),uvText,
+        spaceNamesPreserved:JSON.stringify(snapshot.geometry.atlas.spaces.map(space=>space.name))===JSON.stringify(originalSpaceNames),errors};
     })()`);
     assert.equal(actual.lang,locale);assert.equal(actual.stable,true,'display changes must preserve geometry, canvas, positions, and camera');
     assert.equal(actual.callbacks,0,'a language/theme change must not dispatch a pipeline edit/run/cancel');
     assert.equal(actual.glError,0);assert.deepEqual(actual.errors,[]);assert.equal(actual.budget,'17');
     assert.equal(actual.obsoleteRepair,false,'geometry-only UI must not expose original-UV repair');
+    assert.ok(actual.uvText.includes(locale==='en'?'UV page 1':'UV 页 1'),'the actual Canvas draw call must use the selected page-label language');
+    assert.equal(actual.spaceNamesPreserved,true,'display localization must preserve atlas/export names');
     const rgb=actual.expected.map(channel=>Math.round(channel*255));
     assert.deepEqual(actual.gpu.slice(0,3),rgb);
     assert.deepEqual(actual.uv.slice(0,3),rgb);

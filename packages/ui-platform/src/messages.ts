@@ -26,3 +26,10 @@ export function displayLabel(value: string, locale: Locale = displayPreferences.
 export function renderMessage(value: string | MessageDescriptor, locale: Locale = displayPreferences.getSnapshot().locale): string {
   return typeof value === 'string' ? displayLabel(value, locale) : message(value.key, value.values, locale);
 }
+
+/** Generated page IDs carry display semantics; arbitrary material/space names
+ * remain user data. Format the label without rewriting atlas/export metadata. */
+export function uvSpaceDisplayName(id: string, name: string, locale: Locale = displayPreferences.getSnapshot().locale): string {
+  const page = /^atlas-page-([1-9]\d*)$/.exec(id);
+  return page ? bilingual(`UV page ${page[1]}`, `UV 页 ${page[1]}`, locale) : name;
+}

@@ -1,6 +1,6 @@
 import { displayUV, islandColor, type AtlasFrame } from '@meshtailor/uv';
 import type { UVSnapshot } from '../workers/uv.worker';
-import {bilingual as b,getPalette,displayPreferences} from '@meshtailor/ui-platform';
+import {bilingual as b,getPalette,displayPreferences,uvSpaceDisplayName} from '@meshtailor/ui-platform';
 export interface UVDisplay { selected:readonly number[]; focusFace:number|null; checker:boolean; wireframe:boolean }
 export function uvScreenFrame(atlas:AtlasFrame,width:number,height:number){
   const sx=atlas.max[0]-atlas.min[0],sy=atlas.max[1]-atlas.min[1];
@@ -45,7 +45,7 @@ export function drawUVSnapshot(ctx:CanvasRenderingContext2D,snapshot:UVSnapshot,
   }
   for(const space of geometry.atlas.spaces??[]){
     ctx.strokeStyle=palette.atlasBorder;ctx.lineWidth=1;ctx.strokeRect(ox+space.min[0]*scale,oy-space.max[1]*scale,(space.max[0]-space.min[0])*scale,(space.max[1]-space.min[1])*scale);
-    ctx.font='10px sans-serif';ctx.textAlign='left';ctx.fillStyle=palette.labelText;ctx.fillText(space.name,ox+space.min[0]*scale+3,oy-space.max[1]*scale-8);
+    ctx.font='10px sans-serif';ctx.textAlign='left';ctx.fillStyle=palette.labelText;ctx.fillText(uvSpaceDisplayName(space.id,space.name),ox+space.min[0]*scale+3,oy-space.max[1]*scale-8);
   }
   ctx.textAlign='left';ctx.fillStyle=palette.caption;ctx.fillText(b(`${packed.length} UV islands · matching colors and IDs`,`${packed.length} 个 UV 岛 · 同色同编号`),12,17);
   ctx.fillStyle=palette.quiet;ctx.font='10px ui-monospace, monospace';ctx.fillText(b('U →  ·  V ↑  ·  select island, then face / click again to clear','U →  ·  V ↑  ·  先选岛，再选面 / 重复点击取消'),12,height-12);
