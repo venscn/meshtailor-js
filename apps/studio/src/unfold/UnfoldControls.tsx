@@ -1,4 +1,4 @@
-import { message, displayLabel } from '../../../../packages/ui-platform/src/index';
+import { message, displayLabel } from '../../../../packages/ui-platform/src/index.js';
 import {attachScrubSession} from './scrub-session';
 import { useEffect, useRef, useMemo, useState } from 'react';
 import { islandColor, islandProgress, HINGE_STAGES, type UnfoldOrder, type UnfoldPath } from '@meshtailor/uv';

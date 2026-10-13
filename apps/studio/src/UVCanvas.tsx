@@ -1,4 +1,4 @@
-import { message } from '../../../packages/ui-platform/src/index';
+import { message,getPalette } from '../../../packages/ui-platform/src/index.js';
 import { useEffect, useRef } from 'react';
 import type { UVSnapshot } from './workers/uv.worker';
 import { attachUVSelection, type BoxMode } from './unfold/uv-box-selection';
@@ -16,7 +16,7 @@ interface Props {
 }
 /** This view ONLY draws a shared snapshot; it must never run its own UV worker. */
 export function UVCanvas({snapshot,status,selected,focusFace=null,checker=false,wireframe=false,onPick,onBox}:Props){
-  const {locale}=useDisplayPreferences();
+  const {locale,theme}=useDisplayPreferences();
   const host=useRef<HTMLDivElement>(null),canvas=useRef<HTMLCanvasElement>(null);
   const state=useRef({snapshot,selected,onPick,onBox});state.current={snapshot,selected,onPick,onBox};
   useEffect(()=>{if(!canvas.current)return;return attachUVSelection(canvas.current,()=>state.current,(ids,mode)=>state.current.onBox?.(ids,mode),(...args)=>state.current.onPick?.(...args));},[]);
@@ -28,11 +28,11 @@ export function UVCanvas({snapshot,status,selected,focusFace=null,checker=false,
       const dpr=Math.min(window.devicePixelRatio||1,2),width=Math.max(1,Math.round(w*dpr)),height=Math.max(1,Math.round(h*dpr));
       if(c.width!==width)c.width=width;if(c.height!==height)c.height=height;
       ctx.setTransform(width/w,0,0,height/h,0,0);
-      ctx.fillStyle='#1b1d1f';ctx.fillRect(0,0,w,h);
+      ctx.fillStyle=getPalette(theme).background;ctx.fillRect(0,0,w,h);
       if(snapshot)drawUVSnapshot(ctx,snapshot,w,h,{selected,focusFace,checker,wireframe});
     };
     const observer=new ResizeObserver(draw);observer.observe(el);window.addEventListener('resize',draw);draw();
     return()=>{observer.disconnect();window.removeEventListener('resize',draw);};
-  },[snapshot,selected,focusFace,checker,wireframe,locale]);
+  },[snapshot,selected,focusFace,checker,wireframe,locale,theme]);
   return <div ref={host} className="uv-viewport"><canvas ref={canvas} className="uv-canvas" aria-label={message("UV chart preview")}/><div className="uv-box-hint">{message("拖拽框选 · Shift 加选 · Alt 反选 · Ctrl/⌘ 减选")}</div>{status&&<div className="uv-status" role="status">{status}</div>}</div>;
 }

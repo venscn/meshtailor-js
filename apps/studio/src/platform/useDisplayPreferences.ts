@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { displayPreferences, readDisplayPreferences, DISPLAY_STORAGE_KEY, type PreferenceStorage } from '../../../../packages/ui-platform/src/index';
+import { displayPreferences, readDisplayPreferences, DISPLAY_STORAGE_KEY, getPalette, type PreferenceStorage } from '../../../../packages/ui-platform/src/index.js';
 
 export function useDisplayPreferences() {
   return useSyncExternalStore(displayPreferences.subscribe, displayPreferences.getSnapshot, displayPreferences.getSnapshot);
@@ -14,6 +14,10 @@ export function initializeDisplayPreferences(browser: Window) {
   const apply = () => {
     const preferences = displayPreferences.getSnapshot();
     browser.document.documentElement.lang = preferences.locale;
+    const root=browser.document.documentElement;
+    root.dataset.theme=preferences.theme;
+    root.style.colorScheme=preferences.theme;
+    for(const [token,color] of Object.entries(getPalette(preferences.theme).tokens))root.style.setProperty(token,color);
     try { storage?.setItem(DISPLAY_STORAGE_KEY, JSON.stringify(preferences)); } catch { /* Do not interrupt an active mesh job. */ }
   };
   apply();

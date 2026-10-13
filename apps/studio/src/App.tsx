@@ -1,4 +1,4 @@
-import { message, displayLabel, bilingual as b, descriptor, renderMessage, type MessageDescriptor } from '../../../packages/ui-platform/src/index';
+import { message, displayLabel, bilingual as b, descriptor, renderMessage, type MessageDescriptor } from '../../../packages/ui-platform/src/index.js';
 import { useDisplayPreferences } from './platform/useDisplayPreferences';
 import { DisplayControls } from './platform/DisplayControls';
 import {LoadPipelinePanel} from './unfold/LoadPipelinePanel';

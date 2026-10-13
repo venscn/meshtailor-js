@@ -1,4 +1,4 @@
-import {message} from '../../../../packages/ui-platform/src/index';
+import {message} from '../../../../packages/ui-platform/src/index.js';
 import type {PeelReport,PackedChart} from '@meshtailor/uv';
 /** Current chart identity comes from its immutable face membership, never a
  * stale island number after stitching/repacking. */

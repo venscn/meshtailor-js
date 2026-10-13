@@ -1,6 +1,6 @@
 import {geometryOnlyMesh} from '@meshtailor/mesh-core';
 import type { UVJob, UVJobProgress, UVMessage, UVSnapshot } from '../workers/uv.worker.js';
-import {message,displayLabel,displayPreferences} from '../../../../packages/ui-platform/src/index';
+import {message,displayLabel,displayPreferences} from '../../../../packages/ui-platform/src/index.js';
 export type UVFailureCode='cancelled'|'timeout'|'startup'|'worker'|'invalid';
 export class UVJobFailure extends Error {
   constructor(public readonly code:UVFailureCode,message:string){super(message);this.name='UVJobFailure';}

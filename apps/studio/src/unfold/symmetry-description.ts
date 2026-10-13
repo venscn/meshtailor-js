@@ -1,4 +1,4 @@
-import {message} from '../../../../packages/ui-platform/src/index';
+import {message} from '../../../../packages/ui-platform/src/index.js';
 import {auditUVReflection, type ChartDiagnostic, type PackedChart, type PeelReport} from '@meshtailor/uv';
 import type {Vec2} from '@meshtailor/mesh-core';
 const audits=new WeakMap<PackedChart,{contract:NonNullable<PeelReport['surfaceContracts']>[number];value:ReturnType<typeof auditUVReflection>}>();

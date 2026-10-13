@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { MeshData } from '@meshtailor/mesh-core';
 import type { GenerationFrame } from '@meshtailor/runtime';
 import { fitDistance, prepareViewportMesh, viewportSize, type ViewportMesh } from './viewport-math';
-import {bilingual as b,displayPreferences} from '../../../packages/ui-platform/src/index';
+import {bilingual as b,displayPreferences,getPalette} from '../../../packages/ui-platform/src/index.js';
 
 /** Dispose every geometry/material in a subtree, including traversal overlays. */
 function disposeGroup(group: THREE.Group): void {
@@ -50,7 +50,7 @@ export class ViewportScene {
     canvas.setAttribute('aria-label', b('3D mesh traversal canvas','3D 网格遍历画布'));
     canvas.dataset.testid = 'mesh-canvas';
     this.host.appendChild(canvas);
-    this.scene.background = new THREE.Color(0x1b1d1f);
+    this.scene.background = new THREE.Color(getPalette(displayPreferences.getSnapshot().theme).background);
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.addEventListener('change', this.recordCamera);
@@ -65,7 +65,11 @@ export class ViewportScene {
     window.addEventListener('resize', this.resize);
     this.resize();
     this.report(null);
-    this.unsubscribeDisplay=displayPreferences.subscribe(()=>canvas.setAttribute('aria-label',b('3D mesh traversal canvas','3D 网格遍历画布')));
+    this.unsubscribeDisplay=displayPreferences.subscribe(()=>{
+      canvas.setAttribute('aria-label',b('3D mesh traversal canvas','3D 网格遍历画布'));
+      // Change only the background; the live mesh, controls, and camera survive.
+      (this.scene.background as THREE.Color).set(getPalette(displayPreferences.getSnapshot().theme).background);
+    });
     this.animation = requestAnimationFrame(this.tick);
   }
 
