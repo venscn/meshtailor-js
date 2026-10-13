@@ -26,6 +26,8 @@
 
 ## 维护与历史
 
+- [10 月 13 日本地维护审计](audits/2026-10-13.zh-CN.md)：完成批次、展示/resize 证据和待修的浏览器套件基线；[English](audits/2026-10-13.md)。
+
 - [开源整理与当前验证](OPEN_SOURCE_PREPARATION.md)。
 - [版本记录](../CHANGELOG.md)、[历史发布说明](releases/)。较早发布的说明文件为本目录的 `RELEASE-*.md`。
 - [历史验证目录](../validation/README.md)。记录表示当次执行范围，不等于当前环境已重新执行。

@@ -17,6 +17,8 @@ If no actionable finding exists, do no speculative cleanup, create no empty bran
 
 ## Finding record
 
+The current thread heartbeat runs daily at **09:00 Asia/Shanghai**, as requested by the maintainer. It audits and develops locally, and never uploads without approval. The scheduled run requires this Codex environment to be available; it is not a deployed service or an application timer.
+
 Use `docs/audits/YYYY-MM-DD.md` for a useful cycle report. For each finding, include a stable identifier, priority, evidence, status, owning branch, natural grouping rationale, validation and remaining limitations. Historical checkpoints and previously completed feature branches are not active tasks simply because their refs still exist.
 
 Priority: P0 for data loss/security or a broken core contract, P1 for unavailable required functionality/correctness, P2 for maintainability or misleading documentation, P3 for optional polish. A priority label is not permission to broaden scope or change remote state.

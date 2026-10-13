@@ -14,6 +14,10 @@ Use Node.js 22.16+ and a locked install (`npm ci`). The following existing comma
 | `npm run check:geometry` | Strict core compilation; geometry input isolation, boundaries, candidate contracts, topology, unified generation policy, and core regressions | Geometry pipeline or generator changes |
 | `npm run check` | Unit tests, Studio production build, and complete TypeScript check | Application/code changes |
 | `npm run typecheck` | Complete TypeScript check | Types and module boundaries |
+| `npm run test:layout` | CSS access, narrow/short grids, dynamic resize, and bounded HiDPI buffers; uses a layout fixture | Layout/CSS changes; supplement with the actual clients |
+| `npm run test:display:browser` | Actual production DOM controls, Canvas labels/colors and WebGL appearance in four display combinations; retains snapshot/camera and checks disposal | Shared presentation or renderer changes; this harness does not mount React |
+| `npm run test:touch:browser` | Real production unfolding renderer under captured touch input at DPR 1/2; pan/pinch, release/cancel, selection and mouse behavior | Camera/input changes; real-device Safari remains a separate check |
+| `npm run test:offline-display:browser` | Actual rebuilt offline page, four display combinations, persistence, playing-state isolation and bundled geometry assets without original UVs | Offline entry, shared display, or bundler changes |
 | `npm run test:git` / `npm run git:check` | Git tool regressions / actual immutable release identities and clean repository state | Git tooling / after committing a maintenance batch |
 | `npm run test:geometry:real` | Both SHA-pinned real models; original, absent, and randomized UV variants; exact seam/face-corner signature and OBJ equality | Every generation-strategy change |
 

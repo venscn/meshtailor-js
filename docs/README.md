@@ -27,6 +27,8 @@ Since v0.4.20, production generation accepts geometry only. It does not use impo
 
 ## Maintenance and historical records
 
+- [October 13 local maintenance audit](audits/2026-10-13.md): completed batches, display/resize evidence, and the remaining browser-suite baseline issue; [中文](audits/2026-10-13.zh-CN.md).
+
 - [Open-source preparation and validation (Chinese)](OPEN_SOURCE_PREPARATION.md).
 - [Changelog](../CHANGELOG.md) and [release notes](releases/) retain their original English/Chinese entries. Earlier release notes are `RELEASE-*.md` in this directory.
 - [Validation archive (Chinese)](../validation/README.md): a report describes its original run, not a fresh test in your environment.
