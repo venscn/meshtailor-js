@@ -33,6 +33,6 @@ export async function downloadGeometryAsset(asset:RemoteMeshAsset,options:AssetD
   const binary=await get(binaryURL.href,64*1024*1024);
   if(binary.byteLength!==buffer.byteLength)throw new Error('Geometry buffer length mismatch; the remote file may be truncated.');
   delete buffer.uri;
-  doc.asset={...doc.asset,generator:'MeshTailor-JS geometry-only repack',extras:{source:asset.source,license:asset.license,credit:asset.credit,modifications:'Materials/textures removed; geometry, transforms and UVs retained.'}};
+  doc.asset={...doc.asset,generator:'MeshTailor-JS geometry-only repack',extras:{source:asset.source,license:asset.license,credit:asset.credit,modifications:'Removed texture dependencies and original UV/tangent attribute references; retained geometry, transforms, skins, morphs and material-domain identities.'}};
   return {data:writeGLB(doc,new Uint8Array(binary)),sourceBytes:json.byteLength+binary.byteLength,document:doc};
 }
