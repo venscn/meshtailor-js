@@ -1,6 +1,6 @@
 import {message} from '../../../../packages/ui-platform/src/index.js';
 import {type FillReport} from '@meshtailor/uv';
-import {describeGrowthStopPresentation as describeGrowthStop} from './fill-description';
+import {describeGrowthStopPresentation as describeGrowthStop} from './fill-description.js';
 
 /** Shared DOM renderer. Only textContent is used for report data. */
 export function renderFillGrowth(host:HTMLElement,report:FillReport|undefined):void {

@@ -3,8 +3,8 @@ import {describeSymmetrySummary} from './symmetry-description';
 import {renderFillGrowth} from './fill-growth-panel';
 import { useState, useEffect, useRef } from 'react';
 import { DEFAULT_FILL_DENSITY_LIMIT, DEFAULT_HUMAN, DEFAULT_UNWRAP, type UnwrapOptions } from '@meshtailor/uv';
-import {describeFillPresentation as describeFill} from './fill-description';
-import {useDisplayPreferences} from '../platform/useDisplayPreferences';
+import {describeFillPresentation as describeFill} from './fill-description.js';
+import {useDisplayPreferences} from '../platform/useDisplayPreferences.js';
 import type { UVSnapshot } from '../workers/uv.worker';
 function FillGrowthPanel({snapshot}:{snapshot:UVSnapshot|null}){
   const {locale}=useDisplayPreferences();
