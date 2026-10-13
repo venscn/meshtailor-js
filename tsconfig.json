@@ -25,6 +25,9 @@
       ],
       "@meshtailor/model": [
         "packages/model/src/index.ts"
+      ],
+      "@meshtailor/ui-platform": [
+        "packages/ui-platform/src/index.ts"
       ]
     },
     "types": [
