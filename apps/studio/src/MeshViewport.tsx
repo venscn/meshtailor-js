@@ -51,8 +51,8 @@ export function MeshViewport({ mesh, seamEdges, frame, wireframe, xray = true, c
     </div>}
     {!error && <div className="viewport-hint">
       {frame && frame.token >= 0 && frame.revealedEdges.length === 0
-        ? 'Chain start: use Next / Play to reveal the first edge.'
-        : 'Drag: orbit · Wheel: zoom · Right drag: pan'}
+        ? message('Chain start: use Next / Play to reveal the first edge.')
+        : message('Drag: orbit · Wheel: zoom · Right drag: pan')}
     </div>}
   </div>;
 }
